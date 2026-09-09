@@ -21,7 +21,7 @@ data class RoutePoint(
     val distance: Double
 )
 
-class AltimetriaDataField(private val context: Context) : KarooExtension("altimetria_graph", "1.0") {
+class AltimetriaDataField(private val context: Context) : KarooExtension("altimetria_graph", "0.1") {
 
     private val karooSystem = KarooSystemService(context)
     private val scope = CoroutineScope(Dispatchers.Main)
