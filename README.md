@@ -62,13 +62,17 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 ALTGRAPH/
 ├── app/
-│   └── src/main/java/com/example/altgraph/
-│       ├── AltimetriaDataField.kt       # Gestión de eventos Karoo y cálculo de estrategia
-│       ├── AltimetriaExtensionService.kt # Servicio Karoo Extension principal
-│       ├── AltimetriaView.kt             # Renderizado visual y gráficos de perfil
-│       ├── ApmCalculator.kt              # Tabla e interpolación de coeficientes APM
-│       ├── ApmDataField.kt               # Campo de datos individual para el Coeficiente APM
-│       └── ClimbStateManager.kt          # Estado reactivo global del análisis de subida
+│   └── src/main/
+│       ├── java/com/example/altgraph/
+│       │   ├── AltimetriaDataField.kt       # Gestión de eventos Karoo y cálculo de estrategia
+│       │   ├── AltimetriaExtensionService.kt # Servicio Karoo Extension principal
+│       │   ├── AltimetriaView.kt             # Renderizado visual y gráficos de perfil
+│       │   ├── ApmCalculator.kt              # Tabla e interpolación de coeficientes APM
+│       │   ├── ApmDataField.kt               # Campo de datos individual para el Coeficiente APM
+│       │   └── ClimbStateManager.kt          # Estado reactivo global del análisis de subida
+│       └── res/
+│           └── drawable/
+│               └── ic_altigraph_logo.xml    # Logotipo vectorial (Vector Drawable)
 └── build.gradle.kts
 ```
 
