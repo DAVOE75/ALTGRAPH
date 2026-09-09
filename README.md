@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="art/logo.png" alt="ALTGRAPH Logo" width="160" />
+</p>
+
 # ALTGRAPH (v0.2)
 
 **ALTGRAPH** es una extensión avanzada de altimetría y rendimiento para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3) desarrollada con el SDK oficial `karoo-ext`.
