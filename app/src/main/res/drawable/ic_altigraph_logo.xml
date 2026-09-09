@@ -1,0 +1,50 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Fondo redondeado estilo Karoo / Dark UI -->
+    <path
+        android:fillColor="#18181B"
+        android:pathData="M16,0 L92,0 A16,16 0 0,1 108,16 L108,92 A16,16 0 0,1 92,108 L16,108 A16,16 0 0,1 0,92 L0,16 A16,16 0 0,1 16,0 Z" />
+
+    <!-- Silueta de montaña de fondo (perfil altimétrico secundario) -->
+    <path
+        android:fillColor="#27272A"
+        android:pathData="M12,86 L36,54 L54,68 L80,34 L96,86 Z" />
+
+    <!-- Bloque 1: Tramo suave / inicio (Verde) -->
+    <path
+        android:fillColor="#22C55E"
+        android:pathData="M14,86 L32,66 L32,86 Z" />
+
+    <!-- Bloque 2: Tramo intermedio (Amarillo / Naranja) -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M34,66 L56,44 L56,86 L34,86 Z" />
+
+    <!-- Bloque 3: Muro / Zona de ataque (Rojo intenso) -->
+    <path
+        android:fillColor="#EF4444"
+        android:pathData="M58,44 L82,22 L82,86 L58,86 Z" />
+
+    <!-- Bloque 4: Cima / Descenso final (Gris oscuro) -->
+    <path
+        android:fillColor="#3F3F46"
+        android:pathData="M84,22 L94,36 L94,86 L84,86 Z" />
+
+    <!-- Línea de trazado del perfil (Cresta blanca de la gráfica) -->
+    <path
+        android:strokeColor="#FAFAFA"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M14,86 L32,66 L56,44 L82,22 L94,36" />
+
+    <!-- Círculo de posición actual (Punto del ciclista en el perfil) -->
+    <path
+        android:fillColor="#38BDF8"
+        android:pathData="M 56, 44 m -4, 0 a 4,4 0 1,0 8,0 a 4,4 0 1,0 -8,0" />
+
+</vector>
