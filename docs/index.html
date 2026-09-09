@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALTGRAPH - Extensión de Altimetría y Rendimiento para Hammerhead Karoo</title>
+    <meta name="description" content="Extensión avanzada para ciclocomputadores Hammerhead Karoo 2 y 3. Análisis de puertos de montaña, alertas de ataque, ritmo VAM y Coeficiente APM.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #09090b;
+            --card-bg: #18181b;
+            --card-border: #27272a;
+            --accent-blue: #38bdf8;
+            --accent-green: #22c55e;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --text-main: #fafafa;
+            --text-muted: #a1a1aa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 60px;
+        }
+
+        header {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-container img {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+        }
+
+        .logo-container h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 20px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-blue);
+        }
+
+        .hero {
+            max-width: 1100px;
+            margin: 40px auto 80px auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .hero img.main-logo {
+            width: 160px;
+            height: 160px;
+            margin-bottom: 25px;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .hero h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .hero h2 span {
+            color: var(--accent-blue);
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 750px;
+            margin: 0 auto 35px auto;
+        }
+
+        .badges {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .badge {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-blue);
+            color: #000;
+        }
+
+        .btn-secondary {
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--card-border);
+        }
+
+        .features {
+            max-width: 1100px;
+            margin: 0 auto 80px auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 30px;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .install-section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+        }
+
+        .install-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .install-steps {
+            list-style: decimal inside;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        footer {
+            max-width: 1100px;
+            margin: 60px auto 0 auto;
+            padding: 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--card-border);
+        }
+
+        footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-container">
+            <img src="../art/logo.png" alt="ALTGRAPH Logo">
+            <h1>ALTGRAPH</h1>
+        </div>
+        <nav class="nav-links">
+            <a href="#features">Características</a>
+            <a href="#install">Instalación</a>
+            <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">GitHub</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <img src="../art/logo.png" alt="ALTGRAPH Logo" class="main-logo">
+        <h2>Domina los puertos con <span>ALTGRAPH</span></h2>
+        <p>Extensión avanzada de altimetría, alertas de ataque, ritmo VAM objetivo e índice APM diseñada exclusivamente para ciclocomputadores <strong>Hammerhead Karoo 2 y Karoo 3</strong>.</p>
+
+        <div class="badges">
+            <span class="badge">v0.2 Release</span>
+            <span class="badge">Hammerhead Karoo 2 & 3</span>
+            <span class="badge">Karoo Extension SDK 1.1.4</span>
+            <span class="badge">Español & English</span>
+        </div>
+
+        <div class="cta-buttons">
+            <a href="https://github.com/DAVOE75/ALTGRAPH/releases" target="_blank" class="btn btn-primary">Descargar APK (v0.2)</a>
+            <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/USER_MANUAL.md" target="_blank" class="btn btn-secondary">Ver Manual de Usuario</a>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <h2 class="section-title">Campos de Datos Exclusivos</h2>
+        <div class="grid">
+            <div class="card">
+                <div class="card-icon">📊</div>
+                <h3>Estratega de Altimetría</h3>
+                <p>Gráfico de perfil dinámico en bloques de 100m con código de colores según pendiente y alertas visuales de ataque (<strong>¡ATACA!</strong>) al detectar rampas >10%.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">⛰️</div>
+                <h3>Índice de Dificultad APM</h3>
+                <p>Calcula dinámicamente la puntuación acumulada de dificultad restante en la subida mediante el Coeficiente APM (Altitud, Pendiente, Metros).</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">🚴</div>
+                <h3>Ritmo VAM Objetivo</h3>
+                <p>Asistente de ritmo basado en VAM (m/h). Te indica la velocidad objetivo en km/h para mantener tu ritmo óptimo de ascensión según la pendiente actual.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">📈</div>
+                <h3>Tendencia 3D y Rampa Máx.</h3>
+                <p>Indicador de tendencia en tiempo real (↗️ Endureciendo, ➔ Estable, ↘️ Suavizando) anticipándose al retraso barométrico, registrando el % máximo de la rampa.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="install-section" id="install">
+        <h3>🚀 Instalación rápida en tu Hammerhead Karoo</h3>
+        <ol class="install-steps">
+            <li>Conecta tu Hammerhead Karoo al ordenador por cable USB con la <strong>Depuración USB</strong> activada.</li>
+            <li>Descarga la versión más reciente del archivo <code>app-debug.apk</code> desde nuestro repositorio en GitHub.</li>
+            <li>Ejecuta el comando en tu consola: <code>adb install -r app-debug.apk</code></li>
+            <li>En tu Karoo, entra en <strong>Ajustes &gt; Perfiles de Carrera</strong>, edita una pantalla de datos y añade los campos de la categoría <strong>ALTGRAPH</strong>.</li>
+        </ol>
+    </section>
+
+    <footer>
+        <p>ALTGRAPH v0.2 &bull; Desarrollado para Hammerhead Karoo &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Código Fuente en GitHub</a></p>
+    </footer>
+
+</body>
+</html>
