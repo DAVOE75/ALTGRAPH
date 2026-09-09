@@ -8,6 +8,7 @@ import android.graphics.RectF
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.View
+import java.util.Locale
 import kotlin.math.min
 
 class AltimetriaView @JvmOverloads constructor(
@@ -22,24 +23,29 @@ class AltimetriaView @JvmOverloads constructor(
     private var zoneColor: String = "VERDE"
     private var nextBlocks: List<Float> = emptyList()
     private var attackAlert: Boolean = false
-    private var blockSizeMeters: Double = 100.0 // NUEVO
+    private var blockSizeMeters: Double = 100.0
 
+    // Paints declarados como campos para evitar GC en onDraw
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        textSize = 60f
+        textSize = 55f
         typeface = Typeface.DEFAULT_BOLD
         textAlign = Paint.Align.CENTER
     }
 
     private val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.LTGRAY
-        textSize = 30f
+        textSize = 25f
         typeface = Typeface.DEFAULT_BOLD
         textAlign = Paint.Align.CENTER
     }
 
+    private val bgHeaderPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val blockPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val alertPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val alertBgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val alertStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val alertRect = RectF()
+    private val blockRect = RectF()
 
     fun updateStrategyData(
         remainingDistance: Double,
@@ -48,7 +54,7 @@ class AltimetriaView @JvmOverloads constructor(
         currentZoneColor: String,
         nextBlocks: List<Float>,
         attackAlert: Boolean,
-        blockSizeMeters: Double // NUEVO
+        blockSizeMeters: Double
     ) {
         this.remainingDistance = remainingDistance
         this.timeToSummit = timeToSummit
@@ -58,7 +64,7 @@ class AltimetriaView @JvmOverloads constructor(
         this.attackAlert = attackAlert
         this.blockSizeMeters = blockSizeMeters
 
-        invalidate()
+        postInvalidate()
     }
 
     private fun getColorForGrade(grade: Float): Int {
@@ -74,82 +80,98 @@ class AltimetriaView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        val width = width.toFloat()
-        val height = height.toFloat()
+        val w = width.toFloat()
+        val h = height.toFloat()
+        if (w <= 0 || h <= 0) return
 
         canvas.drawColor(Color.DKGRAY)
 
-        android.graphics.Paint().apply { color = when (zoneColor) {
+        val headerColor = when (zoneColor) {
             "AMARILLO" -> Color.parseColor("#FFEB3B")
             "NARANJA" -> Color.parseColor("#FF9800")
             "ROJO" -> Color.parseColor("#F44336")
             "VIOLETA" -> Color.parseColor("#9C27B0")
             else -> Color.parseColor("#4CAF50")
-        }}.let { paint ->
-            canvas.drawRect(0f, 0f, width, height * 0.5f, paint)
         }
+        bgHeaderPaint.color = headerColor
+        canvas.drawRect(0f, 0f, w, h * 0.45f, bgHeaderPaint)
 
-        val textColor = if (zoneColor == "AMARILLO") Color.BLACK else Color.WHITE
-        textPaint.color = textColor
-        labelPaint.color = if (zoneColor == "AMARILLO") Color.DKGRAY else Color.LTGRAY
+        val isLightHeader = zoneColor == "AMARILLO"
+        val headerTextColor = if (isLightHeader) Color.BLACK else Color.WHITE
+        val headerLabelColor = if (isLightHeader) Color.DKGRAY else Color.LTGRAY
 
-        val centerX = width / 2
+        val centerX = w / 2f
 
-        val distanceText = String.format("%.1f km", remainingDistance / 1000)
+        labelPaint.color = headerLabelColor
+        labelPaint.textSize = (h * 0.08f).coerceAtLeast(18f)
+        canvas.drawText(context.getString(R.string.header_climb_strategist), centerX, h * 0.12f, labelPaint)
+
+        val distanceKm = remainingDistance / 1000.0
+        val distanceText = String.format(Locale.getDefault(), "%.1f km", distanceKm)
         val minutes = timeToSummit / 60
         val seconds = timeToSummit % 60
-        val timeText = String.format("%02d:%02d", minutes, seconds)
-        val gradeText = String.format("%.1f %%", avgGradeRemaining)
+        val timeText = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
 
-        labelPaint.textSize = 30f
-        canvas.drawText("ESTRATEGA DE PUERTO", centerX, 40f, labelPaint)
+        textPaint.color = headerTextColor
+        textPaint.textSize = (h * 0.14f).coerceAtLeast(24f)
+        canvas.drawText(distanceText, centerX, h * 0.26f, textPaint)
 
-        textPaint.textSize = 55f
-        canvas.drawText(distanceText, centerX, height * 0.35f, textPaint)
-        canvas.drawText(timeText, centerX, height * 0.5f - 10f, textPaint)
+        labelPaint.textSize = (h * 0.07f).coerceAtLeast(16f)
+        canvas.drawText(context.getString(R.string.label_dist_remaining), centerX, h * 0.34f, labelPaint)
 
-        labelPaint.textSize = 25f
-        canvas.drawText("DIST. RESTANTE", centerX, height * 0.45f - 10f, labelPaint)
-        canvas.drawText("TIEMPO A CIMA", centerX, height * 0.6f - 10f, labelPaint)
+        labelPaint.color = Color.LTGRAY
+        textPaint.color = Color.WHITE
+        textPaint.textSize = (h * 0.12f).coerceAtLeast(22f)
+        canvas.drawText(timeText, centerX, h * 0.58f, textPaint)
 
-        // Barra de bloques dinámica
-        val barY = height * 0.75f
-        val barHeight = 40f
-        val totalMeters = nextBlocks.size * blockSizeMeters // Ej: 10 bloques * 100m = 1000m
+        labelPaint.textSize = (h * 0.06f).coerceAtLeast(14f)
+        canvas.drawText(context.getString(R.string.label_time_to_summit), centerX, h * 0.66f, labelPaint)
 
-        // Título dinámico
-        labelPaint.textSize = 25f
-        canvas.drawText("PRÓXIMOS ${totalMeters.toInt()} m (Bloques de ${blockSizeMeters.toInt()} m)", centerX, barY - 20f, labelPaint)
+        // Bloques
+        val barY = h * 0.76f
+        val barHeight = h * 0.15f
+        val totalMeters = (nextBlocks.size * blockSizeMeters).toInt()
 
-        val blockWidth = (width - 40f) / 10f
+        labelPaint.textSize = (h * 0.055f).coerceAtLeast(14f)
+        val blocksTitle = context.getString(R.string.label_next_blocks, totalMeters, blockSizeMeters.toInt())
+        canvas.drawText(blocksTitle, centerX, barY - 10f, labelPaint)
 
-        for (i in 0 until min(10, nextBlocks.size)) {
-            val left = 20f + i * blockWidth
-            val top = barY
-            val right = left + blockWidth - 8f
-            val bottom = barY + barHeight
+        val count = min(10, nextBlocks.size)
+        if (count > 0) {
+            val blockWidth = (w - 40f) / count.toFloat()
 
-            blockPaint.color = getColorForGrade(nextBlocks[i])
-            canvas.drawRoundRect(RectF(left, top, right, bottom), 10f, 10f, blockPaint)
+            for (i in 0 until count) {
+                val left = 20f + i * blockWidth
+                val top = barY
+                val right = left + blockWidth - 6f
+                val bottom = top + barHeight
+
+                blockRect.set(left, top, right, bottom)
+                blockPaint.color = getColorForGrade(nextBlocks[i])
+                canvas.drawRoundRect(blockRect, 8f, 8f, blockPaint)
+            }
         }
 
+        // Alerta
         if (attackAlert) {
-            val alertRect = RectF(width * 0.1f, height * 0.25f, width * 0.9f, height * 0.65f)
-            alertPaint.color = Color.RED
-            alertPaint.style = Paint.Style.FILL
-            canvas.drawRoundRect(alertRect, 30f, 30f, alertPaint)
+            alertRect.set(w * 0.1f, h * 0.25f, w * 0.9f, h * 0.65f)
 
-            alertPaint.style = Paint.Style.STROKE
-            alertPaint.strokeWidth = 8f
-            alertPaint.color = Color.WHITE
-            canvas.drawRoundRect(alertRect, 30f, 30f, alertPaint)
+            alertBgPaint.color = Color.RED
+            alertBgPaint.style = Paint.Style.FILL
+            canvas.drawRoundRect(alertRect, 24f, 24f, alertBgPaint)
+
+            alertStrokePaint.color = Color.WHITE
+            alertStrokePaint.style = Paint.Style.STROKE
+            alertStrokePaint.strokeWidth = 6f
+            canvas.drawRoundRect(alertRect, 24f, 24f, alertStrokePaint)
 
             textPaint.color = Color.WHITE
-            textPaint.textSize = 45f
-            canvas.drawText("¡ATACA!", width / 2, height * 0.45f, textPaint)
+            textPaint.textSize = (h * 0.12f).coerceAtLeast(22f)
+            canvas.drawText(context.getString(R.string.alert_attack), centerX, h * 0.42f, textPaint)
 
-            textPaint.textSize = 25f
-            canvas.drawText("Rampa dura en el próximo tramo", width / 2, height * 0.55f, textPaint)
+            labelPaint.color = Color.WHITE
+            labelPaint.textSize = (h * 0.065f).coerceAtLeast(14f)
+            canvas.drawText(context.getString(R.string.alert_attack_sub), centerX, h * 0.54f, labelPaint)
         }
     }
 }

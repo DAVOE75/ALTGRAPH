@@ -1,3 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ALTGRAPH</string>
+
+    <!-- Extension Data Fields -->
+    <string name="data_type_altimetria_title">Altimetry Profile &amp; Strategy</string>
+    <string name="data_type_altimetria_desc">Dynamic profile graph with segment grades and attack alerts</string>
+
+    <string name="data_type_apm_title">APM Difficulty Index</string>
+    <string name="data_type_apm_desc">Accumulated climb difficulty score for the remaining ascent</string>
+
+    <string name="data_type_climb_pacing_title">ClimbPacing VAM Target</string>
+    <string name="data_type_climb_pacing_desc">Target VAM (m/h) pacing assistant based on current gradient</string>
+
+    <string name="data_type_gradient_trend_title">3D Gradient Trend &amp; Max Ramp</string>
+    <string name="data_type_gradient_trend_desc">Real-time gradient trend (Steepening/Easing) &amp; max % peak in segment</string>
+
+    <!-- UI Labels for AltimetriaView -->
+    <string name="header_climb_strategist">CLIMB STRATEGIST</string>
+    <string name="label_dist_remaining">DIST. REMAINING</string>
+    <string name="label_time_to_summit">TIME TO SUMMIT</string>
+    <string name="label_next_blocks">NEXT %1$d m (%2$d m BLOCKS)</string>
+    <string name="alert_attack">ATTACK!</string>
+    <string name="alert_attack_sub">Steep ramp in upcoming block</string>
+
+    <!-- Zone Colors -->
+    <string name="zone_green">GREEN</string>
+    <string name="zone_yellow">YELLOW</string>
+    <string name="zone_orange">ORANGE</string>
+    <string name="zone_red">RED</string>
+    <string name="zone_purple">PURPLE</string>
 </resources>

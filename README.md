@@ -1,24 +1,40 @@
-# ALTGRAPH (v0.1)
+# ALTGRAPH (v0.2)
 
-**ALTGRAPH** es una extensión para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3) desarrollada con el SDK oficial `karoo-ext`. Proporciona un análisis dinámico de altimetría en tiempo real y el cálculo de la dificultad de subidas utilizando el **Coeficiente APM (Altitud, Pendiente, Metros)**.
+**ALTGRAPH** es una extensión avanzada de altimetría y rendimiento para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3) desarrollada con el SDK oficial `karoo-ext`.
+
+Proporciona análisis dinámico de puertos de montaña, alertas de ataque en rampas duras, estimación de ritmo **VAM** y el cálculo de la dificultad de subidas mediante el **Coeficiente APM (Altitud, Pendiente, Metros)**.
 
 ---
 
-## 🚀 Características principales (v0.1)
+## 🌐 Soporte Multilingüe (English / Español)
+La extensión detecta automáticamente el idioma de tu sistema Karoo:
+* **Inglés** (idioma predeterminado)
+* **Español**
 
-* 📊 **Gráfico de Altimetría Dinámica**:
-  * Visualización por bloques ajustables de distancia (por defecto 100m).
-  * Código de colores según dureza de la pendiente.
-  * Alertas visuales de ataque en tramos exigentes (>10%).
-  * Indicación de distancia restante a la cima, pendiente media restante y tiempo estimado de llegada.
+---
 
-* ⛰️ **Coeficiente APM (`apm_score`)**:
-  * Campo de datos en tiempo real que calcula la dificultad acumulada de la subida restante.
-  * Basado en una tabla de ponderación no lineal según el porcentaje de pendiente (décimas de porcentaje del 0% al 30%).
+## 🚀 Características y Campos de Datos (v0.2)
 
-* ⚡ **Integración con Karoo Extension SDK 1.1.4**:
-  * Lectura eficiente de sensores mediante flujos reactivos de velocidad y elevación barométrica.
-  * Compatibilidad total con el ecosistema de aplicaciones de Karoo.
+* 📊 **Estratega de Altimetría (`altimetria_graph`)**:
+  * Visualización del perfil por bloques ajustables de distancia (100 m) con código de colores según dureza.
+  * Alertas visuales de ataque (**¡ATACA! / ATTACK!**) al detectar rampas >10%.
+  * Distancia restante a la cima, tiempo estimado y pendiente media restante.
+
+* ⛰️ **Índice de Dificultad APM (`apm_score`)**:
+  * Campo de datos que calcula la puntuación acumulada de dificultad que te queda por superar antes de coronar.
+
+* 🚴 **Ritmo VAM Objetivo (`climb_pacing`) — *Novedad v0.2***:
+  * Asistente de ritmo basado en **VAM (m/h)**.
+  * Calcula la velocidad objetivo (km/h) requerida en la pendiente actual para mantener tu ritmo de ascensión óptimo.
+
+* 📈 **Tendencia 3D y Rampa Máxima (`gradient_trend`) — *Novedad v0.2***:
+  * Indicador de tendencia en tiempo real (↗️ Endureciendo, ➔ Estable, ↘️ Suavizando) anticipándose al retraso del sensor barométrico.
+  * Registro de la pendiente máxima (% max) alcanzada en el tramo.
+
+---
+
+## 📖 Manual de Usuario
+Consulta el [**Manual de Usuario (`USER_MANUAL.md`)**](USER_MANUAL.md) para ver la guía completa de configuración e instalación en español e inglés.
 
 ---
 
@@ -28,11 +44,9 @@
 * **Android Studio**: Ladybug / 2024.2.1 o superior.
 * **JDK**: Java 17 o superior.
 * **Android SDK**: `compileSdk = 34`, `minSdk = 26`.
-* **Dispositivo**: Hammerhead Karoo 2 o Karoo 3 con opciones de desarrollador (ADB) activadas.
+* **Dispositivo**: Hammerhead Karoo 2 o Karoo 3 con ADB activado.
 
 ### Configuración del proyecto (`local.properties`)
-Dado que la librería `io.hammerhead:karoo-ext` se distribuye a través del repositorio de GitHub Packages, necesitas agregar tus credenciales en el archivo `local.properties`:
-
 ```properties
 gpr.user=TU_USUARIO_GITHUB
 gpr.key=TU_GITHUB_PERSONAL_ACCESS_TOKEN
@@ -42,16 +56,11 @@ gpr.key=TU_GITHUB_PERSONAL_ACCESS_TOKEN
 
 ## 📦 Compilación
 
-Para compilar el archivo APK de depuración desde la terminal:
-
 ```bash
 # Compilar proyecto
 ./gradlew assembleDebug
-```
 
-Para instalar la extensión directamente en un Karoo conectado por USB via ADB:
-
-```bash
+# Instalar en Karoo conectado por USB
 adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
@@ -64,20 +73,30 @@ ALTGRAPH/
 ├── app/
 │   └── src/main/
 │       ├── java/com/example/altgraph/
-│       │   ├── AltimetriaDataField.kt       # Gestión de eventos Karoo y cálculo de estrategia
-│       │   ├── AltimetriaExtensionService.kt # Servicio Karoo Extension principal
-│       │   ├── AltimetriaView.kt             # Renderizado visual y gráficos de perfil
-│       │   ├── ApmCalculator.kt              # Tabla e interpolación de coeficientes APM
-│       │   ├── ApmDataField.kt               # Campo de datos individual para el Coeficiente APM
-│       │   └── ClimbStateManager.kt          # Estado reactivo global del análisis de subida
+│       │   ├── AltimetriaExtensionService.kt # Servicio principal Karoo Extension (v0.2)
+│       │   ├── AltimetriaGraphDataField.kt    # Campo gráfico de altimetría
+│       │   ├── AltimetriaStrategyCalculator.kt# Algoritmo de cálculo de estrategia de puerto
+│       │   ├── AltimetriaView.kt             # Renderizado optimizado (Zero-Allocation onDraw)
+│       │   ├── ApmCalculator.kt              # Tabla de coeficientes APM
+│       │   ├── ApmDataField.kt               # Campo de datos del Coeficiente APM
+│       │   ├── ClimbPacingCalculator.kt      # Asistente de ritmo VAM (m/h)
+│       │   ├── ClimbPacingDataField.kt       # Campo de datos ClimbPacing
+│       │   ├── ClimbStateManager.kt          # Estado reactivo global
+│       │   ├── GradientTrendDataField.kt     # Campo de datos de tendencia de pendiente
+│       │   └── GradientTrendTracker.kt       # Algoritmo de detección de tendencia 3D
 │       └── res/
-│           └── drawable/
-│               └── ic_altigraph_logo.xml    # Logotipo vectorial (Vector Drawable)
-└── build.gradle.kts
+│           ├── drawable/
+│           │   └── ic_altigraph_logo.xml     # Logotipo vectorial de la aplicación
+│           ├── values/
+│           │   └── strings.xml               # Textos en Inglés (por defecto)
+│           └── values-es/
+│               └── strings.xml               # Textos en Español
+├── USER_MANUAL.md                            # Manual de usuario (ES/EN)
+└── README.md
 ```
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto se distribuye bajo la licencia **MIT**. Consulta el archivo `LICENSE` para más detalles.
+Este proyecto se distribuye bajo la licencia **MIT**.
