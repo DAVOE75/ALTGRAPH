@@ -1,17 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <attr name="id" format="string" />
+    <attr name="typeId" format="string" />
+    <attr name="label" format="string|reference" />
+    <attr name="displayName" format="string|reference" />
+    <attr name="description" format="string|reference" />
+    <attr name="icon" format="reference" />
+    <attr name="graphical" format="boolean" />
+    <attr name="scansDevices" format="boolean" />
+    <attr name="mapLayer" format="boolean" />
+    <attr name="fitFile" format="boolean" />
+
     <declare-styleable name="Extension">
-        <attr name="id" format="string" />
-        <attr name="displayName" format="string|reference" />
-        <attr name="icon" format="reference" />
-        <attr name="scansDevices" format="boolean" />
-        <attr name="mapLayer" format="boolean" />
-        <attr name="fitFile" format="boolean" />
+        <attr name="id" />
+        <attr name="label" />
+        <attr name="displayName" />
+        <attr name="icon" />
+        <attr name="scansDevices" />
+        <attr name="mapLayer" />
+        <attr name="fitFile" />
     </declare-styleable>
 
     <declare-styleable name="DataType">
-        <attr name="typeId" format="string" />
-        <attr name="description" format="string|reference" />
-        <attr name="graphical" format="boolean" />
+        <attr name="id" />
+        <attr name="typeId" />
+        <attr name="label" />
+        <attr name="displayName" />
+        <attr name="description" />
+        <attr name="graphical" />
+        <attr name="icon" />
     </declare-styleable>
 </resources>
