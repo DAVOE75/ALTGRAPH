@@ -2,11 +2,11 @@
   <img src="art/logo.png" alt="ALTGRAPH Logo" width="160" />
 </p>
 
-# ALTGRAPH (v0.2.1)
+# ALTGRAPH (v0.2.2)
 
 **ALTGRAPH** es una extensión avanzada de altimetría y rendimiento para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3) desarrollada por **David García Pascual** con el SDK oficial `karoo-ext`.
 
-Proporciona análisis dinámico de puertos de montaña, gráficos 3D en relieve con porcentajes de rampa serigrafiados en cada bloque, alertas de ataque en rampas duras, estimación de ritmo **VAM** dual con velocidad recomendada y el cálculo del **Grado de Fatiga (GF)** basado en un modelo científico de dureza, tipo de asfalto y pendiente máxima.
+Proporciona análisis dinámico de puertos de montaña, gráficos 3D en perspectiva isométrica con extrusión de paredes de montaña, cotas verticales a 90°, etiquetas de % serigrafiadas en cada bloque sin recuadros, indicadores de rampas duras (≥10%), alertas de ataque, ritmo **VAM** dual con velocidad recomendada y cálculo científico del **Grado de Fatiga (GF)**.
 
 ---
 
@@ -17,15 +17,18 @@ La extensión detecta automáticamente el idioma de tu sistema Karoo:
 
 ---
 
-## 🚀 Características y Campos de Datos (v0.2.1)
+## 🚀 Características y Campos de Datos (v0.2.2)
 
 * 🏔️ **Altimetría 3D (`altimetria_3d`)**:
   * Perfil en perspectiva isométrica 3D ampliada a pantalla completa con relieve extruido y sombras en degradado.
-  * Etiquetas del **% de inclinación** serigrafiadas en cada bloque del perfil 3D con **escalado de fuente personalizable** (`Normal`, `Grande`, `Extra Gr.`).
-  * Cinta de inclinación en tiempo real por colores y marcador flotante 3D (*Beacon*) con tu altitud exacta.
+  * Porcentajes del **% de inclinación** serigrafiados directamente sobre cada bloque con **escalado de fuente personalizable** (`Normal`, `Grande`, `Extra Gr.`).
+  * Cotas de altitud en metros rotadas a 90° corriendo en paralelo a las líneas verticales de separación de tramo (conmutador opcional `Sí / No`).
+  * Flechas señalizadoras e indicadores de rampas duras (≥10%) exclusivas para subidas (conmutador opcional `Sí / No`).
+  * Distancia de anticipación en el Eje X configurable desde **200 m a 500 m** (en pasos de 50m).
 
 * 📊 **Estratega de Altimetría (`altimetria_graph`)**:
-  * Visualización del perfil por bloques ajustables de distancia (50m, 100m, 250m, 500m) con etiquetas del % de inclinación serigrafiadas dentro de cada bloque.
+  * Visualización del perfil por bloques ajustables de distancia (50m, 100m, 250m, 500m) con **número de tramos visibles personalizable (1 a 10, por defecto 5)**.
+  * Etiquetas del % de inclinación serigrafiadas dentro de cada bloque.
   * Alertas visuales de ataque (**¡ATACA! / ATTACK!**) al detectar rampas >10%.
   * Distancia restante a la cima, tiempo estimado y pendiente media restante.
 

@@ -3,7 +3,7 @@ package com.example.altgraph
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.hammerhead.karooext.extension.KarooExtension
 
-class AltimetriaExtensionService : KarooExtension("altgraph", "0.2.1") {
+class AltimetriaExtensionService : KarooExtension("altgraph", "0.2.2") {
 
     override val types: List<DataTypeImpl>
         get() = listOf(

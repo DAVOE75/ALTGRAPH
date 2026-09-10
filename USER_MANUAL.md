@@ -1,4 +1,4 @@
-# 📖 Manual de Usuario - ALTGRAPH (v0.2.1)
+# 📖 Manual de Usuario - ALTGRAPH (v0.2.2)
 
 **ALTGRAPH** es una extensión avanzada de altimetría y análisis de rendimiento para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3), desarrollada por **David García Pascual**.
 
@@ -14,6 +14,8 @@
 ### 2. Panel de Configuración de la App
 Al abrir **ALTGRAPH** desde el menú de aplicaciones de tu Karoo 3, podrás personalizar:
 - **Distancia por Bloque del Perfil**: 50 m, 100 m, 250 m o 500 m.
+- **Número de Tramos Visibles en Perfil**: Ajuste de 1 a 10 tramos (5 por defecto).
+- **Distancia de Anticipación 3D (Eje X)**: 200 m a 500 m (en pasos de 50 m).
 - **Umbral de Alerta de Ataque (%)**: 8%, 10%, 12% o 15%.
 - **VAM Objetivo (m/h)**: Ajuste desde 500 m/h hasta 2000 m/h.
 - **Tipo / Calidad de Asfalto (TA)**:
@@ -23,15 +25,17 @@ Al abrir **ALTGRAPH** desde el menú de aplicaciones de tu Karoo 3, podrás pers
   - Malo / Gravilla ($\text{TA} = 1.7$)
 - **Tamaño de Letra del % en Altimetría 3D**: Normal, Grande o Extra Grande.
 - **Mostrar % en Bloques del Perfil**: Activado / Desactivado.
+- **Mostrar Cotas de Altitud en Gráfico 3D**: Activado / Desactivado.
+- **Mostrar Indicadores de Rampas Duras (≥10%) en 3D**: Activado / Desactivado.
 - **Activar Alertas Visuales de Ataque**: Activado / Desactivado.
 
-### 3. Campos de Datos Disponibles (v0.2.1)
+### 3. Campos de Datos Disponibles (v0.2.2)
 
 #### 🏔️ 1. Altimetría 3D (`3D Altimetry`)
-- **Descripción**: Muestra un gráfico de perfil en perspectiva isométrica 3D ampliada con relieve extruido, etiquetas de % en cada bloque del perfil con tamaño de fuente ajustable (`Normal`, `Grande`, `Extra Gr.`) y marcador flotante 3D (*Beacon*) con tu altitud en tiempo real.
+- **Descripción**: Muestra un gráfico de perfil en perspectiva isométrica 3D ampliada con relieve extruido, cotas verticales a 90°, etiquetas de % en cada bloque del perfil con tamaño de fuente ajustable (`Normal`, `Grande`, `Extra Gr.`), indicación de rampas duras de subida ($\ge 10\%$) y marcador flotante 3D (*Beacon*) con tu altitud en tiempo real.
 
 #### 📊 2. Estratega de Altimetría (`Altimetry Profile & Strategy`)
-- **Descripción**: Muestra un perfil de elevación dinámico por bloques ajustables (50m, 100m, 250m, 500m) con un código de colores y el % de pendiente impreso dentro de cada bloque.
+- **Descripción**: Muestra un perfil de elevación dinámico por bloques ajustables (50m, 100m, 250m, 500m) con un número de tramos visibles personalizable (1 a 10, por defecto 5), código de colores y % de pendiente impreso dentro de cada bloque.
 - **Alertas de Ataque**: Cuando detecta un tramo con pendiente mayor al umbral configurado, muestra un aviso destacado en pantalla (**¡ATACA!**).
 - **Métricas**: Distancia restante a la cima, tiempo estimado de llegada y pendiente media restante.
 
@@ -59,6 +63,8 @@ Al abrir **ALTGRAPH** desde el menú de aplicaciones de tu Karoo 3, podrás pers
 ### 2. Extension Settings Panel
 When opening **ALTGRAPH** from your Karoo app launcher, you can customize:
 - **Profile Block Distance**: 50 m, 100 m, 250 m, or 500 m.
+- **Upcoming Visible Blocks Count**: 1 to 10 blocks (5 default).
+- **3D Lookahead Distance (X Axis)**: 200 m to 500 m (in 50 m steps).
 - **Attack Alert Threshold (%)**: 8%, 10%, 12%, or 15%.
 - **Target VAM (m/h)**: Adjust from 500 m/h to 2000 m/h.
 - **Asphalt Quality (TA)**:
@@ -68,15 +74,17 @@ When opening **ALTGRAPH** from your Karoo app launcher, you can customize:
   - Poor / Gravel ($\text{TA} = 1.7$)
 - **3D Slope % Font Size**: Normal, Large, or XL.
 - **Show Slope % Inside Profile Blocks**: Enabled / Disabled.
+- **Show Altitude Labels in 3D Graph**: Enabled / Disabled.
+- **Show Steep Ramp Callouts (≥10%) in 3D Graph**: Enabled / Disabled.
 - **Enable Visual Attack Banner**: Enabled / Disabled.
 
-### 3. Available Data Fields (v0.2.1)
+### 3. Available Data Fields (v0.2.2)
 
 #### 🏔️ 1. 3D Altimetry
-- **Description**: Renders an enlarged 3D isometric elevation profile with extruded mountain relief shading, embedded % labels on 3D blocks with scalable font sizes, and a 3D floating rider beacon.
+- **Description**: Renders an enlarged 3D isometric elevation profile with extruded mountain relief shading, 90° vertical altitude cotas, embedded % labels on 3D blocks with scalable font sizes, uphill steep ramp flags ($\ge 10\%$), and a 3D floating rider beacon.
 
 #### 📊 2. Altimetry Profile & Strategy
-- **Description**: Displays a dynamic elevation profile divided into customizable distance blocks (50m, 100m, 250m, 500m) with color coding and embedded slope % text inside each block.
+- **Description**: Displays a dynamic elevation profile divided into customizable distance blocks (50m, 100m, 250m, 500m) with customizable visible blocks count (1 to 10, default 5), color coding, and embedded slope % text inside each block.
 - **Attack Alerts**: Displays a high-contrast visual alert (**ATTACK!**) when an upcoming block exceeds your alert threshold.
 - **Metrics**: Distance remaining to summit, estimated time of arrival, and average remaining grade.
 
