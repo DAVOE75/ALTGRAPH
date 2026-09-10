@@ -184,9 +184,15 @@ class Altimetria3DView @JvmOverloads constructor(
 
         // % de Pendiente en Tiempo Real EXTRA GRANDE justo debajo de PENDIENTE ACTUAL
         val liveGradeText = "%.1f%%".format(currentGrade)
-        liveGradePaint.textSize = ((h * 0.20f) * fontScale).coerceIn(28f, 68f)
+        liveGradePaint.textSize = ((h * 0.18f) * fontScale).coerceIn(26f, 60f)
         liveGradePaint.color = Color.parseColor(getGradeColor(currentGrade))
-        canvas.drawText(liveGradeText, 20f, h * 0.31f, liveGradePaint)
+        canvas.drawText(liveGradeText, 20f, h * 0.28f, liveGradePaint)
+
+        // Pendiente Máxima dentro del kilómetro por el que circulamos
+        val kmMaxGrade = if (nextBlocks.isNotEmpty()) nextBlocks.take(10).maxOrNull()?.toDouble() ?: 12.8 else 12.8
+        val labelMaxGrade = context.getString(R.string.label_max_gradient_km)
+        subTitleLabelPaint.textSize = ((h * 0.048f) * fontScale).coerceIn(10f, 16f)
+        canvas.drawText("$labelMaxGrade: %.1f%%".format(kmMaxGrade), 20f, h * 0.36f, subTitleLabelPaint)
 
         // 3. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)
@@ -201,10 +207,10 @@ class Altimetria3DView @JvmOverloads constructor(
 
         for (i in 0..gridLines) {
             val ratio = i.toFloat() / gridLines
-            val x1 = w * 0.06f + ratio * (w * 0.22f)
+            val x1 = w * 0.04f + ratio * (w * 0.22f)
             val y1 = groundY - ratio * (h * 0.14f)
 
-            val x2 = w * 0.74f + ratio * (w * 0.22f)
+            val x2 = w * 0.78f + ratio * (w * 0.22f)
             val y2 = groundY - ratio * (h * 0.14f)
 
             canvas.drawLine(x1, y1, x2, y2, gridPaint)
@@ -216,8 +222,9 @@ class Altimetria3DView @JvmOverloads constructor(
         val blocksCount = (totalMetersAhead / blockSizeMeters.coerceAtLeast(10.0)).toInt().coerceIn(2, 10)
         val samples = blocksCount + 1
 
-        val startX = w * 0.10f
-        val endX = w * 0.90f
+        // Estirado hacia los bordes laterales (sobre todo el lado derecho)
+        val startX = w * 0.05f
+        val endX = w * 0.96f
         val baseGroundY = h * 0.86f
         val maxPeakHeight = h * 0.44f
 
@@ -240,7 +247,7 @@ class Altimetria3DView @JvmOverloads constructor(
             pointElevations[i] = accumulatedElev.toFloat()
 
             val progress = i.toFloat() / (samples - 1)
-            val curveOffset = sin(progress * Math.PI * 1.5).toFloat() * (w * 0.08f)
+            val curveOffset = sin(progress * Math.PI * 1.5).toFloat() * (w * 0.06f)
 
             val px = startX + i * stepX + curveOffset
             val normalizedHeight = (grade.coerceIn(-5.0, 20.0) + 5.0) / 25.0
@@ -276,7 +283,7 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawPath(wallPath, wallPaint)
         }
 
-        // DIBUJAR LÍNEAS VERTICALES DE LÍMITE Y COTAS DE ALTITUD EN CADA TRAMO ROTADAS A 90 GRADOS (como en la imagen)
+        // DIBUJAR LÍNEAS VERTICALES DE LÍMITE Y COTAS DE ALTITUD EN CADA TRAMO ROTADAS A 90 GRADOS
         cotaTextPaint.textSize = ((h * 0.052f) * fontScale).coerceIn(10f, 18f)
 
         for (i in 0 until samples) {
@@ -302,7 +309,7 @@ class Altimetria3DView @JvmOverloads constructor(
         }
         canvas.drawPath(ribbonPath, lineStrokePaint)
 
-        // DIBUJAR RAMPA DURA (≥ 10% para ≥ 20m) CON FLECHA Y INDICADOR FLOTANTE si está activado
+        // DIBUJAR RAMPA DURA (≥ 10% para ≥ 20m) - ÚNICAMENTE VISIBLES EN SUBIDAS (>=10%), NUNCA EN BAJADAS
         if (showRamps) {
             for (i in 0 until samples - 1) {
                 val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
@@ -313,7 +320,7 @@ class Altimetria3DView @JvmOverloads constructor(
                     val arrowTopY = midY - (h * 0.18f)
                     val arrowBottomY = midY - 8f
 
-                    // Flecha apuntando a la rampa
+                    // Flecha apuntando hacia abajo a la rampa dura
                     canvas.drawLine(midX, arrowTopY, midX, arrowBottomY, rampArrowPaint)
 
                     arrowPath.reset()

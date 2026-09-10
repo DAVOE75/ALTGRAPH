@@ -24,6 +24,7 @@
     <string name="label_time_to_summit">TIME TO SUMMIT</string>
     <string name="label_next_blocks">NEXT %1$d m (%2$d m BLOCKS)</string>
     <string name="label_current_gradient">CURRENT GRADIENT</string>
+    <string name="label_max_gradient_km">MAX GRADIENT (KM)</string>
     <string name="alert_attack">ATTACK!</string>
     <string name="alert_attack_sub">Steep ramp in upcoming block</string>
 
