@@ -25,8 +25,8 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#27272A")
-        strokeWidth = 2f
+        color = Color.parseColor("#1F2937")
+        strokeWidth = 1.2f
         style = Paint.Style.STROKE
     }
 
@@ -88,9 +88,9 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private val axisTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#71717A")
+        color = Color.parseColor("#64748B")
         typeface = Typeface.DEFAULT_BOLD
-        textAlign = Paint.Align.CENTER
+        textAlign = Paint.Align.LEFT
     }
 
     private val percentTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -192,11 +192,48 @@ class Altimetria3DView @JvmOverloads constructor(
         maxGradePaint.color = Color.parseColor(getGradeColor(tramoMaxGrade))
         canvas.drawText(maxGradeText, 20f, h * 0.43f, maxGradePaint)
 
-        // 3. Rejilla Isometrica 3D de Suelo
+        // 3. REJILLA TRASERA 3D DE ALTITUD EN EL FONDO (Líneas finas de referencia por detrás del gráfico, como en la imagen)
+        draw3DBackwallGrid(canvas, w, h)
+
+        // 4. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)
 
-        // 4. Perfil 3D con Cotas Verticales y Marcadores de Rampas Duras
+        // 5. Perfil 3D con Cotas Verticales y Marcadores de Rampas Duras
         draw3DRibbonAndWalls(canvas, w, h)
+    }
+
+    private fun draw3DBackwallGrid(canvas: Canvas, w: Float, h: Float) {
+        val startX = w * 0.04f
+        val endX = w * 0.96f
+        val baseGroundY = h * 0.86f
+        val topGridY = h * 0.28f
+        val gridHeight = baseGroundY - topGridY
+
+        val steps = 4
+        val stepHeight = gridHeight / steps
+
+        // 1. Líneas horizontales finas de altitud en el fondo
+        axisTextPaint.textSize = (h * 0.038f).coerceIn(9f, 13f)
+
+        for (i in 0..steps) {
+            val y = baseGroundY - (i * stepHeight)
+
+            // Línea de cuadrícula horizontal
+            canvas.drawLine(startX, y, endX, y, gridPaint)
+
+            // Etiqueta de referencia de altitud en el fondo
+            val elevMark = (currentElevation + (i * 100)).toInt()
+            canvas.drawText("${elevMark}m", startX + 10f, y - 3f, axisTextPaint)
+        }
+
+        // 2. Líneas verticales finas de cuadrícula trasera
+        val verticalGridLines = 6
+        val stepX = (endX - startX) / verticalGridLines
+
+        for (i in 0..verticalGridLines) {
+            val x = startX + (i * stepX)
+            canvas.drawLine(x, topGridY, x, baseGroundY, gridPaint)
+        }
     }
 
     private fun drawIsometricGrid(canvas: Canvas, w: Float, h: Float) {
@@ -223,7 +260,7 @@ class Altimetria3DView @JvmOverloads constructor(
         val startX = w * 0.04f
         val endX = w * 0.96f
         val baseGroundY = h * 0.86f
-        val maxPeakHeight = h * 0.52f // Profundidad y altura del relieve 3D aumentada
+        val maxPeakHeight = h * 0.52f
 
         val stepX = (endX - startX) / (samples - 1).coerceAtLeast(1)
 
@@ -244,7 +281,7 @@ class Altimetria3DView @JvmOverloads constructor(
             pointElevations[i] = accumulatedElev.toFloat()
 
             val progress = i.toFloat() / (samples - 1)
-            val curveOffset = sin(progress * Math.PI * 1.5).toFloat() * (w * 0.09f) // Curvatura y volumen 3D ampliado
+            val curveOffset = sin(progress * Math.PI * 1.5).toFloat() * (w * 0.09f)
 
             val px = startX + i * stepX + curveOffset
             val normalizedHeight = (grade.coerceIn(-5.0, 20.0) + 5.0) / 25.0
@@ -256,7 +293,7 @@ class Altimetria3DView @JvmOverloads constructor(
             pointsYBase[i] = pYBase
         }
 
-        // DIBUJAR PAREDES DE EXTROSIÓN 3D (Relieve)
+        // DIBUJAR PAREDES DE EXTROSIÓN 3D (Relieve por delante de la rejilla de fondo)
         for (i in 0 until samples - 1) {
             val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
 
@@ -338,6 +375,7 @@ class Altimetria3DView @JvmOverloads constructor(
 
         // DIBUJAR EJE X CON MARCAS DE DISTANCIA EN METROS SEGÚN ANTICIPACIÓN
         axisTextPaint.textSize = (h * 0.045f).coerceIn(10f, 15f)
+        axisTextPaint.textAlign = Paint.Align.CENTER
         val stepDistMeters = (totalMetersAhead / blocksCount).toInt()
 
         for (i in 0 until samples) {
