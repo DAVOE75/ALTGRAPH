@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    id="altimetria_graph"
+    displayName="@string/app_name"
+    icon="@drawable/ic_altigraph_logo"
+    android:id="@+id/altimetria_graph"
+    android:label="@string/app_name"
+    android:icon="@drawable/ic_altigraph_logo"
     app:id="altimetria_graph"
     app:displayName="@string/app_name"
     app:icon="@drawable/ic_altigraph_logo">
 
     <data-type
+        id="altimetria_graph"
+        typeId="altimetria_graph"
+        displayName="@string/data_type_altimetria_title"
+        description="@string/data_type_altimetria_desc"
+        graphical="true"
+        icon="@drawable/ic_altigraph_logo"
+        android:id="@+id/dt_altimetria_graph"
+        android:label="@string/data_type_altimetria_title"
+        android:description="@string/data_type_altimetria_desc"
+        android:icon="@drawable/ic_altigraph_logo"
         app:typeId="altimetria_graph"
         app:displayName="@string/data_type_altimetria_title"
         app:description="@string/data_type_altimetria_desc"
@@ -13,6 +30,16 @@
         app:icon="@drawable/ic_altigraph_logo" />
 
     <data-type
+        id="apm_score"
+        typeId="apm_score"
+        displayName="@string/data_type_apm_title"
+        description="@string/data_type_apm_desc"
+        graphical="false"
+        icon="@drawable/ic_altigraph_logo"
+        android:id="@+id/dt_apm_score"
+        android:label="@string/data_type_apm_title"
+        android:description="@string/data_type_apm_desc"
+        android:icon="@drawable/ic_altigraph_logo"
         app:typeId="apm_score"
         app:displayName="@string/data_type_apm_title"
         app:description="@string/data_type_apm_desc"
@@ -20,6 +47,16 @@
         app:icon="@drawable/ic_altigraph_logo" />
 
     <data-type
+        id="climb_pacing"
+        typeId="climb_pacing"
+        displayName="@string/data_type_climb_pacing_title"
+        description="@string/data_type_climb_pacing_desc"
+        graphical="false"
+        icon="@drawable/ic_altigraph_logo"
+        android:id="@+id/dt_climb_pacing"
+        android:label="@string/data_type_climb_pacing_title"
+        android:description="@string/data_type_climb_pacing_desc"
+        android:icon="@drawable/ic_altigraph_logo"
         app:typeId="climb_pacing"
         app:displayName="@string/data_type_climb_pacing_title"
         app:description="@string/data_type_climb_pacing_desc"
@@ -27,6 +64,16 @@
         app:icon="@drawable/ic_altigraph_logo" />
 
     <data-type
+        id="gradient_trend"
+        typeId="gradient_trend"
+        displayName="@string/data_type_gradient_trend_title"
+        description="@string/data_type_gradient_trend_desc"
+        graphical="false"
+        icon="@drawable/ic_altigraph_logo"
+        android:id="@+id/dt_gradient_trend"
+        android:label="@string/data_type_gradient_trend_title"
+        android:description="@string/data_type_gradient_trend_desc"
+        android:icon="@drawable/ic_altigraph_logo"
         app:typeId="gradient_trend"
         app:displayName="@string/data_type_gradient_trend_title"
         app:description="@string/data_type_gradient_trend_desc"
