@@ -11,6 +11,7 @@ import android.graphics.Shader
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.View
+import kotlin.math.abs
 import kotlin.math.sin
 
 class Altimetria3DView @JvmOverloads constructor(
@@ -98,17 +99,7 @@ class Altimetria3DView @JvmOverloads constructor(
         color = Color.WHITE
         typeface = Typeface.DEFAULT_BOLD
         textAlign = Paint.Align.CENTER
-    }
-
-    private val percentBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#C018181B")
-        style = Paint.Style.FILL
-    }
-
-    private val percentBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#38BDF8")
-        strokeWidth = 1.5f
-        style = Paint.Style.STROKE
+        setShadowLayer(6f, 0f, 0f, Color.BLACK)
     }
 
     private val beaconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -135,7 +126,6 @@ class Altimetria3DView @JvmOverloads constructor(
     private val ribbonPath = Path()
     private val wallPath = Path()
     private val arrowPath = Path()
-    private val pctRect = RectF()
 
     fun update3DData(
         blocks: List<Float>,
@@ -199,7 +189,7 @@ class Altimetria3DView @JvmOverloads constructor(
         subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(10f, 15f)
         canvas.drawText(labelMaxGrade, 20f, h * 0.32f, subTitleLabelPaint)
 
-        // Número PENDIENTE MÁX. TRAMO (Grande justo debajo del número actual)
+        // Número PENDIENTE MÁX. TRAMO (Grande justo debajo)
         val maxGradeText = "%.1f%%".format(tramoMaxGrade)
         maxGradePaint.textSize = ((h * 0.13f) * fontScale).coerceIn(18f, 38f)
         maxGradePaint.color = Color.parseColor(getGradeColor(tramoMaxGrade))
@@ -360,9 +350,8 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawLine(pointsX[i], pointsYBase[i], pointsX[i], pointsYBase[i] + 6f, gridPaint)
         }
 
-        // DIBUJAR PORCENTAJES (%) DENTRO/SOBRE CADA BLOQUE 3D CON TAMAÑO CONFIGURABLE
-        val calcFontSize = ((h * 0.055f) * fontScale).coerceIn(11f, 26f)
-        percentTextPaint.textSize = calcFontSize
+        // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D (SIN CUADRO GRIS, MÁS GRANDE Y ADAPTADO AL ANCHO)
+        val fontBaseSize = (h * 0.090f) * fontScale
 
         for (i in 0 until samples - 1) {
             val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
@@ -373,19 +362,9 @@ class Altimetria3DView @JvmOverloads constructor(
             val midYBase = (pointsYBase[i] + pointsYBase[i + 1]) / 2f
             val centerY = (midYTop + midYBase) / 2f
 
-            val txtW = percentTextPaint.measureText(pctStr)
-            val rectWidth = txtW + 12f
-            val rectHeight = calcFontSize + 8f
-
-            pctRect.set(
-                midX - (rectWidth / 2f),
-                centerY - (rectHeight / 2f),
-                midX + (rectWidth / 2f),
-                centerY + (rectHeight / 2f)
-            )
-
-            canvas.drawRoundRect(pctRect, 6f, 6f, percentBgPaint)
-            canvas.drawRoundRect(pctRect, 6f, 6f, percentBorderPaint)
+            val blockW = abs(pointsX[i + 1] - pointsX[i])
+            val calcFontSize = (blockW * 0.58f * fontScale).coerceIn(18f, fontBaseSize.coerceAtLeast(38f))
+            percentTextPaint.textSize = calcFontSize
 
             val textY = centerY + (calcFontSize * 0.35f)
             canvas.drawText(pctStr, midX, textY, percentTextPaint)
