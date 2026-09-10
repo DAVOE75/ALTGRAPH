@@ -73,6 +73,11 @@ class Altimetria3DView @JvmOverloads constructor(
         typeface = Typeface.DEFAULT_BOLD
     }
 
+    private val liveGradePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#38BDF8")
+        typeface = Typeface.DEFAULT_BOLD
+    }
+
     private val axisTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#71717A")
         typeface = Typeface.DEFAULT_BOLD
@@ -164,13 +169,19 @@ class Altimetria3DView @JvmOverloads constructor(
 
         // 2. Encabezado Título ("Altimetría 3D")
         val titleText = context.getString(R.string.data_type_altimetria_3d_title)
-        titlePaint.textSize = (h * 0.12f).coerceIn(24f, 44f)
-        canvas.drawText(titleText, 20f, h * 0.14f, titlePaint)
+        titlePaint.textSize = ((h * 0.075f) * fontScale).coerceIn(16f, 26f)
+        canvas.drawText(titleText, 20f, h * 0.09f, titlePaint)
+
+        // % de Pendiente en Tiempo Real justo debajo del texto Altimetría 3D (en letra grande)
+        val liveGradeText = "%.1f%%".format(currentGrade)
+        liveGradePaint.textSize = ((h * 0.16f) * fontScale).coerceIn(24f, 54f)
+        liveGradePaint.color = Color.parseColor(getGradeColor(currentGrade))
+        canvas.drawText(liveGradeText, 20f, h * 0.23f, liveGradePaint)
 
         // 3. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)
 
-        // 4. Perfil y Cinta de Ruta en Relieve 3D con Marcas en Eje X
+        // 4. Perfil 3D con Cotas Verticales y Marcadores de Rampas Duras
         draw3DRibbonAndWalls(canvas, w, h)
     }
 
@@ -198,7 +209,7 @@ class Altimetria3DView @JvmOverloads constructor(
         val startX = w * 0.10f
         val endX = w * 0.90f
         val baseGroundY = h * 0.86f
-        val maxPeakHeight = h * 0.48f
+        val maxPeakHeight = h * 0.44f
 
         val stepX = (endX - startX) / (samples - 1).coerceAtLeast(1)
 
