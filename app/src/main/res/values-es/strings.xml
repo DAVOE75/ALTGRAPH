@@ -23,6 +23,14 @@
     <string name="alert_attack">¡ATACA!</string>
     <string name="alert_attack_sub">Rampa dura en el próximo tramo</string>
 
+    <!-- Settings Panel Strings -->
+    <string name="title_settings">Panel de Configuración</string>
+    <string name="setting_block_size">Distancia por Bloque del Perfil</string>
+    <string name="setting_attack_threshold">Umbral de Alerta de Ataque (%)</string>
+    <string name="setting_target_vam">VAM Objetivo (m/h)</string>
+    <string name="setting_enable_alerts">Activar Alertas Visuales de Ataque</string>
+    <string name="status_saved">Ajustes Guardados Automáticamente</string>
+
     <!-- Zone Colors -->
     <string name="zone_green">VERDE</string>
     <string name="zone_yellow">AMARILLO</string>

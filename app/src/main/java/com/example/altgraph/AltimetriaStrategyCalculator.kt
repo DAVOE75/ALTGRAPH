@@ -1,5 +1,6 @@
 package com.example.altgraph
 
+import android.content.Context
 import kotlin.math.hypot
 import kotlin.math.roundToInt
 
@@ -29,17 +30,17 @@ class AltimetriaStrategyCalculator {
 
     var routePoints: List<RoutePoint> = emptyList()
 
-    val userBlockSize = 100.0
-    val minBlockSize = 100.0
-    val thresholdAttack = 10.0
+    fun calculateStrategy(context: Context? = null): StrategyData {
+        val prefs = context?.let { AppPreferences.getInstance(it) }
 
-    fun calculateStrategy(): StrategyData {
+        val blockSize = prefs?.blockSizeMeters ?: 100.0
+        val thresholdAttack = prefs?.thresholdAttackPct ?: 10.0
+        val attackAlertsEnabled = prefs?.attackAlertEnabled ?: true
+
         if (routePoints.isEmpty() || currentSpeed <= 0.1) {
             ClimbStateManager.updateApm(0)
-            return StrategyData(0.0, 0L, 0.0, emptyList(), false, userBlockSize, 0)
+            return StrategyData(0.0, 0L, 0.0, emptyList(), false, blockSize, 0)
         }
-
-        val blockSize = if (userBlockSize < minBlockSize) minBlockSize else userBlockSize
 
         var nearestIndex = 0
         var minDistance = Double.MAX_VALUE
@@ -75,7 +76,7 @@ class AltimetriaStrategyCalculator {
 
                 if (nextBlocks.size < 10) {
                     nextBlocks.add(grade.toFloat())
-                    if (grade > thresholdAttack) {
+                    if (attackAlertsEnabled && grade > thresholdAttack) {
                         attack = true
                     }
                 }

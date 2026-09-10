@@ -23,6 +23,14 @@
     <string name="alert_attack">ATTACK!</string>
     <string name="alert_attack_sub">Steep ramp in upcoming block</string>
 
+    <!-- Settings Panel Strings -->
+    <string name="title_settings">Settings Panel</string>
+    <string name="setting_block_size">Profile Block Distance</string>
+    <string name="setting_attack_threshold">Attack Alert Threshold (%)</string>
+    <string name="setting_target_vam">Target VAM (m/h)</string>
+    <string name="setting_enable_alerts">Enable Attack Visual Alerts</string>
+    <string name="status_saved">Settings Saved Automatically</string>
+
     <!-- Zone Colors -->
     <string name="zone_green">GREEN</string>
     <string name="zone_yellow">YELLOW</string>
