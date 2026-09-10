@@ -29,14 +29,14 @@ class AltimetriaView @JvmOverloads constructor(
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        textSize = 55f
+        textSize = 65f
         typeface = Typeface.DEFAULT_BOLD
         textAlign = Paint.Align.CENTER
     }
 
     private val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.LTGRAY
-        textSize = 25f
+        textSize = 30f
         typeface = Typeface.DEFAULT_BOLD
         textAlign = Paint.Align.CENTER
     }
@@ -116,7 +116,7 @@ class AltimetriaView @JvmOverloads constructor(
         val centerX = w / 2f
 
         labelPaint.color = headerLabelColor
-        labelPaint.textSize = (h * 0.08f).coerceAtLeast(18f)
+        labelPaint.textSize = (h * 0.09f).coerceAtLeast(20f)
         canvas.drawText(context.getString(R.string.header_climb_strategist), centerX, h * 0.12f, labelPaint)
 
         val distanceKm = remainingDistance / 1000.0
@@ -126,37 +126,37 @@ class AltimetriaView @JvmOverloads constructor(
         val timeText = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
 
         textPaint.color = headerTextColor
-        textPaint.textSize = (h * 0.14f).coerceAtLeast(24f)
-        canvas.drawText(distanceText, centerX, h * 0.26f, textPaint)
+        textPaint.textSize = (h * 0.16f).coerceAtLeast(28f)
+        canvas.drawText(distanceText, centerX, h * 0.27f, textPaint)
 
-        labelPaint.textSize = (h * 0.07f).coerceAtLeast(16f)
-        canvas.drawText(context.getString(R.string.label_dist_remaining), centerX, h * 0.34f, labelPaint)
+        labelPaint.textSize = (h * 0.075f).coerceAtLeast(18f)
+        canvas.drawText(context.getString(R.string.label_dist_remaining), centerX, h * 0.35f, labelPaint)
 
         labelPaint.color = Color.LTGRAY
         textPaint.color = Color.WHITE
-        textPaint.textSize = (h * 0.12f).coerceAtLeast(22f)
+        textPaint.textSize = (h * 0.14f).coerceAtLeast(26f)
         canvas.drawText(timeText, centerX, h * 0.58f, textPaint)
 
-        labelPaint.textSize = (h * 0.06f).coerceAtLeast(14f)
+        labelPaint.textSize = (h * 0.07f).coerceAtLeast(16f)
         canvas.drawText(context.getString(R.string.label_time_to_summit), centerX, h * 0.66f, labelPaint)
 
         // Bloques
-        val barY = h * 0.76f
-        val barHeight = h * 0.15f
+        val barY = h * 0.74f
+        val barHeight = h * 0.18f
         val count = min(visibleBlocksCount, nextBlocks.size)
         val totalMeters = (count * blockSizeMeters).toInt()
 
-        labelPaint.textSize = (h * 0.055f).coerceAtLeast(14f)
+        labelPaint.textSize = (h * 0.065f).coerceAtLeast(16f)
         val blocksTitle = context.getString(R.string.label_next_blocks, totalMeters, blockSizeMeters.toInt())
         canvas.drawText(blocksTitle, centerX, barY - 10f, labelPaint)
 
         if (count > 0) {
-            val blockWidth = (w - 40f) / count.toFloat()
+            val blockWidth = (w - 30f) / count.toFloat()
 
             for (i in 0 until count) {
-                val left = 20f + i * blockWidth
+                val left = 15f + i * blockWidth
                 val top = barY
-                val right = left + blockWidth - 6f
+                val right = left + blockWidth - 4f
                 val bottom = top + barHeight
 
                 blockRect.set(left, top, right, bottom)
@@ -164,10 +164,10 @@ class AltimetriaView @JvmOverloads constructor(
                 blockPaint.color = getColorForGrade(gradeVal)
                 canvas.drawRoundRect(blockRect, 8f, 8f, blockPaint)
 
-                // Dibujar % de pendiente dentro de cada bloque si está activado
+                // Dibujar % de pendiente significativamente MÁS GRANDE dentro de cada bloque
                 if (showBlockPercentages) {
                     val gradeText = "%.0f%%".format(gradeVal)
-                    blockTextPaint.textSize = (barHeight * 0.55f).coerceIn(10f, 18f)
+                    blockTextPaint.textSize = (barHeight * 0.68f).coerceIn(14f, 26f)
                     blockTextPaint.color = if (gradeVal > 3f && gradeVal <= 5f) Color.BLACK else Color.WHITE
 
                     val txtX = blockRect.centerX()
@@ -191,11 +191,11 @@ class AltimetriaView @JvmOverloads constructor(
             canvas.drawRoundRect(alertRect, 24f, 24f, alertStrokePaint)
 
             textPaint.color = Color.WHITE
-            textPaint.textSize = (h * 0.12f).coerceAtLeast(22f)
+            textPaint.textSize = (h * 0.14f).coerceAtLeast(26f)
             canvas.drawText(context.getString(R.string.alert_attack), centerX, h * 0.42f, textPaint)
 
             labelPaint.color = Color.WHITE
-            labelPaint.textSize = (h * 0.065f).coerceAtLeast(14f)
+            labelPaint.textSize = (h * 0.075f).coerceAtLeast(16f)
             canvas.drawText(context.getString(R.string.alert_attack_sub), centerX, h * 0.54f, labelPaint)
         }
     }
