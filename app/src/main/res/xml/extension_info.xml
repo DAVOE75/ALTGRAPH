@@ -14,6 +14,13 @@
         icon="@drawable/ic_altigraph_logo" />
 
     <DataType
+        typeId="altimetria_3d"
+        displayName="@string/data_type_altimetria_3d_title"
+        description="@string/data_type_altimetria_3d_desc"
+        graphical="true"
+        icon="@drawable/ic_altigraph_logo" />
+
+    <DataType
         typeId="fatigue_grade"
         displayName="@string/data_type_fatigue_grade_title"
         description="@string/data_type_fatigue_grade_desc"

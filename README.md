@@ -6,7 +6,7 @@
 
 **ALTGRAPH** es una extensión avanzada de altimetría y rendimiento para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3) desarrollada con el SDK oficial `karoo-ext`.
 
-Proporciona análisis dinámico de puertos de montaña, alertas de ataque en rampas duras, estimación de ritmo **VAM** y el cálculo del **Grado de Fatiga (GF)** basado en un modelo científico de dureza, tipo de asfalto y pendiente máxima.
+Proporciona análisis dinámico de puertos de montaña, vista de perfil 3D en relieve con itinerario, alertas de ataque en rampas duras, estimación de ritmo **VAM** y el cálculo del **Grado de Fatiga (GF)** basado en un modelo científico de dureza, tipo de asfalto y pendiente máxima.
 
 ---
 
@@ -19,8 +19,12 @@ La extensión detecta automáticamente el idioma de tu sistema Karoo:
 
 ## 🚀 Características y Campos de Datos (v0.2)
 
+* 🏔️ **Altimetría 3D y Recorrido (`altimetria_3d`) — *Novedad v0.2***:
+  * Visualización del perfil e itinerario en perspectiva isométrica 3D con relieve extruido.
+  * Cinta de color con inclinaciones en tiempo real y marcador de posición 3D (*Beacon*).
+
 * 📊 **Estratega de Altimetría (`altimetria_graph`)**:
-  * Visualización del perfil por bloques ajustables de distancia (100 m) con código de colores según dureza.
+  * Visualización del perfil por bloques ajustables de distancia (50m, 100m, 250m, 500m) con código de colores según dureza.
   * Alertas visuales de ataque (**¡ATACA! / ATTACK!**) al detectar rampas >10%.
   * Distancia restante a la cima, tiempo estimado y pendiente media restante.
 
@@ -53,12 +57,6 @@ Consulta el [**Manual de Usuario (`USER_MANUAL.md`)**](USER_MANUAL.md) para ver 
 * **Android SDK**: `compileSdk = 34`, `minSdk = 26`.
 * **Dispositivo**: Hammerhead Karoo 2 o Karoo 3 con ADB activado.
 
-### Configuración del proyecto (`local.properties`)
-```properties
-gpr.user=TU_USUARIO_GITHUB
-gpr.key=TU_GITHUB_PERSONAL_ACCESS_TOKEN
-```
-
 ---
 
 ## 📦 Compilación
@@ -69,42 +67,6 @@ gpr.key=TU_GITHUB_PERSONAL_ACCESS_TOKEN
 
 # Instalar en Karoo conectado por USB
 adb install -r app/build/outputs/apk/debug/app-debug.apk
-```
-
----
-
-## 📁 Estructura del proyecto
-
-```
-ALTGRAPH/
-├── app/
-│   └── src/main/
-│       ├── java/com/example/altgraph/
-│       │   ├── AltimetriaExtensionService.kt # Servicio principal Karoo Extension (v0.2)
-│       │   ├── AltimetriaGraphDataField.kt    # Campo gráfico de altimetría
-│       │   ├── AltimetriaStrategyCalculator.kt# Algoritmo de cálculo de estrategia de puerto
-│       │   ├── AltimetriaView.kt             # Renderizado optimizado (Zero-Allocation onDraw)
-│       │   ├── AppPreferences.kt             # Gestor de configuración persistente
-│       │   ├── ClimbPacingCalculator.kt      # Asistente de ritmo VAM (m/h)
-│       │   ├── ClimbPacingDataField.kt       # Campo de datos ClimbPacing
-│       │   ├── ClimbStateManager.kt          # Estado reactivo global
-│       │   ├── FatigueGradeCalculator.kt     # Algoritmo del Grado de Fatiga (GF)
-│       │   ├── FatigueGradeDataField.kt      # Campo de datos del Grado de Fatiga GF
-│       │   ├── GradientTrendDataField.kt     # Campo de datos de tendencia de pendiente
-│       │   ├── GradientTrendTracker.kt       # Algoritmo de detección de tendencia 3D
-│       │   └── MainActivity.kt               # Panel de configuración táctil
-│       └── res/
-│           ├── drawable/
-│           │   └── ic_altigraph_logo.xml     # Logotipo vectorial de la aplicación
-│           ├── values/
-│           │   ├── attrs.xml                 # Atributos de metadatos Karoo
-│           │   └── strings.xml               # Textos en Inglés (por defecto)
-│           ├── values-es/
-│           │   └── strings.xml               # Textos en Español
-│           └── xml/
-│               └── extension_info.xml        # Declaración estática de la extensión
-├── USER_MANUAL.md                            # Manual de usuario (ES/EN)
-└── README.md
 ```
 
 ---
