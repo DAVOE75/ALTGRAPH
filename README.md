@@ -2,11 +2,11 @@
   <img src="art/logo.png" alt="ALTGRAPH Logo" width="160" />
 </p>
 
-# ALTGRAPH (v0.2)
+# ALTGRAPH (v0.2.1)
 
 **ALTGRAPH** es una extensión avanzada de altimetría y rendimiento para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3) desarrollada con el SDK oficial `karoo-ext`.
 
-Proporciona análisis dinámico de puertos de montaña, vista de perfil 3D en relieve con itinerario, alertas de ataque en rampas duras, estimación de ritmo **VAM** y el cálculo del **Grado de Fatiga (GF)** basado en un modelo científico de dureza, tipo de asfalto y pendiente máxima.
+Proporciona análisis dinámico de puertos de montaña, gráficos 3D en relieve con escalado de tipografía, alertas de ataque en rampas duras, estimación de ritmo **VAM** dual con velocidad recomendada y el cálculo del **Grado de Fatiga (GF)** basado en un modelo científico de dureza, tipo de asfalto y pendiente máxima.
 
 ---
 
@@ -17,14 +17,15 @@ La extensión detecta automáticamente el idioma de tu sistema Karoo:
 
 ---
 
-## 🚀 Características y Campos de Datos (v0.2)
+## 🚀 Características y Campos de Datos (v0.2.1)
 
-* 🏔️ **Altimetría 3D y Recorrido (`altimetria_3d`) — *Novedad v0.2***:
-  * Visualización del perfil e itinerario en perspectiva isométrica 3D con relieve extruido.
-  * Cinta de color con inclinaciones en tiempo real y marcador de posición 3D (*Beacon*).
+* 🏔️ **Altimetría 3D (`altimetria_3d`)**:
+  * Perfil en perspectiva isométrica 3D ampliada a pantalla completa con relieve extruido y sombras en degradado.
+  * Cinta de inclinación en tiempo real por colores y marcador flotante 3D (*Beacon*) con tu altitud exacta.
+  * Escalado interactivo de tamaño de letra de las etiquetas (`Normal`, `Grande`, `Extra Gr.`).
 
 * 📊 **Estratega de Altimetría (`altimetria_graph`)**:
-  * Visualización del perfil por bloques ajustables de distancia (50m, 100m, 250m, 500m) con código de colores según dureza.
+  * Visualización del perfil por bloques ajustables de distancia (50m, 100m, 250m, 500m) con etiquetas del % de inclinación serigrafiadas dentro de cada bloque.
   * Alertas visuales de ataque (**¡ATACA! / ATTACK!**) al detectar rampas >10%.
   * Distancia restante a la cima, tiempo estimado y pendiente media restante.
 
@@ -34,11 +35,11 @@ La extensión detecta automáticamente el idioma de tu sistema Karoo:
   * Ponderación según porcentaje de pendiente ($\text{DU}^*$), tipo de asfalto ($\text{TA}$) y rampa máxima ($\text{PMx}$).
   * Clasificación automática por categorías (5ª Cat, 4ª Cat, 3ª Cat, 2ª Cat, 1ª Cat, Especial HC).
 
-* 🚴 **Ritmo VAM Objetivo (`climb_pacing`) — *Novedad v0.2***:
+* 🚴 **Ritmo VAM Objetivo (`climb_pacing`) — *Opción C Dual***:
   * Asistente de ritmo basado en **VAM (m/h)**.
-  * Calcula la velocidad objetivo (km/h) requerida en la pendiente actual para mantener tu ritmo de ascensión óptimo.
+  * Muestra la VAM instantánea (`850 m/h`) junto a la velocidad objetivo requerida (`12.5 km/h`) en la pendiente actual y la insignia de estado (`🟢 EN RITMO`, `🔴 SOBREESFUERZO`, `🔵 POR DEBAJO`).
 
-* 📈 **Tendencia 3D y Rampa Máxima (`gradient_trend`) — *Novedad v0.2***:
+* 📈 **Tendencia 3D y Rampa Máxima (`gradient_trend`)**:
   * Indicador de tendencia en tiempo real (↗️ Endureciendo, ➔ Estable, ↘️ Suavizando) anticipándose al retraso del sensor barométrico.
   * Registro de la pendiente máxima (% max) alcanzada en el tramo.
 
