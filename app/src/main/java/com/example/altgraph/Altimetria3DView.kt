@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
-import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
 import android.util.AttributeSet
@@ -99,7 +98,7 @@ class Altimetria3DView @JvmOverloads constructor(
         color = Color.WHITE
         typeface = Typeface.DEFAULT_BOLD
         textAlign = Paint.Align.CENTER
-        setShadowLayer(6f, 0f, 0f, Color.BLACK)
+        setShadowLayer(4f, 0f, 0f, Color.BLACK)
     }
 
     private val beaconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -169,13 +168,13 @@ class Altimetria3DView @JvmOverloads constructor(
 
         // 2. Encabezado Título ("Altimetría 3D")
         val titleText = context.getString(R.string.data_type_altimetria_3d_title)
-        titlePaint.textSize = ((h * 0.065f) * fontScale).coerceIn(14f, 22f)
-        canvas.drawText(titleText, 20f, h * 0.07f, titlePaint)
+        titlePaint.textSize = ((h * 0.070f) * fontScale).coerceIn(15f, 24f)
+        canvas.drawText(titleText, 20f, h * 0.08f, titlePaint)
 
         // Etiqueta PENDIENTE ACTUAL
         val labelCurrentGrade = context.getString(R.string.label_current_gradient)
-        subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(10f, 15f)
-        canvas.drawText(labelCurrentGrade, 20f, h * 0.13f, subTitleLabelPaint)
+        subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(11f, 18f)
+        canvas.drawText(labelCurrentGrade, 20f, h * 0.15f, subTitleLabelPaint)
 
         // Número PENDIENTE ACTUAL (Grande)
         val liveGradeText = "%.1f%%".format(currentGrade)
@@ -350,8 +349,8 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawLine(pointsX[i], pointsYBase[i], pointsX[i], pointsYBase[i] + 6f, gridPaint)
         }
 
-        // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D (SIN CUADRO GRIS, MÁS GRANDE Y ADAPTADO AL ANCHO)
-        val fontBaseSize = (h * 0.090f) * fontScale
+        // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D (REDUCIDO A LA MITAD DE TAMAÑO)
+        val fontBaseSize = (h * 0.045f) * fontScale
 
         for (i in 0 until samples - 1) {
             val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
@@ -363,7 +362,7 @@ class Altimetria3DView @JvmOverloads constructor(
             val centerY = (midYTop + midYBase) / 2f
 
             val blockW = abs(pointsX[i + 1] - pointsX[i])
-            val calcFontSize = (blockW * 0.58f * fontScale).coerceIn(18f, fontBaseSize.coerceAtLeast(38f))
+            val calcFontSize = (blockW * 0.30f * fontScale).coerceIn(10f, fontBaseSize.coerceAtLeast(18f))
             percentTextPaint.textSize = calcFontSize
 
             val textY = centerY + (calcFontSize * 0.35f)
