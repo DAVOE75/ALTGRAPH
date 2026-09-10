@@ -17,15 +17,15 @@ class AltimetriaView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private var remainingDistance: Double = 0.0
-    private var timeToSummit: Long = 0
-    private var avgGradeRemaining: Double = 0.0
+    private var remainingDistance: Double = 8500.0
+    private var timeToSummit: Long = 1620L
+    private var avgGradeRemaining: Double = 7.2
     private var zoneColor: String = "VERDE"
-    private var nextBlocks: List<Float> = emptyList()
+    private var nextBlocks: List<Float> = listOf(3.5f, 5.0f, 7.5f, 11.2f, 12.8f, 9.0f, 6.5f, 8.2f, 10.5f, 4.0f)
     private var attackAlert: Boolean = false
     private var blockSizeMeters: Double = 100.0
+    private var showBlockPercentages: Boolean = true
 
-    // Paints declarados como campos para evitar GC en onDraw
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         textSize = 55f
@@ -36,6 +36,12 @@ class AltimetriaView @JvmOverloads constructor(
     private val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.LTGRAY
         textSize = 25f
+        typeface = Typeface.DEFAULT_BOLD
+        textAlign = Paint.Align.CENTER
+    }
+
+    private val blockTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
         typeface = Typeface.DEFAULT_BOLD
         textAlign = Paint.Align.CENTER
     }
@@ -54,15 +60,19 @@ class AltimetriaView @JvmOverloads constructor(
         currentZoneColor: String,
         nextBlocks: List<Float>,
         attackAlert: Boolean,
-        blockSizeMeters: Double
+        blockSizeMeters: Double,
+        showBlockPct: Boolean = true
     ) {
         this.remainingDistance = remainingDistance
         this.timeToSummit = timeToSummit
         this.avgGradeRemaining = avgGrade
         this.zoneColor = currentZoneColor
-        this.nextBlocks = nextBlocks
+        if (nextBlocks.isNotEmpty()) {
+            this.nextBlocks = nextBlocks
+        }
         this.attackAlert = attackAlert
         this.blockSizeMeters = blockSizeMeters
+        this.showBlockPercentages = showBlockPct
 
         postInvalidate()
     }
@@ -147,8 +157,20 @@ class AltimetriaView @JvmOverloads constructor(
                 val bottom = top + barHeight
 
                 blockRect.set(left, top, right, bottom)
-                blockPaint.color = getColorForGrade(nextBlocks[i])
+                val gradeVal = nextBlocks[i]
+                blockPaint.color = getColorForGrade(gradeVal)
                 canvas.drawRoundRect(blockRect, 8f, 8f, blockPaint)
+
+                // Dibujar % de pendiente dentro de cada bloque si está activado
+                if (showBlockPercentages) {
+                    val gradeText = "%.0f%%".format(gradeVal)
+                    blockTextPaint.textSize = (barHeight * 0.55f).coerceIn(10f, 18f)
+                    blockTextPaint.color = if (gradeVal > 3f && gradeVal <= 5f) Color.BLACK else Color.WHITE
+
+                    val txtX = blockRect.centerX()
+                    val txtY = blockRect.centerY() + (blockTextPaint.textSize * 0.35f)
+                    canvas.drawText(gradeText, txtX, txtY, blockTextPaint)
+                }
             }
         }
 

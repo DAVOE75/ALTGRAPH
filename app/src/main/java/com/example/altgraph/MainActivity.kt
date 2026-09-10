@@ -175,7 +175,46 @@ class MainActivity : Activity() {
         asphaltCard.addView(asphaltValueText)
         asphaltCard.addView(asphaltRow)
 
-        // Section 5: Toggle Attack Alerts Card
+        // Section 5: 3D Font Size Scale Card
+        val font3dCard = createCardContainer()
+        val font3dLabel = createSectionLabel(getString(R.string.setting_font_size_3d))
+        val fontScales = listOf(1.0f to getString(R.string.font_normal), 1.25f to getString(R.string.font_large), 1.5f to getString(R.string.font_xl))
+        val currentFontLabel = fontScales.find { it.first == prefs.fontSize3dScale }?.second ?: getString(R.string.font_normal)
+        val font3dValueText = createValueText(currentFontLabel)
+        val font3dRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
+
+        val fontButtons = mutableListOf<Button>()
+        fontScales.forEach { (scale, labelStr) ->
+            val btn = createSegmentButton(labelStr, prefs.fontSize3dScale == scale) {
+                prefs.fontSize3dScale = scale
+                font3dValueText.text = labelStr
+                updateSegmentActiveStates(fontButtons, fontScales.indexOfFirst { it.first == scale })
+            }
+            fontButtons.add(btn)
+            font3dRow.addView(btn)
+        }
+
+        font3dCard.addView(font3dLabel)
+        font3dCard.addView(font3dValueText)
+        font3dCard.addView(font3dRow)
+
+        // Section 6: Toggle Show % in Profile Blocks Card
+        val showPctCard = createCardContainer()
+        val switchShowPct = Switch(this).apply {
+            text = getString(R.string.setting_show_block_percentages)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.showBlockPercentages
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.showBlockPercentages = isChecked
+            }
+        }
+        showPctCard.addView(switchShowPct)
+
+        // Section 7: Toggle Attack Alerts Card
         val alertCard = createCardContainer()
         val switchAlerts = Switch(this).apply {
             text = getString(R.string.setting_enable_alerts)
@@ -217,6 +256,8 @@ class MainActivity : Activity() {
         rootLayout.addView(attackCard)
         rootLayout.addView(vamCard)
         rootLayout.addView(asphaltCard)
+        rootLayout.addView(font3dCard)
+        rootLayout.addView(showPctCard)
         rootLayout.addView(alertCard)
         rootLayout.addView(saveExitButton)
 

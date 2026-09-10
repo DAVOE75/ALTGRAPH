@@ -76,6 +76,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private var maxElevation: Double = 727.0
     private var currentGrade: Double = 7.2
     private var remainingDistance: Double = 8500.0
+    private var fontScale: Float = 1.0f
 
     private val ribbonPath = Path()
     private val wallPath = Path()
@@ -86,7 +87,8 @@ class Altimetria3DView @JvmOverloads constructor(
         elevation: Double,
         maxElev: Double,
         grade: Double,
-        remainingDist: Double
+        remainingDist: Double,
+        fontScale: Float = 1.0f
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -97,6 +99,7 @@ class Altimetria3DView @JvmOverloads constructor(
         this.maxElevation = if (maxElev > 0) maxElev else 727.0
         this.currentGrade = grade
         this.remainingDistance = remainingDist
+        this.fontScale = fontScale
         postInvalidate()
     }
 
@@ -111,10 +114,10 @@ class Altimetria3DView @JvmOverloads constructor(
         // 1. Fondo Oscuro
         canvas.drawRect(0f, 0f, w, h, bgPaint)
 
-        // 2. Encabezado Título (Tipografía aumentada)
+        // 2. Encabezado Título (Tipografía escalable según preferencia)
         val titleText = context.getString(R.string.data_type_altimetria_3d_title)
-        textPaint.textSize = (h * 0.085f).coerceIn(20f, 32f)
-        subTextPaint.textSize = (h * 0.068f).coerceIn(16f, 26f)
+        textPaint.textSize = ((h * 0.085f) * fontScale).coerceIn(18f, 42f)
+        subTextPaint.textSize = ((h * 0.068f) * fontScale).coerceIn(14f, 34f)
 
         canvas.drawText(titleText, 20f, h * 0.12f, textPaint)
 
@@ -213,9 +216,9 @@ class Altimetria3DView @JvmOverloads constructor(
         canvas.drawCircle(rx, ry, 22f, beaconHaloPaint)
         canvas.drawCircle(rx, ry, 10f, beaconPaint)
 
-        // Etiqueta flotante 3D sobre el corredor con tamaño ampliado
+        // Etiqueta flotante 3D sobre el corredor con tamaño ampliable
         val tagText = "📍 ${currentElevation.toInt()}m"
-        textPaint.textSize = (h * 0.08f).coerceIn(18f, 28f)
+        textPaint.textSize = ((h * 0.08f) * fontScale).coerceIn(16f, 32f)
         val textWidth = textPaint.measureText(tagText)
 
         val rectL = (rx + 16f).coerceAtMost(w - textWidth - 24f)

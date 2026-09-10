@@ -33,6 +33,11 @@
     <string name="setting_target_vam">VAM Objetivo (m/h)</string>
     <string name="setting_asphalt_factor">Tipo / Calidad de Asfalto (TA)</string>
     <string name="setting_enable_alerts">Activar Alertas Visuales de Ataque</string>
+    <string name="setting_font_size_3d">Tamaño de Letra en Altimetría 3D</string>
+    <string name="setting_show_block_percentages">Mostrar % de Pendiente en Bloques del Perfil</string>
+    <string name="font_normal">Normal</string>
+    <string name="font_large">Grande</string>
+    <string name="font_xl">Extra Gr.</string>
     <string name="status_saved">Ajustes Guardados Automáticamente</string>
     <string name="btn_save_and_exit">Guardar y Salir</string>
 

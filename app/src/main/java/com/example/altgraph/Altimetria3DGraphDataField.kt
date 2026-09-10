@@ -65,13 +65,15 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
 
         val viewJob = scope.launch {
             while (true) {
+                val prefs = AppPreferences.getInstance(context)
                 val strategy = calculator.calculateStrategy(context)
                 altimetria3DView.update3DData(
                     blocks = strategy.nextBlocks,
                     elevation = calculator.currentElevation,
                     maxElev = 727.0,
                     grade = strategy.avgGrade,
-                    remainingDist = strategy.remainingDistance
+                    remainingDist = strategy.remainingDistance,
+                    fontScale = prefs.fontSize3dScale
                 )
 
                 val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)

@@ -27,6 +27,14 @@ class AppPreferences(context: Context) {
         get() = prefs.getFloat(KEY_ASPHALT_FACTOR, 0.5f).toDouble()
         set(value) = prefs.edit().putFloat(KEY_ASPHALT_FACTOR, value.toFloat()).apply()
 
+    var fontSize3dScale: Float
+        get() = prefs.getFloat(KEY_FONT_SIZE_3D_SCALE, 1.0f)
+        set(value) = prefs.edit().putFloat(KEY_FONT_SIZE_3D_SCALE, value).apply()
+
+    var showBlockPercentages: Boolean
+        get() = prefs.getBoolean(KEY_SHOW_BLOCK_PERCENTAGES, true)
+        set(value) = prefs.edit().putBoolean(KEY_SHOW_BLOCK_PERCENTAGES, value).apply()
+
     companion object {
         private const val PREFS_NAME = "altgraph_settings"
         private const val KEY_BLOCK_SIZE = "block_size_meters"
@@ -34,6 +42,8 @@ class AppPreferences(context: Context) {
         private const val KEY_TARGET_VAM = "target_vam"
         private const val KEY_ATTACK_ALERT_ENABLED = "attack_alert_enabled"
         private const val KEY_ASPHALT_FACTOR = "asphalt_factor"
+        private const val KEY_FONT_SIZE_3D_SCALE = "font_size_3d_scale"
+        private const val KEY_SHOW_BLOCK_PERCENTAGES = "show_block_percentages"
 
         @Volatile
         private var INSTANCE: AppPreferences? = null

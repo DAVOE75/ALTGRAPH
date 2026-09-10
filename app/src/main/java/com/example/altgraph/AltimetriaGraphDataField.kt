@@ -65,6 +65,7 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
 
         val viewJob = scope.launch {
             while (true) {
+                val prefs = AppPreferences.getInstance(context)
                 val strategy = calculator.calculateStrategy(context)
                 altimetriaView.updateStrategyData(
                     remainingDistance = strategy.remainingDistance,
@@ -73,7 +74,8 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                     currentZoneColor = calculator.getZoneColor(calculator.currentElevation),
                     nextBlocks = strategy.nextBlocks,
                     attackAlert = strategy.attackAlert,
-                    blockSizeMeters = strategy.blockSizeMeters
+                    blockSizeMeters = strategy.blockSizeMeters,
+                    showBlockPct = prefs.showBlockPercentages
                 )
 
                 val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
