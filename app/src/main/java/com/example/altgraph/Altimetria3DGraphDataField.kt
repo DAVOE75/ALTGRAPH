@@ -93,6 +93,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     maxElev = 727.0,
                     grade = strategy.avgGrade,
                     remainingDist = strategy.remainingDistance,
+                    blockSizeMeters = strategy.blockSizeMeters,
                     fontScale = prefs.fontSize3dScale
                 )
 
