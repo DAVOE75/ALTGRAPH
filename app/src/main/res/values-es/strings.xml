@@ -38,6 +38,7 @@
     <string name="setting_font_size_3d">Tamaño de Letra en Altimetría 3D</string>
     <string name="setting_show_block_percentages">Mostrar % de Pendiente en Bloques del Perfil</string>
     <string name="setting_show_3d_cotas">Mostrar Cotas de Altitud en Gráfico 3D</string>
+    <string name="setting_show_3d_ramps">Mostrar Indicadores de Rampas Duras (≥10%) en 3D</string>
     <string name="font_normal">Normal</string>
     <string name="font_large">Grande</string>
     <string name="font_xl">Extra Gr.</string>

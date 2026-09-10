@@ -30,6 +30,34 @@ class Altimetria3DView @JvmOverloads constructor(
         style = Paint.Style.STROKE
     }
 
+    private val cotaLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#52525B")
+        strokeWidth = 1.5f
+        style = Paint.Style.STROKE
+    }
+
+    private val cotaTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#E4E4E7")
+        typeface = Typeface.DEFAULT_BOLD
+    }
+
+    private val rampArrowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#EF4444")
+        strokeWidth = 3f
+        style = Paint.Style.STROKE
+    }
+
+    private val rampArrowHeadPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#EF4444")
+        style = Paint.Style.FILL
+    }
+
+    private val rampTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        typeface = Typeface.DEFAULT_BOLD
+        textAlign = Paint.Align.CENTER
+    }
+
     private val wallPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
     }
@@ -78,17 +106,6 @@ class Altimetria3DView @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
 
-    private val tagBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#18181B")
-        style = Paint.Style.FILL
-    }
-
-    private val tagBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#38BDF8")
-        strokeWidth = 2.5f
-        style = Paint.Style.STROKE
-    }
-
     private var nextBlocks: List<Float> = emptyList()
     private var currentElevation: Double = 350.0
     private var maxElevation: Double = 727.0
@@ -98,10 +115,11 @@ class Altimetria3DView @JvmOverloads constructor(
     private var lookaheadMeters: Int = 350
     private var fontScale: Float = 1.0f
     private var showCotas: Boolean = true
+    private var showRamps: Boolean = true
 
     private val ribbonPath = Path()
     private val wallPath = Path()
-    private val tagRect = RectF()
+    private val arrowPath = Path()
     private val pctRect = RectF()
 
     fun update3DData(
@@ -113,7 +131,8 @@ class Altimetria3DView @JvmOverloads constructor(
         blockSizeMeters: Double = 100.0,
         fontScale: Float = 1.0f,
         lookaheadMeters: Int = 350,
-        showCotas: Boolean = true
+        showCotas: Boolean = true,
+        showRamps: Boolean = true
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -128,6 +147,7 @@ class Altimetria3DView @JvmOverloads constructor(
         this.fontScale = fontScale
         this.lookaheadMeters = lookaheadMeters
         this.showCotas = showCotas
+        this.showRamps = showRamps
         postInvalidate()
     }
 
@@ -150,7 +170,7 @@ class Altimetria3DView @JvmOverloads constructor(
         // 3. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)
 
-        // 4. Perfil y Cinta de Ruta en Relieve 3D con Marcas en Eje X
+        // 4. Perfil 3D con Cotas Verticales y Marcadores de Rampas Duras
         draw3DRibbonAndWalls(canvas, w, h)
     }
 
@@ -185,9 +205,18 @@ class Altimetria3DView @JvmOverloads constructor(
         val pointsX = FloatArray(samples)
         val pointsYTop = FloatArray(samples)
         val pointsYBase = FloatArray(samples)
+        val pointElevations = FloatArray(samples)
+
+        var accumulatedElev = currentElevation
 
         for (i in 0 until samples) {
             val grade = if (i < nextBlocks.size) nextBlocks[i].toDouble() else ((i % 4) * 2.5 + 2.0)
+
+            if (i > 0) {
+                val segmentMeters = blockSizeMeters.coerceAtLeast(20.0)
+                accumulatedElev += (segmentMeters * (grade / 100.0))
+            }
+            pointElevations[i] = accumulatedElev.toFloat()
 
             val progress = i.toFloat() / (samples - 1)
             val curveOffset = sin(progress * Math.PI * 1.5).toFloat() * (w * 0.08f)
@@ -226,6 +255,20 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawPath(wallPath, wallPaint)
         }
 
+        // DIBUJAR LÍNEAS VERTICALES DE LÍMITE Y COTAS DE ALTITUD EN CADA TRAMO
+        cotaTextPaint.textSize = ((h * 0.050f) * fontScale).coerceIn(10f, 18f)
+
+        for (i in 0 until samples) {
+            // Línea vertical que baja desde el perfil
+            canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i], pointsYBase[i] + 12f, cotaLinePaint)
+
+            // Cota de altitud en metros si está activado
+            if (showCotas) {
+                val cotaText = "${pointElevations[i].toInt()} m"
+                canvas.drawText(cotaText, pointsX[i] + 4f, pointsYBase[i] - 12f, cotaTextPaint)
+            }
+        }
+
         // DIBUJAR CINTA SUPERIOR 3D
         ribbonPath.reset()
         ribbonPath.moveTo(pointsX[0], pointsYTop[0])
@@ -233,6 +276,35 @@ class Altimetria3DView @JvmOverloads constructor(
             ribbonPath.lineTo(pointsX[i], pointsYTop[i])
         }
         canvas.drawPath(ribbonPath, lineStrokePaint)
+
+        // DIBUJAR RAMPA DURA (≥ 10% para ≥ 20m) CON FLECHA Y INDICADOR FLOTANTE si está activado
+        if (showRamps) {
+            for (i in 0 until samples - 1) {
+                val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
+                if (grade >= 10.0f) {
+                    val midX = (pointsX[i] + pointsX[i + 1]) / 2f
+                    val midY = (pointsYTop[i] + pointsYTop[i + 1]) / 2f
+
+                    val arrowTopY = midY - (h * 0.18f)
+                    val arrowBottomY = midY - 8f
+
+                    // Flecha apuntando a la rampa
+                    canvas.drawLine(midX, arrowTopY, midX, arrowBottomY, rampArrowPaint)
+
+                    arrowPath.reset()
+                    arrowPath.moveTo(midX, arrowBottomY)
+                    arrowPath.lineTo(midX - 6f, arrowBottomY - 10f)
+                    arrowPath.lineTo(midX + 6f, arrowBottomY - 10f)
+                    arrowPath.close()
+                    canvas.drawPath(arrowPath, rampArrowHeadPaint)
+
+                    // Texto del % sobre la flecha (ej. 10%, 12%, 15%)
+                    rampTextPaint.textSize = ((h * 0.065f) * fontScale).coerceIn(12f, 22f)
+                    val rampLabel = "%.0f%%".format(grade)
+                    canvas.drawText(rampLabel, midX, arrowTopY - 6f, rampTextPaint)
+                }
+            }
+        }
 
         // DIBUJAR EJE X CON MARCAS DE DISTANCIA EN METROS SEGÚN ANTICIPACIÓN
         axisTextPaint.textSize = (h * 0.045f).coerceIn(10f, 15f)
@@ -284,24 +356,6 @@ class Altimetria3DView @JvmOverloads constructor(
 
         canvas.drawCircle(rx, ry, 22f, beaconHaloPaint)
         canvas.drawCircle(rx, ry, 10f, beaconPaint)
-
-        // Etiqueta flotante 3D sobre el corredor si las Cotas están activadas
-        if (showCotas) {
-            val tagText = "📍 ${currentElevation.toInt()}m"
-            titlePaint.textSize = (h * 0.075f).coerceIn(16f, 24f)
-            val textWidth = titlePaint.measureText(tagText)
-
-            val rectL = (rx + 16f).coerceAtMost(w - textWidth - 24f)
-            val rectT = ry - (h * 0.16f)
-            val rectR = rectL + textWidth + 20f
-            val rectB = rectT + (h * 0.12f)
-
-            tagRect.set(rectL, rectT, rectR, rectB)
-            canvas.drawRoundRect(tagRect, 10f, 10f, tagBgPaint)
-            canvas.drawRoundRect(tagRect, 10f, 10f, tagBorderPaint)
-
-            canvas.drawText(tagText, rectL + 10f, rectT + (tagRect.height() * 0.72f), titlePaint)
-        }
     }
 
     private fun getGradeColor(grade: Double): String {

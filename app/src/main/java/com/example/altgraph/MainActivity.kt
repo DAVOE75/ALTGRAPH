@@ -292,7 +292,20 @@ class MainActivity : Activity() {
         }
         showCotasCard.addView(switchShowCotas)
 
-        // Section 10: Toggle Attack Alerts Card
+        // Section 10: Toggle Show 3D Ramp Callouts Card
+        val showRampsCard = createCardContainer()
+        val switchShowRamps = Switch(this).apply {
+            text = getString(R.string.setting_show_3d_ramps)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.show3dRamps
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.show3dRamps = isChecked
+            }
+        }
+        showRampsCard.addView(switchShowRamps)
+
+        // Section 11: Toggle Attack Alerts Card
         val alertCard = createCardContainer()
         val switchAlerts = Switch(this).apply {
             text = getString(R.string.setting_enable_alerts)
@@ -339,6 +352,7 @@ class MainActivity : Activity() {
         rootLayout.addView(font3dCard)
         rootLayout.addView(showPctCard)
         rootLayout.addView(showCotasCard)
+        rootLayout.addView(showRampsCard)
         rootLayout.addView(alertCard)
         rootLayout.addView(saveExitButton)
 
