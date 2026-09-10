@@ -14,6 +14,8 @@ import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import java.util.Locale
+import kotlin.math.abs
 
 class MainActivity : Activity() {
 
@@ -210,11 +212,11 @@ class MainActivity : Activity() {
         vamCard.addView(vamValueText)
         vamCard.addView(vamRow)
 
-        // Section 6: Asphalt Quality Card
+        // Section 6: Asphalt Quality Card (Con 1 solo decimal y Bueno por defecto)
         val asphaltCard = createCardContainer()
         val asphaltLabel = createSectionLabel(getString(R.string.setting_asphalt_factor))
-        val currentAsphaltQuality = FatigueGradeCalculator.AsphaltQuality.entries.find { it.factor == prefs.asphaltFactor } ?: FatigueGradeCalculator.AsphaltQuality.GOOD
-        val asphaltValueText = createValueText("${currentAsphaltQuality.labelEs} (TA = ${prefs.asphaltFactor})")
+        val currentAsphaltQuality = FatigueGradeCalculator.AsphaltQuality.entries.find { abs(it.factor - prefs.asphaltFactor) < 0.05 } ?: FatigueGradeCalculator.AsphaltQuality.GOOD
+        val asphaltValueText = createValueText("${currentAsphaltQuality.labelEs} (TA = %.1f)".format(Locale.US, currentAsphaltQuality.factor))
         val asphaltRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -224,9 +226,10 @@ class MainActivity : Activity() {
         val qualities = FatigueGradeCalculator.AsphaltQuality.entries
 
         qualities.forEach { q ->
-            val btn = createSegmentButton(q.labelEs.take(6), prefs.asphaltFactor == q.factor) {
+            val isActive = abs(prefs.asphaltFactor - q.factor) < 0.05
+            val btn = createSegmentButton(q.labelEs.take(6), isActive) {
                 prefs.asphaltFactor = q.factor
-                asphaltValueText.text = "${q.labelEs} (TA = ${q.factor})"
+                asphaltValueText.text = "${q.labelEs} (TA = %.1f)".format(Locale.US, q.factor)
                 updateSegmentActiveStates(asphaltButtons, qualities.indexOf(q))
             }
             asphaltButtons.add(btn)
