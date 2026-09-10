@@ -6,5 +6,5 @@
   "latestVersionCode": 1,
   "iconUrl": "https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png",
   "developer": "DAVOE75",
-  "description": "Extensión de altimetría, alertas de ataque, ritmo VAM objetivo e índice APM para Hammerhead Karoo"
+  "description": "Extensión de altimetría, alertas de ataque, ritmo VAM e Índice Grado de Fatiga (GF) para Hammerhead Karoo"
 }

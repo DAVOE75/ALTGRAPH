@@ -18,7 +18,7 @@ data class StrategyData(
     val nextBlocks: List<Float>,
     val attackAlert: Boolean,
     val blockSizeMeters: Double,
-    val totalApm: Int
+    val totalFatigueGrade: Int
 )
 
 class AltimetriaStrategyCalculator {
@@ -36,6 +36,7 @@ class AltimetriaStrategyCalculator {
         val blockSize = prefs?.blockSizeMeters ?: 100.0
         val thresholdAttack = prefs?.thresholdAttackPct ?: 10.0
         val attackAlertsEnabled = prefs?.attackAlertEnabled ?: true
+        val asphaltFactor = prefs?.asphaltFactor ?: 0.5
 
         if (routePoints.isEmpty() || currentSpeed <= 0.1) {
             ClimbStateManager.updateApm(0)
@@ -60,7 +61,8 @@ class AltimetriaStrategyCalculator {
 
         val nextBlocks = mutableListOf<Float>()
         var attack = false
-        var accumulatedApm = 0.0
+        var accumulatedHardness = 0.0
+        var maxRampPct = 0.0
 
         var currentBlockStartDistance = routePoints[nearestIndex].distance
         var currentBlockStartElevation = routePoints[nearestIndex].elevation
@@ -71,8 +73,13 @@ class AltimetriaStrategyCalculator {
 
             if (distanceDiff >= blockSize) {
                 val grade = ((point.elevation - currentBlockStartElevation) / distanceDiff) * 100.0
+                val distanceKm = distanceDiff / 1000.0
 
-                accumulatedApm += ApmCalculator.calculateSegmentApm(distanceDiff, grade)
+                if (grade > maxRampPct) {
+                    maxRampPct = grade
+                }
+
+                accumulatedHardness += FatigueGradeCalculator.calculateSegmentHardness(grade, distanceKm)
 
                 if (nextBlocks.size < 10) {
                     nextBlocks.add(grade.toFloat())
@@ -86,8 +93,13 @@ class AltimetriaStrategyCalculator {
             }
         }
 
-        val totalApm = accumulatedApm.roundToInt()
-        ClimbStateManager.updateApm(totalApm)
+        val totalGf = FatigueGradeCalculator.calculateTotalFatigueGrade(
+            totalHardness = accumulatedHardness,
+            asphaltFactor = asphaltFactor,
+            maxRampPct = maxRampPct
+        ).roundToInt()
+
+        ClimbStateManager.updateApm(totalGf)
 
         return StrategyData(
             remainingDistance = totalDistanceRemaining,
@@ -96,7 +108,7 @@ class AltimetriaStrategyCalculator {
             nextBlocks = nextBlocks,
             attackAlert = attack,
             blockSizeMeters = blockSize,
-            totalApm = totalApm
+            totalFatigueGrade = totalGf
         )
     }
 

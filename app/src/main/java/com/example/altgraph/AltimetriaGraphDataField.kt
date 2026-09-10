@@ -32,7 +32,7 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                                 DataType.Field.SINGLE to strategy.avgGrade,
                                 "remaining_distance" to strategy.remainingDistance,
                                 "time_to_summit" to strategy.timeToSummit.toDouble(),
-                                "total_apm" to strategy.totalApm.toDouble()
+                                "total_fatigue_grade" to strategy.totalFatigueGrade.toDouble()
                             )
                         )
                     )
@@ -50,7 +50,7 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
 
         val viewJob = scope.launch {
             while (true) {
-                val strategy = calculator.calculateStrategy()
+                val strategy = calculator.calculateStrategy(context)
                 altimetriaView.updateStrategyData(
                     remainingDistance = strategy.remainingDistance,
                     timeToSummit = strategy.timeToSummit,

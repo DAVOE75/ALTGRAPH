@@ -126,7 +126,27 @@ class MainActivity : Activity() {
         vamControlsLayout.addView(vamMinusBtn)
         vamControlsLayout.addView(vamPlusBtn)
 
-        // Section 4: Toggle Attack Alerts
+        // Section 4: Asphalt Quality (TA)
+        val asphaltLabel = createSectionLabel(getString(R.string.setting_asphalt_factor))
+        val asphaltValueText = createValueText("TA = ${prefs.asphaltFactor}")
+        val asphaltButtonsLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+        }
+
+        val qualities = FatigueGradeCalculator.AsphaltQuality.entries
+        qualities.forEach { q ->
+            val btn = Button(this).apply {
+                text = q.labelEs
+                setOnClickListener {
+                    prefs.asphaltFactor = q.factor
+                    asphaltValueText.text = "${q.labelEs} (TA = ${q.factor})"
+                }
+            }
+            asphaltButtonsLayout.addView(btn)
+        }
+
+        // Section 5: Toggle Attack Alerts
         val switchAlerts = Switch(this).apply {
             text = getString(R.string.setting_enable_alerts)
             setTextColor(Color.WHITE)
@@ -181,6 +201,10 @@ class MainActivity : Activity() {
         rootLayout.addView(vamLabel)
         rootLayout.addView(vamValueText)
         rootLayout.addView(vamControlsLayout)
+
+        rootLayout.addView(asphaltLabel)
+        rootLayout.addView(asphaltValueText)
+        rootLayout.addView(asphaltButtonsLayout)
 
         rootLayout.addView(switchAlerts)
         rootLayout.addView(saveExitButton)

@@ -6,8 +6,8 @@
     <string name="data_type_altimetria_title">Estratega de Altimetría</string>
     <string name="data_type_altimetria_desc">Gráfico de perfil dinámico con pendientes por tramos y alertas de ataque</string>
 
-    <string name="data_type_apm_title">Índice de Dificultad APM</string>
-    <string name="data_type_apm_desc">Puntuación de dificultad acumulada para la subida restante</string>
+    <string name="data_type_fatigue_grade_title">Grado de Fatiga (GF)</string>
+    <string name="data_type_fatigue_grade_desc">Índice científico de Grado de Fatiga y dureza para clasificación de puertos</string>
 
     <string name="data_type_climb_pacing_title">Ritmo VAM Objetivo</string>
     <string name="data_type_climb_pacing_desc">Asistente de VAM objetivo (m/h) según la pendiente actual</string>
@@ -28,6 +28,7 @@
     <string name="setting_block_size">Distancia por Bloque del Perfil</string>
     <string name="setting_attack_threshold">Umbral de Alerta de Ataque (%)</string>
     <string name="setting_target_vam">VAM Objetivo (m/h)</string>
+    <string name="setting_asphalt_factor">Tipo / Calidad de Asfalto (TA)</string>
     <string name="setting_enable_alerts">Activar Alertas Visuales de Ataque</string>
     <string name="status_saved">Ajustes Guardados Automáticamente</string>
     <string name="btn_save_and_exit">Guardar y Salir</string>

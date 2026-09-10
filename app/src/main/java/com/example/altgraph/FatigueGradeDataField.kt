@@ -11,21 +11,19 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class ApmDataField(extension: String) : DataTypeImpl(
-    extension = extension,
-    typeId = "apm_score"
-) {
+class FatigueGradeDataField(extension: String) : DataTypeImpl(extension, "fatigue_grade") {
+
     private val scope = CoroutineScope(Dispatchers.Default)
     private var streamJob: Job? = null
 
     override fun startStream(emitter: Emitter<StreamState>) {
         streamJob = scope.launch {
-            ClimbStateManager.currentApm.collectLatest { apmValue ->
+            ClimbStateManager.currentApm.collectLatest { fatigueValue ->
                 emitter.onNext(
                     StreamState.Streaming(
                         DataPoint(
                             dataTypeId = dataTypeId,
-                            values = mapOf(DataType.Field.SINGLE to apmValue.toDouble())
+                            values = mapOf(DataType.Field.SINGLE to fatigueValue.toDouble())
                         )
                     )
                 )

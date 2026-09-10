@@ -23,12 +23,17 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_ATTACK_ALERT_ENABLED, true)
         set(value) = prefs.edit().putBoolean(KEY_ATTACK_ALERT_ENABLED, value).apply()
 
+    var asphaltFactor: Double
+        get() = prefs.getFloat(KEY_ASPHALT_FACTOR, 0.5f).toDouble()
+        set(value) = prefs.edit().putFloat(KEY_ASPHALT_FACTOR, value.toFloat()).apply()
+
     companion object {
         private const val PREFS_NAME = "altgraph_settings"
         private const val KEY_BLOCK_SIZE = "block_size_meters"
         private const val KEY_THRESHOLD_ATTACK = "threshold_attack_pct"
         private const val KEY_TARGET_VAM = "target_vam"
         private const val KEY_ATTACK_ALERT_ENABLED = "attack_alert_enabled"
+        private const val KEY_ASPHALT_FACTOR = "asphalt_factor"
 
         @Volatile
         private var INSTANCE: AppPreferences? = null

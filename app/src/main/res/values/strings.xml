@@ -6,8 +6,8 @@
     <string name="data_type_altimetria_title">Altimetry Profile &amp; Strategy</string>
     <string name="data_type_altimetria_desc">Dynamic profile graph with segment grades and attack alerts</string>
 
-    <string name="data_type_apm_title">APM Difficulty Index</string>
-    <string name="data_type_apm_desc">Accumulated climb difficulty score for the remaining ascent</string>
+    <string name="data_type_fatigue_grade_title">Fatigue Grade (GF)</string>
+    <string name="data_type_fatigue_grade_desc">Scientific fatigue grade &amp; difficulty index for climb rating</string>
 
     <string name="data_type_climb_pacing_title">ClimbPacing VAM Target</string>
     <string name="data_type_climb_pacing_desc">Target VAM (m/h) pacing assistant based on current gradient</string>
@@ -28,6 +28,7 @@
     <string name="setting_block_size">Profile Block Distance</string>
     <string name="setting_attack_threshold">Attack Alert Threshold (%)</string>
     <string name="setting_target_vam">Target VAM (m/h)</string>
+    <string name="setting_asphalt_factor">Asphalt Quality (TA)</string>
     <string name="setting_enable_alerts">Enable Attack Visual Alerts</string>
     <string name="status_saved">Settings Saved Automatically</string>
     <string name="btn_save_and_exit">Save &amp; Exit</string>

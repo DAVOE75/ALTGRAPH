@@ -13,9 +13,9 @@
         app:icon="@drawable/ic_altigraph_logo" />
 
     <DataType
-        app:typeId="apm_score"
-        app:displayName="@string/data_type_apm_title"
-        app:description="@string/data_type_apm_desc"
+        app:typeId="fatigue_grade"
+        app:displayName="@string/data_type_fatigue_grade_title"
+        app:description="@string/data_type_fatigue_grade_desc"
         app:graphical="false"
         app:icon="@drawable/ic_altigraph_logo" />
 
