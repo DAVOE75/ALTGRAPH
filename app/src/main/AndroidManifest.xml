@@ -13,6 +13,15 @@
             android:name="io.hammerhead.karooext.MANIFEST_URL"
             android:value="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/manifest.json" />
 
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".AltimetriaExtensionService"
             android:exported="true">
