@@ -5,6 +5,6 @@
   "latestVersion": "0.2.1",
   "latestVersionCode": 2,
   "iconUrl": "https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png",
-  "developer": "DAVOE75",
+  "developer": "David García Pascual",
   "description": "Extensión de altimetría 3D en relieve, alertas de ataque, ritmo VAM e Índice Grado de Fatiga (GF) para Hammerhead Karoo"
 }

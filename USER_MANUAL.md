@@ -1,6 +1,6 @@
 # 📖 Manual de Usuario - ALTGRAPH (v0.2.1)
 
-**ALTGRAPH** es una extensión avanzada de altimetría y análisis de rendimiento para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3).
+**ALTGRAPH** es una extensión avanzada de altimetría y análisis de rendimiento para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3), desarrollada por **David García Pascual**.
 
 ---
 
@@ -21,14 +21,14 @@ Al abrir **ALTGRAPH** desde el menú de aplicaciones de tu Karoo 3, podrás pers
   - Bueno ($\text{TA} = 0.5$, *por defecto*)
   - Regular ($\text{TA} = 1.2$)
   - Malo / Gravilla ($\text{TA} = 1.7$)
-- **Tamaño de Letra en Altimetría 3D**: Normal, Grande o Extra Grande.
+- **Tamaño de Letra del % en Altimetría 3D**: Normal, Grande o Extra Grande.
 - **Mostrar % en Bloques del Perfil**: Activado / Desactivado.
 - **Activar Alertas Visuales de Ataque**: Activado / Desactivado.
 
 ### 3. Campos de Datos Disponibles (v0.2.1)
 
 #### 🏔️ 1. Altimetría 3D (`3D Altimetry`)
-- **Descripción**: Muestra un gráfico de perfil en perspectiva isométrica 3D ampliada con relieve extruido y cinta de color por pendientes. Incluye un marcador flotante 3D (*Beacon*) con tu altitud en tiempo real y tipografía de tamaño ajustable.
+- **Descripción**: Muestra un gráfico de perfil en perspectiva isométrica 3D ampliada con relieve extruido, etiquetas de % en cada bloque del perfil con tamaño de fuente ajustable (`Normal`, `Grande`, `Extra Gr.`) y marcador flotante 3D (*Beacon*) con tu altitud en tiempo real.
 
 #### 📊 2. Estratega de Altimetría (`Altimetry Profile & Strategy`)
 - **Descripción**: Muestra un perfil de elevación dinámico por bloques ajustables (50m, 100m, 250m, 500m) con un código de colores y el % de pendiente impreso dentro de cada bloque.
@@ -66,14 +66,14 @@ When opening **ALTGRAPH** from your Karoo app launcher, you can customize:
   - Good ($\text{TA} = 0.5$, *default*)
   - Regular ($\text{TA} = 1.2$)
   - Poor / Gravel ($\text{TA} = 1.7$)
-- **3D Text Font Size**: Normal, Large, or XL.
+- **3D Slope % Font Size**: Normal, Large, or XL.
 - **Show Slope % Inside Profile Blocks**: Enabled / Disabled.
 - **Enable Visual Attack Banner**: Enabled / Disabled.
 
 ### 3. Available Data Fields (v0.2.1)
 
 #### 🏔️ 1. 3D Altimetry
-- **Description**: Renders an enlarged 3D isometric elevation profile with extruded mountain relief shading and gradient colors. Features a 3D floating rider beacon and scalable font sizes.
+- **Description**: Renders an enlarged 3D isometric elevation profile with extruded mountain relief shading, embedded % labels on 3D blocks with scalable font sizes, and a 3D floating rider beacon.
 
 #### 📊 2. Altimetry Profile & Strategy
 - **Description**: Displays a dynamic elevation profile divided into customizable distance blocks (50m, 100m, 250m, 500m) with color coding and embedded slope % text inside each block.

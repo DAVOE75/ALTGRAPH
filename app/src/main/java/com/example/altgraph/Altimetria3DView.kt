@@ -45,6 +45,23 @@ class Altimetria3DView @JvmOverloads constructor(
         typeface = Typeface.DEFAULT_BOLD
     }
 
+    private val percentTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        typeface = Typeface.DEFAULT_BOLD
+        textAlign = Paint.Align.CENTER
+    }
+
+    private val percentBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#C018181B")
+        style = Paint.Style.FILL
+    }
+
+    private val percentBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#38BDF8")
+        strokeWidth = 1.5f
+        style = Paint.Style.STROKE
+    }
+
     private val beaconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#38BDF8")
         style = Paint.Style.FILL
@@ -76,6 +93,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private val ribbonPath = Path()
     private val wallPath = Path()
     private val tagRect = RectF()
+    private val pctRect = RectF()
 
     fun update3DData(
         blocks: List<Float>,
@@ -111,13 +129,13 @@ class Altimetria3DView @JvmOverloads constructor(
 
         // 2. Encabezado Título Elegante Limpio ("Altimetría 3D")
         val titleText = context.getString(R.string.data_type_altimetria_3d_title)
-        textPaint.textSize = ((h * 0.09f) * fontScale).coerceIn(20f, 38f)
-        canvas.drawText(titleText, 20f, h * 0.12f, textPaint)
+        textPaint.textSize = (h * 0.085f).coerceIn(18f, 28f)
+        canvas.drawText(titleText, 20f, h * 0.11f, textPaint)
 
         // 3. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)
 
-        // 4. Perfil y Cinta de Ruta en Relieve 3D (AMPLIADO A TAMAÑO MÁXIMO)
+        // 4. Perfil y Cinta de Ruta en Relieve 3D con % en los bloques
         draw3DRibbonAndWalls(canvas, w, h)
     }
 
@@ -142,7 +160,7 @@ class Altimetria3DView @JvmOverloads constructor(
         val startX = w * 0.10f
         val endX = w * 0.90f
         val baseGroundY = h * 0.88f
-        val maxPeakHeight = h * 0.55f // Aumentado significativamente el tamaño del gráfico 3D
+        val maxPeakHeight = h * 0.52f
 
         val stepX = (endX - startX) / (samples - 1).coerceAtLeast(1)
 
@@ -198,6 +216,37 @@ class Altimetria3DView @JvmOverloads constructor(
         }
         canvas.drawPath(ribbonPath, lineStrokePaint)
 
+        // DIBUJAR PORCENTAJES (%) DENTRO/SOBRE CADA BLOQUE 3D CON TAMAÑO CONFIGURABLE
+        val calcFontSize = ((h * 0.055f) * fontScale).coerceIn(11f, 26f)
+        percentTextPaint.textSize = calcFontSize
+
+        for (i in 0 until samples - 1) {
+            val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
+            val pctStr = "%.0f%%".format(grade)
+
+            val midX = (pointsX[i] + pointsX[i + 1]) / 2f
+            val midYTop = (pointsYTop[i] + pointsYTop[i + 1]) / 2f
+            val midYBase = (pointsYBase[i] + pointsYBase[i + 1]) / 2f
+            val centerY = (midYTop + midYBase) / 2f
+
+            val txtW = percentTextPaint.measureText(pctStr)
+            val rectWidth = txtW + 12f
+            val rectHeight = calcFontSize + 8f
+
+            pctRect.set(
+                midX - (rectWidth / 2f),
+                centerY - (rectHeight / 2f),
+                midX + (rectWidth / 2f),
+                centerY + (rectHeight / 2f)
+            )
+
+            canvas.drawRoundRect(pctRect, 6f, 6f, percentBgPaint)
+            canvas.drawRoundRect(pctRect, 6f, 6f, percentBorderPaint)
+
+            val textY = centerY + (calcFontSize * 0.35f)
+            canvas.drawText(pctStr, midX, textY, percentTextPaint)
+        }
+
         // DIBUJAR MARCADOR BEACON 3D DEL CICLISTA
         val riderIdx = 0
         val rx = pointsX[riderIdx]
@@ -208,7 +257,7 @@ class Altimetria3DView @JvmOverloads constructor(
 
         // Etiqueta flotante 3D sobre el corredor
         val tagText = "📍 ${currentElevation.toInt()}m"
-        textPaint.textSize = ((h * 0.08f) * fontScale).coerceIn(16f, 32f)
+        textPaint.textSize = (h * 0.075f).coerceIn(16f, 24f)
         val textWidth = textPaint.measureText(tagText)
 
         val rectL = (rx + 16f).coerceAtMost(w - textWidth - 24f)

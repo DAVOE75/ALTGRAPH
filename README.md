@@ -4,9 +4,9 @@
 
 # ALTGRAPH (v0.2.1)
 
-**ALTGRAPH** es una extensión avanzada de altimetría y rendimiento para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3) desarrollada con el SDK oficial `karoo-ext`.
+**ALTGRAPH** es una extensión avanzada de altimetría y rendimiento para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3) desarrollada por **David García Pascual** con el SDK oficial `karoo-ext`.
 
-Proporciona análisis dinámico de puertos de montaña, gráficos 3D en relieve con escalado de tipografía, alertas de ataque en rampas duras, estimación de ritmo **VAM** dual con velocidad recomendada y el cálculo del **Grado de Fatiga (GF)** basado en un modelo científico de dureza, tipo de asfalto y pendiente máxima.
+Proporciona análisis dinámico de puertos de montaña, gráficos 3D en relieve con porcentajes de rampa serigrafiados en cada bloque, alertas de ataque en rampas duras, estimación de ritmo **VAM** dual con velocidad recomendada y el cálculo del **Grado de Fatiga (GF)** basado en un modelo científico de dureza, tipo de asfalto y pendiente máxima.
 
 ---
 
@@ -21,8 +21,8 @@ La extensión detecta automáticamente el idioma de tu sistema Karoo:
 
 * 🏔️ **Altimetría 3D (`altimetria_3d`)**:
   * Perfil en perspectiva isométrica 3D ampliada a pantalla completa con relieve extruido y sombras en degradado.
+  * Etiquetas del **% de inclinación** serigrafiadas en cada bloque del perfil 3D con **escalado de fuente personalizable** (`Normal`, `Grande`, `Extra Gr.`).
   * Cinta de inclinación en tiempo real por colores y marcador flotante 3D (*Beacon*) con tu altitud exacta.
-  * Escalado interactivo de tamaño de letra de las etiquetas (`Normal`, `Grande`, `Extra Gr.`).
 
 * 📊 **Estratega de Altimetría (`altimetria_graph`)**:
   * Visualización del perfil por bloques ajustables de distancia (50m, 100m, 250m, 500m) con etiquetas del % de inclinación serigrafiadas dentro de cada bloque.
@@ -72,6 +72,10 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ---
 
-## 📄 Licencia
+## 👨‍💻 Desarrollador
+Desarrollado con pasión por **David García Pascual**.
 
+---
+
+## 📄 Licencia
 Este proyecto se distribuye bajo la licencia **MIT**.
