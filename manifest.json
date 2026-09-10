@@ -1,0 +1,10 @@
+{
+  "label": "ALTGRAPH",
+  "packageName": "com.example.altgraph",
+  "latestApkUrl": "https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/app/build/outputs/apk/debug/app-debug.apk",
+  "latestVersion": "0.2",
+  "latestVersionCode": 1,
+  "iconUrl": "https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png",
+  "developer": "DAVOE75",
+  "description": "Extensión de altimetría, alertas de ataque, ritmo VAM objetivo e índice APM para Hammerhead Karoo"
+}

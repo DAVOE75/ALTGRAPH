@@ -9,12 +9,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat">
 
+        <meta-data
+            android:name="io.hammerhead.karooext.MANIFEST_URL"
+            android:value="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/manifest.json" />
+
         <service
             android:name=".AltimetriaExtensionService"
             android:exported="true">
             <intent-filter>
                 <action android:name="io.hammerhead.karooext.KAROO_EXTENSION" />
             </intent-filter>
+            <meta-data
+                android:name="io.hammerhead.karooext.EXTENSION_INFO"
+                android:resource="@xml/extension_info" />
         </service>
 
     </application>

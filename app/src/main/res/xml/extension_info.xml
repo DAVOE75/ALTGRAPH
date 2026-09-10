@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:id="altimetria_graph"
+    app:displayName="@string/app_name"
+    app:icon="@drawable/ic_altigraph_logo">
+
+    <data-type
+        app:typeId="altimetria_graph"
+        app:displayName="@string/data_type_altimetria_title"
+        app:description="@string/data_type_altimetria_desc"
+        app:graphical="true"
+        app:icon="@drawable/ic_altigraph_logo" />
+
+    <data-type
+        app:typeId="apm_score"
+        app:displayName="@string/data_type_apm_title"
+        app:description="@string/data_type_apm_desc"
+        app:graphical="false"
+        app:icon="@drawable/ic_altigraph_logo" />
+
+    <data-type
+        app:typeId="climb_pacing"
+        app:displayName="@string/data_type_climb_pacing_title"
+        app:description="@string/data_type_climb_pacing_desc"
+        app:graphical="false"
+        app:icon="@drawable/ic_altigraph_logo" />
+
+    <data-type
+        app:typeId="gradient_trend"
+        app:displayName="@string/data_type_gradient_trend_title"
+        app:description="@string/data_type_gradient_trend_desc"
+        app:graphical="false"
+        app:icon="@drawable/ic_altigraph_logo" />
+
+</extension>
