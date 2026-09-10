@@ -174,7 +174,7 @@ class Altimetria3DView @JvmOverloads constructor(
 
         // Etiqueta PENDIENTE ACTUAL
         val labelCurrentGrade = context.getString(R.string.label_current_gradient)
-        subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(10f, 15f)
+        subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(11f, 18f)
         canvas.drawText(labelCurrentGrade, 20f, h * 0.13f, subTitleLabelPaint)
 
         // Número PENDIENTE ACTUAL (Grande)
@@ -354,7 +354,7 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i + 1], pointsYTop[i + 1], lineStrokePaint)
         }
 
-        // DIBUJAR RAMPA DURA (≥ 10% para ≥ 20m) CON FLECHA Y INDICADOR FLOTANTE si está activado
+        // DIBUJAR RAMPA DURA (≥ 10% para ≥ 20m) CON FLECHA Y INDICADOR FLOTANTE (SIEMPRE CON 1 DECIMAL)
         if (showRamps) {
             for (i in 0 until samples - 1) {
                 val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
@@ -375,7 +375,8 @@ class Altimetria3DView @JvmOverloads constructor(
                     canvas.drawPath(arrowPath, rampArrowHeadPaint)
 
                     rampTextPaint.textSize = ((h * 0.065f) * fontScale).coerceIn(12f, 22f)
-                    val rampLabel = "%.0f%%".format(grade)
+                    // LAS RAMPAS SIEMPRE SE FORMATAN CON EXACTAMENTE 1 DECIMAL
+                    val rampLabel = "%.1f%%".format(grade)
                     canvas.drawText(rampLabel, midX, arrowTopY - 6f, rampTextPaint)
                 }
             }
@@ -395,7 +396,6 @@ class Altimetria3DView @JvmOverloads constructor(
         }
 
         // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D
-        // Regla: Si bloques <= 50m muestra 1 decimal; si bloques >= 100m sin decimales (enteros)
         val fontBaseSize = (h * 0.045f) * fontScale
 
         for (i in 0 until samples - 1) {
