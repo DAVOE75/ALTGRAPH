@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
-import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
 import android.util.AttributeSet
@@ -44,7 +43,7 @@ class Altimetria3DView @JvmOverloads constructor(
 
     private val rampArrowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#EF4444")
-        strokeWidth = 3f
+        strokeWidth = 3.5f
         style = Paint.Style.STROKE
     }
 
@@ -64,7 +63,7 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private val lineStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        strokeWidth = 5f
+        strokeWidth = 7f
         style = Paint.Style.STROKE
     }
 
@@ -206,11 +205,11 @@ class Altimetria3DView @JvmOverloads constructor(
 
         for (i in 0..gridLines) {
             val ratio = i.toFloat() / gridLines
-            val x1 = w * 0.04f + ratio * (w * 0.22f)
-            val y1 = groundY - ratio * (h * 0.14f)
+            val x1 = w * 0.04f + ratio * (w * 0.25f)
+            val y1 = groundY - ratio * (h * 0.15f)
 
-            val x2 = w * 0.78f + ratio * (w * 0.22f)
-            val y2 = groundY - ratio * (h * 0.14f)
+            val x2 = w * 0.78f + ratio * (w * 0.25f)
+            val y2 = groundY - ratio * (h * 0.15f)
 
             canvas.drawLine(x1, y1, x2, y2, gridPaint)
         }
@@ -221,10 +220,10 @@ class Altimetria3DView @JvmOverloads constructor(
         val blocksCount = (totalMetersAhead / blockSizeMeters.coerceAtLeast(10.0)).toInt().coerceIn(2, 10)
         val samples = blocksCount + 1
 
-        val startX = w * 0.05f
+        val startX = w * 0.04f
         val endX = w * 0.96f
         val baseGroundY = h * 0.86f
-        val maxPeakHeight = h * 0.44f
+        val maxPeakHeight = h * 0.52f // Profundidad y altura del relieve 3D aumentada
 
         val stepX = (endX - startX) / (samples - 1).coerceAtLeast(1)
 
@@ -245,12 +244,12 @@ class Altimetria3DView @JvmOverloads constructor(
             pointElevations[i] = accumulatedElev.toFloat()
 
             val progress = i.toFloat() / (samples - 1)
-            val curveOffset = sin(progress * Math.PI * 1.5).toFloat() * (w * 0.06f)
+            val curveOffset = sin(progress * Math.PI * 1.5).toFloat() * (w * 0.09f) // Curvatura y volumen 3D ampliado
 
             val px = startX + i * stepX + curveOffset
             val normalizedHeight = (grade.coerceIn(-5.0, 20.0) + 5.0) / 25.0
-            val pYTop = baseGroundY - (progress * (h * 0.08f)) - (normalizedHeight * maxPeakHeight).toFloat()
-            val pYBase = baseGroundY - (progress * (h * 0.08f))
+            val pYTop = baseGroundY - (progress * (h * 0.10f)) - (normalizedHeight * maxPeakHeight).toFloat()
+            val pYBase = baseGroundY - (progress * (h * 0.10f))
 
             pointsX[i] = px
             pointsYTop[i] = pYTop
@@ -299,7 +298,7 @@ class Altimetria3DView @JvmOverloads constructor(
             }
         }
 
-        // DIBUJAR CINTA SUPERIOR 3D CON BORDE DEL MISMO COLOR QUE EL BLOQUE PERO MÁS OSCURO (Efecto Sombra 3D)
+        // DIBUJAR CINTA SUPERIOR 3D CON BORDE MÁS ANCHO Y DEL MISMO COLOR QUE EL BLOQUE PERO MÁS OSCURO
         for (i in 0 until samples - 1) {
             val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
             val darkStrokeColor = getDarkGradeColor(grade.toDouble())
