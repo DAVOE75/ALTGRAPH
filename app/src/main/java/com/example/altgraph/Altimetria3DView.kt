@@ -255,17 +255,21 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawPath(wallPath, wallPaint)
         }
 
-        // DIBUJAR LÍNEAS VERTICALES DE LÍMITE Y COTAS DE ALTITUD EN CADA TRAMO
-        cotaTextPaint.textSize = ((h * 0.050f) * fontScale).coerceIn(10f, 18f)
+        // DIBUJAR LÍNEAS VERTICALES DE LÍMITE Y COTAS DE ALTITUD EN CADA TRAMO ROTADAS A 90 GRADOS (como en la imagen)
+        cotaTextPaint.textSize = ((h * 0.052f) * fontScale).coerceIn(10f, 18f)
 
         for (i in 0 until samples) {
             // Línea vertical que baja desde el perfil
             canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i], pointsYBase[i] + 12f, cotaLinePaint)
 
-            // Cota de altitud en metros si está activado
+            // Cota de altitud rotada a 90 grados pegada a la línea de separación si está activada
             if (showCotas) {
                 val cotaText = "${pointElevations[i].toInt()} m"
-                canvas.drawText(cotaText, pointsX[i] + 4f, pointsYBase[i] - 12f, cotaTextPaint)
+                canvas.save()
+                canvas.translate(pointsX[i] - 5f, pointsYBase[i] - 8f)
+                canvas.rotate(-90f)
+                canvas.drawText(cotaText, 0f, 0f, cotaTextPaint)
+                canvas.restore()
             }
         }
 
