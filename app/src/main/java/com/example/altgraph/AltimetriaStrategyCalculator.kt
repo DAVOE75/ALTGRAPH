@@ -26,7 +26,7 @@ class AltimetriaStrategyCalculator {
     var currentLatitude = 0.0
     var currentLongitude = 0.0
     var currentSpeed = 0.0
-    var currentElevation = 0.0
+    var currentElevation = 350.0
 
     var routePoints: List<RoutePoint> = emptyList()
 
@@ -38,9 +38,23 @@ class AltimetriaStrategyCalculator {
         val attackAlertsEnabled = prefs?.attackAlertEnabled ?: true
         val asphaltFactor = prefs?.asphaltFactor ?: 0.5
 
+        // MODO DEMO / SIMULACIÓN: Cuando no hay ruta cargada o el vehículo está detenido
         if (routePoints.isEmpty() || currentSpeed <= 0.1) {
-            ClimbStateManager.updateApm(0)
-            return StrategyData(0.0, 0L, 0.0, emptyList(), false, blockSize, 0)
+            val demoBlocks = listOf(3.5f, 5.0f, 7.5f, 11.2f, 12.8f, 9.0f, 6.5f, 8.2f, 10.5f, 4.0f)
+            val hasAttack = attackAlertsEnabled && demoBlocks.any { it > thresholdAttack }
+            val demoFatigue = 68
+
+            ClimbStateManager.updateApm(demoFatigue)
+
+            return StrategyData(
+                remainingDistance = 8500.0,
+                timeToSummit = 1620L,
+                avgGrade = 7.2,
+                nextBlocks = demoBlocks,
+                attackAlert = hasAttack,
+                blockSizeMeters = blockSize,
+                totalFatigueGrade = demoFatigue
+            )
         }
 
         var nearestIndex = 0
