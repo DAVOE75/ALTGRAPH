@@ -245,7 +245,20 @@ class MainActivity : Activity() {
         }
         showPctCard.addView(switchShowPct)
 
-        // Section 8: Toggle Attack Alerts Card
+        // Section 8: Toggle Show 3D Cotas Card
+        val showCotasCard = createCardContainer()
+        val switchShowCotas = Switch(this).apply {
+            text = getString(R.string.setting_show_3d_cotas)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.show3dCotas
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.show3dCotas = isChecked
+            }
+        }
+        showCotasCard.addView(switchShowCotas)
+
+        // Section 9: Toggle Attack Alerts Card
         val alertCard = createCardContainer()
         val switchAlerts = Switch(this).apply {
             text = getString(R.string.setting_enable_alerts)
@@ -290,6 +303,7 @@ class MainActivity : Activity() {
         rootLayout.addView(asphaltCard)
         rootLayout.addView(font3dCard)
         rootLayout.addView(showPctCard)
+        rootLayout.addView(showCotasCard)
         rootLayout.addView(alertCard)
         rootLayout.addView(saveExitButton)
 

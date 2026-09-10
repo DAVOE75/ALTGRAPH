@@ -97,6 +97,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private var blockSizeMeters: Double = 100.0
     private var lookaheadMeters: Int = 350
     private var fontScale: Float = 1.0f
+    private var showCotas: Boolean = true
 
     private val ribbonPath = Path()
     private val wallPath = Path()
@@ -111,7 +112,8 @@ class Altimetria3DView @JvmOverloads constructor(
         remainingDist: Double,
         blockSizeMeters: Double = 100.0,
         fontScale: Float = 1.0f,
-        lookaheadMeters: Int = 350
+        lookaheadMeters: Int = 350,
+        showCotas: Boolean = true
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -125,6 +127,7 @@ class Altimetria3DView @JvmOverloads constructor(
         this.blockSizeMeters = blockSizeMeters
         this.fontScale = fontScale
         this.lookaheadMeters = lookaheadMeters
+        this.showCotas = showCotas
         postInvalidate()
     }
 
@@ -282,21 +285,23 @@ class Altimetria3DView @JvmOverloads constructor(
         canvas.drawCircle(rx, ry, 22f, beaconHaloPaint)
         canvas.drawCircle(rx, ry, 10f, beaconPaint)
 
-        // Etiqueta flotante 3D sobre el corredor
-        val tagText = "📍 ${currentElevation.toInt()}m"
-        titlePaint.textSize = (h * 0.075f).coerceIn(16f, 24f)
-        val textWidth = titlePaint.measureText(tagText)
+        // Etiqueta flotante 3D sobre el corredor si las Cotas están activadas
+        if (showCotas) {
+            val tagText = "📍 ${currentElevation.toInt()}m"
+            titlePaint.textSize = (h * 0.075f).coerceIn(16f, 24f)
+            val textWidth = titlePaint.measureText(tagText)
 
-        val rectL = (rx + 16f).coerceAtMost(w - textWidth - 24f)
-        val rectT = ry - (h * 0.16f)
-        val rectR = rectL + textWidth + 20f
-        val rectB = rectT + (h * 0.12f)
+            val rectL = (rx + 16f).coerceAtMost(w - textWidth - 24f)
+            val rectT = ry - (h * 0.16f)
+            val rectR = rectL + textWidth + 20f
+            val rectB = rectT + (h * 0.12f)
 
-        tagRect.set(rectL, rectT, rectR, rectB)
-        canvas.drawRoundRect(tagRect, 10f, 10f, tagBgPaint)
-        canvas.drawRoundRect(tagRect, 10f, 10f, tagBorderPaint)
+            tagRect.set(rectL, rectT, rectR, rectB)
+            canvas.drawRoundRect(tagRect, 10f, 10f, tagBgPaint)
+            canvas.drawRoundRect(tagRect, 10f, 10f, tagBorderPaint)
 
-        canvas.drawText(tagText, rectL + 10f, rectT + (tagRect.height() * 0.72f), titlePaint)
+            canvas.drawText(tagText, rectL + 10f, rectT + (tagRect.height() * 0.72f), titlePaint)
+        }
     }
 
     private fun getGradeColor(grade: Double): String {
