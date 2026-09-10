@@ -1,12 +1,17 @@
 package com.example.altgraph
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.view.View
+import android.widget.RemoteViews
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.hammerhead.karooext.internal.Emitter
 import io.hammerhead.karooext.internal.ViewEmitter
 import io.hammerhead.karooext.models.DataPoint
 import io.hammerhead.karooext.models.DataType
 import io.hammerhead.karooext.models.StreamState
+import io.hammerhead.karooext.models.UpdateGraphicConfig
 import io.hammerhead.karooext.models.ViewConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,7 +51,17 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
     }
 
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
+        emitter.onNext(UpdateGraphicConfig(showHeader = false))
+
         val altimetriaView = AltimetriaView(context)
+        val w = if (config.viewSize.first > 0) config.viewSize.first else 480
+        val h = if (config.viewSize.second > 0) config.viewSize.second else 240
+
+        altimetriaView.measure(
+            View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY)
+        )
+        altimetriaView.layout(0, 0, w, h)
 
         val viewJob = scope.launch {
             while (true) {
@@ -60,6 +75,16 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                     attackAlert = strategy.attackAlert,
                     blockSizeMeters = strategy.blockSizeMeters
                 )
+
+                val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+                val canvas = Canvas(bitmap)
+                altimetriaView.draw(canvas)
+
+                val remoteViews = RemoteViews(context.packageName, R.layout.view_remote_graphic)
+                remoteViews.setImageViewBitmap(R.id.img_graphic, bitmap)
+
+                emitter.updateView(remoteViews)
+
                 delay(1000)
             }
         }
