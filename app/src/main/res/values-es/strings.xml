@@ -30,6 +30,7 @@
     <string name="setting_target_vam">VAM Objetivo (m/h)</string>
     <string name="setting_enable_alerts">Activar Alertas Visuales de Ataque</string>
     <string name="status_saved">Ajustes Guardados Automáticamente</string>
+    <string name="btn_save_and_exit">Guardar y Salir</string>
 
     <!-- Zone Colors -->
     <string name="zone_green">VERDE</string>

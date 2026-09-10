@@ -30,6 +30,7 @@
     <string name="setting_target_vam">Target VAM (m/h)</string>
     <string name="setting_enable_alerts">Enable Attack Visual Alerts</string>
     <string name="status_saved">Settings Saved Automatically</string>
+    <string name="btn_save_and_exit">Save &amp; Exit</string>
 
     <!-- Zone Colors -->
     <string name="zone_green">GREEN</string>

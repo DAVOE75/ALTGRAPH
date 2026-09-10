@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
+import android.widget.Toast
 
 class MainActivity : Activity() {
 
@@ -136,13 +137,33 @@ class MainActivity : Activity() {
             setPadding(16, 24, 16, 24)
         }
 
+        // Save & Exit Button
+        val saveExitButton = Button(this).apply {
+            text = "💾 " + getString(R.string.btn_save_and_exit)
+            textSize = 16f
+            setBackgroundColor(Color.parseColor("#22C55E"))
+            setTextColor(Color.BLACK)
+            setPadding(32, 20, 32, 20)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = 32
+                bottomMargin = 16
+            }
+            setOnClickListener {
+                Toast.makeText(this@MainActivity, getString(R.string.status_saved), Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
+
         // Status Footer
         val statusText = TextView(this).apply {
             text = "✓ " + getString(R.string.status_saved)
             textSize = 12f
             setTextColor(Color.parseColor("#22C55E"))
             gravity = Gravity.CENTER
-            setPadding(0, 24, 0, 24)
+            setPadding(0, 12, 0, 24)
         }
 
         rootLayout.addView(logo)
@@ -162,6 +183,7 @@ class MainActivity : Activity() {
         rootLayout.addView(vamControlsLayout)
 
         rootLayout.addView(switchAlerts)
+        rootLayout.addView(saveExitButton)
         rootLayout.addView(statusText)
 
         scrollView.addView(rootLayout)
