@@ -56,7 +56,7 @@ class MainActivity : Activity() {
         }
 
         val subtitle = TextView(this).apply {
-            text = "${getString(R.string.title_settings)} • v0.2.2"
+            text = "${getString(R.string.title_settings)} • v0.2.1"
             textSize = 13f
             setTextColor(Color.parseColor("#A1A1AA"))
             gravity = Gravity.CENTER
@@ -305,7 +305,20 @@ class MainActivity : Activity() {
         }
         showRampsCard.addView(switchShowRamps)
 
-        // Section 11: Toggle Attack Alerts Card
+        // Section 11: Toggle Show Max Gradient Readout Card
+        val showMaxGradCard = createCardContainer()
+        val switchShowMaxGrad = Switch(this).apply {
+            text = getString(R.string.setting_show_max_gradient)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.showMaxGradient
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.showMaxGradient = isChecked
+            }
+        }
+        showMaxGradCard.addView(switchShowMaxGrad)
+
+        // Section 12: Toggle Attack Alerts Card
         val alertCard = createCardContainer()
         val switchAlerts = Switch(this).apply {
             text = getString(R.string.setting_enable_alerts)
@@ -353,6 +366,7 @@ class MainActivity : Activity() {
         rootLayout.addView(showPctCard)
         rootLayout.addView(showCotasCard)
         rootLayout.addView(showRampsCard)
+        rootLayout.addView(showMaxGradCard)
         rootLayout.addView(alertCard)
         rootLayout.addView(saveExitButton)
 

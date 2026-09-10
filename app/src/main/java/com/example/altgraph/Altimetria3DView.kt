@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
 import android.util.AttributeSet
@@ -120,6 +121,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private var fontScale: Float = 1.0f
     private var showCotas: Boolean = true
     private var showRamps: Boolean = true
+    private var showMaxGrade: Boolean = true
 
     private val wallPath = Path()
     private val arrowPath = Path()
@@ -134,7 +136,8 @@ class Altimetria3DView @JvmOverloads constructor(
         fontScale: Float = 1.0f,
         lookaheadMeters: Int = 350,
         showCotas: Boolean = true,
-        showRamps: Boolean = true
+        showRamps: Boolean = true,
+        showMaxGrade: Boolean = true
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -150,6 +153,7 @@ class Altimetria3DView @JvmOverloads constructor(
         this.lookaheadMeters = lookaheadMeters
         this.showCotas = showCotas
         this.showRamps = showRamps
+        this.showMaxGrade = showMaxGrade
         postInvalidate()
     }
 
@@ -166,13 +170,13 @@ class Altimetria3DView @JvmOverloads constructor(
 
         // 2. Encabezado Título ("Altimetría 3D")
         val titleText = context.getString(R.string.data_type_altimetria_3d_title)
-        titlePaint.textSize = ((h * 0.070f) * fontScale).coerceIn(15f, 24f)
-        canvas.drawText(titleText, 20f, h * 0.08f, titlePaint)
+        titlePaint.textSize = ((h * 0.065f) * fontScale).coerceIn(14f, 22f)
+        canvas.drawText(titleText, 20f, h * 0.07f, titlePaint)
 
         // Etiqueta PENDIENTE ACTUAL
         val labelCurrentGrade = context.getString(R.string.label_current_gradient)
-        subTitleLabelPaint.textSize = ((h * 0.055f) * fontScale).coerceIn(11f, 18f)
-        canvas.drawText(labelCurrentGrade, 20f, h * 0.15f, subTitleLabelPaint)
+        subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(10f, 15f)
+        canvas.drawText(labelCurrentGrade, 20f, h * 0.13f, subTitleLabelPaint)
 
         // Número PENDIENTE ACTUAL (Grande)
         val liveGradeText = "%.1f%%".format(currentGrade)
@@ -180,17 +184,18 @@ class Altimetria3DView @JvmOverloads constructor(
         liveGradePaint.color = Color.parseColor(getGradeColor(currentGrade))
         canvas.drawText(liveGradeText, 20f, h * 0.25f, liveGradePaint)
 
-        // Etiqueta PENDIENTE MÁX. TRAMO
-        val tramoMaxGrade = if (nextBlocks.isNotEmpty()) nextBlocks.maxOrNull()?.toDouble() ?: 12.8 else 12.8
-        val labelMaxGrade = context.getString(R.string.label_max_gradient_tramo)
-        subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(10f, 15f)
-        canvas.drawText(labelMaxGrade, 20f, h * 0.32f, subTitleLabelPaint)
+        // PENDIENTE MÁXIMA DEL TRAMO VISIBLE (Opcional según preferencia del usuario)
+        if (showMaxGrade) {
+            val tramoMaxGrade = if (nextBlocks.isNotEmpty()) nextBlocks.maxOrNull()?.toDouble() ?: 12.8 else 12.8
+            val labelMaxGrade = context.getString(R.string.label_max_gradient_tramo)
+            subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(10f, 15f)
+            canvas.drawText(labelMaxGrade, 20f, h * 0.32f, subTitleLabelPaint)
 
-        // Número PENDIENTE MÁX. TRAMO (Grande justo debajo)
-        val maxGradeText = "%.1f%%".format(tramoMaxGrade)
-        maxGradePaint.textSize = ((h * 0.13f) * fontScale).coerceIn(18f, 38f)
-        maxGradePaint.color = Color.parseColor(getGradeColor(tramoMaxGrade))
-        canvas.drawText(maxGradeText, 20f, h * 0.43f, maxGradePaint)
+            val maxGradeText = "%.1f%%".format(tramoMaxGrade)
+            maxGradePaint.textSize = ((h * 0.13f) * fontScale).coerceIn(18f, 38f)
+            maxGradePaint.color = Color.parseColor(getGradeColor(tramoMaxGrade))
+            canvas.drawText(maxGradeText, 20f, h * 0.43f, maxGradePaint)
+        }
 
         // 3. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)
@@ -390,7 +395,7 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawLine(pointsX[i], pointsYBase[i], pointsX[i], pointsYBase[i] + 5f, gridPaint)
         }
 
-        // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D (Formateado a 1 decimal para precisión exacta)
+        // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D
         val fontBaseSize = (h * 0.045f) * fontScale
 
         for (i in 0 until samples - 1) {
