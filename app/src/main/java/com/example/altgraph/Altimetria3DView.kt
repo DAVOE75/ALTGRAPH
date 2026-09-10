@@ -73,6 +73,11 @@ class Altimetria3DView @JvmOverloads constructor(
         typeface = Typeface.DEFAULT_BOLD
     }
 
+    private val subTitleLabelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#38BDF8")
+        typeface = Typeface.DEFAULT_BOLD
+    }
+
     private val liveGradePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#38BDF8")
         typeface = Typeface.DEFAULT_BOLD
@@ -169,14 +174,19 @@ class Altimetria3DView @JvmOverloads constructor(
 
         // 2. Encabezado Título ("Altimetría 3D")
         val titleText = context.getString(R.string.data_type_altimetria_3d_title)
-        titlePaint.textSize = ((h * 0.075f) * fontScale).coerceIn(16f, 26f)
-        canvas.drawText(titleText, 20f, h * 0.09f, titlePaint)
+        titlePaint.textSize = ((h * 0.070f) * fontScale).coerceIn(15f, 24f)
+        canvas.drawText(titleText, 20f, h * 0.08f, titlePaint)
 
-        // % de Pendiente en Tiempo Real justo debajo del texto Altimetría 3D (en letra grande)
+        // Etiqueta "PENDIENTE ACTUAL"
+        val labelCurrentGrade = context.getString(R.string.label_current_gradient)
+        subTitleLabelPaint.textSize = ((h * 0.055f) * fontScale).coerceIn(11f, 18f)
+        canvas.drawText(labelCurrentGrade, 20f, h * 0.15f, subTitleLabelPaint)
+
+        // % de Pendiente en Tiempo Real EXTRA GRANDE justo debajo de PENDIENTE ACTUAL
         val liveGradeText = "%.1f%%".format(currentGrade)
-        liveGradePaint.textSize = ((h * 0.16f) * fontScale).coerceIn(24f, 54f)
+        liveGradePaint.textSize = ((h * 0.20f) * fontScale).coerceIn(28f, 68f)
         liveGradePaint.color = Color.parseColor(getGradeColor(currentGrade))
-        canvas.drawText(liveGradeText, 20f, h * 0.23f, liveGradePaint)
+        canvas.drawText(liveGradeText, 20f, h * 0.31f, liveGradePaint)
 
         // 3. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)

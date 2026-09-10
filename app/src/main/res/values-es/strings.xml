@@ -7,7 +7,7 @@
     <string name="data_type_altimetria_desc">Gráfico de perfil dinámico con pendientes por tramos y alertas de ataque</string>
 
     <string name="data_type_altimetria_3d_title">Altimetría 3D</string>
-    <string name="data_type_altimetria_3d_desc">Perfil de altimetría e itinerario en perspectiva isométrica 3D con pendientes en relieve</string>
+    <string name="data_type_altimetria_3d_desc">Perfil de altimetría e itinerario en perspectiva isométrica 3D con pendientes en relief</string>
 
     <string name="data_type_fatigue_grade_title">Grado de Fatiga (GF)</string>
     <string name="data_type_fatigue_grade_desc">Índice científico de Grado de Fatiga y dureza para clasificación de puertos</string>
@@ -23,6 +23,7 @@
     <string name="label_dist_remaining">DIST. RESTANTE</string>
     <string name="label_time_to_summit">TIEMPO A CIMA</string>
     <string name="label_next_blocks">PRÓXIMOS %1$d m (Bloques de %2$d m)</string>
+    <string name="label_current_gradient">PENDIENTE ACTUAL</string>
     <string name="alert_attack">¡ATACA!</string>
     <string name="alert_attack_sub">Rampa dura en el próximo tramo</string>
 
