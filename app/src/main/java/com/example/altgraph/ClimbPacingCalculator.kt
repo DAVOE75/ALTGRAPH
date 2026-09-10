@@ -22,11 +22,16 @@ object ClimbPacingCalculator {
         currentGradientPct: Double,
         userTargetVam: Int = 900
     ): PacingResult {
+        // En parado / interiores (Modo Demo de prueba)
         if (currentSpeedMps <= 0.1 || currentGradientPct <= 0.5) {
+            val demoGrade = 7.2
+            val demoSpeedKmh = (userTargetVam.toDouble() / (demoGrade * 10.0)).coerceIn(3.0, 45.0)
+            val demoVam = 850
+
             return PacingResult(
-                currentVam = 0,
+                currentVam = demoVam,
                 targetVam = userTargetVam,
-                targetSpeedKmh = 0.0,
+                targetSpeedKmh = demoSpeedKmh,
                 status = PacingStatus.ON_PACE
             )
         }

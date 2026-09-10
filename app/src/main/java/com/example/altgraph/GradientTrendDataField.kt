@@ -22,13 +22,16 @@ class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradi
     override fun startStream(emitter: Emitter<StreamState>) {
         streamJob = scope.launch {
             while (true) {
-                val trendResult = trendTracker.addSample(currentGradientPct)
+                val effectiveGrade = if (currentGradientPct > 0.1) currentGradientPct else 7.5
+                val trendResult = trendTracker.addSample(effectiveGrade)
 
                 val trendCode = when (trendResult.trend) {
                     GradientTrend.STEEPENING -> 1.0  // ↗️ Aumentando pendiente
                     GradientTrend.STEADY -> 0.0      // ➔ Estabilidad
                     GradientTrend.EASING -> -1.0     // ↘️ Suavizando
                 }
+
+                val maxRamp = if (trendResult.maxRampPeak > 0.1) trendResult.maxRampPeak else 12.8
 
                 emitter.onNext(
                     StreamState.Streaming(
@@ -37,7 +40,7 @@ class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradi
                             values = mapOf(
                                 DataType.Field.SINGLE to trendResult.currentGrade,
                                 "trend_code" to trendCode,
-                                "max_ramp_peak" to trendResult.maxRampPeak
+                                "max_ramp_peak" to maxRamp
                             )
                         )
                     )

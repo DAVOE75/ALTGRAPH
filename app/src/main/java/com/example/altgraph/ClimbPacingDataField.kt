@@ -22,7 +22,7 @@ class ClimbPacingDataField(extension: String) : DataTypeImpl(extension, "climb_p
     override fun startStream(emitter: Emitter<StreamState>) {
         streamJob = scope.launch {
             while (true) {
-                val targetVam = 900 // Default or dynamic from AppPreferences
+                val targetVam = 900
                 val result = ClimbPacingCalculator.calculatePacing(
                     currentSpeedMps = currentSpeedMps,
                     currentGradientPct = currentGradientPct,
