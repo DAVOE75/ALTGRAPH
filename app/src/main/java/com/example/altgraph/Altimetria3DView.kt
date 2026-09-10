@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
 import android.util.AttributeSet
@@ -63,7 +64,6 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private val lineStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#38BDF8")
         strokeWidth = 5f
         style = Paint.Style.STROKE
     }
@@ -122,7 +122,6 @@ class Altimetria3DView @JvmOverloads constructor(
     private var showCotas: Boolean = true
     private var showRamps: Boolean = true
 
-    private val ribbonPath = Path()
     private val wallPath = Path()
     private val arrowPath = Path()
 
@@ -166,33 +165,33 @@ class Altimetria3DView @JvmOverloads constructor(
         // 1. Fondo Oscuro
         canvas.drawRect(0f, 0f, w, h, bgPaint)
 
-        // 2. Encabezado Título ("Altimetría 3D") MUCHO MÁS GRANDE
+        // 2. Encabezado Título ("Altimetría 3D")
         val titleText = context.getString(R.string.data_type_altimetria_3d_title)
-        titlePaint.textSize = ((h * 0.125f) * fontScale).coerceIn(24f, 48f)
-        canvas.drawText(titleText, 20f, h * 0.11f, titlePaint)
+        titlePaint.textSize = ((h * 0.070f) * fontScale).coerceIn(15f, 24f)
+        canvas.drawText(titleText, 20f, h * 0.08f, titlePaint)
 
         // Etiqueta PENDIENTE ACTUAL
         val labelCurrentGrade = context.getString(R.string.label_current_gradient)
-        subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(10f, 16f)
-        canvas.drawText(labelCurrentGrade, 20f, h * 0.17f, subTitleLabelPaint)
+        subTitleLabelPaint.textSize = ((h * 0.055f) * fontScale).coerceIn(11f, 18f)
+        canvas.drawText(labelCurrentGrade, 20f, h * 0.15f, subTitleLabelPaint)
 
         // Número PENDIENTE ACTUAL (Grande)
         val liveGradeText = "%.1f%%".format(currentGrade)
-        liveGradePaint.textSize = ((h * 0.13f) * fontScale).coerceIn(20f, 42f)
+        liveGradePaint.textSize = ((h * 0.14f) * fontScale).coerceIn(20f, 44f)
         liveGradePaint.color = Color.parseColor(getGradeColor(currentGrade))
-        canvas.drawText(liveGradeText, 20f, h * 0.27f, liveGradePaint)
+        canvas.drawText(liveGradeText, 20f, h * 0.25f, liveGradePaint)
 
         // Etiqueta PENDIENTE MÁX. TRAMO
         val tramoMaxGrade = if (nextBlocks.isNotEmpty()) nextBlocks.maxOrNull()?.toDouble() ?: 12.8 else 12.8
         val labelMaxGrade = context.getString(R.string.label_max_gradient_tramo)
-        subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(10f, 16f)
-        canvas.drawText(labelMaxGrade, 20f, h * 0.34f, subTitleLabelPaint)
+        subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(10f, 15f)
+        canvas.drawText(labelMaxGrade, 20f, h * 0.32f, subTitleLabelPaint)
 
         // Número PENDIENTE MÁX. TRAMO (Grande justo debajo)
         val maxGradeText = "%.1f%%".format(tramoMaxGrade)
-        maxGradePaint.textSize = ((h * 0.12f) * fontScale).coerceIn(18f, 36f)
+        maxGradePaint.textSize = ((h * 0.13f) * fontScale).coerceIn(18f, 38f)
         maxGradePaint.color = Color.parseColor(getGradeColor(tramoMaxGrade))
-        canvas.drawText(maxGradeText, 20f, h * 0.44f, maxGradePaint)
+        canvas.drawText(maxGradeText, 20f, h * 0.43f, maxGradePaint)
 
         // 3. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)
@@ -300,13 +299,14 @@ class Altimetria3DView @JvmOverloads constructor(
             }
         }
 
-        // DIBUJAR CINTA SUPERIOR 3D
-        ribbonPath.reset()
-        ribbonPath.moveTo(pointsX[0], pointsYTop[0])
-        for (i in 1 until samples) {
-            ribbonPath.lineTo(pointsX[i], pointsYTop[i])
+        // DIBUJAR CINTA SUPERIOR 3D CON BORDE DEL MISMO COLOR QUE EL BLOQUE PERO MÁS OSCURO (Efecto Sombra 3D)
+        for (i in 0 until samples - 1) {
+            val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
+            val darkStrokeColor = getDarkGradeColor(grade.toDouble())
+
+            lineStrokePaint.color = Color.parseColor(darkStrokeColor)
+            canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i + 1], pointsYTop[i + 1], lineStrokePaint)
         }
-        canvas.drawPath(ribbonPath, lineStrokePaint)
 
         // DIBUJAR RAMPA DURA (≥ 10% para ≥ 20m) CON FLECHA Y INDICADOR FLOTANTE si está activado
         if (showRamps) {
@@ -385,6 +385,16 @@ class Altimetria3DView @JvmOverloads constructor(
             grade < 9.0 -> "#F97316" // Naranja
             grade < 12.0 -> "#EF4444" // Rojo
             else -> "#A855F7"         // Violeta rampa dura
+        }
+    }
+
+    private fun getDarkGradeColor(grade: Double): String {
+        return when {
+            grade < 3.0 -> "#15803D"  // Verde oscuro
+            grade < 6.0 -> "#B45309"  // Amarillo/Ocre oscuro
+            grade < 9.0 -> "#C2410C"  // Naranja oscuro
+            grade < 12.0 -> "#B91C1C" // Rojo oscuro
+            else -> "#6B21A8"         // Violeta/Púrpura oscuro
         }
     }
 }
