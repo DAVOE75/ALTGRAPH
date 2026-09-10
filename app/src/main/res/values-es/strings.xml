@@ -24,7 +24,7 @@
     <string name="label_time_to_summit">TIEMPO A CIMA</string>
     <string name="label_next_blocks">PRÓXIMOS %1$d m (Bloques de %2$d m)</string>
     <string name="label_current_gradient">PENDIENTE ACTUAL</string>
-    <string name="label_max_gradient_km">PENDIENTE MÁX. (KM)</string>
+    <string name="label_max_gradient_tramo">PENDIENTE MÁX. TRAMO</string>
     <string name="alert_attack">¡ATACA!</string>
     <string name="alert_attack_sub">Rampa dura en el próximo tramo</string>
 
