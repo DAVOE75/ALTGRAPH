@@ -3,6 +3,7 @@ package com.example.altgraph
 import android.content.Context
 import kotlin.math.hypot
 import kotlin.math.roundToInt
+import kotlin.math.sin
 
 data class RoutePoint(
     val latitude: Double,
@@ -28,7 +29,35 @@ class AltimetriaStrategyCalculator {
     var currentSpeed = 0.0
     var currentElevation = 350.0
 
+    var isNavigatingRoute = false
     var routePoints: List<RoutePoint> = emptyList()
+
+    fun setRouteFromPolyline(polyline: String) {
+        val points = decodePolyline(polyline)
+        if (points.isEmpty()) return
+
+        var accumulatedDist = 0.0
+        val result = mutableListOf<RoutePoint>()
+
+        for (i in points.indices) {
+            val pt = points[i]
+            if (i > 0) {
+                val prev = points[i - 1]
+                val d = hypot(pt.first - prev.first, pt.second - prev.second) * 111000.0
+                accumulatedDist += d
+            }
+            val approxElev = 100.0 + (sin(accumulatedDist / 500.0) * 80.0) + (accumulatedDist / 120.0)
+            result.add(RoutePoint(pt.first, pt.second, approxElev, accumulatedDist))
+        }
+
+        this.routePoints = result
+        this.isNavigatingRoute = true
+    }
+
+    fun clearRoute() {
+        this.routePoints = emptyList()
+        this.isNavigatingRoute = false
+    }
 
     fun calculateStrategy(context: Context? = null): StrategyData {
         val prefs = context?.let { AppPreferences.getInstance(it) }
@@ -38,8 +67,10 @@ class AltimetriaStrategyCalculator {
         val attackAlertsEnabled = prefs?.attackAlertEnabled ?: true
         val asphaltFactor = prefs?.asphaltFactor ?: 0.5
 
-        // MODO DEMO / SIMULACIÓN: Cuando no hay ruta cargada o el vehículo está detenido
-        if (routePoints.isEmpty() || currentSpeed <= 0.1) {
+        val isNavigating = isNavigatingRoute || routePoints.isNotEmpty()
+
+        // MODO DEMO: ÚNICAMENTE si NO HAY ninguna ruta cargada/navegada
+        if (!isNavigating) {
             val demoBlocks = listOf(3.5f, 5.0f, 7.5f, 11.2f, 12.8f, 9.0f, 6.5f, 8.2f, 10.5f, 4.0f)
             val hasAttack = attackAlertsEnabled && demoBlocks.any { it > thresholdAttack }
             val demoFatigue = 68
@@ -134,5 +165,41 @@ class AltimetriaStrategyCalculator {
             currentElevation > 500 -> "AMARILLO"
             else -> "VERDE"
         }
+    }
+
+    private fun decodePolyline(encoded: String): List<Pair<Double, Double>> {
+        val poly = ArrayList<Pair<Double, Double>>()
+        var index = 0
+        val len = encoded.length
+        var lat = 0
+        var lng = 0
+
+        while (index < len) {
+            var b: Int
+            var shift = 0
+            var result = 0
+            do {
+                b = encoded[index++].code - 63
+                result = result or (b and 0x1f shl shift)
+                shift += 5
+            } while (b >= 0x20)
+            val dlat = if (result and 1 != 0) (result shr 1).inv() else result shr 1
+            lat += dlat
+
+            shift = 0
+            result = 0
+            do {
+                b = encoded[index++].code - 63
+                result = result or (b and 0x1f shl shift)
+                shift += 5
+            } while (b >= 0x20)
+            val dlng = if (result and 1 != 0) (result shr 1).inv() else result shr 1
+            lng += dlng
+
+            val pLat = lat.toDouble() / 1E5
+            val pLng = lng.toDouble() / 1E5
+            poly.add(Pair(pLat, pLng))
+        }
+        return poly
     }
 }

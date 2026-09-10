@@ -5,11 +5,13 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.view.View
 import android.widget.RemoteViews
+import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.hammerhead.karooext.internal.Emitter
 import io.hammerhead.karooext.internal.ViewEmitter
 import io.hammerhead.karooext.models.DataPoint
 import io.hammerhead.karooext.models.DataType
+import io.hammerhead.karooext.models.OnNavigationState
 import io.hammerhead.karooext.models.StreamState
 import io.hammerhead.karooext.models.UpdateGraphicConfig
 import io.hammerhead.karooext.models.ViewConfig
@@ -24,6 +26,7 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
     private val scope = CoroutineScope(Dispatchers.Main)
     private var streamJob: Job? = null
     private val calculator = AltimetriaStrategyCalculator()
+    private var karooSystem: KarooSystemService? = null
 
     override fun startStream(emitter: Emitter<StreamState>) {
         streamJob = scope.launch {
@@ -52,6 +55,23 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
 
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
         emitter.onNext(UpdateGraphicConfig(showHeader = false))
+
+        if (karooSystem == null) {
+            val system = KarooSystemService(context)
+            system.connect { connected ->
+                if (connected) {
+                    system.addConsumer<OnNavigationState> { navEvent ->
+                        val state = navEvent.state
+                        if (state is OnNavigationState.NavigationState.NavigatingRoute) {
+                            calculator.setRouteFromPolyline(state.routePolyline)
+                        } else {
+                            calculator.clearRoute()
+                        }
+                    }
+                }
+            }
+            karooSystem = system
+        }
 
         val altimetriaView = AltimetriaView(context)
         val w = if (config.viewSize.first > 0) config.viewSize.first else 480
@@ -93,6 +113,8 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
 
         emitter.setCancellable {
             viewJob.cancel()
+            karooSystem?.disconnect()
+            karooSystem = null
         }
     }
 }
