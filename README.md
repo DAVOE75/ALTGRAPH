@@ -6,7 +6,7 @@
 
 **ALTGRAPH** es una extensión avanzada de altimetría y rendimiento para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3) desarrollada con el SDK oficial `karoo-ext`.
 
-Proporciona análisis dinámico de puertos de montaña, alertas de ataque en rampas duras, estimación de ritmo **VAM** y el cálculo de la dificultad de subidas mediante el **Coeficiente APM (Altitud, Pendiente, Metros)**.
+Proporciona análisis dinámico de puertos de montaña, alertas de ataque en rampas duras, estimación de ritmo **VAM** y el cálculo del **Grado de Fatiga (GF)** basado en un modelo científico de dureza, tipo de asfalto y pendiente máxima.
 
 ---
 
@@ -24,8 +24,11 @@ La extensión detecta automáticamente el idioma de tu sistema Karoo:
   * Alertas visuales de ataque (**¡ATACA! / ATTACK!**) al detectar rampas >10%.
   * Distancia restante a la cima, tiempo estimado y pendiente media restante.
 
-* ⛰️ **Índice de Dificultad APM (`apm_score`)**:
-  * Campo de datos que calcula la puntuación acumulada de dificultad que te queda por superar antes de coronar.
+* ⛰️ **Índice Grado de Fatiga GF (`fatigue_grade`)**:
+  * Cálculo científico de la dureza acumulada de la subida restante basado en la fórmula:
+    $$\text{GF} = \sum \text{DU}^* + \text{TA} + \left(\frac{\text{PMx}}{5}\right)$$
+  * Ponderación según porcentaje de pendiente ($\text{DU}^*$), tipo de asfalto ($\text{TA}$) y rampa máxima ($\text{PMx}$).
+  * Clasificación automática por categorías (5ª Cat, 4ª Cat, 3ª Cat, 2ª Cat, 1ª Cat, Especial HC).
 
 * 🚴 **Ritmo VAM Objetivo (`climb_pacing`) — *Novedad v0.2***:
   * Asistente de ritmo basado en **VAM (m/h)**.
@@ -81,20 +84,25 @@ ALTGRAPH/
 │       │   ├── AltimetriaGraphDataField.kt    # Campo gráfico de altimetría
 │       │   ├── AltimetriaStrategyCalculator.kt# Algoritmo de cálculo de estrategia de puerto
 │       │   ├── AltimetriaView.kt             # Renderizado optimizado (Zero-Allocation onDraw)
-│       │   ├── ApmCalculator.kt              # Tabla de coeficientes APM
-│       │   ├── ApmDataField.kt               # Campo de datos del Coeficiente APM
+│       │   ├── AppPreferences.kt             # Gestor de configuración persistente
 │       │   ├── ClimbPacingCalculator.kt      # Asistente de ritmo VAM (m/h)
 │       │   ├── ClimbPacingDataField.kt       # Campo de datos ClimbPacing
 │       │   ├── ClimbStateManager.kt          # Estado reactivo global
+│       │   ├── FatigueGradeCalculator.kt     # Algoritmo del Grado de Fatiga (GF)
+│       │   ├── FatigueGradeDataField.kt      # Campo de datos del Grado de Fatiga GF
 │       │   ├── GradientTrendDataField.kt     # Campo de datos de tendencia de pendiente
-│       │   └── GradientTrendTracker.kt       # Algoritmo de detección de tendencia 3D
+│       │   ├── GradientTrendTracker.kt       # Algoritmo de detección de tendencia 3D
+│       │   └── MainActivity.kt               # Panel de configuración táctil
 │       └── res/
 │           ├── drawable/
 │           │   └── ic_altigraph_logo.xml     # Logotipo vectorial de la aplicación
 │           ├── values/
+│           │   ├── attrs.xml                 # Atributos de metadatos Karoo
 │           │   └── strings.xml               # Textos en Inglés (por defecto)
-│           └── values-es/
-│               └── strings.xml               # Textos en Español
+│           ├── values-es/
+│           │   └── strings.xml               # Textos en Español
+│           └── xml/
+│               └── extension_info.xml        # Declaración estática de la extensión
 ├── USER_MANUAL.md                            # Manual de usuario (ES/EN)
 └── README.md
 ```

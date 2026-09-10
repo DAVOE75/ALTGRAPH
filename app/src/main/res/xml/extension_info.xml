@@ -2,34 +2,37 @@
 <ExtensionInfo
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:id="altgraph"
-    app:displayName="@string/app_name"
-    app:icon="@drawable/ic_altigraph_logo">
+    app:displayName="ALTGRAPH"
+    app:icon="@drawable/ic_altigraph_logo"
+    app:scansDevices="false"
+    app:mapLayer="false"
+    app:fitFile="false">
 
     <DataType
         app:typeId="altimetria_graph"
-        app:displayName="@string/data_type_altimetria_title"
-        app:description="@string/data_type_altimetria_desc"
+        app:displayName="Estratega de Altimetría"
+        app:description="Gráfico de perfil dinámico con pendientes por tramos y alertas de ataque"
         app:graphical="true"
         app:icon="@drawable/ic_altigraph_logo" />
 
     <DataType
         app:typeId="fatigue_grade"
-        app:displayName="@string/data_type_fatigue_grade_title"
-        app:description="@string/data_type_fatigue_grade_desc"
+        app:displayName="Grado de Fatiga (GF)"
+        app:description="Índice científico de Grado de Fatiga y dureza para clasificación de puertos"
         app:graphical="false"
         app:icon="@drawable/ic_altigraph_logo" />
 
     <DataType
         app:typeId="climb_pacing"
-        app:displayName="@string/data_type_climb_pacing_title"
-        app:description="@string/data_type_climb_pacing_desc"
+        app:displayName="Ritmo VAM Objetivo"
+        app:description="Asistente de VAM objetivo (m/h) según la pendiente actual"
         app:graphical="false"
         app:icon="@drawable/ic_altigraph_logo" />
 
     <DataType
         app:typeId="gradient_trend"
-        app:displayName="@string/data_type_gradient_trend_title"
-        app:description="@string/data_type_gradient_trend_desc"
+        app:displayName="Tendencia 3D y Rampa Máxima"
+        app:description="Tendencia de pendiente en tiempo real y pico máximo % del tramo"
         app:graphical="false"
         app:icon="@drawable/ic_altigraph_logo" />
 
