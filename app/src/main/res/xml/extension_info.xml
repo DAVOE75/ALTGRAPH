@@ -1,40 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ExtensionInfo
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:id="altgraph"
-    app:displayName="@string/app_name"
-    app:icon="@drawable/ic_altigraph_logo"
-    app:scansDevices="false"
-    app:mapLayer="false"
-    app:fitFile="false"
-    app:configurable="true">
+    id="altgraph"
+    displayName="@string/app_name"
+    icon="@drawable/ic_altigraph_logo"
+    configurable="true"
+    fitFile="false">
 
     <DataType
-        app:typeId="altimetria_graph"
-        app:displayName="@string/data_type_altimetria_title"
-        app:description="@string/data_type_altimetria_desc"
-        app:graphical="true"
-        app:icon="@drawable/ic_altigraph_logo" />
+        typeId="altimetria_graph"
+        displayName="@string/data_type_altimetria_title"
+        description="@string/data_type_altimetria_desc"
+        graphical="true"
+        icon="@drawable/ic_altigraph_logo" />
 
     <DataType
-        app:typeId="fatigue_grade"
-        app:displayName="@string/data_type_fatigue_grade_title"
-        app:description="@string/data_type_fatigue_grade_desc"
-        app:graphical="false"
-        app:icon="@drawable/ic_altigraph_logo" />
+        typeId="fatigue_grade"
+        displayName="@string/data_type_fatigue_grade_title"
+        description="@string/data_type_fatigue_grade_desc"
+        graphical="false"
+        icon="@drawable/ic_altigraph_logo" />
 
     <DataType
-        app:typeId="climb_pacing"
-        app:displayName="@string/data_type_climb_pacing_title"
-        app:description="@string/data_type_climb_pacing_desc"
-        app:graphical="false"
-        app:icon="@drawable/ic_altigraph_logo" />
+        typeId="climb_pacing"
+        displayName="@string/data_type_climb_pacing_title"
+        description="@string/data_type_climb_pacing_desc"
+        graphical="false"
+        icon="@drawable/ic_altigraph_logo" />
 
     <DataType
-        app:typeId="gradient_trend"
-        app:displayName="@string/data_type_gradient_trend_title"
-        app:description="@string/data_type_gradient_trend_desc"
-        app:graphical="false"
-        app:icon="@drawable/ic_altigraph_logo" />
+        typeId="gradient_trend"
+        displayName="@string/data_type_gradient_trend_title"
+        description="@string/data_type_gradient_trend_desc"
+        graphical="false"
+        icon="@drawable/ic_altigraph_logo" />
 
 </ExtensionInfo>
