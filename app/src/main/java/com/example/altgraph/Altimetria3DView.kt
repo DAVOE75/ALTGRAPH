@@ -329,10 +329,8 @@ class Altimetria3DView @JvmOverloads constructor(
         cotaTextPaint.textSize = ((h * 0.050f) * fontScale).coerceIn(10f, 18f)
 
         for (i in 0 until samples) {
-            // Línea vertical que baja desde el perfil
             canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i], pointsYBase[i] + 10f, cotaLinePaint)
 
-            // Cota de altitud rotada a 90 grados pegada a la línea de separación si está activada
             if (showCotas) {
                 val cotaText = "${pointElevations[i].toInt()} m"
                 canvas.save()
@@ -373,7 +371,7 @@ class Altimetria3DView @JvmOverloads constructor(
                     canvas.drawPath(arrowPath, rampArrowHeadPaint)
 
                     rampTextPaint.textSize = ((h * 0.065f) * fontScale).coerceIn(12f, 22f)
-                    val rampLabel = "%.0f%%".format(grade)
+                    val rampLabel = if (grade % 1.0f == 0.0f) "%.0f%%".format(grade) else "%.1f%%".format(grade)
                     canvas.drawText(rampLabel, midX, arrowTopY - 6f, rampTextPaint)
                 }
             }
@@ -392,12 +390,12 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawLine(pointsX[i], pointsYBase[i], pointsX[i], pointsYBase[i] + 5f, gridPaint)
         }
 
-        // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D
+        // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D (Formateado a 1 decimal para precisión exacta)
         val fontBaseSize = (h * 0.045f) * fontScale
 
         for (i in 0 until samples - 1) {
             val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
-            val pctStr = "%.0f%%".format(grade)
+            val pctStr = if (grade % 1.0f == 0.0f) "%.0f%%".format(grade) else "%.1f%%".format(grade)
 
             val midX = (pointsX[i] + pointsX[i + 1]) / 2f
             val midYTop = (pointsYTop[i] + pointsYTop[i + 1]) / 2f

@@ -164,9 +164,9 @@ class AltimetriaView @JvmOverloads constructor(
                 blockPaint.color = getColorForGrade(gradeVal)
                 canvas.drawRoundRect(blockRect, 8f, 8f, blockPaint)
 
-                // Dibujar % de pendiente significativamente MÁS GRANDE dentro de cada bloque
+                // Dibujar % de pendiente con 1 decimal si existe fracción para evitar discrepancias
                 if (showBlockPercentages) {
-                    val gradeText = "%.0f%%".format(gradeVal)
+                    val gradeText = if (gradeVal % 1.0f == 0.0f) "%.0f%%".format(gradeVal) else "%.1f%%".format(gradeVal)
                     blockTextPaint.textSize = (barHeight * 0.68f).coerceIn(14f, 26f)
                     blockTextPaint.color = if (gradeVal > 3f && gradeVal <= 5f) Color.BLACK else Color.WHITE
 
