@@ -29,6 +29,7 @@
     <!-- Settings Panel Strings -->
     <string name="title_settings">Panel de Configuración</string>
     <string name="setting_block_size">Distancia por Bloque del Perfil</string>
+    <string name="setting_visible_blocks_count">Número de Tramos Visibles en Perfil (1 a 10)</string>
     <string name="setting_lookahead_meters_3d">Distancia de Anticipación 3D (Eje X)</string>
     <string name="setting_attack_threshold">Umbral de Alerta de Ataque (%)</string>
     <string name="setting_target_vam">VAM Objetivo (m/h)</string>

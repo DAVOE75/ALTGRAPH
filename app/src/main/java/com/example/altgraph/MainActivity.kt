@@ -91,7 +91,38 @@ class MainActivity : Activity() {
         blockCard.addView(blockValueText)
         blockCard.addView(blockRow)
 
-        // Section 2: 3D Lookahead Distance (Eje X) Card (200m a 500m de 50m en 50m)
+        // Section 2: Visible Blocks Count Card (1 a 10 tramos, por defecto 5)
+        val visibleBlocksCard = createCardContainer()
+        val visibleBlocksLabel = createSectionLabel(getString(R.string.setting_visible_blocks_count))
+        val visibleBlocksValueText = createValueText("${prefs.visibleBlocksCount} tramos")
+        val visibleBlocksRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
+
+        val visibleMinusBtn = createActionButton("- 1") {
+            if (prefs.visibleBlocksCount > 1) {
+                prefs.visibleBlocksCount -= 1
+                visibleBlocksValueText.text = "${prefs.visibleBlocksCount} tramos"
+            }
+        }
+
+        val visiblePlusBtn = createActionButton("+ 1") {
+            if (prefs.visibleBlocksCount < 10) {
+                prefs.visibleBlocksCount += 1
+                visibleBlocksValueText.text = "${prefs.visibleBlocksCount} tramos"
+            }
+        }
+
+        visibleBlocksRow.addView(visibleMinusBtn)
+        visibleBlocksRow.addView(visiblePlusBtn)
+
+        visibleBlocksCard.addView(visibleBlocksLabel)
+        visibleBlocksCard.addView(visibleBlocksValueText)
+        visibleBlocksCard.addView(visibleBlocksRow)
+
+        // Section 3: 3D Lookahead Distance Card
         val lookaheadCard = createCardContainer()
         val lookaheadLabel = createSectionLabel(getString(R.string.setting_lookahead_meters_3d))
         val lookaheadValueText = createValueText("${prefs.lookaheadMeters3d} m")
@@ -122,7 +153,7 @@ class MainActivity : Activity() {
         lookaheadCard.addView(lookaheadValueText)
         lookaheadCard.addView(lookaheadRow)
 
-        // Section 3: Attack Threshold Card
+        // Section 4: Attack Threshold Card
         val attackCard = createCardContainer()
         val attackLabel = createSectionLabel(getString(R.string.setting_attack_threshold))
         val attackValueText = createValueText("${prefs.thresholdAttackPct.toInt()}%")
@@ -148,7 +179,7 @@ class MainActivity : Activity() {
         attackCard.addView(attackValueText)
         attackCard.addView(attackRow)
 
-        // Section 4: Target VAM Card
+        // Section 5: Target VAM Card
         val vamCard = createCardContainer()
         val vamLabel = createSectionLabel(getString(R.string.setting_target_vam))
         val vamValueText = createValueText("${prefs.targetVam} m/h")
@@ -179,7 +210,7 @@ class MainActivity : Activity() {
         vamCard.addView(vamValueText)
         vamCard.addView(vamRow)
 
-        // Section 5: Asphalt Quality Card
+        // Section 6: Asphalt Quality Card
         val asphaltCard = createCardContainer()
         val asphaltLabel = createSectionLabel(getString(R.string.setting_asphalt_factor))
         val currentAsphaltQuality = FatigueGradeCalculator.AsphaltQuality.entries.find { it.factor == prefs.asphaltFactor } ?: FatigueGradeCalculator.AsphaltQuality.GOOD
@@ -206,7 +237,7 @@ class MainActivity : Activity() {
         asphaltCard.addView(asphaltValueText)
         asphaltCard.addView(asphaltRow)
 
-        // Section 6: 3D Font Size Scale Card
+        // Section 7: 3D Font Size Scale Card
         val font3dCard = createCardContainer()
         val font3dLabel = createSectionLabel(getString(R.string.setting_font_size_3d))
         val fontScales = listOf(1.0f to getString(R.string.font_normal), 1.25f to getString(R.string.font_large), 1.5f to getString(R.string.font_xl))
@@ -232,7 +263,7 @@ class MainActivity : Activity() {
         font3dCard.addView(font3dValueText)
         font3dCard.addView(font3dRow)
 
-        // Section 7: Toggle Show % in Profile Blocks Card
+        // Section 8: Toggle Show % in Profile Blocks Card
         val showPctCard = createCardContainer()
         val switchShowPct = Switch(this).apply {
             text = getString(R.string.setting_show_block_percentages)
@@ -245,7 +276,7 @@ class MainActivity : Activity() {
         }
         showPctCard.addView(switchShowPct)
 
-        // Section 8: Toggle Show 3D Cotas Card
+        // Section 9: Toggle Show 3D Cotas Card
         val showCotasCard = createCardContainer()
         val switchShowCotas = Switch(this).apply {
             text = getString(R.string.setting_show_3d_cotas)
@@ -258,7 +289,7 @@ class MainActivity : Activity() {
         }
         showCotasCard.addView(switchShowCotas)
 
-        // Section 9: Toggle Attack Alerts Card
+        // Section 10: Toggle Attack Alerts Card
         val alertCard = createCardContainer()
         val switchAlerts = Switch(this).apply {
             text = getString(R.string.setting_enable_alerts)
@@ -297,6 +328,7 @@ class MainActivity : Activity() {
 
         rootLayout.addView(headerCard)
         rootLayout.addView(blockCard)
+        rootLayout.addView(visibleBlocksCard)
         rootLayout.addView(lookaheadCard)
         rootLayout.addView(attackCard)
         rootLayout.addView(vamCard)

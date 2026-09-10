@@ -25,6 +25,7 @@ class AltimetriaView @JvmOverloads constructor(
     private var attackAlert: Boolean = false
     private var blockSizeMeters: Double = 100.0
     private var showBlockPercentages: Boolean = true
+    private var visibleBlocksCount: Int = 5
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
@@ -61,7 +62,8 @@ class AltimetriaView @JvmOverloads constructor(
         nextBlocks: List<Float>,
         attackAlert: Boolean,
         blockSizeMeters: Double,
-        showBlockPct: Boolean = true
+        showBlockPct: Boolean = true,
+        visibleBlocksCount: Int = 5
     ) {
         this.remainingDistance = remainingDistance
         this.timeToSummit = timeToSummit
@@ -73,6 +75,7 @@ class AltimetriaView @JvmOverloads constructor(
         this.attackAlert = attackAlert
         this.blockSizeMeters = blockSizeMeters
         this.showBlockPercentages = showBlockPct
+        this.visibleBlocksCount = visibleBlocksCount.coerceIn(1, 10)
 
         postInvalidate()
     }
@@ -140,13 +143,13 @@ class AltimetriaView @JvmOverloads constructor(
         // Bloques
         val barY = h * 0.76f
         val barHeight = h * 0.15f
-        val totalMeters = (nextBlocks.size * blockSizeMeters).toInt()
+        val count = min(visibleBlocksCount, nextBlocks.size)
+        val totalMeters = (count * blockSizeMeters).toInt()
 
         labelPaint.textSize = (h * 0.055f).coerceAtLeast(14f)
         val blocksTitle = context.getString(R.string.label_next_blocks, totalMeters, blockSizeMeters.toInt())
         canvas.drawText(blocksTitle, centerX, barY - 10f, labelPaint)
 
-        val count = min(10, nextBlocks.size)
         if (count > 0) {
             val blockWidth = (w - 40f) / count.toFloat()
 

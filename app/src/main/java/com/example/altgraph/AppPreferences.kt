@@ -43,6 +43,10 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_SHOW_3D_COTAS, true)
         set(value) = prefs.edit().putBoolean(KEY_SHOW_3D_COTAS, value).apply()
 
+    var visibleBlocksCount: Int
+        get() = prefs.getInt(KEY_VISIBLE_BLOCKS_COUNT, 5)
+        set(value) = prefs.edit().putInt(KEY_VISIBLE_BLOCKS_COUNT, value.coerceIn(1, 10)).apply()
+
     companion object {
         private const val PREFS_NAME = "altgraph_settings"
         private const val KEY_BLOCK_SIZE = "block_size_meters"
@@ -54,6 +58,7 @@ class AppPreferences(context: Context) {
         private const val KEY_SHOW_BLOCK_PERCENTAGES = "show_block_percentages"
         private const val KEY_LOOKAHEAD_METERS_3D = "lookahead_meters_3d"
         private const val KEY_SHOW_3D_COTAS = "show_3d_cotas"
+        private const val KEY_VISIBLE_BLOCKS_COUNT = "visible_blocks_count"
 
         @Volatile
         private var INSTANCE: AppPreferences? = null

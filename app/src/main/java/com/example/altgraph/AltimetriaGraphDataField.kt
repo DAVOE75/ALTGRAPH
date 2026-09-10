@@ -95,7 +95,8 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                     nextBlocks = strategy.nextBlocks,
                     attackAlert = strategy.attackAlert,
                     blockSizeMeters = strategy.blockSizeMeters,
-                    showBlockPct = prefs.showBlockPercentages
+                    showBlockPct = prefs.showBlockPercentages,
+                    visibleBlocksCount = prefs.visibleBlocksCount
                 )
 
                 val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
