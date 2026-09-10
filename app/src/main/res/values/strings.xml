@@ -6,7 +6,7 @@
     <string name="data_type_altimetria_title">Altimetry Profile &amp; Strategy</string>
     <string name="data_type_altimetria_desc">Dynamic profile graph with segment grades and attack alerts</string>
 
-    <string name="data_type_altimetria_3d_title">3D Altimetry &amp; Route Ribbon</string>
+    <string name="data_type_altimetria_3d_title">3D Altimetry</string>
     <string name="data_type_altimetria_3d_desc">3D isometric elevation profile and route path ribbon with gradient relief</string>
 
     <string name="data_type_fatigue_grade_title">Fatigue Grade (GF)</string>
