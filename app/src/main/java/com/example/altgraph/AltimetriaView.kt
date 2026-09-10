@@ -97,7 +97,7 @@ class AltimetriaView @JvmOverloads constructor(
         val h = height.toFloat()
         if (w <= 0 || h <= 0) return
 
-        canvas.drawColor(Color.DKGRAY)
+        canvas.drawColor(Color.BLACK)
 
         val headerColor = when (zoneColor) {
             "AMARILLO" -> Color.parseColor("#FFEB3B")
@@ -137,7 +137,7 @@ class AltimetriaView @JvmOverloads constructor(
         textPaint.textSize = (h * 0.14f).coerceAtLeast(26f)
         canvas.drawText(timeText, centerX, h * 0.58f, textPaint)
 
-        labelPaint.textSize = (h * 0.07f).coerceAtLeast(16f)
+        labelPaint.textSize = (h * 0.07f).coerceAtLeast(14f)
         canvas.drawText(context.getString(R.string.label_time_to_summit), centerX, h * 0.66f, labelPaint)
 
         // Bloques
@@ -164,9 +164,13 @@ class AltimetriaView @JvmOverloads constructor(
                 blockPaint.color = getColorForGrade(gradeVal)
                 canvas.drawRoundRect(blockRect, 8f, 8f, blockPaint)
 
-                // Dibujar % de pendiente con 1 decimal si existe fracción para evitar discrepancias
+                // Regla: Bloques de 50m muestran decimales; de 100m en adelante sin decimales (enteros)
                 if (showBlockPercentages) {
-                    val gradeText = if (gradeVal % 1.0f == 0.0f) "%.0f%%".format(gradeVal) else "%.1f%%".format(gradeVal)
+                    val gradeText = if (blockSizeMeters <= 50.0) {
+                        if (gradeVal % 1.0f == 0.0f) "%.0f%%".format(gradeVal) else "%.1f%%".format(gradeVal)
+                    } else {
+                        "%.0f%%".format(gradeVal)
+                    }
                     blockTextPaint.textSize = (barHeight * 0.68f).coerceIn(14f, 26f)
                     blockTextPaint.color = if (gradeVal > 3f && gradeVal <= 5f) Color.BLACK else Color.WHITE
 
@@ -195,7 +199,7 @@ class AltimetriaView @JvmOverloads constructor(
             canvas.drawText(context.getString(R.string.alert_attack), centerX, h * 0.42f, textPaint)
 
             labelPaint.color = Color.WHITE
-            labelPaint.textSize = (h * 0.075f).coerceAtLeast(16f)
+            labelPaint.textSize = (h * 0.075f).coerceAtLeast(14f)
             canvas.drawText(context.getString(R.string.alert_attack_sub), centerX, h * 0.54f, labelPaint)
         }
     }

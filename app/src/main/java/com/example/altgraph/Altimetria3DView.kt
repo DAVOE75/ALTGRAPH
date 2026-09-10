@@ -375,7 +375,7 @@ class Altimetria3DView @JvmOverloads constructor(
                     canvas.drawPath(arrowPath, rampArrowHeadPaint)
 
                     rampTextPaint.textSize = ((h * 0.065f) * fontScale).coerceIn(12f, 22f)
-                    val rampLabel = if (grade % 1.0f == 0.0f) "%.0f%%".format(grade) else "%.1f%%".format(grade)
+                    val rampLabel = "%.0f%%".format(grade)
                     canvas.drawText(rampLabel, midX, arrowTopY - 6f, rampTextPaint)
                 }
             }
@@ -395,11 +395,16 @@ class Altimetria3DView @JvmOverloads constructor(
         }
 
         // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D
+        // Regla: Si bloques <= 50m muestra 1 decimal; si bloques >= 100m sin decimales (enteros)
         val fontBaseSize = (h * 0.045f) * fontScale
 
         for (i in 0 until samples - 1) {
             val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
-            val pctStr = if (grade % 1.0f == 0.0f) "%.0f%%".format(grade) else "%.1f%%".format(grade)
+            val pctStr = if (blockSizeMeters <= 50.0) {
+                if (grade % 1.0f == 0.0f) "%.0f%%".format(grade) else "%.1f%%".format(grade)
+            } else {
+                "%.0f%%".format(grade)
+            }
 
             val midX = (pointsX[i] + pointsX[i + 1]) / 2f
             val midYTop = (pointsYTop[i] + pointsYTop[i + 1]) / 2f
