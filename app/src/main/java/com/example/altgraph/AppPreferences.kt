@@ -35,6 +35,10 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_SHOW_BLOCK_PERCENTAGES, true)
         set(value) = prefs.edit().putBoolean(KEY_SHOW_BLOCK_PERCENTAGES, value).apply()
 
+    var lookaheadMeters3d: Int
+        get() = prefs.getInt(KEY_LOOKAHEAD_METERS_3D, 350)
+        set(value) = prefs.edit().putInt(KEY_LOOKAHEAD_METERS_3D, value).apply()
+
     companion object {
         private const val PREFS_NAME = "altgraph_settings"
         private const val KEY_BLOCK_SIZE = "block_size_meters"
@@ -44,6 +48,7 @@ class AppPreferences(context: Context) {
         private const val KEY_ASPHALT_FACTOR = "asphalt_factor"
         private const val KEY_FONT_SIZE_3D_SCALE = "font_size_3d_scale"
         private const val KEY_SHOW_BLOCK_PERCENTAGES = "show_block_percentages"
+        private const val KEY_LOOKAHEAD_METERS_3D = "lookahead_meters_3d"
 
         @Volatile
         private var INSTANCE: AppPreferences? = null

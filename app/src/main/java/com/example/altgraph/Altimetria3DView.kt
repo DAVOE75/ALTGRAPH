@@ -95,6 +95,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private var currentGrade: Double = 7.2
     private var remainingDistance: Double = 8500.0
     private var blockSizeMeters: Double = 100.0
+    private var lookaheadMeters: Int = 350
     private var fontScale: Float = 1.0f
 
     private val ribbonPath = Path()
@@ -109,7 +110,8 @@ class Altimetria3DView @JvmOverloads constructor(
         grade: Double,
         remainingDist: Double,
         blockSizeMeters: Double = 100.0,
-        fontScale: Float = 1.0f
+        fontScale: Float = 1.0f,
+        lookaheadMeters: Int = 350
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -122,6 +124,7 @@ class Altimetria3DView @JvmOverloads constructor(
         this.remainingDistance = remainingDist
         this.blockSizeMeters = blockSizeMeters
         this.fontScale = fontScale
+        this.lookaheadMeters = lookaheadMeters
         postInvalidate()
     }
 
@@ -136,7 +139,7 @@ class Altimetria3DView @JvmOverloads constructor(
         // 1. Fondo Oscuro
         canvas.drawRect(0f, 0f, w, h, bgPaint)
 
-        // 2. Encabezado Título MUCHO MÁS GRANDE ("Altimetría 3D")
+        // 2. Encabezado Título ("Altimetría 3D")
         val titleText = context.getString(R.string.data_type_altimetria_3d_title)
         titlePaint.textSize = (h * 0.12f).coerceIn(24f, 44f)
         canvas.drawText(titleText, 20f, h * 0.14f, titlePaint)
@@ -165,7 +168,10 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private fun draw3DRibbonAndWalls(canvas: Canvas, w: Float, h: Float) {
-        val samples = if (nextBlocks.isNotEmpty()) nextBlocks.size else 10
+        val totalMetersAhead = lookaheadMeters.toDouble().coerceIn(200.0, 500.0)
+        val blocksCount = (totalMetersAhead / blockSizeMeters.coerceAtLeast(10.0)).toInt().coerceIn(2, 10)
+        val samples = blocksCount + 1
+
         val startX = w * 0.10f
         val endX = w * 0.90f
         val baseGroundY = h * 0.86f
@@ -225,12 +231,12 @@ class Altimetria3DView @JvmOverloads constructor(
         }
         canvas.drawPath(ribbonPath, lineStrokePaint)
 
-        // DIBUJAR EJE X CON MARCAS DE DISTANCIA EN METROS
+        // DIBUJAR EJE X CON MARCAS DE DISTANCIA EN METROS SEGÚN ANTICIPACIÓN
         axisTextPaint.textSize = (h * 0.045f).coerceIn(10f, 15f)
-        val stepMeters = blockSizeMeters.toInt()
+        val stepDistMeters = (totalMetersAhead / blocksCount).toInt()
 
-        for (i in 0 until samples step 2) {
-            val distLabel = "${i * stepMeters}m"
+        for (i in 0 until samples) {
+            val distLabel = "${i * stepDistMeters}m"
             val lx = pointsX[i]
             val ly = pointsYBase[i] + 16f
             canvas.drawText(distLabel, lx, ly, axisTextPaint)

@@ -91,7 +91,38 @@ class MainActivity : Activity() {
         blockCard.addView(blockValueText)
         blockCard.addView(blockRow)
 
-        // Section 2: Attack Threshold Card
+        // Section 2: 3D Lookahead Distance (Eje X) Card (200m a 500m de 50m en 50m)
+        val lookaheadCard = createCardContainer()
+        val lookaheadLabel = createSectionLabel(getString(R.string.setting_lookahead_meters_3d))
+        val lookaheadValueText = createValueText("${prefs.lookaheadMeters3d} m")
+        val lookaheadRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
+
+        val lookaheadMinusBtn = createActionButton("- 50 m") {
+            if (prefs.lookaheadMeters3d > 200) {
+                prefs.lookaheadMeters3d -= 50
+                lookaheadValueText.text = "${prefs.lookaheadMeters3d} m"
+            }
+        }
+
+        val lookaheadPlusBtn = createActionButton("+ 50 m") {
+            if (prefs.lookaheadMeters3d < 500) {
+                prefs.lookaheadMeters3d += 50
+                lookaheadValueText.text = "${prefs.lookaheadMeters3d} m"
+            }
+        }
+
+        lookaheadRow.addView(lookaheadMinusBtn)
+        lookaheadRow.addView(lookaheadPlusBtn)
+
+        lookaheadCard.addView(lookaheadLabel)
+        lookaheadCard.addView(lookaheadValueText)
+        lookaheadCard.addView(lookaheadRow)
+
+        // Section 3: Attack Threshold Card
         val attackCard = createCardContainer()
         val attackLabel = createSectionLabel(getString(R.string.setting_attack_threshold))
         val attackValueText = createValueText("${prefs.thresholdAttackPct.toInt()}%")
@@ -117,7 +148,7 @@ class MainActivity : Activity() {
         attackCard.addView(attackValueText)
         attackCard.addView(attackRow)
 
-        // Section 3: Target VAM Card
+        // Section 4: Target VAM Card
         val vamCard = createCardContainer()
         val vamLabel = createSectionLabel(getString(R.string.setting_target_vam))
         val vamValueText = createValueText("${prefs.targetVam} m/h")
@@ -148,7 +179,7 @@ class MainActivity : Activity() {
         vamCard.addView(vamValueText)
         vamCard.addView(vamRow)
 
-        // Section 4: Asphalt Quality Card
+        // Section 5: Asphalt Quality Card
         val asphaltCard = createCardContainer()
         val asphaltLabel = createSectionLabel(getString(R.string.setting_asphalt_factor))
         val currentAsphaltQuality = FatigueGradeCalculator.AsphaltQuality.entries.find { it.factor == prefs.asphaltFactor } ?: FatigueGradeCalculator.AsphaltQuality.GOOD
@@ -175,7 +206,7 @@ class MainActivity : Activity() {
         asphaltCard.addView(asphaltValueText)
         asphaltCard.addView(asphaltRow)
 
-        // Section 5: 3D Font Size Scale Card
+        // Section 6: 3D Font Size Scale Card
         val font3dCard = createCardContainer()
         val font3dLabel = createSectionLabel(getString(R.string.setting_font_size_3d))
         val fontScales = listOf(1.0f to getString(R.string.font_normal), 1.25f to getString(R.string.font_large), 1.5f to getString(R.string.font_xl))
@@ -201,7 +232,7 @@ class MainActivity : Activity() {
         font3dCard.addView(font3dValueText)
         font3dCard.addView(font3dRow)
 
-        // Section 6: Toggle Show % in Profile Blocks Card
+        // Section 7: Toggle Show % in Profile Blocks Card
         val showPctCard = createCardContainer()
         val switchShowPct = Switch(this).apply {
             text = getString(R.string.setting_show_block_percentages)
@@ -214,7 +245,7 @@ class MainActivity : Activity() {
         }
         showPctCard.addView(switchShowPct)
 
-        // Section 7: Toggle Attack Alerts Card
+        // Section 8: Toggle Attack Alerts Card
         val alertCard = createCardContainer()
         val switchAlerts = Switch(this).apply {
             text = getString(R.string.setting_enable_alerts)
@@ -253,6 +284,7 @@ class MainActivity : Activity() {
 
         rootLayout.addView(headerCard)
         rootLayout.addView(blockCard)
+        rootLayout.addView(lookaheadCard)
         rootLayout.addView(attackCard)
         rootLayout.addView(vamCard)
         rootLayout.addView(asphaltCard)
