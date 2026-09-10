@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
-import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
 import android.util.AttributeSet
@@ -21,7 +20,7 @@ class Altimetria3DView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     private val bgPaint = Paint().apply {
-        color = Color.parseColor("#09090B")
+        color = Color.BLACK
         style = Paint.Style.FILL
     }
 
