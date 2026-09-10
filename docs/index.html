@@ -15,8 +15,9 @@
             --card-border: #27272a;
             --accent-blue: #38bdf8;
             --accent-green: #22c55e;
-            --accent-orange: #f59e0b;
+            --accent-yellow: #eab308;
             --accent-red: #ef4444;
+            --accent-purple: #a855f7;
             --text-main: #fafafa;
             --text-muted: #a1a1aa;
         }
@@ -79,7 +80,7 @@
 
         .hero {
             max-width: 1100px;
-            margin: 40px auto 80px auto;
+            margin: 40px auto 60px auto;
             padding: 0 20px;
             text-align: center;
         }
@@ -106,7 +107,7 @@
         .hero p {
             font-size: 1.25rem;
             color: var(--text-muted);
-            max-width: 750px;
+            max-width: 780px;
             margin: 0 auto 35px auto;
         }
 
@@ -159,6 +160,75 @@
             border: 1px solid var(--card-border);
         }
 
+        /* FLAGSHIP ALMA MATER SECTION */
+        .flagship-section {
+            max-width: 1100px;
+            margin: 0 auto 60px auto;
+            padding: 0 20px;
+        }
+
+        .flagship-card {
+            background: linear-gradient(145deg, #18181b 0%, #09090b 100%);
+            border: 2px solid var(--accent-blue);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(56, 189, 248, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flagship-badge {
+            display: inline-block;
+            background-color: var(--accent-blue);
+            color: #000;
+            font-size: 0.85rem;
+            font-weight: 800;
+            padding: 6px 16px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
+
+        .flagship-card h3 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .flagship-card p.lead {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+        }
+
+        .flagship-features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .feature-item {
+            background: rgba(39, 39, 42, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .feature-item h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-bottom: 8px;
+        }
+
+        .feature-item p {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+        }
+
         .features {
             max-width: 1100px;
             margin: 0 auto 80px auto;
@@ -168,42 +238,90 @@
         .section-title {
             text-align: center;
             font-size: 2rem;
-            font-weight: 700;
+            font-weight: 800;
             margin-bottom: 40px;
         }
 
-        .grid {
+        .detailed-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            gap: 25px;
         }
 
-        .card {
+        @media (max-width: 600px) {
+            .detailed-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .detailed-card {
             background-color: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 30px;
-            transition: border-color 0.2s;
+            border-radius: 20px;
+            padding: 32px;
+            transition: border-color 0.2s, transform 0.2s;
         }
 
-        .card:hover {
+        .detailed-card:hover {
             border-color: var(--accent-blue);
+            transform: translateY(-3px);
         }
 
-        .card-icon {
-            font-size: 2rem;
-            margin-bottom: 15px;
+        .detailed-card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 18px;
         }
 
-        .card h3 {
-            font-size: 1.25rem;
+        .detailed-card-icon {
+            font-size: 2.2rem;
+            background: rgba(56, 189, 248, 0.1);
+            padding: 12px;
+            border-radius: 16px;
+        }
+
+        .detailed-card h3 {
+            font-size: 1.35rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            color: #ffffff;
         }
 
-        .card p {
+        .detailed-card p.desc {
             color: var(--text-muted);
-            font-size: 0.95rem;
+            font-size: 0.98rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-bullets {
+            list-style: none;
+        }
+
+        .feature-bullets li {
+            position: relative;
+            padding-left: 24px;
+            margin-bottom: 10px;
+            font-size: 0.92rem;
+            color: var(--text-main);
+        }
+
+        .feature-bullets li::before {
+            content: "▹";
+            position: absolute;
+            left: 0;
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+
+        .code-box {
+            background: #09090b;
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-family: monospace;
+            font-size: 0.88rem;
+            color: var(--accent-yellow);
+            margin-top: 12px;
         }
 
         .install-section {
@@ -250,7 +368,8 @@
             <h1>ALTGRAPH</h1>
         </div>
         <nav class="nav-links">
-            <a href="#features">Características</a>
+            <a href="#flagship">Altimetría 3D</a>
+            <a href="#features">Campos de Datos</a>
             <a href="#install">Instalación</a>
             <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">GitHub</a>
         </nav>
@@ -258,8 +377,8 @@
 
     <section class="hero">
         <img src="../art/logo.png" alt="ALTGRAPH Logo" class="main-logo">
-        <h2>Domina los puertos con <span>ALTGRAPH v0.2.2</span></h2>
-        <p>Extensión avanzada desarrollada por <strong>David García Pascual</strong>. Altimetría 3D en relieve con cotas verticales a 90°, etiquetas de % serigrafiadas, alertas de ataque, ritmo VAM dual e <strong>Índice Grado de Fatiga (GF)</strong> para ciclocomputadores <strong>Hammerhead Karoo 2 y Karoo 3</strong>.</p>
+        <h2>Domina la montaña con <span>ALTGRAPH v0.2.2</span></h2>
+        <p>Extensión avanzada desarrollada por <strong>David García Pascual</strong>. Análisis dinámico de puertos, perfil 3D en relieve con cotas verticales, alertas de ataque, ritmo VAM dual e <strong>Índice Grado de Fatiga (GF)</strong> para <strong>Hammerhead Karoo 2 y Karoo 3</strong>.</p>
 
         <div class="badges">
             <span class="badge">v0.2.2 Release</span>
@@ -275,44 +394,152 @@
         </div>
     </section>
 
-    <section class="features" id="features">
-        <h2 class="section-title">Campos de Datos Exclusivos</h2>
-        <div class="grid">
-            <div class="card">
-                <div class="card-icon">🏔️</div>
-                <h3>Altimetría 3D</h3>
-                <p>Perfil de montaña ampliado en perspectiva isométrica 3D con relieve extruido, cotas verticales a 90°, etiquetas de % de rampa serigrafiadas y escala de anticipación de 200m a 500m.</p>
-            </div>
-            <div class="card">
-                <div class="card-icon">📊</div>
-                <h3>Estratega de Altimetría</h3>
-                <p>Gráfico de perfil dinámico en bloques (1 a 10 tramos, por defecto 5) con el % impreso dentro de cada bloque y alertas visuales de ataque (<strong>¡ATACA!</strong>) al detectar rampas >10%.</p>
-            </div>
-            <div class="card">
-                <div class="card-icon">⛰️</div>
-                <h3>Índice Grado de Fatiga (GF)</h3>
-                <p>Calcula la dureza científica acumulada restante mediante la fórmula <code>GF = SUM(DU) + TA + PMx/5</code> considerando el tipo de asfalto y rampas máximas.</p>
-            </div>
-            <div class="card">
-                <div class="card-icon">🚴</div>
-                <h3>Ritmo VAM Objetivo (Opción C)</h3>
-                <p>Asistente dual de ritmo. Muestra la VAM instantánea (m/h) junto a la velocidad objetivo recomendada (km/h) y la insignia de estado (<strong>EN RITMO / SOBREESFUERZO</strong>).</p>
-            </div>
-            <div class="card">
-                <div class="card-icon">📈</div>
-                <h3>Tendencia 3D y Rampa Máx.</h3>
-                <p>Indicador de tendencia en tiempo real (↗️ Endureciendo, ➔ Estable, ↘️ Suavizando) anticipándose al retraso barométrico, registrando el % máximo de la rampa.</p>
+    <!-- FLAGSHIP SECTION: ALTIMETRIA 3D (EL ALMA MATER DE ALTGRAPH) -->
+    <section class="flagship-section" id="flagship">
+        <div class="flagship-card">
+            <span class="flagship-badge">🌟 El Alma Mater de ALTGRAPH</span>
+            <h3>🏔️ Altimetría 3D e Itinerario en Relieve</h3>
+            <p class="lead">Inspirado en los libros de ruta de las grandes vueltas profesionales, el gráfico de **Altimetría 3D** recrea el perfil completo del puerto en perspectiva isométrica con volumen de montaña, sombreado degradado y máxima claridad de datos.</p>
+
+            <div class="flagship-features-grid">
+                <div class="feature-item">
+                    <h4>📐 Perspectiva Isométrica 3D</h4>
+                    <p>Relieve tridimensional extruido con sombreado de sombra vertical <code>LinearGradient</code> e iluminación dinámica sobre la carretera.</p>
+                </div>
+                <div class="feature-item">
+                    <h4>📐 Cotas Verticales a 90°</h4>
+                    <p>Cotas de altitud en metros (<code>272m</code>, <code>461m</code>, <code>533m</code>...) rotadas a 90 grados y alineadas exactamente con cada línea divisoria de tramo.</p>
+                </div>
+                <div class="feature-item">
+                    <h4>📊 Porcentajes % en los Bloques</h4>
+                    <p>Escriben el % de inclinación directamente sobre el cuerpo 3D en blanco de alto contraste con sombra proyectada y <strong>tamaño de fuente personalizable</strong>.</p>
+                </div>
+                <div class="feature-item">
+                    <h4>📏 Anticipación de Eje X Configurable</h4>
+                    <p>Ajuste de distancia de vista hacia adelante en el Eje X desde <strong>200m hasta 500m</strong> (en intervalos de 50m) para adaptar la escala al instante.</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🚩 Rampas Duras de Subida (≥10%)</h4>
+                    <p>Flechas rojas señalizadoras apuntando hacia abajo directamente a las rampas duras de subida con la etiqueta del % (<code>10%</code>, <code>12%</code>, <code>15%</code>).</p>
+                </div>
+                <div class="feature-item">
+                    <h4>🔢 Doble Lectura Numérica</h4>
+                    <p>Escriben en números grandes en la esquina superior la <strong>PENDIENTE ACTUAL</strong> y la <strong>PENDIENTE MÁX. TRAMO</strong> que te espera por delante.</p>
+                </div>
             </div>
         </div>
     </section>
 
+    <!-- DETAILED DATA FIELDS SECTION -->
+    <section class="features" id="features">
+        <h2 class="section-title">Análisis Detallado de los 5 Campos de Datos</h2>
+
+        <div class="detailed-grid">
+
+            <!-- 1. ALTIMETRIA 3D -->
+            <div class="detailed-card">
+                <div class="detailed-card-header">
+                    <div class="detailed-card-icon">🏔️</div>
+                    <div>
+                        <h3>Altimetría 3D</h3>
+                        <span style="color: var(--accent-blue); font-size: 0.85rem; font-weight: 700;">Flagship Data Field</span>
+                    </div>
+                </div>
+                <p class="desc">Campo gráfico en perspectiva isométrica 3D con extrusión de volumen, cotas verticales y escala de distancia configurable en el Eje X.</p>
+                <ul class="feature-bullets">
+                    <li><strong>Escala de Anticipación</strong>: Elige ver de 200m a 500m por delante en el Eje X.</li>
+                    <li><strong>Cotas Verticales</strong>: Altitud en metros rotada 90° en las divisiones de tramo.</li>
+                    <li><strong>Rampas Duras</strong>: Flechas rojas señalando pendientes ≥10% en subida.</li>
+                    <li><strong>Doble Métrica</strong>: Lectura en grande de Pendiente Actual y Pendiente Máxima del tramo.</li>
+                    <li><strong>Marcador Flotante</strong>: Faro 3D luminoso (*Beacon*) siguiendo tu posición en vivo.</li>
+                </ul>
+            </div>
+
+            <!-- 2. ESTRATEGA DE ALTIMETRIA -->
+            <div class="detailed-card">
+                <div class="detailed-card-header">
+                    <div class="detailed-card-icon">📊</div>
+                    <div>
+                        <h3>Estratega de Altimetría</h3>
+                        <span style="color: var(--accent-green); font-size: 0.85rem; font-weight: 700;">2D Profile & Strategy</span>
+                    </div>
+                </div>
+                <p class="desc">Perfil de bloques de distancia con código de colores según pendiente y alertas emergentes de ataque en rampas duras.</p>
+                <ul class="feature-bullets">
+                    <li><strong>Tramos Configurables</strong>: Selecciona de 1 a 10 bloques visibles (5 por defecto).</li>
+                    <li><strong>Distancia por Bloque</strong>: Ajustable a 50m, 100m, 250m o 500m.</li>
+                    <li><strong>Serigrafiado de %</strong>: Porcentaje de inclinación impreso dentro de cada bloque.</li>
+                    <li><strong>Alertas ¡ATACA!</strong>: Aviso destacado en pantalla al detectar rampas >10%.</li>
+                    <li><strong>Métricas de Puerto</strong>: Distancia restante a la cima, tiempo estimado y pendiente media.</li>
+                </ul>
+            </div>
+
+            <!-- 3. INDICE GRADO DE FATIGA -->
+            <div class="detailed-card">
+                <div class="detailed-card-header">
+                    <div class="detailed-card-icon">⛰️</div>
+                    <div>
+                        <h3>Índice Grado de Fatiga (GF)</h3>
+                        <span style="color: var(--accent-yellow); font-size: 0.85rem; font-weight: 700;">Scientific Climb Hardness</span>
+                    </div>
+                </div>
+                <p class="desc">Índice científico de dureza acumulada que evalúa la dificultad real del puerto restante considerando pendiente, asfalto y rampa máxima.</p>
+                <ul class="feature-bullets">
+                    <li><strong>Modelo Ponderado por Tramos</strong>: DU* ponderada según tramos de pendiente (0-3%, 3-9%, 9-20%, >20%).</li>
+                    <li><strong>Factor de Asfalto (TA)</strong>: Configurable a Muy Bueno (0.1), Bueno (0.5), Regular (1.2), Malo (1.7).</li>
+                    <li><strong>Penalización por Rampa Máxima</strong>: Suma el factor PMx / 5 a la dureza del puerto.</li>
+                    <li><strong>Clasificación Oficial</strong>: Categoriza el puerto automáticamente (5ª Cat a Especial HC).</li>
+                </ul>
+                <div class="code-box">Fórmula: GF = SUM(DU*) + TA + (PMx / 5)</div>
+            </div>
+
+            <!-- 4. RITMO VAM OBJETIVO -->
+            <div class="detailed-card">
+                <div class="detailed-card-header">
+                    <div class="detailed-card-icon">🚴</div>
+                    <div>
+                        <h3>Ritmo VAM Objetivo (Opción C)</h3>
+                        <span style="color: var(--accent-red); font-size: 0.85rem; font-weight: 700;">Dual Pacing Assistant</span>
+                    </div>
+                </div>
+                <p class="desc">Asistente de ritmo para dosificar el esfuerzo en puerto calculando la velocidad recomendada en km/h según la pendiente actual.</p>
+                <ul class="feature-bullets">
+                    <li><strong>Lectura VAM Principal</strong>: VAM instantánea en m/h (ej. 850 m/h) + VAM Objetivo.</li>
+                    <li><strong>Velocidad Recomendada</strong>: Indica a qué velocidad exacta en km/h debes subir (ej. 12.5 km/h).</li>
+                    <li><strong>Insignia de Estado</strong>: Píldora de color indicando 🟢 EN RITMO, 🔴 SOBREESFUERZO o 🔵 POR DEBAJO.</li>
+                    <li><strong>Ajuste Personalizado</strong>: VAM objetivo regulable desde 500 m/h a 2000 m/h en el panel.</li>
+                </ul>
+            </div>
+
+            <!-- 5. TENDENCIA 3D Y RAMPA MAXIMA -->
+            <div class="detailed-card">
+                <div class="detailed-card-header">
+                    <div class="detailed-card-icon">📈</div>
+                    <div>
+                        <h3>Tendencia 3D y Rampa Máxima</h3>
+                        <span style="color: var(--accent-purple); font-size: 0.85rem; font-weight: 700;">Gradient Trend Tracker</span>
+                    </div>
+                </div>
+                <p class="desc">Sensor de tendencia inmediata de pendiente que elimina el retraso del altímetro barométrico y registra el pico de rampa máxima.</p>
+                <ul class="feature-bullets">
+                    <li><strong>Filtro Estocástico Corto/Largo Plazo</strong>: Anticipa si la pendiente está endureciendo o suavizando.</li>
+                    <li><strong>Indicadores Visuales</strong>: Flechas vectoriales (↗️ ENDURECIENDO, ➔ ESTABLE, ↘️ SUAVIZANDO).</li>
+                    <li><strong>Pico de Rampa Máxima</strong>: Registra y mantiene el % de rampa más dura alcanzado en el tramo.</li>
+                </ul>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- INSTALLATION SECTION -->
     <section class="install-section" id="install">
-        <h3>🚀 Instalación rápida en tu Hammerhead Karoo</h3>
+        <h3>🚀 Instalación Rápida en tu Hammerhead Karoo</h3>
         <ol class="install-steps">
-            <li>Conecta tu Hammerhead Karoo al ordenador por cable USB con la <strong>Depuración USB</strong> activada.</li>
-            <li>Descarga la versión más reciente del archivo <code>app-debug.apk</code> desde nuestro repositorio en GitHub.</li>
-            <li>Ejecuta el comando en tu consola: <code>adb install -r app-debug.apk</code></li>
+            <li>Conecta tu Hammerhead Karoo 2 o Karoo 3 al ordenador por cable USB con la <strong>Depuración USB</strong> activada.</li>
+            <li>Descarga la versión más reciente del archivo <code>app-debug.apk</code> (v0.2.2) desde nuestro repositorio en GitHub.</li>
+            <li>Ejecuta el comando en tu consola de comandos: <code>adb install -r app-debug.apk</code></li>
             <li>En tu Karoo, entra en <strong>Ajustes &gt; Perfiles de Carrera</strong>, edita una pantalla de datos y añade los campos de la categoría <strong>ALTGRAPH</strong>.</li>
+            <li>Abre el <strong>Panel de Configuración de ALTGRAPH</strong> desde el menú de aplicaciones de tu Karoo para personalizar las 11 opciones de ajuste a tu gusto.</li>
         </ol>
     </section>
 
