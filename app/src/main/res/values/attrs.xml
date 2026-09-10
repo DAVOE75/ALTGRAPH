@@ -10,6 +10,7 @@
     <attr name="scansDevices" format="boolean" />
     <attr name="mapLayer" format="boolean" />
     <attr name="fitFile" format="boolean" />
+    <attr name="configurable" format="boolean" />
 
     <declare-styleable name="Extension">
         <attr name="id" />
@@ -19,6 +20,7 @@
         <attr name="scansDevices" />
         <attr name="mapLayer" />
         <attr name="fitFile" />
+        <attr name="configurable" />
     </declare-styleable>
 
     <declare-styleable name="DataType">

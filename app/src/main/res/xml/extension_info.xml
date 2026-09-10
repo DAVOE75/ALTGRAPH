@@ -6,7 +6,8 @@
     app:icon="@drawable/ic_altigraph_logo"
     app:scansDevices="false"
     app:mapLayer="false"
-    app:fitFile="false">
+    app:fitFile="false"
+    app:configurable="true">
 
     <DataType
         app:typeId="altimetria_graph"
