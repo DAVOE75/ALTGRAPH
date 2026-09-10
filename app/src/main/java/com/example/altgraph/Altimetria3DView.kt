@@ -192,63 +192,68 @@ class Altimetria3DView @JvmOverloads constructor(
         maxGradePaint.color = Color.parseColor(getGradeColor(tramoMaxGrade))
         canvas.drawText(maxGradeText, 20f, h * 0.43f, maxGradePaint)
 
-        // 3. REJILLA TRASERA 3D DE ALTITUD EN EL FONDO (Líneas finas de referencia por detrás del gráfico, como en la imagen)
-        draw3DBackwallGrid(canvas, w, h)
-
-        // 4. Rejilla Isometrica 3D de Suelo
+        // 3. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)
 
-        // 5. Perfil 3D con Cotas Verticales y Marcadores de Rampas Duras
+        // 4. Perfil 3D con Rejilla Trasera en Perspectiva 3D, Cotas Verticales y Marcadores
         draw3DRibbonAndWalls(canvas, w, h)
     }
 
-    private fun draw3DBackwallGrid(canvas: Canvas, w: Float, h: Float) {
-        val startX = w * 0.04f
-        val endX = w * 0.96f
-        val baseGroundY = h * 0.86f
-        val topGridY = h * 0.28f
-        val gridHeight = baseGroundY - topGridY
-
-        val steps = 4
-        val stepHeight = gridHeight / steps
-
-        // 1. Líneas horizontales finas de altitud en el fondo
-        axisTextPaint.textSize = (h * 0.038f).coerceIn(9f, 13f)
-
-        for (i in 0..steps) {
-            val y = baseGroundY - (i * stepHeight)
-
-            // Línea de cuadrícula horizontal
-            canvas.drawLine(startX, y, endX, y, gridPaint)
-
-            // Etiqueta de referencia de altitud en el fondo
-            val elevMark = (currentElevation + (i * 100)).toInt()
-            canvas.drawText("${elevMark}m", startX + 10f, y - 3f, axisTextPaint)
-        }
-
-        // 2. Líneas verticales finas de cuadrícula trasera
-        val verticalGridLines = 6
-        val stepX = (endX - startX) / verticalGridLines
-
-        for (i in 0..verticalGridLines) {
-            val x = startX + (i * stepX)
-            canvas.drawLine(x, topGridY, x, baseGroundY, gridPaint)
-        }
-    }
-
     private fun drawIsometricGrid(canvas: Canvas, w: Float, h: Float) {
-        val groundY = h * 0.88f
+        val groundY = h * 0.91f
         val gridLines = 5
 
         for (i in 0..gridLines) {
             val ratio = i.toFloat() / gridLines
             val x1 = w * 0.04f + ratio * (w * 0.25f)
-            val y1 = groundY - ratio * (h * 0.15f)
+            val y1 = groundY - ratio * (h * 0.12f)
 
             val x2 = w * 0.78f + ratio * (w * 0.25f)
-            val y2 = groundY - ratio * (h * 0.15f)
+            val y2 = groundY - ratio * (h * 0.12f)
 
             canvas.drawLine(x1, y1, x2, y2, gridPaint)
+        }
+    }
+
+    private fun draw3DBackwallGrid(
+        canvas: Canvas,
+        w: Float,
+        h: Float,
+        pointsX: FloatArray,
+        pointsYBase: FloatArray,
+        samples: Int,
+        maxPeakHeight: Float
+    ) {
+        val steps = 4
+        axisTextPaint.textSize = (h * 0.038f).coerceIn(9f, 13f)
+
+        // 1. Líneas horizontales de altitud en PERSPECTIVA ISOMÉTRICA 3D
+        for (k in 0..steps) {
+            val ratio = k.toFloat() / steps
+            val elevMark = (currentElevation + (k * 100)).toInt()
+
+            for (j in 0 until samples - 1) {
+                val x1 = pointsX[j]
+                val y1 = pointsYBase[j] - (ratio * maxPeakHeight)
+
+                val x2 = pointsX[j + 1]
+                val y2 = pointsYBase[j + 1] - (ratio * maxPeakHeight)
+
+                canvas.drawLine(x1, y1, x2, y2, gridPaint)
+            }
+
+            // Etiqueta de altitud sobre el eje Z en perspectiva 3D
+            val labelX = (pointsX[0] - 28f).coerceAtLeast(10f)
+            val labelY = pointsYBase[0] - (ratio * maxPeakHeight) + 4f
+            canvas.drawText("${elevMark}m", labelX, labelY, axisTextPaint)
+        }
+
+        // 2. Columnas verticales de rejilla en PERSPECTIVA ISOMÉTRICA 3D
+        for (j in 0 until samples) {
+            val x = pointsX[j]
+            val yBottom = pointsYBase[j]
+            val yTop = pointsYBase[j] - maxPeakHeight
+            canvas.drawLine(x, yTop, x, yBottom, gridPaint)
         }
     }
 
@@ -257,10 +262,10 @@ class Altimetria3DView @JvmOverloads constructor(
         val blocksCount = (totalMetersAhead / blockSizeMeters.coerceAtLeast(10.0)).toInt().coerceIn(2, 10)
         val samples = blocksCount + 1
 
-        val startX = w * 0.04f
+        val startX = w * 0.08f
         val endX = w * 0.96f
-        val baseGroundY = h * 0.86f
-        val maxPeakHeight = h * 0.52f
+        val baseGroundY = h * 0.91f
+        val maxPeakHeight = h * 0.45f
 
         val stepX = (endX - startX) / (samples - 1).coerceAtLeast(1)
 
@@ -281,19 +286,22 @@ class Altimetria3DView @JvmOverloads constructor(
             pointElevations[i] = accumulatedElev.toFloat()
 
             val progress = i.toFloat() / (samples - 1)
-            val curveOffset = sin(progress * Math.PI * 1.5).toFloat() * (w * 0.09f)
+            val curveOffset = sin(progress * Math.PI * 1.5).toFloat() * (w * 0.08f)
 
             val px = startX + i * stepX + curveOffset
             val normalizedHeight = (grade.coerceIn(-5.0, 20.0) + 5.0) / 25.0
-            val pYTop = baseGroundY - (progress * (h * 0.10f)) - (normalizedHeight * maxPeakHeight).toFloat()
-            val pYBase = baseGroundY - (progress * (h * 0.10f))
+            val pYTop = baseGroundY - (progress * (h * 0.06f)) - (normalizedHeight * maxPeakHeight).toFloat()
+            val pYBase = baseGroundY - (progress * (h * 0.06f))
 
             pointsX[i] = px
             pointsYTop[i] = pYTop
             pointsYBase[i] = pYBase
         }
 
-        // DIBUJAR PAREDES DE EXTROSIÓN 3D (Relieve por delante de la rejilla de fondo)
+        // DIBUJAR REJILLA TRASERA DE ALTITUD EN PERSPECTIVA 3D (Por detrás de la montaña)
+        draw3DBackwallGrid(canvas, w, h, pointsX, pointsYBase, samples, maxPeakHeight)
+
+        // DIBUJAR PAREDES DE EXTROSIÓN 3D (Relieve)
         for (i in 0 until samples - 1) {
             val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
 
@@ -318,11 +326,11 @@ class Altimetria3DView @JvmOverloads constructor(
         }
 
         // DIBUJAR LÍNEAS VERTICALES DE LÍMITE Y COTAS DE ALTITUD EN CADA TRAMO ROTADAS A 90 GRADOS
-        cotaTextPaint.textSize = ((h * 0.052f) * fontScale).coerceIn(10f, 18f)
+        cotaTextPaint.textSize = ((h * 0.050f) * fontScale).coerceIn(10f, 18f)
 
         for (i in 0 until samples) {
             // Línea vertical que baja desde el perfil
-            canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i], pointsYBase[i] + 12f, cotaLinePaint)
+            canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i], pointsYBase[i] + 10f, cotaLinePaint)
 
             // Cota de altitud rotada a 90 grados pegada a la línea de separación si está activada
             if (showCotas) {
@@ -335,7 +343,7 @@ class Altimetria3DView @JvmOverloads constructor(
             }
         }
 
-        // DIBUJAR CINTA SUPERIOR 3D CON BORDE MÁS ANCHO Y DEL MISMO COLOR QUE EL BLOQUE PERO MÁS OSCURO
+        // DIBUJAR CINTA SUPERIOR 3D
         for (i in 0 until samples - 1) {
             val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
             val darkStrokeColor = getDarkGradeColor(grade.toDouble())
@@ -352,10 +360,9 @@ class Altimetria3DView @JvmOverloads constructor(
                     val midX = (pointsX[i] + pointsX[i + 1]) / 2f
                     val midY = (pointsYTop[i] + pointsYTop[i + 1]) / 2f
 
-                    val arrowTopY = midY - (h * 0.18f)
+                    val arrowTopY = midY - (h * 0.16f)
                     val arrowBottomY = midY - 8f
 
-                    // Flecha apuntando a la rampa
                     canvas.drawLine(midX, arrowTopY, midX, arrowBottomY, rampArrowPaint)
 
                     arrowPath.reset()
@@ -365,7 +372,6 @@ class Altimetria3DView @JvmOverloads constructor(
                     arrowPath.close()
                     canvas.drawPath(arrowPath, rampArrowHeadPaint)
 
-                    // Texto del % sobre la flecha (ej. 10%, 12%, 15%)
                     rampTextPaint.textSize = ((h * 0.065f) * fontScale).coerceIn(12f, 22f)
                     val rampLabel = "%.0f%%".format(grade)
                     canvas.drawText(rampLabel, midX, arrowTopY - 6f, rampTextPaint)
@@ -381,9 +387,9 @@ class Altimetria3DView @JvmOverloads constructor(
         for (i in 0 until samples) {
             val distLabel = "${i * stepDistMeters}m"
             val lx = pointsX[i]
-            val ly = pointsYBase[i] + 16f
+            val ly = pointsYBase[i] + 14f
             canvas.drawText(distLabel, lx, ly, axisTextPaint)
-            canvas.drawLine(pointsX[i], pointsYBase[i], pointsX[i], pointsYBase[i] + 6f, gridPaint)
+            canvas.drawLine(pointsX[i], pointsYBase[i], pointsX[i], pointsYBase[i] + 5f, gridPaint)
         }
 
         // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D
