@@ -73,7 +73,17 @@ class Altimetria3DView @JvmOverloads constructor(
         typeface = Typeface.DEFAULT_BOLD
     }
 
+    private val subTitleLabelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#38BDF8")
+        typeface = Typeface.DEFAULT_BOLD
+    }
+
     private val liveGradePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#38BDF8")
+        typeface = Typeface.DEFAULT_BOLD
+    }
+
+    private val maxGradePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#38BDF8")
         typeface = Typeface.DEFAULT_BOLD
     }
@@ -101,17 +111,6 @@ class Altimetria3DView @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
 
-    private val tagBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#18181B")
-        style = Paint.Style.FILL
-    }
-
-    private val tagBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#38BDF8")
-        strokeWidth = 2.5f
-        style = Paint.Style.STROKE
-    }
-
     private var nextBlocks: List<Float> = emptyList()
     private var currentElevation: Double = 350.0
     private var maxElevation: Double = 727.0
@@ -127,7 +126,6 @@ class Altimetria3DView @JvmOverloads constructor(
 
     private val wallPath = Path()
     private val arrowPath = Path()
-    private val tagRect = RectF()
 
     fun update3DData(
         blocks: List<Float>,
@@ -162,7 +160,9 @@ class Altimetria3DView @JvmOverloads constructor(
         this.rotate90 = rotate90
 
         FontHelper.applyFontToPaint(titlePaint, fontFamilyKey)
+        FontHelper.applyFontToPaint(subTitleLabelPaint, fontFamilyKey)
         FontHelper.applyFontToPaint(liveGradePaint, fontFamilyKey)
+        FontHelper.applyFontToPaint(maxGradePaint, fontFamilyKey)
         FontHelper.applyFontToPaint(percentTextPaint, fontFamilyKey)
         FontHelper.applyFontToPaint(rampTextPaint, fontFamilyKey)
         FontHelper.applyFontToPaint(cotaTextPaint, fontFamilyKey)
@@ -194,25 +194,49 @@ class Altimetria3DView @JvmOverloads constructor(
         // 1. Fondo Oscuro
         canvas.drawRect(0f, 0f, w, h, bgPaint)
 
-        // 2. Título "Altimetría 3D" discreto en la parte superior izquierda
+        // 2. Encabezado Título ("Altimetría 3D") MÁS GRANDE
         val titleText = context.getString(R.string.data_type_altimetria_3d_title)
-        titlePaint.textSize = ((h * 0.050f) * fontScale).coerceIn(12f, 18f)
-        canvas.drawText(titleText, 16f, h * 0.05f, titlePaint)
+        titlePaint.textSize = ((h * 0.085f) * fontScale).coerceIn(18f, 32f)
+        canvas.drawText(titleText, 18f, h * 0.08f, titlePaint)
+
+        // Etiqueta PENDIENTE ACTUAL
+        val labelCurrentGrade = context.getString(R.string.label_current_gradient)
+        subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(10f, 16f)
+        canvas.drawText(labelCurrentGrade, 18f, h * 0.14f, subTitleLabelPaint)
+
+        // Número PENDIENTE ACTUAL (Grande reducido un 5% para encaje impecable)
+        val liveGradeText = "%.1f%%".format(currentGrade)
+        liveGradePaint.textSize = ((h * 0.13f) * fontScale).coerceIn(20f, 42f)
+        liveGradePaint.color = Color.parseColor(getGradeColor(currentGrade))
+        canvas.drawText(liveGradeText, 18f, h * 0.25f, liveGradePaint)
+
+        // PENDIENTE MÁXIMA DEL TRAMO VISIBLE (Opcional según preferencia del usuario)
+        if (showMaxGrade) {
+            val tramoMaxGrade = if (nextBlocks.isNotEmpty()) nextBlocks.maxOrNull()?.toDouble() ?: 12.8 else 12.8
+            val labelMaxGrade = context.getString(R.string.label_max_gradient_tramo)
+            subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(10f, 15f)
+            canvas.drawText(labelMaxGrade, 18f, h * 0.32f, subTitleLabelPaint)
+
+            val maxGradeText = "%.1f%%".format(tramoMaxGrade)
+            maxGradePaint.textSize = ((h * 0.12f) * fontScale).coerceIn(18f, 36f)
+            maxGradePaint.color = Color.parseColor(getGradeColor(tramoMaxGrade))
+            canvas.drawText(maxGradeText, 18f, h * 0.43f, maxGradePaint)
+        }
 
         // 3. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)
 
-        // 4. Perfil 3D a Pantalla Completa 100% (Estirado de extremo a extremo)
+        // 4. Perfil 3D por encima de las líneas de fondo del Eje Y
         draw3DRibbonAndWalls(canvas, w, h)
     }
 
     private fun drawIsometricGrid(canvas: Canvas, w: Float, h: Float) {
-        val groundY = h * 0.94f
+        val groundY = h * 0.93f
         val gridLines = 5
 
         for (i in 0..gridLines) {
             val ratio = i.toFloat() / gridLines
-            val x1 = w * 0.01f + ratio * (w * 0.25f)
+            val x1 = w * 0.04f + ratio * (w * 0.25f)
             val y1 = groundY - ratio * (h * 0.12f)
 
             val x2 = w * 0.78f + ratio * (w * 0.25f)
@@ -273,11 +297,11 @@ class Altimetria3DView @JvmOverloads constructor(
         val blocksCount = (totalMetersAhead / blockSizeMeters.coerceAtLeast(10.0)).toInt().coerceIn(2, 10)
         val samples = blocksCount + 1
 
-        // HUELLA 3D ESTIRADA AL 100% DEL ANCHO Y ALTO DE PANTALLA
-        val startX = w * 0.01f
+        // MARGEN IZQUIERDO AJUSTADO PARA QUE LA COTA DE 0M ("350 m") SEA 100% VISIBLE SIN CORTARSE
+        val startX = w * 0.08f
         val endX = w * 0.98f
-        val baseGroundY = h * 0.94f
-        val maxPeakHeight = h * 0.82f // Expande el relieve 3D para ocupar el 82% de la altura total de pantalla
+        val baseGroundY = h * 0.93f
+        val maxPeakHeight = h * 0.58f
 
         val stepX = (endX - startX) / (samples - 1).coerceAtLeast(1)
 
@@ -309,8 +333,8 @@ class Altimetria3DView @JvmOverloads constructor(
             val px = startX + i * stepX + curveOffset
             val normalizedHeight = ((pointElevations[i] - minElev) / elevRange).coerceIn(0f, 1f)
 
-            val pYTop = baseGroundY - (progress * (h * 0.04f)) - (normalizedHeight * maxPeakHeight)
-            val pYBase = baseGroundY - (progress * (h * 0.04f))
+            val pYTop = baseGroundY - (progress * (h * 0.05f)) - (normalizedHeight * maxPeakHeight)
+            val pYBase = baseGroundY - (progress * (h * 0.05f))
 
             pointsX[i] = px
             pointsYTop[i] = pYTop
@@ -348,12 +372,14 @@ class Altimetria3DView @JvmOverloads constructor(
         cotaTextPaint.textSize = ((h * 0.050f) * fontScale).coerceIn(10f, 18f)
 
         for (i in 0 until samples) {
-            canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i], pointsYBase[i] + 10f, cotaLinePaint)
+            canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i], pointsYBase[i], cotaLinePaint)
 
             if (showCotas) {
                 val cotaText = "${pointElevations[i].toInt()} m"
                 canvas.save()
-                canvas.translate(pointsX[i] - 5f, pointsYBase[i] - 6f)
+                // Para i = 0, se desplaza hacia la derecha para que no quede cortada en el margen izquierdo
+                val textOffsetX = if (i == 0) pointsX[i] + 8f else pointsX[i] - 5f
+                canvas.translate(textOffsetX, pointsYBase[i] - 6f)
                 canvas.rotate(-90f)
                 canvas.drawText(cotaText, 0f, 0f, cotaTextPaint)
                 canvas.restore()
@@ -397,7 +423,7 @@ class Altimetria3DView @JvmOverloads constructor(
         }
 
         // DIBUJAR EJE X CON MARCAS DE DISTANCIA EN METROS SEGÚN ANTICIPACIÓN
-        axisTextPaint.textSize = (h * 0.042f).coerceIn(9f, 14f)
+        axisTextPaint.textSize = (h * 0.040f).coerceIn(9f, 13f)
         axisTextPaint.textAlign = Paint.Align.CENTER
         val stepDistMeters = (totalMetersAhead / blocksCount).toInt()
 
@@ -406,8 +432,7 @@ class Altimetria3DView @JvmOverloads constructor(
             val px = pointsX[i]
             val pyBase = pointsYBase[i]
 
-            canvas.drawLine(px, pyBase, px, pyBase + 6f, cotaLinePaint)
-            canvas.drawText(distLabel, px, pyBase + 18f, axisTextPaint)
+            canvas.drawText(distLabel, px, pyBase - 4f, axisTextPaint)
         }
 
         // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D
@@ -434,51 +459,13 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawText(pctStr, midX, textY, percentTextPaint)
         }
 
-        // DIBUJAR MARCADOR BEACON 3D DEL CICLISTA Y GLOBO FLOTANTE DE PENDIENTE ACTUAL (Conforme la bici avanza)
+        // DIBUJAR MARCADOR BEACON 3D DEL CICLISTA
         val riderIdx = 0
         val rx = pointsX[riderIdx]
         val ry = pointsYTop[riderIdx]
 
         canvas.drawCircle(rx, ry, 22f, beaconHaloPaint)
         canvas.drawCircle(rx, ry, 10f, beaconPaint)
-
-        // GLOBO FLOTANTE 3D CON PENDIENTE ACTUAL EN TIEMPO REAL SOBRE EL CICLISTA
-        drawRiderLiveGradeBalloon(canvas, w, h, rx, ry)
-    }
-
-    private fun drawRiderLiveGradeBalloon(canvas: Canvas, w: Float, h: Float, rx: Float, ry: Float) {
-        val gradeColorHex = getGradeColor(currentGrade)
-        liveGradePaint.color = Color.parseColor(gradeColorHex)
-
-        val fontFontSize = ((h * 0.10f) * fontScale).coerceIn(18f, 36f)
-        liveGradePaint.textSize = fontFontSize
-
-        val balloonText = "📍 %.1f%%".format(currentGrade)
-        val textW = liveGradePaint.measureText(balloonText)
-        val rectW = textW + 20f
-        val rectH = fontFontSize + 14f
-
-        val rectL = (rx + 10f).coerceAtMost(w - rectW - 10f)
-        val rectT = (ry - rectH - 18f).coerceAtLeast(10f)
-        val rectR = rectL + rectW
-        val rectB = rectT + rectH
-
-        tagRect.set(rectL, rectT, rectR, rectB)
-
-        // Fondo del globo flotante en tono oscuro
-        tagBgPaint.color = Color.parseColor("#18181B")
-        canvas.drawRoundRect(tagRect, 12f, 12f, tagBgPaint)
-
-        // Borde del globo en el color dinámico de la rampa actual
-        tagBorderPaint.color = Color.parseColor(gradeColorHex)
-        canvas.drawRoundRect(tagRect, 12f, 12f, tagBorderPaint)
-
-        // Puntero conector desde la bici hacia el globo
-        canvas.drawLine(rx, ry, rectL + (rectW / 2f), rectB, tagBorderPaint)
-
-        // Texto de la pendiente actual dentro del globo
-        val txtY = rectT + (rectH * 0.72f)
-        canvas.drawText(balloonText, rectL + 10f, txtY, liveGradePaint)
     }
 
     private fun getGradeColor(grade: Double): String {
