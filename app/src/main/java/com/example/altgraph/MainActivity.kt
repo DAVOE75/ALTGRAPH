@@ -382,6 +382,68 @@ class MainActivity : Activity() {
         }
         showRampsCard.addView(switchShowRamps)
 
+        // Section 11b: Ramp Minimum Slope (%) Card
+        val rampMinCard = createCardContainer()
+        val rampMinLabel = createSectionLabel(getString(R.string.setting_ramp_min_slope))
+        val rampMinValueText = createValueText("${prefs.rampMinSlopePct.toInt()}%")
+        val rampMinRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
+
+        val rampMinMinusBtn = createActionButton("- 1%") {
+            if (prefs.rampMinSlopePct > 5.0) {
+                prefs.rampMinSlopePct -= 1.0
+                rampMinValueText.text = "${prefs.rampMinSlopePct.toInt()}%"
+            }
+        }
+
+        val rampMinPlusBtn = createActionButton("+ 1%") {
+            if (prefs.rampMinSlopePct < prefs.rampMaxSlopePct - 1.0) {
+                prefs.rampMinSlopePct += 1.0
+                rampMinValueText.text = "${prefs.rampMinSlopePct.toInt()}%"
+            }
+        }
+
+        rampMinRow.addView(rampMinMinusBtn)
+        rampMinRow.addView(rampMinPlusBtn)
+
+        rampMinCard.addView(rampMinLabel)
+        rampMinCard.addView(rampMinValueText)
+        rampMinCard.addView(rampMinRow)
+
+        // Section 11c: Ramp Maximum Slope (%) Card
+        val rampMaxCard = createCardContainer()
+        val rampMaxLabel = createSectionLabel(getString(R.string.setting_ramp_max_slope))
+        val rampMaxValueText = createValueText("${prefs.rampMaxSlopePct.toInt()}%")
+        val rampMaxRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
+
+        val rampMaxMinusBtn = createActionButton("- 1%") {
+            if (prefs.rampMaxSlopePct > prefs.rampMinSlopePct + 1.0) {
+                prefs.rampMaxSlopePct -= 1.0
+                rampMaxValueText.text = "${prefs.rampMaxSlopePct.toInt()}%"
+            }
+        }
+
+        val rampMaxPlusBtn = createActionButton("+ 1%") {
+            if (prefs.rampMaxSlopePct < 30.0) {
+                prefs.rampMaxSlopePct += 1.0
+                rampMaxValueText.text = "${prefs.rampMaxSlopePct.toInt()}%"
+            }
+        }
+
+        rampMaxRow.addView(rampMaxMinusBtn)
+        rampMaxRow.addView(rampMaxPlusBtn)
+
+        rampMaxCard.addView(rampMaxLabel)
+        rampMaxCard.addView(rampMaxValueText)
+        rampMaxCard.addView(rampMaxRow)
+
         // Section 12: Toggle Show Max Gradient Readout Card
         val showMaxGradCard = createCardContainer()
         val switchShowMaxGrad = Switch(this).apply {
@@ -445,6 +507,8 @@ class MainActivity : Activity() {
         rootLayout.addView(showPctCard)
         rootLayout.addView(showCotasCard)
         rootLayout.addView(showRampsCard)
+        rootLayout.addView(rampMinCard)
+        rootLayout.addView(rampMaxCard)
         rootLayout.addView(showMaxGradCard)
         rootLayout.addView(alertCard)
         rootLayout.addView(saveExitButton)

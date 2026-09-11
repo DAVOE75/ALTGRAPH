@@ -31,8 +31,8 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private val cotaLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#52525B")
-        strokeWidth = 1.2f
+        color = Color.parseColor("#E4E4E7")
+        strokeWidth = 2.5f
         style = Paint.Style.STROKE
     }
 
@@ -63,7 +63,7 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private val lineStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        strokeWidth = 7f
+        strokeWidth = 8f
         style = Paint.Style.STROKE
     }
 
@@ -88,7 +88,7 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private val axisTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#64748B")
+        color = Color.parseColor("#9CA3AF")
         typeface = Typeface.DEFAULT_BOLD
         textAlign = Paint.Align.LEFT
     }
@@ -122,6 +122,8 @@ class Altimetria3DView @JvmOverloads constructor(
     private var showRamps: Boolean = true
     private var showMaxGrade: Boolean = true
     private var rotate90: Boolean = false
+    private var rampMinSlope: Double = 10.0
+    private var rampMaxSlope: Double = 15.0
 
     private val wallPath = Path()
     private val arrowPath = Path()
@@ -139,7 +141,9 @@ class Altimetria3DView @JvmOverloads constructor(
         showRamps: Boolean = true,
         showMaxGrade: Boolean = true,
         fontFamilyKey: String = "sans-serif-condensed",
-        rotate90: Boolean = false
+        rotate90: Boolean = false,
+        rampMinSlope: Double = 10.0,
+        rampMaxSlope: Double = 15.0
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -157,6 +161,8 @@ class Altimetria3DView @JvmOverloads constructor(
         this.showRamps = showRamps
         this.showMaxGrade = showMaxGrade
         this.rotate90 = rotate90
+        this.rampMinSlope = rampMinSlope
+        this.rampMaxSlope = rampMaxSlope
 
         FontHelper.applyFontToPaint(titlePaint, fontFamilyKey)
         FontHelper.applyFontToPaint(subTitleLabelPaint, fontFamilyKey)
@@ -225,7 +231,7 @@ class Altimetria3DView @JvmOverloads constructor(
         // 3. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)
 
-        // 4. Perfil 3D con Sub-Bloques Micro-Relieve de 50m dentro de cada Kilómetro
+        // 4. Perfil 3D con Rampas dentro del Rango [rampMinSlope, rampMaxSlope] Delimitado por el Usuario
         draw3DRibbonAndWalls(canvas, w, h)
     }
 
@@ -303,7 +309,7 @@ class Altimetria3DView @JvmOverloads constructor(
         val majorSamples = majorBlocksCount + 1
 
         // SUB-DIVISIÓN MICRO-RELIEVE (Bloques finos de 50m dentro de cada kilómetro)
-        val microSubDivisions = if (totalMetersAhead >= 1000.0) 20 else 2 // 20 micro-bloques de 50m por cada 1km
+        val microSubDivisions = if (totalMetersAhead >= 1000.0) 20 else 2
         val totalMicroSamples = (majorBlocksCount * microSubDivisions) + 1
 
         val startX = w * 0.08f
@@ -328,7 +334,6 @@ class Altimetria3DView @JvmOverloads constructor(
             val majorBlockIdx = (i / microSubDivisions).coerceAtMost(nextBlocks.size - 1)
             val baseGrade = if (majorBlockIdx < nextBlocks.size) nextBlocks[majorBlockIdx].toDouble() else 4.0
 
-            // Oscilación realista de micro-relieve de 50m (llanos, rampas y descansillos)
             val distMeters = i * microDistMeters
             val microVariation = (sin(distMeters / 60.0) * 3.5) + (sin(distMeters / 140.0) * 4.5)
             val microGrade = (baseGrade + microVariation).coerceIn(-6.0, 22.0).toFloat()
@@ -375,12 +380,15 @@ class Altimetria3DView @JvmOverloads constructor(
         // DIBUJAR REJILLA TRASERA DE ALTITUD EN PERSPECTIVA 3D
         draw3DBackwallGrid(canvas, w, h, majorX, majorYBase, majorSamples, maxPeakHeight, minElev, maxElev)
 
-        // DIBUJAR PAREDES DE EXTROSIÓN 3D EN SUB-BLOQUES FINOS DE 50M (LLANOS Y RAMPAS DENTRO DE CADA KM)
+        // DIBUJAR PAREDES DE EXTROSIÓN 3D CON SOMBRA DE OCLUSIÓN PERSPECTIVA EN BAJADAS
         for (i in 0 until totalMicroSamples - 1) {
             val grade = microGrades[i]
 
-            val colorHex = getGradeColor(grade.toDouble())
-            val fillColor = Color.parseColor(colorHex)
+            val fillColor = if (grade < 0.0f) {
+                Color.parseColor("#1E3A8A") // Azul sombra oculta
+            } else {
+                Color.parseColor(getGradeColor(grade.toDouble()))
+            }
 
             wallPath.reset()
             wallPath.moveTo(microX[i], microYTop[i])
@@ -389,19 +397,18 @@ class Altimetria3DView @JvmOverloads constructor(
             wallPath.lineTo(microX[i], microYBase[i])
             wallPath.close()
 
+            val bottomDarkHex = if (grade < 0.0f) "#020617" else "#0F172A"
             val wallShader = LinearGradient(
                 microX[i], microYTop[i],
                 microX[i], microYBase[i],
-                fillColor, Color.parseColor("#0F172A"),
+                fillColor, Color.parseColor(bottomDarkHex),
                 Shader.TileMode.CLAMP
             )
             wallPaint.shader = wallShader
             canvas.drawPath(wallPath, wallPaint)
         }
 
-        // DIBUJAR LÍNEAS DIVISORIAS PRINCIPALES Y COTAS DE ALTITUD EN CADA KM (O BLOQUE)
-        cotaTextPaint.textSize = ((h * 0.050f) * fontScale).coerceIn(10f, 18f)
-
+        // DIBUJAR LÍNEAS DIVISORIAS PRINCIPALES DE KILÓMETRO REFORZADAS Y NÍTIDAS
         for (k in 0 until majorSamples) {
             val px = majorX[k]
             val pyTop = majorYTop[k]
@@ -430,11 +437,23 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawLine(microX[i], microYTop[i], microX[i + 1], microYTop[i + 1], lineStrokePaint)
         }
 
-        // DIBUJAR RAMPA DURA (≥ 10% para ≥ 20m) CON FLECHA Y INDICADOR FLOTANTE
+        // DIBUJAR LAS RAMPAS MÁS DURAS DENTRO DEL RANGO DELIMITADO POR EL USUARIO [rampMinSlope, rampMaxSlope]
         if (showRamps) {
-            for (i in 0 until totalMicroSamples - 1) {
-                val grade = microGrades[i]
-                if (grade >= 10.0f && i % microSubDivisions == microSubDivisions / 2) {
+            for (k in 0 until majorBlocksCount) {
+                val startIdx = k * microSubDivisions
+                val endIdx = ((k + 1) * microSubDivisions).coerceAtMost(totalMicroSamples - 1)
+
+                val steepRampsInKm = mutableListOf<Pair<Int, Float>>()
+                for (i in startIdx until endIdx) {
+                    val g = microGrades[i]
+                    if (g >= rampMinSlope.toFloat() && g <= rampMaxSlope.toFloat()) {
+                        steepRampsInKm.add(Pair(i, g))
+                    }
+                }
+
+                val topSteepRamps = steepRampsInKm.sortedByDescending { it.second }.take(3)
+
+                for ((i, grade) in topSteepRamps) {
                     val midX = (microX[i] + microX[i + 1]) / 2f
                     val midY = (microYTop[i] + microYTop[i + 1]) / 2f
 
@@ -475,7 +494,7 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawText(distLabel, px, pyBase + 12f, axisTextPaint)
         }
 
-        // DIBUJAR PORCENTAJES PROMEDIO (%) DE CADA KILÓMETRO (O BLOQUE) CENTRADOS EN CADA SECCIÓN
+        // DIBUJAR PORCENTAJES PROMEDIO (%) DE CADA KILÓMETRO CENTRADOS EN CADA SECCIÓN
         val fontBaseSize = (h * 0.045f) * fontScale
 
         for (k in 0 until majorBlocksCount) {

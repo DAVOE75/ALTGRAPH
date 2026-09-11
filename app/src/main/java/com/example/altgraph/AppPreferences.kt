@@ -63,6 +63,14 @@ class AppPreferences(context: Context) {
         get() = prefs.getInt(KEY_VISIBLE_BLOCKS_COUNT, 5)
         set(value) = prefs.edit().putInt(KEY_VISIBLE_BLOCKS_COUNT, value.coerceIn(1, 10)).apply()
 
+    var rampMinSlopePct: Double
+        get() = prefs.getFloat(KEY_RAMP_MIN_SLOPE, 10.0f).toDouble()
+        set(value) = prefs.edit().putFloat(KEY_RAMP_MIN_SLOPE, value.toFloat()).apply()
+
+    var rampMaxSlopePct: Double
+        get() = prefs.getFloat(KEY_RAMP_MAX_SLOPE, 15.0f).toDouble()
+        set(value) = prefs.edit().putFloat(KEY_RAMP_MAX_SLOPE, value.toFloat()).apply()
+
     companion object {
         private const val PREFS_NAME = "altgraph_settings"
         private const val KEY_FONT_FAMILY = "font_family_key"
@@ -79,6 +87,8 @@ class AppPreferences(context: Context) {
         private const val KEY_SHOW_MAX_GRADIENT = "show_max_gradient"
         private const val KEY_ROTATE_90_CW = "rotate_90_cw"
         private const val KEY_VISIBLE_BLOCKS_COUNT = "visible_blocks_count"
+        private const val KEY_RAMP_MIN_SLOPE = "ramp_min_slope_pct"
+        private const val KEY_RAMP_MAX_SLOPE = "ramp_max_slope_pct"
 
         @Volatile
         private var INSTANCE: AppPreferences? = null

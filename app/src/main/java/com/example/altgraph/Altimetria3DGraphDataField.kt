@@ -100,7 +100,9 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     showRamps = prefs.show3dRamps,
                     showMaxGrade = prefs.showMaxGradient,
                     fontFamilyKey = prefs.fontFamilyKey,
-                    rotate90 = prefs.rotate90Clockwise
+                    rotate90 = prefs.rotate90Clockwise,
+                    rampMinSlope = prefs.rampMinSlopePct,
+                    rampMaxSlope = prefs.rampMaxSlopePct
                 )
 
                 val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
