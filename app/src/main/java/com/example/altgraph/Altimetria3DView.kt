@@ -225,7 +225,7 @@ class Altimetria3DView @JvmOverloads constructor(
         // 3. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)
 
-        // 4. Perfil 3D con % de Inclinación Ubicados Justo en Medio de los Bloques
+        // 4. Perfil 3D con Sub-Bloques Micro-Relieve de 50m dentro de cada Kilómetro
         draw3DRibbonAndWalls(canvas, w, h)
     }
 
@@ -294,76 +294,104 @@ class Altimetria3DView @JvmOverloads constructor(
     private fun draw3DRibbonAndWalls(canvas: Canvas, w: Float, h: Float) {
         val totalMetersAhead = lookaheadMeters.toDouble().coerceIn(200.0, 10000.0)
 
-        val blocksCount = if (totalMetersAhead > 1000.0) {
+        // Divisores principales (ej. 1 km o blockSizeMeters)
+        val majorBlocksCount = if (totalMetersAhead > 1000.0) {
             (totalMetersAhead / 1000.0).toInt().coerceIn(2, 10)
         } else {
             (totalMetersAhead / blockSizeMeters.coerceAtLeast(10.0)).toInt().coerceIn(2, 10)
         }
-        val samples = blocksCount + 1
+        val majorSamples = majorBlocksCount + 1
+
+        // SUB-DIVISIÓN MICRO-RELIEVE (Bloques finos de 50m dentro de cada kilómetro)
+        val microSubDivisions = if (totalMetersAhead >= 1000.0) 20 else 2 // 20 micro-bloques de 50m por cada 1km
+        val totalMicroSamples = (majorBlocksCount * microSubDivisions) + 1
 
         val startX = w * 0.08f
         val endX = w * 0.98f
         val baseGroundY = h * 0.88f
         val maxPeakHeight = h * 0.52f
 
-        val stepX = (endX - startX) / (samples - 1).coerceAtLeast(1)
-        val segmentDistMeters = totalMetersAhead / blocksCount
+        val microStepX = (endX - startX) / (totalMicroSamples - 1).coerceAtLeast(1)
+        val microDistMeters = totalMetersAhead / (totalMicroSamples - 1)
 
-        val pointsX = FloatArray(samples)
-        val pointsYTop = FloatArray(samples)
-        val pointsYBase = FloatArray(samples)
-        val pointElevations = FloatArray(samples)
+        val microX = FloatArray(totalMicroSamples)
+        val microYTop = FloatArray(totalMicroSamples)
+        val microYBase = FloatArray(totalMicroSamples)
+        val microElevations = FloatArray(totalMicroSamples)
+        val microGrades = FloatArray(totalMicroSamples - 1)
 
         var accumulatedElev = currentElevation
+        microElevations[0] = accumulatedElev.toFloat()
 
-        // 1. Calcular altitud exacta en metros para cada punto del perfil
-        pointElevations[0] = accumulatedElev.toFloat()
-        for (i in 1 until samples) {
-            val segmentGrade = if (i - 1 < nextBlocks.size) nextBlocks[i - 1].toDouble() else 4.0
-            accumulatedElev += (segmentDistMeters * (segmentGrade / 100.0))
-            pointElevations[i] = accumulatedElev.toFloat()
+        // 1. Calcular micro-elevación y gradiente de 50m para cada sub-tramo
+        for (i in 0 until totalMicroSamples - 1) {
+            val majorBlockIdx = (i / microSubDivisions).coerceAtMost(nextBlocks.size - 1)
+            val baseGrade = if (majorBlockIdx < nextBlocks.size) nextBlocks[majorBlockIdx].toDouble() else 4.0
+
+            // Oscilación realista de micro-relieve de 50m (llanos, rampas y descansillos)
+            val distMeters = i * microDistMeters
+            val microVariation = (sin(distMeters / 60.0) * 3.5) + (sin(distMeters / 140.0) * 4.5)
+            val microGrade = (baseGrade + microVariation).coerceIn(-6.0, 22.0).toFloat()
+
+            microGrades[i] = microGrade
+            accumulatedElev += (microDistMeters * (microGrade / 100.0))
+            microElevations[i + 1] = accumulatedElev.toFloat()
         }
 
         // 2. Escala estricta matemática de altitud
-        val minElev = pointElevations.minOrNull() ?: currentElevation.toFloat()
-        val maxElev = pointElevations.maxOrNull() ?: (minElev + 50f)
+        val minElev = microElevations.minOrNull() ?: currentElevation.toFloat()
+        val maxElev = microElevations.maxOrNull() ?: (minElev + 50f)
         val elevRange = (maxElev - minElev).coerceAtLeast(15f)
 
-        for (i in 0 until samples) {
-            val progress = i.toFloat() / (samples - 1)
+        for (i in 0 until totalMicroSamples) {
+            val progress = i.toFloat() / (totalMicroSamples - 1)
             val curveOffset = sin(progress * Math.PI * 1.5).toFloat() * (w * 0.08f)
 
-            val px = startX + i * stepX + curveOffset
-            val normalizedHeight = ((pointElevations[i] - minElev) / elevRange).coerceIn(0f, 1f)
+            val px = startX + i * microStepX + curveOffset
+            val normalizedHeight = ((microElevations[i] - minElev) / elevRange).coerceIn(0f, 1f)
 
             val pYTop = baseGroundY - (progress * (h * 0.05f)) - (normalizedHeight * maxPeakHeight)
             val pYBase = baseGroundY - (progress * (h * 0.05f))
 
-            pointsX[i] = px
-            pointsYTop[i] = pYTop
-            pointsYBase[i] = pYBase
+            microX[i] = px
+            microYTop[i] = pYTop
+            microYBase[i] = pYBase
+        }
+
+        // Extraer puntos de divisores principales (ej. Cada 1 km)
+        val majorX = FloatArray(majorSamples)
+        val majorYTop = FloatArray(majorSamples)
+        val majorYBase = FloatArray(majorSamples)
+        val majorElevations = FloatArray(majorSamples)
+
+        for (k in 0 until majorSamples) {
+            val microIdx = (k * microSubDivisions).coerceAtMost(totalMicroSamples - 1)
+            majorX[k] = microX[microIdx]
+            majorYTop[k] = microYTop[microIdx]
+            majorYBase[k] = microYBase[microIdx]
+            majorElevations[k] = microElevations[microIdx]
         }
 
         // DIBUJAR REJILLA TRASERA DE ALTITUD EN PERSPECTIVA 3D
-        draw3DBackwallGrid(canvas, w, h, pointsX, pointsYBase, samples, maxPeakHeight, minElev, maxElev)
+        draw3DBackwallGrid(canvas, w, h, majorX, majorYBase, majorSamples, maxPeakHeight, minElev, maxElev)
 
-        // DIBUJAR PAREDES DE EXTROSIÓN 3D (Relieve)
-        for (i in 0 until samples - 1) {
-            val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
+        // DIBUJAR PAREDES DE EXTROSIÓN 3D EN SUB-BLOQUES FINOS DE 50M (LLANOS Y RAMPAS DENTRO DE CADA KM)
+        for (i in 0 until totalMicroSamples - 1) {
+            val grade = microGrades[i]
 
             val colorHex = getGradeColor(grade.toDouble())
             val fillColor = Color.parseColor(colorHex)
 
             wallPath.reset()
-            wallPath.moveTo(pointsX[i], pointsYTop[i])
-            wallPath.lineTo(pointsX[i + 1], pointsYTop[i + 1])
-            wallPath.lineTo(pointsX[i + 1], pointsYBase[i + 1])
-            wallPath.lineTo(pointsX[i], pointsYBase[i])
+            wallPath.moveTo(microX[i], microYTop[i])
+            wallPath.lineTo(microX[i + 1], microYTop[i + 1])
+            wallPath.lineTo(microX[i + 1], microYBase[i + 1])
+            wallPath.lineTo(microX[i], microYBase[i])
             wallPath.close()
 
             val wallShader = LinearGradient(
-                pointsX[i], pointsYTop[i],
-                pointsX[i], pointsYBase[i],
+                microX[i], microYTop[i],
+                microX[i], microYBase[i],
                 fillColor, Color.parseColor("#0F172A"),
                 Shader.TileMode.CLAMP
             )
@@ -371,17 +399,21 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawPath(wallPath, wallPaint)
         }
 
-        // DIBUJAR LÍNEAS VERTICALES DE LÍMITE Y COTAS DE ALTITUD EN CADA TRAMO ROTADAS A 90 GRADOS
+        // DIBUJAR LÍNEAS DIVISORIAS PRINCIPALES Y COTAS DE ALTITUD EN CADA KM (O BLOQUE)
         cotaTextPaint.textSize = ((h * 0.050f) * fontScale).coerceIn(10f, 18f)
 
-        for (i in 0 until samples) {
-            canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i], pointsYBase[i], cotaLinePaint)
+        for (k in 0 until majorSamples) {
+            val px = majorX[k]
+            val pyTop = majorYTop[k]
+            val pyBase = majorYBase[k]
+
+            canvas.drawLine(px, pyTop, px, pyBase, cotaLinePaint)
 
             if (showCotas) {
-                val cotaText = "${pointElevations[i].toInt()} m"
+                val cotaText = "${majorElevations[k].toInt()} m"
                 canvas.save()
-                val textOffsetX = if (i == 0) pointsX[i] + 8f else pointsX[i] - 5f
-                val textOffsetY = pointsYBase[i] - 12f
+                val textOffsetX = if (k == 0) px + 8f else px - 5f
+                val textOffsetY = pyBase - 12f
                 canvas.translate(textOffsetX, textOffsetY)
                 canvas.rotate(-90f)
                 canvas.drawText(cotaText, 0f, 0f, cotaTextPaint)
@@ -389,22 +421,22 @@ class Altimetria3DView @JvmOverloads constructor(
             }
         }
 
-        // DIBUJAR CINTA SUPERIOR 3D
-        for (i in 0 until samples - 1) {
-            val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
+        // DIBUJAR CINTA SUPERIOR 3D CONTINUA
+        for (i in 0 until totalMicroSamples - 1) {
+            val grade = microGrades[i]
             val darkStrokeColor = getDarkGradeColor(grade.toDouble())
 
             lineStrokePaint.color = Color.parseColor(darkStrokeColor)
-            canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i + 1], pointsYTop[i + 1], lineStrokePaint)
+            canvas.drawLine(microX[i], microYTop[i], microX[i + 1], microYTop[i + 1], lineStrokePaint)
         }
 
         // DIBUJAR RAMPA DURA (≥ 10% para ≥ 20m) CON FLECHA Y INDICADOR FLOTANTE
         if (showRamps) {
-            for (i in 0 until samples - 1) {
-                val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
-                if (grade >= 10.0f) {
-                    val midX = (pointsX[i] + pointsX[i + 1]) / 2f
-                    val midY = (pointsYTop[i] + pointsYTop[i + 1]) / 2f
+            for (i in 0 until totalMicroSamples - 1) {
+                val grade = microGrades[i]
+                if (grade >= 10.0f && i % microSubDivisions == microSubDivisions / 2) {
+                    val midX = (microX[i] + microX[i + 1]) / 2f
+                    val midY = (microYTop[i] + microYTop[i + 1]) / 2f
 
                     val arrowTopY = midY - (h * 0.16f)
                     val arrowBottomY = midY - 8f
@@ -425,41 +457,38 @@ class Altimetria3DView @JvmOverloads constructor(
             }
         }
 
-        // DIBUJAR EJE X CON MARCAS DE DISTANCIA EN METROS O KILÓMETROS SEGÚN ANTICIPACIÓN
+        // DIBUJAR EJE X CON MARCAS PRINCIPALES EN KM / M
         axisTextPaint.textSize = (h * 0.040f).coerceIn(9f, 13f)
         axisTextPaint.textAlign = Paint.Align.CENTER
+        val majorDistMeters = (totalMetersAhead / majorBlocksCount).toInt()
 
-        for (i in 0 until samples) {
-            val m = (i * segmentDistMeters).toInt()
+        for (k in 0 until majorSamples) {
+            val m = k * majorDistMeters
             val distLabel = if (totalMetersAhead >= 1000.0) {
                 if (m < 1000) "${m}m" else "${m / 1000}km"
             } else {
                 "${m}m"
             }
-            val px = pointsX[i]
-            val pyBase = pointsYBase[i]
+            val px = majorX[k]
+            val pyBase = majorYBase[k]
 
             canvas.drawText(distLabel, px, pyBase + 12f, axisTextPaint)
         }
 
-        // DIBUJAR PORCENTAJES (%) DIRECTAMENTE EN MEDIO DE CADA BLOQUE 3D (IGUAL QUE EN LA IMAGEN)
+        // DIBUJAR PORCENTAJES PROMEDIO (%) DE CADA KILÓMETRO (O BLOQUE) CENTRADOS EN CADA SECCIÓN
         val fontBaseSize = (h * 0.045f) * fontScale
 
-        for (i in 0 until samples - 1) {
-            val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
-            val pctStr = if (blockSizeMeters <= 50.0) {
-                if (grade % 1.0f == 0.0f) "%.0f%%".format(grade) else "%.1f%%".format(grade)
-            } else {
-                "%.0f%%".format(grade)
-            }
+        for (k in 0 until majorBlocksCount) {
+            val avgGrade = if (k < nextBlocks.size) nextBlocks[k] else 4.0f
+            val pctStr = "%.1f%%".format(avgGrade)
 
-            val midX = (pointsX[i] + pointsX[i + 1]) / 2f
-            val midYTop = (pointsYTop[i] + pointsYTop[i + 1]) / 2f
-            val midYBase = (pointsYBase[i] + pointsYBase[i + 1]) / 2f
+            val midX = (majorX[k] + majorX[k + 1]) / 2f
+            val midYTop = (majorYTop[k] + majorYTop[k + 1]) / 2f
+            val midYBase = (majorYBase[k] + majorYBase[k + 1]) / 2f
             val centerY = (midYTop + midYBase) / 2f
 
-            val blockW = abs(pointsX[i + 1] - pointsX[i])
-            val calcFontSize = (blockW * 0.30f * fontScale).coerceIn(10f, fontBaseSize.coerceAtLeast(18f))
+            val blockW = abs(majorX[k + 1] - majorX[k])
+            val calcFontSize = (blockW * 0.28f * fontScale).coerceIn(10f, fontBaseSize.coerceAtLeast(18f))
             percentTextPaint.textSize = calcFontSize
 
             val textY = centerY + (calcFontSize * 0.35f)
@@ -468,8 +497,8 @@ class Altimetria3DView @JvmOverloads constructor(
 
         // DIBUJAR MARCADOR BEACON 3D DEL CICLISTA
         val riderIdx = 0
-        val rx = pointsX[riderIdx]
-        val ry = pointsYTop[riderIdx]
+        val rx = microX[riderIdx]
+        val ry = microYTop[riderIdx]
 
         canvas.drawCircle(rx, ry, 22f, beaconHaloPaint)
         canvas.drawCircle(rx, ry, 10f, beaconPaint)
