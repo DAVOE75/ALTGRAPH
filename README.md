@@ -10,10 +10,20 @@ Proporciona análisis dinámico de puertos de montaña, gráficos 3D en perspect
 
 ---
 
-## 🌐 Soporte Multilingüe (English / Español)
-La extensión detecta automáticamente el idioma de tu sistema Karoo:
-* **Inglés** (idioma predeterminado)
-* **Español**
+## 📸 Capturas en Pantalla Real de Karoo 3
+
+| 🏔️ Altimetría 3D e Itinerario | 🎨 Pestaña Estilo | 🏔️ Pestaña 3D |
+| :---: | :---: | :---: |
+| ![Altimetría 3D](art/screenshot_3d_profile.png) | ![Panel Estilo](art/screenshot_settings_estilo.png) | ![Panel 3D](art/screenshot_settings_3d.png) |
+
+| 📊 Pestaña 2D | 🚴 Pestaña VAM |
+| :---: | :---: |
+| ![Panel 2D](art/screenshot_settings_2d.png) | ![Panel VAM](art/screenshot_settings_vam.png) |
+
+---
+
+## 🌐 Portal Web Oficial y Soporte Multilingüe
+Visita el **[Portal Web Oficial de ALTGRAPH (docs/index.html)](https://davoe75.github.io/ALTGRAPH/)** para la documentación interactiva completa en español e inglés.
 
 ---
 
