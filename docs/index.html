@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">ALTGRAPH v0.2.4 - Extensión de Altimetría 3D y Rendimiento por David García Pascual</title>
-    <meta name="description" content="Extensión avanzada para ciclocomputadores Hammerhead Karoo 2 y 3 desarrollada por David García Pascual. Análisis de puertos de montaña, visión 3D en relieve, fuentes Google Sans Condensed, modo apaisado 90°, alertas de ataque, ritmo VAM e Índice Grado de Fatiga (GF).">
+    <title id="page-title">ALTGRAPH v0.3.0 STABLE - Extensión de Altimetría 3D y Rendimiento por David García Pascual</title>
+    <meta name="description" content="Extensión avanzada para ciclocomputadores Hammerhead Karoo 2 y 3 desarrollada por David García Pascual. Análisis de puertos de montaña, visión 3D en relief, cálculo topográfico, detección de herraduras, fuentes Google Sans Condensed, modo apaisado 90°, alertas de ataque, ritmo VAM e Índice Grado de Fatiga (GF).">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -468,11 +468,11 @@
 
     <section class="hero">
         <img src="../art/logo.png" onerror="this.onerror=null; this.src='art/logo.png';" alt="ALTGRAPH Logo" class="main-logo">
-        <h2 id="hero-title">Domina la montaña con <span>ALTGRAPH v0.2.4</span></h2>
-        <p id="hero-desc">Extensión avanzada desarrollada por <strong>David García Pascual</strong>. Análisis dinámico de puertos, perfil 3D en relieve con cálculo topográfico, fuentes Google Sans Condensed, modo apaisado rotado a 90°, globo flotante 3D, ritmo VAM e <strong>Índice Grado de Fatiga (GF)</strong> para <strong>Hammerhead Karoo 2 y Karoo 3</strong>.</p>
+        <h2 id="hero-title">Domina la montaña con <span>ALTGRAPH v0.3.0 STABLE</span></h2>
+        <p id="hero-desc">Extensión avanzada desarrollada por <strong>David García Pascual</strong>. Análisis dinámico de puertos, perfil 3D en relieve con cálculo topográfico, fuentes Google Sans Condensed, modo apaisado rotado a 90°, lectura triple de pendiente (Actual, Media y Máx), herraduras GPS e <strong>Índice Grado de Fatiga (GF)</strong> para <strong>Hammerhead Karoo 2 y Karoo 3</strong>.</p>
 
         <div class="badges">
-            <span class="badge">v0.2.4 Release</span>
+            <span class="badge">v0.3.0 Stable Release</span>
             <span class="badge">David García Pascual</span>
             <span class="badge">Hammerhead Karoo 2 & 3</span>
             <span class="badge">Karoo Extension SDK 1.1.4</span>
@@ -480,7 +480,7 @@
         </div>
 
         <div class="cta-buttons">
-            <a href="https://github.com/DAVOE75/ALTGRAPH/releases/tag/v0.2.4" target="_blank" class="btn btn-primary" id="btn-download">Descargar APK (v0.2.4)</a>
+            <a href="https://github.com/DAVOE75/ALTGRAPH/releases/tag/v0.3.0" target="_blank" class="btn btn-primary" id="btn-download">Descargar APK (v0.3.0)</a>
             <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/USER_MANUAL.md" target="_blank" class="btn btn-secondary" id="btn-manual">Ver Manual de Usuario</a>
         </div>
     </section>
@@ -491,7 +491,7 @@
         <div class="gallery-grid">
             <div class="gallery-card">
                 <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile.png" alt="Perfil Altimetría 3D">
-                <p id="g1-label">🏔️ Altimetría 3D y Globo Flotante</p>
+                <p id="g1-label">🏔️ Altimetría 3D e Encabezado Triple</p>
             </div>
             <div class="gallery-card">
                 <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_estilo.png" alt="Pestaña Estilo">
@@ -529,16 +529,16 @@
                     <p id="f2-desc">Expande la gráfica a un ancho gigante de 800px a pantalla completa liberando la compresión de píxeles.</p>
                 </div>
                 <div class="feature-item">
-                    <h4 id="f3-title">📍 Globo Flotante 3D de Pendiente</h4>
-                    <p id="f3-desc">Cápsula en tiempo real (<code>📍 7.2%</code>) conectada al faro del ciclista que te acompaña sobre el relieve.</p>
+                    <h4 id="f3-title">📊 Lectura Triple en Encabezado</h4>
+                    <p id="f3-desc">Lectura simultánea en vivo de <strong>PENDIENTE ACTUAL</strong>, <strong>PENDIENTE MEDIA</strong> de la sección y <strong>PENDIENTE MÁXIMA</strong>.</p>
                 </div>
                 <div class="feature-item">
-                    <h4 id="f4-title">🌈 Sub-Seccionado 50m en Kilómetros</h4>
-                    <p id="f4-desc">División en 20 micro-bloques de 50m dentro de cada kilómetro dibujando descansillos y rampas reales.</p>
+                    <h4 id="f4-title">🏎️ Curvas de Herradura (Tornanti)</h4>
+                    <p id="f4-desc">Cálculo matemático vectorial GPS de giros cerrados (>120°) con marcas de herradura del 20% en el relieve.</p>
                 </div>
                 <div class="feature-item">
-                    <h4 id="f5-title">🚩 Rampas Duras Delimitadas (10%-15%)</h4>
-                    <p id="f5-desc">Señalización con flecha roja de las 2 o 3 rampas más duras dentro del rango exacto configurado por el usuario.</p>
+                    <h4 id="f5-title">📍 Filtro de Puntos de Interés (POIs)</h4>
+                    <p id="f5-desc">Conmutadores independientes para filtrar Pueblos, Fuentes de Agua, Miradores y Cimas/Puertos.</p>
                 </div>
                 <div class="feature-item">
                     <h4 id="f6-title">📐 Método Topográfico Exacto</h4>
@@ -635,30 +635,30 @@
         <h3 id="install-title">🚀 Instalación Rápida en tu Hammerhead Karoo</h3>
         <ol class="install-steps" id="install-steps">
             <li>Conecta tu Hammerhead Karoo 2 o Karoo 3 al ordenador por cable USB con la <strong>Depuración USB</strong> activada.</li>
-            <li>Descarga la versión más reciente del archivo <code>ALTGRAPH-v0.2.4.apk</code> desde nuestro repositorio en GitHub.</li>
-            <li>Ejecuta el comando en tu consola de comandos: <code>adb install -r ALTGRAPH-v0.2.4.apk</code></li>
+            <li>Descarga la versión más reciente del archivo <code>ALTGRAPH-v0.3.0.apk</code> desde nuestro repositorio en GitHub.</li>
+            <li>Ejecuta el comando en tu consola de comandos: <code>adb install -r ALTGRAPH-v0.3.0.apk</code></li>
             <li>En tu Karoo, entra en <strong>Ajustes &gt; Perfiles de Carrera</strong>, edita una pantalla de datos y añade los campos de la categoría <strong>ALTGRAPH</strong>.</li>
             <li>Abre el <strong>Panel de Configuración de ALTGRAPH</strong> organizado por pestañas en el menú de apps para personalizar tus ajustes.</li>
         </ol>
     </section>
 
     <footer>
-        <p id="footer-text">ALTGRAPH v0.2.4 &bull; Desarrollado por David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Código Fuente en GitHub</a></p>
+        <p id="footer-text">ALTGRAPH v0.3.0 STABLE &bull; Desarrollado por David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Código Fuente en GitHub</a></p>
     </footer>
 
     <script>
         const translations = {
             es: {
-                pageTitle: "ALTGRAPH v0.2.4 - Extensión de Altimetría 3D y Rendimiento por David García Pascual",
+                pageTitle: "ALTGRAPH v0.3.0 STABLE - Extensión de Altimetría 3D y Rendimiento por David García Pascual",
                 navGallery: "Capturas",
                 navFields: "Campos",
                 navInstall: "Instalación",
-                heroTitle: "Domina la montaña con <span>ALTGRAPH v0.2.4</span>",
-                heroDesc: "Extensión avanzada desarrollada por <strong>David García Pascual</strong>. Análisis dinámico de puertos, perfil 3D en relieve con cálculo topográfico, fuentes Google Sans Condensed, modo apaisado rotado a 90°, globo flotante 3D, ritmo VAM e <strong>Índice Grado de Fatiga (GF)</strong> para <strong>Hammerhead Karoo 2 y Karoo 3</strong>.",
-                btnDownload: "Descargar APK (v0.2.4)",
+                heroTitle: "Domina la montaña con <span>ALTGRAPH v0.3.0 STABLE</span>",
+                heroDesc: "Extensión avanzada desarrollada por <strong>David García Pascual</strong>. Análisis dinámico de puertos, perfil 3D en relieve con cálculo topográfico, fuentes Google Sans Condensed, modo apaisado rotado a 90°, lectura triple de pendiente (Actual, Media y Máx), herraduras GPS e <strong>Índice Grado de Fatiga (GF)</strong> para <strong>Hammerhead Karoo 2 y Karoo 3</strong>.",
+                btnDownload: "Descargar APK (v0.3.0)",
                 btnManual: "Ver Manual de Usuario",
                 galleryMainTitle: "📸 Galería de Capturas en Karoo 3 Real",
-                g1Label: "🏔️ Altimetría 3D y Globo Flotante",
+                g1Label: "🏔️ Altimetría 3D y Encabezado Triple",
                 g2Label: "🎨 Panel Pestaña Estilo",
                 g3Label: "🏔️ Panel Pestaña 3D",
                 g4Label: "📊 Panel Pestaña 2D",
@@ -670,12 +670,12 @@
                 f1Desc: "Carga directa de tipografías condensadas para números altos, estilizados y ultra-legibles en pantallas Karoo.",
                 f2Title: "🔄 Modo Apaisado Rotado 90°",
                 f2Desc: "Expande la gráfica a un ancho gigante de 800px a pantalla completa liberando la compresión de píxeles.",
-                f3Title: "📍 Globo Flotante 3D de Pendiente",
-                f3Desc: "Cápsula en tiempo real (<code>📍 7.2%</code>) conectada al faro del ciclista que te acompaña sobre el relieve.",
-                f4Title: "🌈 Sub-Seccionado 50m en Kilómetros",
-                f4Desc: "División en 20 micro-bloques de 50m dentro de cada kilómetro dibujando descansillos y rampas reales.",
-                f5Title: "🚩 Rampas Duras Delimitadas (10%-15%)",
-                f5Desc: "Señalización con flecha roja de las 2 o 3 rampas más duras dentro del rango exacto configurado por el usuario.",
+                f3Title: "📊 Lectura Triple en Encabezado",
+                f3Desc: "Lectura simultánea en vivo de <strong>PENDIENTE ACTUAL</strong>, <strong>PENDIENTE MEDIA</strong> de la sección y <strong>PENDIENTE MÁXIMA</strong>.",
+                f4Title: "🏎️ Curvas de Herradura (Tornanti)",
+                f4Desc: "Cálculo matemático vectorial GPS de giros cerrados (>120°) con marcas de herradura del 20% en el relieve.",
+                f5Title: "📍 Filtro de Puntos de Interés (POIs)",
+                f5Desc: "Conmutadores independientes para filtrar Pueblos, Fuentes de Agua, Miradores y Cimas/Puertos.",
                 f6Title: "📐 Método Topográfico Exacto",
                 f6Desc: "Opción para calcular la pendiente % sobre la proyección horizontal del mapa, eliminando el sesgo de la hipotenusa en rampas extremas.",
                 secFieldsTitle: "Análisis Detallado de los 4 Campos Restantes",
@@ -696,20 +696,20 @@
                 c5Desc: "Sensor de tendencia inmediata de pendiente que elimina el retraso del altímetro barométrico y registra el pico de rampa máxima.",
                 c5Bullets: `<li><strong>Filtro Estocástico Corto/Largo Plazo</strong>: Anticipa si la pendiente está endureciendo o suavizando.</li><li><strong>Indicadores Visuales</strong>: Flechas vectoriales (↗️ ENDURECIENDO, ➔ ESTABLE, ↘️ SUAVIZANDO).</li><li><strong>Pico de Rampa Máxima</strong>: Registra y mantiene el % de rampa más dura alcanzado en el tramo.</li>`,
                 installTitle: "🚀 Instalación Rápida en tu Hammerhead Karoo",
-                installSteps: `<li>Conecta tu Hammerhead Karoo 2 o Karoo 3 al ordenador por cable USB con la <strong>Depuración USB</strong> activada.</li><li>Descarga la versión más reciente del archivo <code>ALTGRAPH-v0.2.4.apk</code> desde nuestro repositorio en GitHub.</li><li>Ejecuta el comando en tu consola de comandos: <code>adb install -r ALTGRAPH-v0.2.4.apk</code></li><li>En tu Karoo, entra en <strong>Ajustes &gt; Perfiles de Carrera</strong>, edita una pantalla de datos y añade los campos de la categoría <strong>ALTGRAPH</strong>.</li><li>Abre el <strong>Panel de Configuración de ALTGRAPH</strong> organizado por pestañas en el menú de apps para personalizar tus ajustes.</li>`,
-                footerText: `ALTGRAPH v0.2.4 &bull; Desarrollado por David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Código Fuente en GitHub</a>`
+                installSteps: `<li>Conecta tu Hammerhead Karoo 2 o Karoo 3 al ordenador por cable USB con la <strong>Depuración USB</strong> activada.</li><li>Descarga la versión más reciente del archivo <code>ALTGRAPH-v0.3.0.apk</code> desde nuestro repositorio en GitHub.</li><li>Ejecuta el comando en tu consola de comandos: <code>adb install -r ALTGRAPH-v0.3.0.apk</code></li><li>En tu Karoo, entra en <strong>Ajustes &gt; Perfiles de Carrera</strong>, edita una pantalla de datos y añade los campos de la categoría <strong>ALTGRAPH</strong>.</li><li>Abre el <strong>Panel de Configuración de ALTGRAPH</strong> organizado por pestañas en el menú de apps para personalizar tus ajustes.</li>`,
+                footerText: `ALTGRAPH v0.3.0 STABLE &bull; Desarrollado por David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Código Fuente en GitHub</a>`
             },
             en: {
-                pageTitle: "ALTGRAPH v0.2.4 - 3D Altimetry & Performance Extension by David García Pascual",
+                pageTitle: "ALTGRAPH v0.3.0 STABLE - 3D Altimetry & Performance Extension by David García Pascual",
                 navGallery: "Screenshots",
                 navFields: "Fields",
                 navInstall: "Installation",
-                heroTitle: "Conquer climbs with <span>ALTGRAPH v0.2.4</span>",
-                heroDesc: "Advanced extension developed by <strong>David García Pascual</strong>. Dynamic climb analysis, 3D relief profile with topographic calculation, Google Sans Condensed fonts, 90° landscape mode, floating 3D slope balloon, dual VAM pacing, and <strong>Fatigue Grade (GF) Index</strong> for <strong>Hammerhead Karoo 2 and Karoo 3</strong>.",
-                btnDownload: "Download APK (v0.2.4)",
+                heroTitle: "Conquer climbs with <span>ALTGRAPH v0.3.0 STABLE</span>",
+                heroDesc: "Advanced extension developed by <strong>David García Pascual</strong>. Dynamic climb analysis, 3D relief profile with topographic calculation, Google Sans Condensed fonts, 90° landscape mode, triple header readout (Live, Avg & Max Slope), GPS hairpins, dual VAM pacing, and <strong>Fatigue Grade (GF) Index</strong> for <strong>Hammerhead Karoo 2 and Karoo 3</strong>.",
+                btnDownload: "Download APK (v0.3.0)",
                 btnManual: "View User Manual",
                 galleryMainTitle: "📸 Real Karoo 3 Screenshots Gallery",
-                g1Label: "🏔️ 3D Altimetry & Floating Balloon",
+                g1Label: "🏔️ 3D Altimetry & Triple Header",
                 g2Label: "🎨 Style Tab Settings",
                 g3Label: "🏔️ 3D Tab Settings",
                 g4Label: "📊 2D Tab Settings",
@@ -721,12 +721,12 @@
                 f1Desc: "Direct loading of condensed typography for tall, stylish, and ultra-readable digits on Karoo displays.",
                 f2Title: "🔄 90° Clockwise Landscape Mode",
                 f2Desc: "Expands the graph to a full-screen 800px width, liberating pixel compression.",
-                f3Title: "📍 Floating 3D Slope Balloon Tag",
-                f3Desc: "Real-time slope tag (<code>📍 7.2%</code>) attached to the cyclist beacon advancing along the profile.",
-                f4Title: "🌈 50m Micro-Block Sub-Segmenting",
-                f4Desc: "20 micro-blocks of 50m per kilometer rendering real flats, dips, and steep ramps.",
-                f5Title: "🚩 Custom Steep Ramp Range (10%-15%)",
-                f5Desc: "Red callout arrows marking the top 2-3 steepest ramps within your exact configured range.",
+                f3Title: "📊 Triple Header Readout",
+                f3Desc: "Simultaneous live readout of <strong>CURRENT SLOPE</strong>, section <strong>AVG SLOPE</strong>, and <strong>MAX SLOPE</strong>.",
+                f4Title: "🏎️ GPS Hairpin Bends (Tornanti)",
+                f4Desc: "Vectorial GPS mathematical calculation of sharp turns (>120°) with 20% hairpin marks on mountain ribbon.",
+                f5Title: "📍 Points of Interest Filter (POIs)",
+                f5Desc: "Independent toggles to filter Towns, Water Springs, Viewpoints, and Summits/Passes.",
                 f6Title: "📐 Exact Topographic Method",
                 f6Desc: "Option to calculate slope % over horizontal map projection, eliminating hypotenuse bias on extreme ramps.",
                 secFieldsTitle: "Detailed Breakdown of the 4 Remaining Fields",
@@ -747,20 +747,20 @@
                 c5Desc: "Immediate gradient trend sensor that eliminates barometric altimeter lag and tracks peak ramp gradient.",
                 c5Bullets: `<li><strong>Short/Long Term EMA Filter</strong>: Predicts whether slope is steepening or easing.</li><li><strong>Visual Arrows</strong>: Vector trend arrows (↗️ STEEPENING, ➔ STEADY, ↘️ EASING).</li><li><strong>Max Ramp Peak</strong>: Tracks and holds the steepest % ramp hit in the segment.</li>`,
                 installTitle: "🚀 Quick Installation on your Hammerhead Karoo",
-                installSteps: `<li>Connect your Hammerhead Karoo 2 or Karoo 3 to your computer via USB cable with <strong>USB Debugging</strong> enabled.</li><li>Download the latest <code>ALTGRAPH-v0.2.4.apk</code> file from our GitHub repository.</li><li>Run the command in your terminal: <code>adb install -r ALTGRAPH-v0.2.4.apk</code></li><li>On your Karoo, go to <strong>Settings &gt; Ride Profiles</strong>, edit a data page, and add fields from the <strong>ALTGRAPH</strong> category.</li><li>Open the <strong>ALTGRAPH Settings Panel</strong> organized by tabs from your Karoo app launcher to customize all settings.</li>`,
-                footerText: `ALTGRAPH v0.2.4 &bull; Developed by David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Source Code on GitHub</a>`
+                installSteps: `<li>Connect your Hammerhead Karoo 2 or Karoo 3 to your computer via USB cable with <strong>USB Debugging</strong> enabled.</li><li>Download the latest <code>ALTGRAPH-v0.3.0.apk</code> file from our GitHub repository.</li><li>Run the command in your terminal: <code>adb install -r ALTGRAPH-v0.3.0.apk</code></li><li>On your Karoo, go to <strong>Settings &gt; Ride Profiles</strong>, edit a data page, and add fields from the <strong>ALTGRAPH</strong> category.</li><li>Open the <strong>ALTGRAPH Settings Panel</strong> organized by tabs from your Karoo app launcher to customize all settings.</li>`,
+                footerText: `ALTGRAPH v0.3.0 STABLE &bull; Developed by David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Source Code on GitHub</a>`
             },
             fr: {
-                pageTitle: "ALTGRAPH v0.2.4 - Extension d'Altimétrie 3D et Performance par David García Pascual",
+                pageTitle: "ALTGRAPH v0.3.0 STABLE - Extension d'Altimétrie 3D et Performance par David García Pascual",
                 navGallery: "Captures",
                 navFields: "Champs",
                 navInstall: "Installation",
-                heroTitle: "Dominez la montagne avec <span>ALTGRAPH v0.2.4</span>",
-                heroDesc: "Extension avancée développée par <strong>David García Pascual</strong>. Analyse dynamique des cols, profil 3D en relief avec calcul topographique, polices Google Sans Condensed, mode paysage 90°, ballon 3D flottant, rythme VAM et <strong>Indice de Fatigue (GF)</strong> pour <strong>Hammerhead Karoo 2 et Karoo 3</strong>.",
-                btnDownload: "Télécharger APK (v0.2.4)",
+                heroTitle: "Dominez la montagne avec <span>ALTGRAPH v0.3.0 STABLE</span>",
+                heroDesc: "Extension avancée développée par <strong>David García Pascual</strong>. Analyse dynamique des cols, profil 3D en relief avec calcul topographique, polices Google Sans Condensed, mode paysage 90°, affichage triple (Actuelle, Moyenne, Max), virages en épingle GPS, rythme VAM et <strong>Indice de Fatigue (GF)</strong> pour <strong>Hammerhead Karoo 2 et Karoo 3</strong>.",
+                btnDownload: "Télécharger APK (v0.3.0)",
                 btnManual: "Voir Manuel Utilisateur",
                 galleryMainTitle: "📸 Galerie de Captures sur Karoo 3 Réel",
-                g1Label: "🏔️ Altimétrie 3D et Ballon Flottant",
+                g1Label: "🏔️ Altimétrie 3D et En-tête Triple",
                 g2Label: "🎨 Panneau Onglet Style",
                 g3Label: "🏔️ Panneau Onglet 3D",
                 g4Label: "📊 Panneau Onglet 2D",
@@ -772,12 +772,12 @@
                 f1Desc: "Chargement direct de typographies condensées pour des chiffres grands, stylisés et ultra-lisibles sur Karoo.",
                 f2Title: "🔄 Mode Paysage Rotation 90°",
                 f2Desc: "Agrandit le graphique à une largeur géante de 800px en plein écran, libérant la compression des pixels.",
-                f3Title: "📍 Ballon Flottant 3D de Pente",
-                f3Desc: "Capsule en temps réel (<code>📍 7.2%</code>) connectée au phare du cycliste qui vous accompagne sur le relief.",
-                f4Title: "🌈 Sous-Segmentation 50m par Km",
-                f4Desc: "Division en 20 micro-blocks de 50m dans chaque kilomètre dessinant les vrais replats et rampes.",
-                f5Title: "🚩 Rampes Raides Délimitées (10%-15%)",
-                f5Desc: "Signalisation par flèche rouge des 2 ou 3 rampes les plus dures dans la plage exacte configurée par l'utilisateur.",
+                f3Title: "📊 Affichage Triple en En-tête",
+                f3Desc: "Affichage simultané en direct de <strong>PENTE ACTUELLE</strong>, <strong>PENTE MOYENNE</strong> de la section et <strong>PENTE MAXIMALE</strong>.",
+                f4Title: "🏎️ Virages en Épingle GPS (Tornanti)",
+                f4Desc: "Calcul mathématique vectoriel GPS des virages serrés (>120°) avec repères d'épingle de 20% sur le relief.",
+                f5Title: "📍 Filtre des Points d'Intérêt (POIs)",
+                f5Desc: "Commutateurs indépendants pour filtrer Villes, Points d'Eau, Points de Vue et Sommets/Cols.",
                 f6Title: "📐 Méthode Topographique Exacte",
                 f6Desc: "Option pour calculer le % de pente sur la projection horizontale de la carte, éliminant le biais de l'hypoténuse sur les rampes extrêmes.",
                 secFieldsTitle: "Analyse Détaillée des 4 Autres Champs",
@@ -798,20 +798,20 @@
                 c5Desc: "Capteur de tendance immédiate de la pente qui élimine le retard de l'altimètre barométrique et enregistre le pic de rampe maximale.",
                 c5Bullets: `<li><strong>Filtre Stochastique Court/Long Terme</strong>: Anticipe si la pente se durcit ou s'adoucit.</li><li><strong>Indicateurs Visuels</strong>: Flèches vectorielles (↗️ SE DURCIT, ➔ STABLE, ↘️ S'ADOUCIT).</li><li><strong>Pic de Rampe Maximale</strong>: Enregistre et conserve le % de la rampe la plus dure atteinte dans le tronçon.</li>`,
                 installTitle: "🚀 Installation Rapide sur votre Hammerhead Karoo",
-                installSteps: `<li>Connectez votre Hammerhead Karoo 2 ou Karoo 3 à l'ordinateur par câble USB avec le <strong>Débogage USB</strong> activé.</li><li>Téléchargez la dernière version du fichier <code>ALTGRAPH-v0.2.4.apk</code> depuis notre répertoire GitHub.</li><li>Exécutez la commande dans votre console : <code>adb install -r ALTGRAPH-v0.2.4.apk</code></li><li>Sur votre Karoo, allez dans <strong>Paramètres &gt; Profils de Parcours</strong>, éditez une page de données et ajoutez les champs de la catégorie <strong>ALTGRAPH</strong>.</li><li>Ouvrez le <strong>Panneau de Configuration d'ALTGRAPH</strong> organisé par onglets dans le menu des applications de votre Karoo pour personnaliser vos paramètres.</li>`,
-                footerText: `ALTGRAPH v0.2.4 &bull; Développé par David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Code Source sur GitHub</a>`
+                installSteps: `<li>Connectez votre Hammerhead Karoo 2 ou Karoo 3 à l'ordinateur par câble USB avec le <strong>Débogage USB</strong> activé.</li><li>Téléchargez la dernière version du fichier <code>ALTGRAPH-v0.3.0.apk</code> depuis notre répertoire GitHub.</li><li>Exécutez la commande dans votre console : <code>adb install -r ALTGRAPH-v0.3.0.apk</code></li><li>Sur votre Karoo, allez dans <strong>Paramètres &gt; Profils de Parcours</strong>, éditez une page de données et ajoutez les champs de la catégorie <strong>ALTGRAPH</strong>.</li><li>Ouvrez le <strong>Panneau de Configuration d'ALTGRAPH</strong> organisé par onglets dans le menu des applications de votre Karoo pour personnaliser vos paramètres.</li>`,
+                footerText: `ALTGRAPH v0.3.0 STABLE &bull; Développé par David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Code Source sur GitHub</a>`
             },
             it: {
-                pageTitle: "ALTGRAPH v0.2.4 - Estensione di Altimetria 3D e Prestazioni di David García Pascual",
+                pageTitle: "ALTGRAPH v0.3.0 STABLE - Estensione di Altimetria 3D e Prestazioni di David García Pascual",
                 navGallery: "Screenshot",
                 navFields: "Campi",
                 navInstall: "Installazione",
-                heroTitle: "Domina le salite con <span>ALTGRAPH v0.2.4</span>",
-                heroDesc: "Estensione avanzata sviluppata da <strong>David García Pascual</strong>. Analisi dinamica delle salite, profilo 3D in rilievo con calcolo topografico, font Google Sans Condensed, modalità orizzontale 90°, palloncino 3D fluttuante, ritmo VAM e <strong>Indice Grado di Fatica (GF)</strong> per <strong>Hammerhead Karoo 2 e Karoo 3</strong>.",
-                btnDownload: "Scarica APK (v0.2.4)",
+                heroTitle: "Domina le salite con <span>ALTGRAPH v0.3.0 STABLE</span>",
+                heroDesc: "Estensione avanzata sviluppata da <strong>David García Pascual</strong>. Analisi dinamica delle salite, profilo 3D in rilievo con calcolo topografico, font Google Sans Condensed, modalità orizzontale 90°, tripla lettura della pendenza (Attuale, Media e Max), tornanti GPS, ritmo VAM e <strong>Indice Grado di Fatica (GF)</strong> per <strong>Hammerhead Karoo 2 e Karoo 3</strong>.",
+                btnDownload: "Scarica APK (v0.3.0)",
                 btnManual: "Vedi Manuale Utente",
                 galleryMainTitle: "📸 Galleria di Screenshot su Karoo 3 Reale",
-                g1Label: "🏔️ Altimetria 3D e Palloncino",
+                g1Label: "🏔️ Altimetria 3D e Tripla Lettura",
                 g2Label: "🎨 Pannello Scheda Stile",
                 g3Label: "🏔️ Pannello Scheda 3D",
                 g4Label: "📊 Pannello Scheda 2D",
@@ -823,12 +823,12 @@
                 f1Desc: "Caricamento diretto di tipografie condensate per numeri alti, stilizzati e ultra-leggibili sugli schermi Karoo.",
                 f2Title: "🔄 Modalità Orizzontale Ruotata a 90°",
                 f2Desc: "Espande il grafico a un'enorme larghezza di 800px a schermo intero liberando la compressione dei pixel.",
-                f3Title: "📍 Palloncino Fluttuante 3D di Pendenza",
-                f3Desc: "Capsula in tempo reale (<code>📍 7.2%</code>) collegata al faro del ciclista che ti accompagna sul rilievo.",
-                f4Title: "🌈 Sub-Segmentazione 50m in Chilometri",
-                f4Desc: "Divisione in 20 micro-blocchi di 50m all'interno di ogni chilometro disegnando reali tratti in piano e rampe.",
-                f5Title: "🚩 Rampe Dure Delimitate (10%-15%)",
-                f5Desc: "Segnalazione con freccia rossa delle 2 o 3 rampe più dure all'interno dell'intervallo esatto configurato dall'utente.",
+                f3Title: "📊 Tripla Lettura nell'Intestazione",
+                f3Desc: "Lettura simultanea in tempo reale di <strong>PENDENZA ATTUALE</strong>, <strong>PENDENZA MEDIA</strong> della sezione e <strong>PENDENZA MASSIMA</strong>.",
+                f4Title: "🏎️ Tornanti GPS (Hairpins)",
+                f4Desc: "Calcolo matematico vettoriale GPS delle curve strette (>120°) con segni di tornante del 20% sul rilievo.",
+                f5Title: "📍 Filtro Punti di Interesse (POI)",
+                f5Desc: "Interruttori indipendenti per filtrare Paesi, Fontane d'Acqua, Punti Panoramici e Vette/Passi.",
                 f6Title: "📐 Metodo Topografico Esatto",
                 f6Desc: "Opzione per calcolare la pendenza % sulla proiezione orizzontale della mappa, eliminando l'errore dell'ipotenusa su rampe estreme.",
                 secFieldsTitle: "Analisi Dettagliata dei 4 Campi Rimanenti",
@@ -842,27 +842,27 @@
                 c3Bullets: `<li><strong>Modello Ponderato per Tratti</strong>: DU* ponderata in base agli intervalli di pendenza (0-3%, 3-9%, 9-20%, >20%).</li><li><strong>Fattore Asfalto (TA)</strong>: Configurabile in Molto Buono (0.1), Buono (0.5), Regolare (1.2), Pessimo (1.7).</li><li><strong>Penalizzazione per Rampa Massima</strong>: Aggiunge il fattore PMx / 5 alla difficoltà della salita.</li><li><strong>Classificazione Ufficiale</strong>: Categorizza la salita automaticamente (dalla 5ª Categoria a Fuori Categoria HC).</li>`,
                 c4Title: "Ritmo VAM Obiettivo (Opzione C)",
                 c4Tag: "Dual Pacing Assistant",
-                c4Desc: "Assistente di ritmo per dosare lo sforzo in salita calcolando la velocità raccomandata in km/h in base alla pendenza attuale.",
+                c4Desc: "Assistente di ritmo per dosare lo sforzo in salita calcolando la velocità raccomandata in km/h in base alla pendenzaattuale.",
                 c4Bullets: `<li><strong>Lettura VAM Principale</strong>: VAM istantanea in m/h (es. 850 m/h) + VAM Obiettivo.</li><li><strong>Velocità Raccomandata</strong>: Indica a quale velocità esatta in km/h devi salire (es. 12.5 km/h).</li><li><strong>Badge di Stato</strong>: Pillola colorata che indica 🟢 A RITMO, 🔴 FUORI GIRI o 🔵 SOTTO RITMO.</li><li><strong>Regolazione Personalizzata</strong>: VAM obiettivo regolabile da 500 m/h a 2000 m/h nelle impostazioni.</li>`,
                 c5Title: "Tendenza 3D e Rampa Massima",
                 c5Tag: "Gradient Trend Tracker",
                 c5Desc: "Sensore di tendenza immediata della pendenza che elimina il ritardo dell'altimetro barometrico e registra il picco di rampa massima.",
                 c5Bullets: `<li><strong>Filtro Stocastico a Breve/Lungo Termine</strong>: Anticipa se la pendenza sta aumentando o diminuendo.</li><li><strong>Indicatori Visivi</strong>: Frecce vettoriali (↗️ IN AUMENTO, ➔ STABILE, ↘️ IN DIMINUZIONE).</li><li><strong>Picco Rampa Massima</strong>: Registra e mantiene la pendenza % più dura raggiunta nel tratto.</li>`,
                 installTitle: "🚀 Installazione Rapida sul tuo Hammerhead Karoo",
-                installSteps: `<li>Collega il tuo Hammerhead Karoo 2 o Karoo 3 al computer tramite cavo USB con il <strong>Debug USB</strong> abilitato.</li><li>Scarica l'ultima versione del file <code>ALTGRAPH-v0.2.4.apk</code> dalla nostra repository GitHub.</li><li>Esegui il comando nel terminale: <code>adb install -r ALTGRAPH-v0.2.4.apk</code></li><li>Sul tuo Karoo, vai su <strong>Impostazioni &gt; Profili di Corsa</strong>, modifica una pagina dati e aggiungi i campi della categoria <strong>ALTGRAPH</strong>.</li><li>Apri il <strong>Pannello delle Impostazioni di ALTGRAPH</strong> organizzato a schede nel launcher delle app del Karoo per personalizzare le impostazioni.</li>`,
-                footerText: `ALTGRAPH v0.2.4 &bull; Sviluppato da David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Codice Sorgente su GitHub</a>`
+                installSteps: `<li>Collega il tuo Hammerhead Karoo 2 o Karoo 3 al computer tramite cavo USB con il <strong>Debug USB</strong> abilitato.</li><li>Scarica l'ultima versione del file <code>ALTGRAPH-v0.3.0.apk</code> dalla nostra repository GitHub.</li><li>Esegui il comando nel terminale: <code>adb install -r ALTGRAPH-v0.3.0.apk</code></li><li>Sul tuo Karoo, vai su <strong>Impostazioni &gt; Profili di Corsa</strong>, modifica una pagina dati e aggiungi i campi della categoria <strong>ALTGRAPH</strong>.</li><li>Apri il <strong>Pannello delle Impostazioni di ALTGRAPH</strong> organizzato a schede nel launcher delle app del Karoo per personalizzare le impostazioni.</li>`,
+                footerText: `ALTGRAPH v0.3.0 STABLE &bull; Sviluppato da David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Codice Sorgente su GitHub</a>`
             },
             de: {
-                pageTitle: "ALTGRAPH v0.2.4 - 3D Altimetrie & Leistungs-Erweiterung von David García Pascual",
+                pageTitle: "ALTGRAPH v0.3.0 STABLE - 3D Altimetrie & Leistungs-Erweiterung von David García Pascual",
                 navGallery: "Screenshots",
                 navFields: "Felder",
                 navInstall: "Installation",
-                heroTitle: "Meistere Anstiege mit <span>ALTGRAPH v0.2.4</span>",
-                heroDesc: "Fortschrittliche Erweiterung, entwickelt von <strong>David García Pascual</strong>. Dynamische Anstiegsanalyse, 3D-Reliefprofil mit topografischer Berechnung, Google Sans Condensed Schriftarten, 90° Querformat, 3D-schwebender Ballon, VAM-Pacing und <strong>Ermüdungsgrad (GF) Index</strong> für <strong>Hammerhead Karoo 2 und Karoo 3</strong>.",
-                btnDownload: "APK Herunterladen (v0.2.4)",
+                heroTitle: "Meistere Anstiege mit <span>ALTGRAPH v0.3.0 STABLE</span>",
+                heroDesc: "Fortschrittliche Erweiterung, entwickelt von <strong>David García Pascual</strong>. Dynamische Anstiegsanalyse, 3D-Reliefprofil mit topografischer Berechnung, Google Sans Condensed Schriftarten, 90° Querformat, dreifache Steigungsanzeige (Aktuell, Durchschnitt & Max), GPS-Haarnadelkurven, VAM-Pacing und <strong>Ermüdungsgrad (GF) Index</strong> für <strong>Hammerhead Karoo 2 und Karoo 3</strong>.",
+                btnDownload: "APK Herunterladen (v0.3.0)",
                 btnManual: "Benutzerhandbuch ansehen",
                 galleryMainTitle: "📸 Echte Karoo 3 Screenshots Galerie",
-                g1Label: "🏔️ 3D Altimetrie & Schwebender Ballon",
+                g1Label: "🏔️ 3D Altimetrie & Dreifach-Header",
                 g2Label: "🎨 Stil-Tab-Einstellungen",
                 g3Label: "🏔️ 3D-Tab-Einstellungen",
                 g4Label: "📊 2D-Tab-Einstellungen",
@@ -874,12 +874,12 @@
                 f1Desc: "Direktes Laden kondensierter Typografie für große, stilvolle und extrem gut lesbare Ziffern auf Karoo-Displays.",
                 f2Title: "🔄 90° Querformat",
                 f2Desc: "Erweitert das Diagramm auf eine riesige Breite von 800px im Vollbildmodus und befreit es von Pixelkompression.",
-                f3Title: "📍 Schwebender 3D-Steigungsballon",
-                f3Desc: "Echtzeit-Steigungskapsel (<code>📍 7.2%</code>), die an den Radfahrer-Beacon angehängt ist und Sie über das Relief begleitet.",
-                f4Title: "🌈 50m Mikroblock-Untersegmentierung",
-                f4Desc: "Aufteilung in 20 Mikroblöcke zu je 50m innerhalb jedes Kilometers, die echte Flachstücke und Rampen zeichnen.",
-                f5Title: "🚩 Begrenzte steile Rampen (10%-15%)",
-                f5Desc: "Markierung der 2 oder 3 steilsten Rampen innerhalb des vom Benutzer konfigurierten Bereichs mit einem roten Pfeil.",
+                f3Title: "📊 Dreifache Header-Anzeige",
+                f3Desc: "Gleichzeitige Echtzeit-Anzeige der <strong>AKTUELLE STEIGUNG</strong>, Abschnitts-<strong>DURCHSCHNITTSSTEIGUNG</strong> und <strong>MAXIMALE STEIGUNG</strong>.",
+                f4Title: "🏎️ GPS-Haarnadelkurven (Tornanti)",
+                f4Desc: "Vektorielle GPS-mathematische Berechnung scharfer Kurven (>120°) mit 20%-Haarnadelmarkierungen auf dem Relief.",
+                f5Title: "📍 Interessenpunkte-Filter (POIs)",
+                f5Desc: "Unabhängige Schalter zum Filtern von Städten, Wasserquellen, Aussichtspunkten und Gipfeln/Pässen.",
                 f6Title: "📐 Exakte topografische Methode",
                 f6Desc: "Option zur Berechnung der Steigung in % auf der horizontalen Kartenprojektion, um Hypotenusenfehler bei extremen Rampen zu eliminieren.",
                 secFieldsTitle: "Detaillierte Analyse der 4 weiteren Felder",
@@ -898,10 +898,9 @@
                 c5Title: "3D Steigungstrend & Max Ramp",
                 c5Tag: "Gradient Trend Tracker",
                 c5Desc: "Unmittelbarer Steigungstrend-Sensor, der die Verzögerung des barometrischen Höhenmessers eliminiert und die maximale Rampensteilheit aufzeichnet.",
-                c5Bullets: `<li><strong>Kurz-/Langzeit-Stochastikfilter</strong>: Antizipiert, ob die Steigung steiler oder flacher wird.</li><li><strong>Visuelle Indikatoren</strong>: Vektorpfeile (↗️ WIRD STEILER, ➔ KONSTANT, ↘️ WIRD FLACHER).</li><li><strong>Maximaler Rampen-Peak</strong>: Zeichnet den steilsten erreichten %-Wert im Abschnitt auf und behält ihn bei.</li>`,
                 installTitle: "🚀 Schnelle Installation auf Ihrem Hammerhead Karoo",
-                installSteps: `<li>Verbinden Sie Ihren Hammerhead Karoo 2 oder Karoo 3 über ein USB-Kabel mit aktiviertem <strong>USB-Debugging</strong> mit dem Computer.</li><li>Laden Sie die neueste Datei <code>ALTGRAPH-v0.2.4.apk</code> aus unserem GitHub-Repository herunter.</li><li>Führen Sie den Befehl in Ihrem Terminal aus: <code>adb install -r ALTGRAPH-v0.2.4.apk</code></li><li>Gehen Sie auf Ihrem Karoo zu <strong>Einstellungen &gt; Fahrprofile</strong>, bearbeiten Sie eine Datenseite und fügen Sie Felder aus der Kategorie <strong>ALTGRAPH</strong> hinzu.</li><li>Öffnen Sie das <strong>ALTGRAPH-Einstellungspanel</strong> (in Tabs organisiert) aus Ihrem Karoo-App-Launcher, um alle Einstellungen anzupassen.</li>`,
-                footerText: `ALTGRAPH v0.2.4 &bull; Entwickelt von David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Quellcode auf GitHub</a>`
+                installSteps: `<li>Verbinden Sie Ihren Hammerhead Karoo 2 oder Karoo 3 über ein USB-Kabel mit aktiviertem <strong>USB-Debugging</strong> mit dem Computer.</li><li>Laden Sie die neueste Datei <code>ALTGRAPH-v0.3.0.apk</code> aus unserem GitHub-Repository herunter.</li><li>Führen Sie den Befehl in Ihrem Terminal aus: <code>adb install -r ALTGRAPH-v0.3.0.apk</code></li><li>Gehen Sie auf Ihrem Karoo zu <strong>Einstellungen &gt; Fahrprofile</strong>, bearbeiten Sie eine Datenseite und fügen Sie Felder aus der Kategorie <strong>ALTGRAPH</strong> hinzu.</li><li>Öffnen Sie das <strong>ALTGRAPH-Einstellungspanel</strong> (in Tabs organisiert) aus Ihrem Karoo-App-Launcher, um alle Einstellungen anzupassen.</li>`,
+                footerText: `ALTGRAPH v0.3.0 STABLE &bull; Entwickelt von David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Quellcode auf GitHub</a>`
             }
         };
 
@@ -911,7 +910,6 @@
 
             document.getElementById('page-title').innerText = t.pageTitle;
             document.getElementById('nav-gallery').innerText = t.navGallery;
-            document.getElementById('nav-3d').innerText = t.nav3d;
             document.getElementById('nav-fields').innerText = t.navFields;
             document.getElementById('nav-install').innerText = t.navInstall;
 
