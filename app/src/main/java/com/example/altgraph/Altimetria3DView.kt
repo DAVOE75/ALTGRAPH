@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
-import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
 import android.util.AttributeSet
@@ -194,7 +193,7 @@ class Altimetria3DView @JvmOverloads constructor(
         // 1. Fondo Oscuro
         canvas.drawRect(0f, 0f, w, h, bgPaint)
 
-        // 2. Encabezado Título ("Altimetría 3D") MÁS GRANDE
+        // 2. Encabezado Título ("Altimetría 3D")
         val titleText = context.getString(R.string.data_type_altimetria_3d_title)
         titlePaint.textSize = ((h * 0.085f) * fontScale).coerceIn(18f, 32f)
         canvas.drawText(titleText, 18f, h * 0.08f, titlePaint)
@@ -204,7 +203,7 @@ class Altimetria3DView @JvmOverloads constructor(
         subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(10f, 16f)
         canvas.drawText(labelCurrentGrade, 18f, h * 0.14f, subTitleLabelPaint)
 
-        // Número PENDIENTE ACTUAL (Grande reducido un 5% para encaje impecable)
+        // Número PENDIENTE ACTUAL (Grande)
         val liveGradeText = "%.1f%%".format(currentGrade)
         liveGradePaint.textSize = ((h * 0.13f) * fontScale).coerceIn(20f, 42f)
         liveGradePaint.color = Color.parseColor(getGradeColor(currentGrade))
@@ -226,12 +225,12 @@ class Altimetria3DView @JvmOverloads constructor(
         // 3. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)
 
-        // 4. Perfil 3D por encima de las líneas de fondo del Eje Y
+        // 4. Perfil 3D con Cotas Verticales Colgadas desde Arriba
         draw3DRibbonAndWalls(canvas, w, h)
     }
 
     private fun drawIsometricGrid(canvas: Canvas, w: Float, h: Float) {
-        val groundY = h * 0.93f
+        val groundY = h * 0.88f
         val gridLines = 5
 
         for (i in 0..gridLines) {
@@ -297,11 +296,10 @@ class Altimetria3DView @JvmOverloads constructor(
         val blocksCount = (totalMetersAhead / blockSizeMeters.coerceAtLeast(10.0)).toInt().coerceIn(2, 10)
         val samples = blocksCount + 1
 
-        // MARGEN IZQUIERDO AJUSTADO PARA QUE LA COTA DE 0M ("350 m") SEA 100% VISIBLE SIN CORTARSE
         val startX = w * 0.08f
         val endX = w * 0.98f
-        val baseGroundY = h * 0.93f
-        val maxPeakHeight = h * 0.58f
+        val baseGroundY = h * 0.88f
+        val maxPeakHeight = h * 0.52f
 
         val stepX = (endX - startX) / (samples - 1).coerceAtLeast(1)
 
@@ -368,7 +366,7 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawPath(wallPath, wallPaint)
         }
 
-        // DIBUJAR LÍNEAS VERTICALES DE LÍMITE Y COTAS DE ALTITUD EN CADA TRAMO ROTADAS A 90 GRADOS
+        // DIBUJAR LÍNEAS VERTICALES DE LÍMITE Y COTAS DE ALTITUD ROTADAS A 90 GRADOS COLGANDO DESDE ARRIBA (JUSTO DEBAJO DE LA CINTA/CUMBRE, COMO EN LA IMAGEN)
         cotaTextPaint.textSize = ((h * 0.050f) * fontScale).coerceIn(10f, 18f)
 
         for (i in 0 until samples) {
@@ -377,9 +375,10 @@ class Altimetria3DView @JvmOverloads constructor(
             if (showCotas) {
                 val cotaText = "${pointElevations[i].toInt()} m"
                 canvas.save()
-                // Para i = 0, se desplaza hacia la derecha para que no quede cortada en el margen izquierdo
                 val textOffsetX = if (i == 0) pointsX[i] + 8f else pointsX[i] - 5f
-                canvas.translate(textOffsetX, pointsYBase[i] - 6f)
+                // Anclar justo debajo de la superficie de la cinta superior (pointsYTop[i] + 18f)
+                val textOffsetY = pointsYTop[i] + 18f
+                canvas.translate(textOffsetX, textOffsetY)
                 canvas.rotate(-90f)
                 canvas.drawText(cotaText, 0f, 0f, cotaTextPaint)
                 canvas.restore()
@@ -432,10 +431,10 @@ class Altimetria3DView @JvmOverloads constructor(
             val px = pointsX[i]
             val pyBase = pointsYBase[i]
 
-            canvas.drawText(distLabel, px, pyBase - 4f, axisTextPaint)
+            canvas.drawText(distLabel, px, pyBase + 12f, axisTextPaint)
         }
 
-        // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D
+        // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D DENTRO DE LA MONTAÑA
         val fontBaseSize = (h * 0.045f) * fontScale
 
         for (i in 0 until samples - 1) {
