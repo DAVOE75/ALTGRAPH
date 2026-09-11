@@ -115,7 +115,7 @@ class Altimetria3DView @JvmOverloads constructor(
 
     private val hairpinLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#111827")
-        strokeWidth = 5f
+        strokeWidth = 5.5f
         style = Paint.Style.STROKE
     }
 
@@ -148,12 +148,6 @@ class Altimetria3DView @JvmOverloads constructor(
         style = Paint.Style.STROKE
     }
 
-    private val zoomTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
-        typeface = Typeface.DEFAULT_BOLD
-        textAlign = Paint.Align.CENTER
-    }
-
     private val zoomBtnPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#38BDF8")
         typeface = Typeface.DEFAULT_BOLD
@@ -180,7 +174,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private var pois: List<Poi> = emptyList()
     private var showZoomControls: Boolean = true
 
-    // Interactive Zoom & Pan (Desplazamiento táctil tipo mapa)
+    // Interactive Zoom & Pan
     private var zoomScale: Float = 1.0f
     private var panOffsetX: Float = 0.0f
     private var isDragging: Boolean = false
@@ -262,33 +256,27 @@ class Altimetria3DView @JvmOverloads constructor(
         val w = width.toFloat()
         val h = height.toFloat()
 
-        val pillW = (w * 0.42f).coerceIn(130f, 220f)
+        val pillW = (w * 0.22f).coerceIn(80f, 130f)
         val pillH = (h * 0.15f).coerceIn(28f, 44f)
         val right = w - 16f
         val left = right - pillW
         val top = 16f
         val bottom = top + pillH
-        val btnW = pillW * 0.28f
+        val centerX = left + (pillW / 2f)
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 if (touchY in top..bottom) {
-                    // Pulsó [-] (Zoom Out / Alejar)
-                    if (touchX >= left && touchX <= left + btnW + 10f) {
+                    // Pulsó [-] (Mitad izquierda)
+                    if (touchX >= left && touchX < centerX) {
                         performClick()
                         zoomOut()
                         return true
                     }
-                    // Pulsó [+] (Zoom In / Acercar)
-                    if (touchX >= right - btnW - 10f && touchX <= right) {
+                    // Pulsó [+] (Mitad derecha)
+                    if (touchX >= centerX && touchX <= right) {
                         performClick()
                         zoomIn()
-                        return true
-                    }
-                    // Pulsó texto central (Restablecer Pan/Zoom)
-                    if (touchX > left + btnW && touchX < right - btnW) {
-                        performClick()
-                        resetPanZoom()
                         return true
                     }
                 }
@@ -320,33 +308,28 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private fun zoomIn() {
-        zoomScale = when {
-            zoomScale < 1.5f -> 1.5f
-            zoomScale < 2.0f -> 2.0f
-            zoomScale < 3.0f -> 3.0f
-            zoomScale < 4.0f -> 4.0f
-            else -> 4.0f
+        val curr = lookaheadMeters
+        val nextVal = when {
+            curr > 1000 -> curr - 1000
+            curr == 1000 -> 500
+            curr > 200 -> curr - 50
+            else -> 200
         }
-        val maxPanX = (width.toFloat() * zoomScale - width.toFloat()).coerceAtLeast(0f)
-        panOffsetX = panOffsetX.coerceIn(0f, maxPanX)
+        lookaheadMeters = nextVal
+        AppPreferences.getInstance(context).lookaheadMeters3d = nextVal
         postInvalidate()
     }
 
     private fun zoomOut() {
-        zoomScale = when {
-            zoomScale > 3.0f -> 3.0f
-            zoomScale > 2.0f -> 2.0f
-            zoomScale > 1.5f -> 1.5f
-            else -> 1.0f
+        val curr = lookaheadMeters
+        val nextVal = when {
+            curr < 500 -> curr + 50
+            curr == 500 -> 1000
+            curr < 10000 -> curr + 1000
+            else -> 10000
         }
-        val maxPanX = (width.toFloat() * zoomScale - width.toFloat()).coerceAtLeast(0f)
-        panOffsetX = panOffsetX.coerceIn(0f, maxPanX)
-        postInvalidate()
-    }
-
-    private fun resetPanZoom() {
-        zoomScale = 1.0f
-        panOffsetX = 0f
+        lookaheadMeters = nextVal
+        AppPreferences.getInstance(context).lookaheadMeters3d = nextVal
         postInvalidate()
     }
 
@@ -402,7 +385,7 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawText(maxGradeText, 18f, h * 0.43f, maxGradePaint)
         }
 
-        // 3. Controles de Zoom y Desplazamiento Táctil en Esquina Superior Derecha
+        // 3. Botones Minimalistas de Zoom [ - | + ] en Esquina Superior Derecha
         if (showZoomControls) {
             drawZoomOverlay(canvas, w, h)
         }
@@ -412,10 +395,7 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private fun drawZoomOverlay(canvas: Canvas, w: Float, h: Float) {
-        val pctZoom = (zoomScale * 100).toInt()
-        val zoomText = "${pctZoom}%"
-
-        val pillW = (w * 0.42f).coerceIn(130f, 220f)
+        val pillW = (w * 0.22f).coerceIn(80f, 130f)
         val pillH = (h * 0.15f).coerceIn(28f, 44f)
 
         val marginR = 16f
@@ -430,28 +410,22 @@ class Altimetria3DView @JvmOverloads constructor(
         canvas.drawRoundRect(rect, pillH / 2f, pillH / 2f, zoomBgPaint)
         canvas.drawRoundRect(rect, pillH / 2f, pillH / 2f, zoomBorderPaint)
 
-        val btnW = pillW * 0.28f
-        val textSize = (pillH * 0.55f)
-
-        // Botón [-] (Zoom Out / Alejar)
+        val halfW = pillW / 2f
+        val textSize = (pillH * 0.65f)
         zoomBtnPaint.textSize = textSize
-        val minusX = left + (btnW / 2f)
-        val centerY = top + (pillH / 2f) + (textSize * 0.32f)
+
+        val centerY = top + (pillH / 2f) + (textSize * 0.34f)
+
+        // Botón [-] (Alejar / Zoom Out)
+        val minusX = left + (halfW / 2f)
         canvas.drawText("–", minusX, centerY, zoomBtnPaint)
 
-        // Línea divisoria izquierda
-        canvas.drawLine(left + btnW, top + 4f, left + btnW, bottom - 4f, zoomBorderPaint)
+        // Línea divisoria central
+        val centerX = left + halfW
+        canvas.drawLine(centerX, top + 4f, centerX, bottom - 4f, zoomBorderPaint)
 
-        // Texto central (ej. 🔍 100% / 🔍 200%)
-        zoomTextPaint.textSize = (pillH * 0.46f)
-        val labelX = left + (pillW / 2f)
-        canvas.drawText("🔍 $zoomText", labelX, centerY, zoomTextPaint)
-
-        // Línea divisoria derecha
-        canvas.drawLine(right - btnW, top + 4f, right - btnW, bottom - 4f, zoomBorderPaint)
-
-        // Botón [+] (Zoom In / Acercar)
-        val plusX = right - (btnW / 2f)
+        // Botón [+] (Acercar / Zoom In)
+        val plusX = centerX + (halfW / 2f)
         canvas.drawText("+", plusX, centerY, zoomBtnPaint)
     }
 
@@ -517,7 +491,6 @@ class Altimetria3DView @JvmOverloads constructor(
         val baseGroundY = h * 0.88f
         val maxPeakHeight = h * 0.52f
 
-        // Aplicación del factor de Zoom y Desplazamiento PanX
         val totalSpanX = (baseEndX - startX) * zoomScale
         val microStepX = totalSpanX / (totalMicroSamples - 1).coerceAtLeast(1)
         val microDistMeters = totalMetersAhead / (totalMicroSamples - 1)
@@ -531,7 +504,6 @@ class Altimetria3DView @JvmOverloads constructor(
         var accumulatedElev = currentElevation
         microElevations[0] = accumulatedElev.toFloat()
 
-        // Cálculo de pendiente física pura estricta sin ruido ni deformación por ondas sinusoidales
         for (i in 0 until totalMicroSamples - 1) {
             val majorBlockIdx = (i / microSubDivisions).coerceAtMost(nextBlocks.size - 1)
             val baseGrade = if (majorBlockIdx < nextBlocks.size) nextBlocks[majorBlockIdx].toDouble() else 4.0
@@ -551,7 +523,6 @@ class Altimetria3DView @JvmOverloads constructor(
             val progress = i.toFloat() / (totalMicroSamples - 1)
             val curveOffset = sin(progress * Math.PI * 1.5).toFloat() * (w * 0.08f)
 
-            // Posición X escalada por zoom y desplazada por arrastre táctil (panOffsetX)
             val px = startX + (i * microStepX) + curveOffset - panOffsetX
             val normalizedHeight = ((microElevations[i] - minElev) / elevRange).coerceIn(0f, 1f)
 
@@ -605,6 +576,7 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawPath(wallPath, wallPaint)
         }
 
+        // Trazar Curvas de Herradura: Línea corta recortada al 20% superior de la curva
         if (showHairpins) {
             for (hpRelDist in hairpins) {
                 if (hpRelDist > totalMetersAhead) continue
@@ -619,7 +591,10 @@ class Altimetria3DView @JvmOverloads constructor(
                 val pyTop = microYTop[idx] + rem * (microYTop[idx + 1] - microYTop[idx])
                 val pyBase = microYBase[idx] + rem * (microYBase[idx + 1] - microYBase[idx])
 
-                canvas.drawLine(px, pyTop, px, pyBase, hairpinLinePaint)
+                val wallHeight = pyBase - pyTop
+                val pyShortBottom = pyTop + (wallHeight * 0.20f)
+
+                canvas.drawLine(px, pyTop, px, pyShortBottom, hairpinLinePaint)
             }
         }
 
