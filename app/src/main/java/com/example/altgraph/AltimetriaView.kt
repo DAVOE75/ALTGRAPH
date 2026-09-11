@@ -63,7 +63,8 @@ class AltimetriaView @JvmOverloads constructor(
         attackAlert: Boolean,
         blockSizeMeters: Double,
         showBlockPct: Boolean = true,
-        visibleBlocksCount: Int = 5
+        visibleBlocksCount: Int = 5,
+        fontFamilyKey: String = "sans-serif-condensed"
     ) {
         this.remainingDistance = remainingDistance
         this.timeToSummit = timeToSummit
@@ -76,6 +77,11 @@ class AltimetriaView @JvmOverloads constructor(
         this.blockSizeMeters = blockSizeMeters
         this.showBlockPercentages = showBlockPct
         this.visibleBlocksCount = visibleBlocksCount.coerceIn(1, 10)
+
+        val tf = FontHelper.getTypeface(fontFamilyKey)
+        textPaint.typeface = tf
+        labelPaint.typeface = tf
+        blockTextPaint.typeface = tf
 
         postInvalidate()
     }
