@@ -167,28 +167,47 @@ class MainActivity : Activity() {
         visibleBlocksCard.addView(visibleBlocksValueText)
         visibleBlocksCard.addView(visibleBlocksRow)
 
-        // Section 3: 3D Lookahead Distance Card
+        // Helper para formatear distancia de anticipación (m / km)
+        fun formatLookaheadText(meters: Int): String {
+            return if (meters < 1000) {
+                "$meters m"
+            } else {
+                "${meters / 1000} km"
+            }
+        }
+
+        // Section 3: 3D Lookahead Distance Card (50m a 500m -> 1km -> 2km... 10km)
         val lookaheadCard = createCardContainer()
         val lookaheadLabel = createSectionLabel(getString(R.string.setting_lookahead_meters_3d))
-        val lookaheadValueText = createValueText("${prefs.lookaheadMeters3d} m")
+        val lookaheadValueText = createValueText(formatLookaheadText(prefs.lookaheadMeters3d))
         val lookaheadRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         }
 
-        val lookaheadMinusBtn = createActionButton("- 50 m") {
-            if (prefs.lookaheadMeters3d > 200) {
-                prefs.lookaheadMeters3d -= 50
-                lookaheadValueText.text = "${prefs.lookaheadMeters3d} m"
+        val lookaheadMinusBtn = createActionButton("- Reducir") {
+            val curr = prefs.lookaheadMeters3d
+            val nextVal = when {
+                curr > 1000 -> curr - 1000
+                curr == 1000 -> 500
+                curr > 200 -> curr - 50
+                else -> 200
             }
+            prefs.lookaheadMeters3d = nextVal
+            lookaheadValueText.text = formatLookaheadText(nextVal)
         }
 
-        val lookaheadPlusBtn = createActionButton("+ 50 m") {
-            if (prefs.lookaheadMeters3d < 500) {
-                prefs.lookaheadMeters3d += 50
-                lookaheadValueText.text = "${prefs.lookaheadMeters3d} m"
+        val lookaheadPlusBtn = createActionButton("+ Aumentar") {
+            val curr = prefs.lookaheadMeters3d
+            val nextVal = when {
+                curr < 500 -> curr + 50
+                curr == 500 -> 1000
+                curr < 10000 -> curr + 1000
+                else -> 10000
             }
+            prefs.lookaheadMeters3d = nextVal
+            lookaheadValueText.text = formatLookaheadText(nextVal)
         }
 
         lookaheadRow.addView(lookaheadMinusBtn)
