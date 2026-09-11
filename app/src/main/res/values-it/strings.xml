@@ -24,7 +24,8 @@
     <string name="label_time_to_summit">TEMPO IN VETTA</string>
     <string name="label_next_blocks">PROSSIMI %1$d m (BLOCCHI DA %2$d m)</string>
     <string name="label_current_gradient">PENDENZA ATTUALE</string>
-    <string name="label_max_gradient_tramo">PENDENZA MAX TRATTO</string>
+    <string name="label_avg_gradient_tramo">PENDENZA MEDIA</string>
+    <string name="label_max_gradient_tramo">PENDENZA MASSIMA</string>
     <string name="alert_attack">ATTACCA!</string>
     <string name="alert_attack_sub">Rampa dura nel prossimo tratto</string>
 

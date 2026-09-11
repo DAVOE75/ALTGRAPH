@@ -24,7 +24,8 @@
     <string name="label_time_to_summit">ZEIT BIS ZUM GIPFEL</string>
     <string name="label_next_blocks">NÄCHSTE %1$d m (%2$d m BLÖCKE)</string>
     <string name="label_current_gradient">AKTUELLE STEIGUNG</string>
-    <string name="label_max_gradient_tramo">MAX. STEIGUNG ABSCHNITT</string>
+    <string name="label_avg_gradient_tramo">DURCHSCHNITTSSTEIGUNG</string>
+    <string name="label_max_gradient_tramo">MAXIMALE STEIGUNG</string>
     <string name="alert_attack">ANGRIFF!</string>
     <string name="alert_attack_sub">Steile Rampe im nächsten Abschnitt</string>
 

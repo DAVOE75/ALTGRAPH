@@ -358,31 +358,44 @@ class Altimetria3DView @JvmOverloads constructor(
 
         // 2. Encabezado Título ("Altimetría 3D")
         val titleText = context.getString(R.string.data_type_altimetria_3d_title)
-        titlePaint.textSize = ((h * 0.085f) * fontScale).coerceIn(18f, 32f)
-        canvas.drawText(titleText, 18f, h * 0.08f, titlePaint)
+        titlePaint.textSize = ((h * 0.080f) * fontScale).coerceIn(16f, 28f)
+        canvas.drawText(titleText, 18f, h * 0.07f, titlePaint)
 
-        // Etiqueta PENDIENTE ACTUAL
+        val col1X = 18f
+        val col2X = w * 0.35f
+        val col3X = w * 0.68f
+
+        subTitleLabelPaint.textSize = ((h * 0.040f) * fontScale).coerceIn(9f, 14f)
+
+        // COLUMNA 1: PENDIENTE ACTUAL
         val labelCurrentGrade = context.getString(R.string.label_current_gradient)
-        subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(10f, 16f)
-        canvas.drawText(labelCurrentGrade, 18f, h * 0.14f, subTitleLabelPaint)
+        canvas.drawText(labelCurrentGrade, col1X, h * 0.13f, subTitleLabelPaint)
 
-        // Número PENDIENTE ACTUAL
         val liveGradeText = "%.1f%%".format(currentGrade)
-        liveGradePaint.textSize = ((h * 0.13f) * fontScale).coerceIn(20f, 42f)
+        liveGradePaint.textSize = ((h * 0.11f) * fontScale).coerceIn(18f, 36f)
         liveGradePaint.color = Color.parseColor(getGradeColor(currentGrade))
-        canvas.drawText(liveGradeText, 18f, h * 0.25f, liveGradePaint)
+        canvas.drawText(liveGradeText, col1X, h * 0.23f, liveGradePaint)
 
-        // PENDIENTE MÁXIMA DEL TRAMO VISIBLE
+        // COLUMNA 2: PENDIENTE MEDIA DEL TRAMO VISIBLE (Calculada de la gráfica en pantalla)
+        val tramoAvgGrade = if (nextBlocks.isNotEmpty()) nextBlocks.average() else currentGrade
+        val labelAvgGrade = context.getString(R.string.label_avg_gradient_tramo)
+        canvas.drawText(labelAvgGrade, col2X, h * 0.13f, subTitleLabelPaint)
+
+        val avgGradeText = "%.1f%%".format(tramoAvgGrade)
+        liveGradePaint.textSize = ((h * 0.11f) * fontScale).coerceIn(18f, 36f)
+        liveGradePaint.color = Color.parseColor(getGradeColor(tramoAvgGrade))
+        canvas.drawText(avgGradeText, col2X, h * 0.23f, liveGradePaint)
+
+        // COLUMNA 3: PENDIENTE MÁXIMA DEL TRAMO VISIBLE (Opcional según preferencia)
         if (showMaxGrade) {
             val tramoMaxGrade = if (nextBlocks.isNotEmpty()) nextBlocks.maxOrNull()?.toDouble() ?: 12.8 else 12.8
             val labelMaxGrade = context.getString(R.string.label_max_gradient_tramo)
-            subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(10f, 15f)
-            canvas.drawText(labelMaxGrade, 18f, h * 0.32f, subTitleLabelPaint)
+            canvas.drawText(labelMaxGrade, col3X, h * 0.13f, subTitleLabelPaint)
 
             val maxGradeText = "%.1f%%".format(tramoMaxGrade)
-            maxGradePaint.textSize = ((h * 0.12f) * fontScale).coerceIn(18f, 36f)
+            maxGradePaint.textSize = ((h * 0.11f) * fontScale).coerceIn(18f, 36f)
             maxGradePaint.color = Color.parseColor(getGradeColor(tramoMaxGrade))
-            canvas.drawText(maxGradeText, 18f, h * 0.43f, maxGradePaint)
+            canvas.drawText(maxGradeText, col3X, h * 0.23f, maxGradePaint)
         }
 
         // 3. Botones Minimalistas de Zoom [ - | + ] en Esquina Superior Derecha

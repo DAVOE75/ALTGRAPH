@@ -24,7 +24,8 @@
     <string name="label_time_to_summit">TEMPS AU SOMMET</string>
     <string name="label_next_blocks">PROCHAINS %1$d m (BLOCKS DE %2$d m)</string>
     <string name="label_current_gradient">PENTE ACTUELLE</string>
-    <string name="label_max_gradient_tramo">PENTE MAX. TRONÇON</string>
+    <string name="label_avg_gradient_tramo">PENTE MOYENNE</string>
+    <string name="label_max_gradient_tramo">PENTE MAXIMAL</string>
     <string name="alert_attack">ATTAQUE!</string>
     <string name="alert_attack_sub">Rampe raide dans le prochain tronçon</string>
 
