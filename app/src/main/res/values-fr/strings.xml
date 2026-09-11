@@ -46,6 +46,7 @@
     <string name="setting_ramp_max_slope">Pente Maximale pour Flèche de Rampe (%)</string>
     <string name="setting_show_max_gradient">Afficher Pente Max dans l\'En-tête 3D</string>
     <string name="setting_rotate_90_cw">Pivoter Graphique 90° (Mode Paysage)</string>
+    <string name="setting_use_topographic">Utiliser la méthode de calcul topographique (Projection horizontale)</string>
     <string name="font_normal">Normale</string>
     <string name="font_large">Grande</string>
     <string name="font_xl">Très Gr.</string>

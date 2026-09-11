@@ -362,6 +362,19 @@ class MainActivity : Activity() {
         rampMaxCard.addView(rampMaxValueText)
         rampMaxCard.addView(rampMaxRow)
 
+        // Opción: Método de Cálculo Topográfico
+        val topographicCard = createCardContainer()
+        val switchTopographic = Switch(this).apply {
+            text = getString(R.string.setting_use_topographic)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.useTopographicCalculation
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.useTopographicCalculation = isChecked
+            }
+        }
+        topographicCard.addView(switchTopographic)
+
         // Opción: Pendiente Máxima en Encabezado
         val showMaxGradCard = createCardContainer()
         val switchShowMaxGrad = Switch(this).apply {
@@ -380,6 +393,7 @@ class MainActivity : Activity() {
         tab3dContainer.addView(showRampsCard)
         tab3dContainer.addView(rampMinCard)
         tab3dContainer.addView(rampMaxCard)
+        tab3dContainer.addView(topographicCard)
         tab3dContainer.addView(showMaxGradCard)
 
         // ==========================================

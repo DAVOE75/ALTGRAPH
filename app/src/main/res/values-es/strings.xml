@@ -46,6 +46,7 @@
     <string name="setting_ramp_max_slope">Pendiente Máxima para Flecha de Rampa (%)</string>
     <string name="setting_show_max_gradient">Mostrar Pendiente Máxima en Encabezado 3D</string>
     <string name="setting_rotate_90_cw">Girar Gráfico 90° (Modo Horizontal / Apaisado)</string>
+    <string name="setting_use_topographic">Usar Método de Cálculo de Pendiente Topográfico (Proyección Horizontal)</string>
     <string name="font_normal">Normal</string>
     <string name="font_large">Large</string>
     <string name="font_xl">Extra Gr.</string>
@@ -57,5 +58,5 @@
     <string name="zone_yellow">AMARILLO</string>
     <string name="zone_orange">NARANJA</string>
     <string name="zone_red">ROJO</string>
-    <string name="zone_purple">PURPLE</string>
+    <string name="zone_purple">VIOLETA</string>
 </resources>

@@ -46,6 +46,7 @@
     <string name="setting_ramp_max_slope">Pendenza Massima Freccia Rampa (%)</string>
     <string name="setting_show_max_gradient">Mostra Pendenza Massima nell\'Intestazione 3D</string>
     <string name="setting_rotate_90_cw">Ruota Grafico 90° (Modalità Orizzontale)</string>
+    <string name="setting_use_topographic">Usa il metodo topografico di calcolo della pendenza (Proiezione orizzontale)</string>
     <string name="font_normal">Normale</string>
     <string name="font_large">Grande</string>
     <string name="font_xl">Molto Gr.</string>

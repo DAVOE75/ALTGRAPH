@@ -46,6 +46,7 @@
     <string name="setting_ramp_max_slope">Maximalsteigung für Rampenpfeil (%)</string>
     <string name="setting_show_max_gradient">Max. Steigung im 3D-Header anzeigen</string>
     <string name="setting_rotate_90_cw">Diagramm um 90° drehen (Querformat)</string>
+    <string name="setting_use_topographic">Topografische Steigungsberechnung verwenden (horizontale Projektion)</string>
     <string name="font_normal">Normal</string>
     <string name="font_large">Groß</string>
     <string name="font_xl">Sehr Groß</string>

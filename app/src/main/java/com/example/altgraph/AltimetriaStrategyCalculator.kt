@@ -4,6 +4,7 @@ import android.content.Context
 import kotlin.math.hypot
 import kotlin.math.roundToInt
 import kotlin.math.sin
+import kotlin.math.sqrt
 
 data class RoutePoint(
     val latitude: Double,
@@ -68,6 +69,7 @@ class AltimetriaStrategyCalculator {
         val thresholdAttack = prefs?.thresholdAttackPct ?: 10.0
         val attackAlertsEnabled = prefs?.attackAlertEnabled ?: true
         val asphaltFactor = prefs?.asphaltFactor ?: 0.5
+        val useTopographicCalculation = prefs?.useTopographicCalculation ?: false
 
         val isNavigating = isNavigatingRoute || routePoints.isNotEmpty()
 
@@ -104,7 +106,24 @@ class AltimetriaStrategyCalculator {
         val totalDistanceRemaining = routePoints.drop(nearestIndex).sumOf { it.distance }
         val endElevation = routePoints.last().elevation
         val elevationGainRemaining = (endElevation - currentElevation).coerceAtLeast(0.0)
-        val avgGradeRemaining = if (totalDistanceRemaining > 0) (elevationGainRemaining / totalDistanceRemaining) * 100.0 else 0.0
+        
+        // Pendiente Promedio Total basada en el método seleccionado por el usuario
+        val avgGradeRemaining = if (totalDistanceRemaining > 0) {
+            if (useTopographicCalculation) {
+                // MÉTODO TOPOGRÁFICO: (Altitud / Distancia Horizontal) * 100
+                // Distancia Horizontal = sqrt(Distancia Real Recorrida^2 - Altitud Ascendida^2)
+                val distRealSq = totalDistanceRemaining * totalDistanceRemaining
+                val elevSq = elevationGainRemaining * elevationGainRemaining
+                val horizontalDist = if (distRealSq > elevSq) sqrt(distRealSq - elevSq) else totalDistanceRemaining
+                (elevationGainRemaining / horizontalDist) * 100.0
+            } else {
+                // MÉTODO CICLOTURISTA (Estándar): (Altitud / Distancia Real Recorrida) * 100
+                (elevationGainRemaining / totalDistanceRemaining) * 100.0
+            }
+        } else {
+            0.0
+        }
+        
         val secondsRemaining = if (currentSpeed > 0.1) (totalDistanceRemaining / currentSpeed).toLong() else 0L
 
         val nextBlocks = mutableListOf<Float>()
@@ -120,9 +139,20 @@ class AltimetriaStrategyCalculator {
             val distanceDiff = point.distance - currentBlockStartDistance
 
             if (distanceDiff >= blockSize) {
-                val distMeters = distanceDiff.coerceAtLeast(1.0)
-                val grade = ((point.elevation - currentBlockStartElevation) / distMeters) * 100.0
-                val distanceKm = distMeters / 1000.0
+                val distReal = distanceDiff.coerceAtLeast(1.0)
+                val elevDiff = point.elevation - currentBlockStartElevation
+                
+                // Cálculo de pendiente por bloque basado en el método seleccionado por el usuario
+                val grade = if (useTopographicCalculation) {
+                    val distRealSq = distReal * distReal
+                    val elevSq = elevDiff * elevDiff
+                    val horizontalDist = if (distRealSq > elevSq) sqrt(distRealSq - elevSq) else distReal
+                    (elevDiff / horizontalDist) * 100.0
+                } else {
+                    (elevDiff / distReal) * 100.0
+                }
+                
+                val distanceKm = distReal / 1000.0
 
                 if (grade > maxRampPct) {
                     maxRampPct = grade
@@ -146,7 +176,16 @@ class AltimetriaStrategyCalculator {
         if (nextBlocks.size < 10 && routePoints.isNotEmpty() && currentBlockStartDistance < routePoints.last().distance) {
             val remainingDist = (routePoints.last().distance - currentBlockStartDistance).coerceAtLeast(1.0)
             if (remainingDist > 10.0) {
-                val lastGrade = ((routePoints.last().elevation - currentBlockStartElevation) / remainingDist) * 100.0
+                val elevDiff = routePoints.last().elevation - currentBlockStartElevation
+                val lastGrade = if (useTopographicCalculation) {
+                    val distRealSq = remainingDist * remainingDist
+                    val elevSq = elevDiff * elevDiff
+                    val horizontalDist = if (distRealSq > elevSq) sqrt(distRealSq - elevSq) else remainingDist
+                    (elevDiff / horizontalDist) * 100.0
+                } else {
+                    (elevDiff / remainingDist) * 100.0
+                }
+                
                 nextBlocks.add(lastGrade.toFloat())
                 if (attackAlertsEnabled && lastGrade > thresholdAttack) {
                     attack = true

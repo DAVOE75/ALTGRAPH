@@ -46,6 +46,7 @@
     <string name="setting_ramp_max_slope">Ramp Maximum Slope Alert (%)</string>
     <string name="setting_show_max_gradient">Show Section Max Gradient in 3D Header</string>
     <string name="setting_rotate_90_cw">Rotate Graph 90° Clockwise (Landscape Mode)</string>
+    <string name="setting_use_topographic">Use Topographic Slope Calculation Method</string>
     <string name="font_normal">Normal</string>
     <string name="font_large">Large</string>
     <string name="font_xl">XL</string>

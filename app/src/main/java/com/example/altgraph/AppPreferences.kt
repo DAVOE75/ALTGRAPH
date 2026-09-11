@@ -71,6 +71,10 @@ class AppPreferences(context: Context) {
         get() = prefs.getFloat(KEY_RAMP_MAX_SLOPE, 15.0f).toDouble()
         set(value) = prefs.edit().putFloat(KEY_RAMP_MAX_SLOPE, value.toFloat()).apply()
 
+    var useTopographicCalculation: Boolean
+        get() = prefs.getBoolean(KEY_USE_TOPOGRAPHIC_CALCULATION, false)
+        set(value) = prefs.edit().putBoolean(KEY_USE_TOPOGRAPHIC_CALCULATION, value).apply()
+
     companion object {
         private const val PREFS_NAME = "altgraph_settings"
         private const val KEY_FONT_FAMILY = "font_family_key"
@@ -89,6 +93,7 @@ class AppPreferences(context: Context) {
         private const val KEY_VISIBLE_BLOCKS_COUNT = "visible_blocks_count"
         private const val KEY_RAMP_MIN_SLOPE = "ramp_min_slope_pct"
         private const val KEY_RAMP_MAX_SLOPE = "ramp_max_slope_pct"
+        private const val KEY_USE_TOPOGRAPHIC_CALCULATION = "use_topographic_calculation"
 
         @Volatile
         private var INSTANCE: AppPreferences? = null
