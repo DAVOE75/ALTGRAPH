@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ALTGRAPH</string>
+
+    <!-- Extension Data Fields -->
+    <string name="data_type_altimetria_title">Stratega di Altimetria</string>
+    <string name="data_type_altimetria_desc">Grafico del profilo dinamico con pendenze e allarmi attacco</string>
+
+    <string name="data_type_altimetria_3d_title">Altimetria 3D</string>
+    <string name="data_type_altimetria_3d_desc">Profilo 3D in prospettiva isometrica con rilievo della pendenza</string>
+
+    <string name="data_type_fatigue_grade_title">Grado di Fatica (GF)</string>
+    <string name="data_type_fatigue_grade_desc">Indice scientifico di difficoltà e fatica della salita</string>
+
+    <string name="data_type_climb_pacing_title">Ritmo VAM Obiettivo</string>
+    <string name="data_type_climb_pacing_desc">Assistente di ritmo VAM (m/h) secondo la pendenza attuale</string>
+
+    <string name="data_type_gradient_trend_title">Tendenza 3D e Pendenza Max</string>
+    <string name="data_type_gradient_trend_desc">Tendenza della pendenza in tempo reale e picco massimo nel tratto</string>
+
+    <!-- UI Labels for AltimetriaView -->
+    <string name="header_climb_strategist">STRATEGA DI SALITA</string>
+    <string name="label_dist_remaining">DIST. RIMANENTE</string>
+    <string name="label_time_to_summit">TEMPO IN VETTA</string>
+    <string name="label_next_blocks">PROSSIMI %1$d m (BLOCCHI DA %2$d m)</string>
+    <string name="label_current_gradient">PENDENZA ATTUALE</string>
+    <string name="label_max_gradient_tramo">PENDENZA MAX TRATTO</string>
+    <string name="alert_attack">ATTACCA!</string>
+    <string name="alert_attack_sub">Rampa dura nel prossimo tratto</string>
+
+    <!-- Settings Panel Strings -->
+    <string name="title_settings">Pannello Impostazioni</string>
+    <string name="setting_font_family">Carattere (Google Sans / Condensed)</string>
+    <string name="setting_block_size">Distanza per Blocco del Profilo</string>
+    <string name="setting_visible_blocks_count">Numero di Tratti Visibili (da 1 a 10)</string>
+    <string name="setting_lookahead_meters_3d">Distanza di Anticipo 3D (Asse X)</string>
+    <string name="setting_attack_threshold">Soglia Allarme Attacco (%)</string>
+    <string name="setting_target_vam">VAM Obiettivo (m/h)</string>
+    <string name="setting_asphalt_factor">Qualità dell\'Asfalto (TA)</string>
+    <string name="setting_enable_alerts">Attiva Allarmi Visivi di Attacco</string>
+    <string name="setting_font_size_3d">Dimensione Carattere Altimetria 3D</string>
+    <string name="setting_show_block_percentages">Mostra % Pendenza nei Blocchi</string>
+    <string name="setting_show_3d_cotas">Mostra Altitudini sul Grafico 3D</string>
+    <string name="setting_show_3d_ramps">Mostra Rampe Dure (≥10%) in 3D</string>
+    <string name="setting_ramp_min_slope">Pendenza Minima Freccia Rampa (%)</string>
+    <string name="setting_ramp_max_slope">Pendenza Massima Freccia Rampa (%)</string>
+    <string name="setting_show_max_gradient">Mostra Pendenza Massima nell\'Intestazione 3D</string>
+    <string name="setting_rotate_90_cw">Ruota Grafico 90° (Modalità Orizzontale)</string>
+    <string name="font_normal">Normale</string>
+    <string name="font_large">Grande</string>
+    <string name="font_xl">Molto Gr.</string>
+    <string name="status_saved">Impostazioni Salvate Automaticamente</string>
+    <string name="btn_save_and_exit">Salva ed Esci</string>
+
+    <!-- Zone Colors -->
+    <string name="zone_green">VERDE</string>
+    <string name="zone_yellow">GIALLO</string>
+    <string name="zone_orange">ARANCIONE</string>
+    <string name="zone_red">ROSSO</string>
+    <string name="zone_purple">VIOLA</string>
+</resources>

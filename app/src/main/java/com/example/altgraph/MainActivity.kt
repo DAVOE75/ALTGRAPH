@@ -142,13 +142,13 @@ class MainActivity : Activity() {
         val fontCard = createCardContainer()
         val fontLabel = createSectionLabel(getString(R.string.setting_font_family))
         val currentFontOpt = FontHelper.options.find { it.key == prefs.fontFamilyKey } ?: FontHelper.options[0]
-        val fontValueText = createValueText(currentFontOpt.labelEs)
+        val fontValueText = createValueText(currentFontOpt.getLocalizedLabel())
 
         val fontSpinner = Spinner(this).apply {
             val adapter = ArrayAdapter(
                 this@MainActivity,
                 android.R.layout.simple_spinner_dropdown_item,
-                FontHelper.options.map { it.labelEs }
+                FontHelper.options.map { it.getLocalizedLabel() }
             )
             setAdapter(adapter)
 
@@ -159,7 +159,7 @@ class MainActivity : Activity() {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     val opt = FontHelper.options[position]
                     prefs.fontFamilyKey = opt.key
-                    fontValueText.text = opt.labelEs
+                    fontValueText.text = opt.getLocalizedLabel()
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -542,7 +542,7 @@ class MainActivity : Activity() {
         val asphaltCard = createCardContainer()
         val asphaltLabel = createSectionLabel(getString(R.string.setting_asphalt_factor))
         val currentAsphaltQuality = FatigueGradeCalculator.AsphaltQuality.entries.find { abs(it.factor - prefs.asphaltFactor) < 0.05 } ?: FatigueGradeCalculator.AsphaltQuality.GOOD
-        val asphaltValueText = createValueText("${currentAsphaltQuality.labelEs} (TA = %.1f)".format(Locale.US, currentAsphaltQuality.factor))
+        val asphaltValueText = createValueText("${currentAsphaltQuality.getLocalizedLabel()} (TA = %.1f)".format(Locale.US, currentAsphaltQuality.factor))
         val asphaltRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -553,9 +553,9 @@ class MainActivity : Activity() {
 
         qualities.forEach { q ->
             val isActive = abs(prefs.asphaltFactor - q.factor) < 0.05
-            val btn = createSegmentButton(q.labelEs.take(6), isActive) {
+            val btn = createSegmentButton(q.getLocalizedLabel().take(6), isActive) {
                 prefs.asphaltFactor = q.factor
-                asphaltValueText.text = "${q.labelEs} (TA = %.1f)".format(Locale.US, q.factor)
+                asphaltValueText.text = "${q.getLocalizedLabel()} (TA = %.1f)".format(Locale.US, q.factor)
                 updateSegmentActiveStates(asphaltButtons, qualities.indexOf(q))
             }
             asphaltButtons.add(btn)

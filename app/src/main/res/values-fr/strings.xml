@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ALTGRAPH</string>
+
+    <!-- Extension Data Fields -->
+    <string name="data_type_altimetria_title">Stratège d\'Altimétrie</string>
+    <string name="data_type_altimetria_desc">Graphique de profil dynamique avec pourcentages et alertes d\'attaque</string>
+
+    <string name="data_type_altimetria_3d_title">Altimétrie 3D</string>
+    <string name="data_type_altimetria_3d_desc">Profil 3D en perspective isométrique avec relief de pente</string>
+
+    <string name="data_type_fatigue_grade_title">Indice de Fatigue (GF)</string>
+    <string name="data_type_fatigue_grade_desc">Indice scientifique de difficulté et fatigue de la montée</string>
+
+    <string name="data_type_climb_pacing_title">Rythme VAM Cible</string>
+    <string name="data_type_climb_pacing_desc">Assistant de rythme VAM (m/h) selon la pente actuelle</string>
+
+    <string name="data_type_gradient_trend_title">Tendance 3D et Pente Max</string>
+    <string name="data_type_gradient_trend_desc">Tendance de pente en temps réel et pic maximum du segment</string>
+
+    <!-- UI Labels for AltimetriaView -->
+    <string name="header_climb_strategist">STRATÈGE DE COL</string>
+    <string name="label_dist_remaining">DIST. RESTANTE</string>
+    <string name="label_time_to_summit">TEMPS AU SOMMET</string>
+    <string name="label_next_blocks">PROCHAINS %1$d m (BLOCKS DE %2$d m)</string>
+    <string name="label_current_gradient">PENTE ACTUELLE</string>
+    <string name="label_max_gradient_tramo">PENTE MAX. TRONÇON</string>
+    <string name="alert_attack">ATTAQUE!</string>
+    <string name="alert_attack_sub">Rampe raide dans le prochain tronçon</string>
+
+    <!-- Settings Panel Strings -->
+    <string name="title_settings">Panneau de Configuration</string>
+    <string name="setting_font_family">Police de Caractères (Google Sans / Condensed)</string>
+    <string name="setting_block_size">Distance par Block de Profil</string>
+    <string name="setting_visible_blocks_count">Nombre de Tronçons Visibles (1 à 10)</string>
+    <string name="setting_lookahead_meters_3d">Distance d\'Anticipation 3D (Axe X)</string>
+    <string name="setting_attack_threshold">Seuil d\'Alerte d\'Attaque (%)</string>
+    <string name="setting_target_vam">VAM Cible (m/h)</string>
+    <string name="setting_asphalt_factor">Qualité de l\'Asphalte (TA)</string>
+    <string name="setting_enable_alerts">Activer les Alertes Visuelles d\'Attaque</string>
+    <string name="setting_font_size_3d">Taille de Police en Altimétrie 3D</string>
+    <string name="setting_show_block_percentages">Afficher % de Pente dans les Blocks</string>
+    <string name="setting_show_3d_cotas">Afficher Altitudes sur Graphique 3D</string>
+    <string name="setting_show_3d_ramps">Afficher Rampes Raides (≥10%) en 3D</string>
+    <string name="setting_ramp_min_slope">Pente Minimale pour Flèche de Rampe (%)</string>
+    <string name="setting_ramp_max_slope">Pente Maximale pour Flèche de Rampe (%)</string>
+    <string name="setting_show_max_gradient">Afficher Pente Max dans l\'En-tête 3D</string>
+    <string name="setting_rotate_90_cw">Pivoter Graphique 90° (Mode Paysage)</string>
+    <string name="font_normal">Normale</string>
+    <string name="font_large">Grande</string>
+    <string name="font_xl">Très Gr.</string>
+    <string name="status_saved">Paramètres Enregistrés Automatiquement</string>
+    <string name="btn_save_and_exit">Enregistrer &amp; Quitter</string>
+
+    <!-- Zone Colors -->
+    <string name="zone_green">VERT</string>
+    <string name="zone_yellow">JAUNE</string>
+    <string name="zone_orange">ORANGE</string>
+    <string name="zone_red">ROUGE</string>
+    <string name="zone_purple">VIOLET</string>
+</resources>

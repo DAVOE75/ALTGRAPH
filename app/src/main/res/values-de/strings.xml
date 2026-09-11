@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ALTGRAPH</string>
+
+    <!-- Extension Data Fields -->
+    <string name="data_type_altimetria_title">Höhenprofil-Stratege</string>
+    <string name="data_type_altimetria_desc">Dynamisches Höhenprofil mit Steigungen und Angriffsalarmen</string>
+
+    <string name="data_type_altimetria_3d_title">3D Höhenprofil</string>
+    <string name="data_type_altimetria_3d_desc">Isometrisches 3D-Höhenprofil mit Geländerelief</string>
+
+    <string name="data_type_fatigue_grade_title">Ermüdungsgrad (GF)</string>
+    <string name="data_type_fatigue_grade_desc">Wissenschaftlicher Schwierigkeits- und Ermüdungsindex</string>
+
+    <string name="data_type_climb_pacing_title">Ziel-VAM-Tempo</string>
+    <string name="data_type_climb_pacing_desc">Ziel-VAM-Assistent (m/h) basierend auf aktueller Steigung</string>
+
+    <string name="data_type_gradient_trend_title">3D Steigungstrend &amp; Max Ramp</string>
+    <string name="data_type_gradient_trend_desc">Echtzeit-Steigungstrend und maximale Rampe im Segment</string>
+
+    <!-- UI Labels for AltimetriaView -->
+    <string name="header_climb_strategist">STEIGUNGS-STRATEGE</string>
+    <string name="label_dist_remaining">RESTDISTANZ</string>
+    <string name="label_time_to_summit">ZEIT BIS ZUM GIPFEL</string>
+    <string name="label_next_blocks">NÄCHSTE %1$d m (%2$d m BLÖCKE)</string>
+    <string name="label_current_gradient">AKTUELLE STEIGUNG</string>
+    <string name="label_max_gradient_tramo">MAX. STEIGUNG ABSCHNITT</string>
+    <string name="alert_attack">ANGRIFF!</string>
+    <string name="alert_attack_sub">Steile Rampe im nächsten Abschnitt</string>
+
+    <!-- Settings Panel Strings -->
+    <string name="title_settings">Einstellungspanel</string>
+    <string name="setting_font_family">Schriftart (Google Sans / Condensed)</string>
+    <string name="setting_block_size">Blockdistanz des Profils</string>
+    <string name="setting_visible_blocks_count">Anzahl sichtbarer Blöcke (1 bis 10)</string>
+    <string name="setting_lookahead_meters_3d">3D-Vorausschaudistanz (X-Achse)</string>
+    <string name="setting_attack_threshold">Schwelle für Angriffs-Alarm (%)</string>
+    <string name="setting_target_vam">Ziel-VAM (m/h)</string>
+    <string name="setting_asphalt_factor">Asphaltqualität (TA)</string>
+    <string name="setting_enable_alerts">Visuelle Angriffs-Alarme aktivieren</string>
+    <string name="setting_font_size_3d">Schriftgröße 3D-Höhenprofil</string>
+    <string name="setting_show_block_percentages">Steigung % in Blöcken anzeigen</string>
+    <string name="setting_show_3d_cotas">Höhenmarkierungen im 3D-Diagramm</string>
+    <string name="setting_show_3d_ramps">Steile Rampen (≥10%) in 3D anzeigen</string>
+    <string name="setting_ramp_min_slope">Mindeststeigung für Rampenpfeil (%)</string>
+    <string name="setting_ramp_max_slope">Maximalsteigung für Rampenpfeil (%)</string>
+    <string name="setting_show_max_gradient">Max. Steigung im 3D-Header anzeigen</string>
+    <string name="setting_rotate_90_cw">Diagramm um 90° drehen (Querformat)</string>
+    <string name="font_normal">Normal</string>
+    <string name="font_large">Groß</string>
+    <string name="font_xl">Sehr Groß</string>
+    <string name="status_saved">Einstellungen automatisch gespeichert</string>
+    <string name="btn_save_and_exit">Speichern &amp; Beenden</string>
+
+    <!-- Zone Colors -->
+    <string name="zone_green">GRÜN</string>
+    <string name="zone_yellow">GELB</string>
+    <string name="zone_orange">ORANGE</string>
+    <string name="zone_red">ROT</string>
+    <string name="zone_purple">VIOLETT</string>
+</resources>

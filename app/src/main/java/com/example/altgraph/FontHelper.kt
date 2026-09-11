@@ -2,6 +2,7 @@ package com.example.altgraph
 
 import android.graphics.Paint
 import android.graphics.Typeface
+import java.util.Locale
 
 object FontHelper {
 
@@ -9,15 +10,29 @@ object FontHelper {
         val key: String,
         val labelEs: String,
         val labelEn: String,
+        val labelFr: String,
+        val labelIt: String,
+        val labelDe: String,
         val scaleX: Float
-    )
+    ) {
+        fun getLocalizedLabel(): String {
+            val lang = Locale.getDefault().language.lowercase()
+            return when {
+                lang.startsWith("es") -> labelEs
+                lang.startsWith("fr") -> labelFr
+                lang.startsWith("it") -> labelIt
+                lang.startsWith("de") -> labelDe
+                else -> labelEn
+            }
+        }
+    }
 
     val options = listOf(
-        FontOption("sans-serif-condensed", "Condensed (Estrecha/Alta)", "Condensed (Narrow/Tall)", 0.72f),
-        FontOption("sans-serif", "Sans-Serif (Estándar)", "Sans-Serif (Standard)", 1.0f),
-        FontOption("sans-serif-medium", "Sans Medium", "Sans Medium", 1.0f),
-        FontOption("sans-serif-black", "Sans Black (Extra Gruesa)", "Sans Black (Heavy)", 1.15f),
-        FontOption("monospace", "Monospace Digital", "Monospace Digital", 1.0f)
+        FontOption("sans-serif-condensed", "Condensed (Estrecha/Alta)", "Condensed (Narrow/Tall)", "Condensed (Étroite)", "Condensed (Stretta)", "Condensed (Schmal)", 0.72f),
+        FontOption("sans-serif", "Sans-Serif (Estándar)", "Sans-Serif (Standard)", "Sans-Serif (Standard)", "Sans-Serif (Standard)", "Sans-Serif (Standard)", 1.0f),
+        FontOption("sans-serif-medium", "Sans Medium", "Sans Medium", "Sans Medium", "Sans Medium", "Sans Medium", 1.0f),
+        FontOption("sans-serif-black", "Sans Black (Extra Gruesa)", "Sans Black (Heavy)", "Sans Black (Épaisse)", "Sans Black (Pesante)", "Sans Black (Extradick)", 1.15f),
+        FontOption("monospace", "Monospace Digital", "Monospace Digital", "Monospacé Digital", "Monospace Digitale", "Monospace Digital", 1.0f)
     )
 
     fun getTypeface(familyKey: String, style: Int = Typeface.BOLD): Typeface {

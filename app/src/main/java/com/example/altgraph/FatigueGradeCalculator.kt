@@ -1,14 +1,33 @@
 package com.example.altgraph
 
+import java.util.Locale
 import kotlin.math.pow
 
 object FatigueGradeCalculator {
 
-    enum class AsphaltQuality(val factor: Double, val labelEs: String, val labelEn: String) {
-        VERY_GOOD(0.1, "Muy Bueno", "Very Good"),
-        GOOD(0.5, "Bueno", "Good"),
-        REGULAR(1.2, "Regular", "Regular"),
-        POOR(1.7, "Malo / Gravilla", "Poor / Gravel")
+    enum class AsphaltQuality(
+        val factor: Double,
+        val labelEs: String,
+        val labelEn: String,
+        val labelFr: String,
+        val labelIt: String,
+        val labelDe: String
+    ) {
+        VERY_GOOD(0.1, "Muy Bueno", "Very Good", "Très Bon", "Molto Buono", "Sehr Gut"),
+        GOOD(0.5, "Bueno", "Good", "Bon", "Buono", "Gut"),
+        REGULAR(1.2, "Regular", "Regular", "Moyen", "Regolare", "Mittel"),
+        POOR(1.7, "Malo / Gravilla", "Poor / Gravel", "Mauvais / Gravier", "Pessimo / Ghiaia", "Schlecht / Kies");
+
+        fun getLocalizedLabel(): String {
+            val lang = Locale.getDefault().language.lowercase()
+            return when {
+                lang.startsWith("es") -> labelEs
+                lang.startsWith("fr") -> labelFr
+                lang.startsWith("it") -> labelIt
+                lang.startsWith("de") -> labelDe
+                else -> labelEn
+            }
+        }
     }
 
     /**
@@ -54,15 +73,28 @@ object FatigueGradeCalculator {
     /**
      * Clasifica el puerto según su Grado de Fatiga (GF)
      */
-    fun getClimbCategoryName(gf: Double, isSpanish: Boolean = true): String {
+    fun getClimbCategoryName(gf: Double): String {
+        val lang = Locale.getDefault().language.lowercase()
         return when {
-            gf < 10.0 -> if (isSpanish) "Repecho" else "Short Rise"
+            gf < 10.0 -> when {
+                lang.startsWith("es") -> "Repecho"
+                lang.startsWith("fr") -> "Côte courte"
+                lang.startsWith("it") -> "Strappetto"
+                lang.startsWith("de") -> "Kurzer Anstieg"
+                else -> "Short Rise"
+            }
             gf <= 20.0 -> "5ª Cat"
             gf <= 40.0 -> "4ª Cat"
             gf <= 70.0 -> "3ª Cat"
             gf <= 120.0 -> "2ª Cat"
             gf <= 200.0 -> "1ª Cat"
-            else -> if (isSpanish) "Esp (HC)" else "Special (HC)"
+            else -> when {
+                lang.startsWith("es") -> "Esp (HC)"
+                lang.startsWith("fr") -> "Hors Catégorie (HC)"
+                lang.startsWith("it") -> "Fuori Categoria (HC)"
+                lang.startsWith("de") -> "Ehrenkategorie (HC)"
+                else -> "Special (HC)"
+            }
         }
     }
 }
