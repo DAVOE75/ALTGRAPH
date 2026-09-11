@@ -8,7 +8,7 @@
 
 | 🏔️ Altimetría 3D | 🎨 Panel Estilo | 🏔️ Panel 3D | 📊 Panel 2D | 🚴 Panel VAM |
 | :---: | :---: | :---: | :---: | :---: |
-| ![3D Profile](art/screenshot_3d_profile.png) | ![Estilo](art/screenshot_settings_estilo.png) | ![3D](art/screenshot_settings_3d.png) | ![2D](art/screenshot_settings_2d.png) | ![VAM](art/screenshot_settings_vam.png) |
+| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile.png" width="160" alt="3D Profile" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_estilo.png" width="160" alt="Estilo" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_3d.png" width="160" alt="3D" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_2d.png" width="160" alt="2D" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_vam.png" width="160" alt="VAM" /> |
 
 ---
 

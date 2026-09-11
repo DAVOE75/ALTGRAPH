@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="art/logo.png" alt="ALTGRAPH Logo" width="160" />
+  <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png" alt="ALTGRAPH Logo" width="160" />
 </p>
 
 # ALTGRAPH (v0.2.3)
@@ -14,16 +14,16 @@ Proporciona análisis dinámico de puertos de montaña, gráficos 3D en perspect
 
 | 🏔️ Altimetría 3D e Itinerario | 🎨 Pestaña Estilo | 🏔️ Pestaña 3D |
 | :---: | :---: | :---: |
-| ![Altimetría 3D](art/screenshot_3d_profile.png) | ![Panel Estilo](art/screenshot_settings_estilo.png) | ![Panel 3D](art/screenshot_settings_3d.png) |
+| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile.png" width="220" alt="Altimetría 3D" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_estilo.png" width="220" alt="Panel Estilo" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_3d.png" width="220" alt="Panel 3D" /> |
 
 | 📊 Pestaña 2D | 🚴 Pestaña VAM |
 | :---: | :---: |
-| ![Panel 2D](art/screenshot_settings_2d.png) | ![Panel VAM](art/screenshot_settings_vam.png) |
+| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_2d.png" width="220" alt="Panel 2D" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_vam.png" width="220" alt="Panel VAM" /> |
 
 ---
 
 ## 🌐 Portal Web Oficial y Soporte Multilingüe
-Visita el **[Portal Web Oficial de ALTGRAPH (docs/index.html)](https://davoe75.github.io/ALTGRAPH/)** para la documentación interactiva completa en español e inglés.
+Visita el **[Portal Web Oficial de ALTGRAPH (davoe75.github.io/ALTGRAPH)](https://davoe75.github.io/ALTGRAPH/)** para la documentación interactiva completa en español e inglés.
 
 ---
 
