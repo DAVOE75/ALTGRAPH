@@ -59,7 +59,7 @@ class MainActivity : Activity() {
         }
 
         val subtitle = TextView(this).apply {
-            text = "${getString(R.string.title_settings)} • v0.2.3"
+            text = "${getString(R.string.title_settings)} • v0.2.4"
             textSize = 12f
             setTextColor(Color.parseColor("#A1A1AA"))
             gravity = Gravity.CENTER
@@ -274,6 +274,34 @@ class MainActivity : Activity() {
         lookaheadCard.addView(lookaheadValueText)
         lookaheadCard.addView(lookaheadRow)
 
+        // Opción: Tamaño de Bloque 3D y Perfil (50m, 100m, 250m, 500m, 1km) -> Movidp a Pestaña 3D
+        val blockCard = createCardContainer()
+        val blockLabel = createSectionLabel(getString(R.string.setting_block_size))
+        val currentBlockText = if (prefs.blockSizeMeters >= 1000.0) "${(prefs.blockSizeMeters / 1000).toInt()} km" else "${prefs.blockSizeMeters.toInt()} m"
+        val blockValueText = createValueText(currentBlockText)
+        val blockRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
+
+        val blockButtons = mutableListOf<Button>()
+        val blockSizes = listOf(50.0, 100.0, 250.0, 500.0, 1000.0)
+
+        blockSizes.forEach { size ->
+            val labelStr = if (size >= 1000.0) "${(size / 1000).toInt()}km" else "${size.toInt()}m"
+            val btn = createSegmentButton(labelStr, prefs.blockSizeMeters == size) {
+                prefs.blockSizeMeters = size
+                blockValueText.text = if (size >= 1000.0) "${(size / 1000).toInt()} km" else "${size.toInt()} m"
+                updateSegmentActiveStates(blockButtons, blockSizes.indexOf(size))
+            }
+            blockButtons.add(btn)
+            blockRow.addView(btn)
+        }
+
+        blockCard.addView(blockLabel)
+        blockCard.addView(blockValueText)
+        blockCard.addView(blockRow)
+
         // Opción: Mostrar Cotas en 3D
         val showCotasCard = createCardContainer()
         val switchShowCotas = Switch(this).apply {
@@ -389,6 +417,7 @@ class MainActivity : Activity() {
         showMaxGradCard.addView(switchShowMaxGrad)
 
         tab3dContainer.addView(lookaheadCard)
+        tab3dContainer.addView(blockCard)
         tab3dContainer.addView(showCotasCard)
         tab3dContainer.addView(showRampsCard)
         tab3dContainer.addView(rampMinCard)
@@ -399,34 +428,6 @@ class MainActivity : Activity() {
         // ==========================================
         // PESTAÑA 3: 📊 ESTRATEGA 2D
         // ==========================================
-
-        // Opción: Tamaño de Bloque (50m, 100m, 250m, 500m, 1km)
-        val blockCard = createCardContainer()
-        val blockLabel = createSectionLabel(getString(R.string.setting_block_size))
-        val currentBlockText = if (prefs.blockSizeMeters >= 1000.0) "${(prefs.blockSizeMeters / 1000).toInt()} km" else "${prefs.blockSizeMeters.toInt()} m"
-        val blockValueText = createValueText(currentBlockText)
-        val blockRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        }
-
-        val blockButtons = mutableListOf<Button>()
-        val blockSizes = listOf(50.0, 100.0, 250.0, 500.0, 1000.0)
-
-        blockSizes.forEach { size ->
-            val labelStr = if (size >= 1000.0) "${(size / 1000).toInt()}km" else "${size.toInt()}m"
-            val btn = createSegmentButton(labelStr, prefs.blockSizeMeters == size) {
-                prefs.blockSizeMeters = size
-                blockValueText.text = if (size >= 1000.0) "${(size / 1000).toInt()} km" else "${size.toInt()} m"
-                updateSegmentActiveStates(blockButtons, blockSizes.indexOf(size))
-            }
-            blockButtons.add(btn)
-            blockRow.addView(btn)
-        }
-
-        blockCard.addView(blockLabel)
-        blockCard.addView(blockValueText)
-        blockCard.addView(blockRow)
 
         // Opción: Tramos Visibles
         val visibleBlocksCard = createCardContainer()
@@ -511,7 +512,6 @@ class MainActivity : Activity() {
         attackCard.addView(attackValueText)
         attackCard.addView(attackRow)
 
-        tab2dContainer.addView(blockCard)
         tab2dContainer.addView(visibleBlocksCard)
         tab2dContainer.addView(showPctCard)
         tab2dContainer.addView(alertCard)
