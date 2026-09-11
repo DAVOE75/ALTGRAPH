@@ -291,6 +291,7 @@ class Altimetria3DView @JvmOverloads constructor(
 
         var accumulatedElev = currentElevation
 
+        // 1. Calcular altitud exacta en metros para cada punto del perfil
         for (i in 0 until samples) {
             val grade = if (i < nextBlocks.size) nextBlocks[i].toDouble() else ((i % 4) * 2.5 + 2.0)
 
@@ -299,13 +300,21 @@ class Altimetria3DView @JvmOverloads constructor(
                 accumulatedElev += (segmentMeters * (grade / 100.0))
             }
             pointElevations[i] = accumulatedElev.toFloat()
+        }
 
+        // 2. Escala estricta matemática de altitud (1% NUNCA se ve más inclinado que 10%, descansillos planos al 0%)
+        val minElev = pointElevations.minOrNull() ?: currentElevation.toFloat()
+        val maxElev = pointElevations.maxOrNull() ?: (minElev + 50f)
+        val elevRange = (maxElev - minElev).coerceAtLeast(15f)
+
+        for (i in 0 until samples) {
             val progress = i.toFloat() / (samples - 1)
             val curveOffset = sin(progress * Math.PI * 1.5).toFloat() * (w * 0.08f)
 
             val px = startX + i * stepX + curveOffset
-            val normalizedHeight = (grade.coerceIn(-5.0, 20.0) + 5.0) / 25.0
-            val pYTop = baseGroundY - (progress * (h * 0.06f)) - (normalizedHeight * maxPeakHeight).toFloat()
+            val normalizedHeight = ((pointElevations[i] - minElev) / elevRange).coerceIn(0f, 1f)
+
+            val pYTop = baseGroundY - (progress * (h * 0.06f)) - (normalizedHeight * maxPeakHeight)
             val pYBase = baseGroundY - (progress * (h * 0.06f))
 
             pointsX[i] = px

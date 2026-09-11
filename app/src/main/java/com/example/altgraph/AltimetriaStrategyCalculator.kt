@@ -46,7 +46,9 @@ class AltimetriaStrategyCalculator {
                 val d = hypot(pt.first - prev.first, pt.second - prev.second) * 111000.0
                 accumulatedDist += d
             }
-            val approxElev = 100.0 + (sin(accumulatedDist / 500.0) * 80.0) + (accumulatedDist / 120.0)
+            // Generación de perfil micro-relieve realista con descansillos y rampas verdaderas
+            val microRelief = (sin(accumulatedDist / 80.0) * 12.0) + (sin(accumulatedDist / 250.0) * 35.0)
+            val approxElev = 100.0 + microRelief + (accumulatedDist / 110.0)
             result.add(RoutePoint(pt.first, pt.second, approxElev, accumulatedDist))
         }
 
@@ -69,9 +71,10 @@ class AltimetriaStrategyCalculator {
 
         val isNavigating = isNavigatingRoute || routePoints.isNotEmpty()
 
-        // MODO DEMO: ÚNICAMENTE si NO HAY ninguna ruta cargada/navegada
+        // MODO DEMO O MODO LIBRE: Perfil con rampas y descansillos realistas
         if (!isNavigating) {
-            val demoBlocks = listOf(3.5f, 5.0f, 7.5f, 11.2f, 12.8f, 9.0f, 6.5f, 8.2f, 10.5f, 4.0f)
+            // Tramos con rampas duras (12.8%, 11.5%), zonas llanas/descansillos (0.5%, 1.2%) y falsos llanos
+            val demoBlocks = listOf(3.2f, 1.0f, 6.5f, 12.8f, 0.5f, 11.5f, 2.0f, 8.5f, 14.2f, 3.0f)
             val hasAttack = attackAlertsEnabled && demoBlocks.any { it > thresholdAttack }
             val demoFatigue = 68
 
