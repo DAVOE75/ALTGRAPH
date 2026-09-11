@@ -225,7 +225,7 @@ class Altimetria3DView @JvmOverloads constructor(
         // 3. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)
 
-        // 4. Perfil 3D con Cotas de Altitud Compactas y % de Bloque Centrados
+        // 4. Perfil 3D adaptable desde 200m hasta 10 km
         draw3DRibbonAndWalls(canvas, w, h)
     }
 
@@ -292,8 +292,15 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private fun draw3DRibbonAndWalls(canvas: Canvas, w: Float, h: Float) {
-        val totalMetersAhead = lookaheadMeters.toDouble().coerceIn(200.0, 500.0)
-        val blocksCount = (totalMetersAhead / blockSizeMeters.coerceAtLeast(10.0)).toInt().coerceIn(2, 10)
+        // PERMITIR ESCALA COMPLETA DE ANTICIPACIÓN HASTA 10 KM (10000m)
+        val totalMetersAhead = lookaheadMeters.toDouble().coerceIn(200.0, 10000.0)
+
+        // Determinar número de muestras/bloques según anticipación (200m-500m o 1km-10km)
+        val blocksCount = if (totalMetersAhead > 1000.0) {
+            (totalMetersAhead / 1000.0).toInt().coerceIn(2, 10)
+        } else {
+            (totalMetersAhead / blockSizeMeters.coerceAtLeast(10.0)).toInt().coerceIn(2, 10)
+        }
         val samples = blocksCount + 1
 
         val startX = w * 0.08f
@@ -302,6 +309,7 @@ class Altimetria3DView @JvmOverloads constructor(
         val maxPeakHeight = h * 0.52f
 
         val stepX = (endX - startX) / (samples - 1).coerceAtLeast(1)
+        val segmentDistMeters = totalMetersAhead / blocksCount
 
         val pointsX = FloatArray(samples)
         val pointsYTop = FloatArray(samples)
@@ -314,8 +322,7 @@ class Altimetria3DView @JvmOverloads constructor(
         pointElevations[0] = accumulatedElev.toFloat()
         for (i in 1 until samples) {
             val segmentGrade = if (i - 1 < nextBlocks.size) nextBlocks[i - 1].toDouble() else 4.0
-            val segmentMeters = blockSizeMeters.coerceAtLeast(20.0)
-            accumulatedElev += (segmentMeters * (segmentGrade / 100.0))
+            accumulatedElev += (segmentDistMeters * (segmentGrade / 100.0))
             pointElevations[i] = accumulatedElev.toFloat()
         }
 
@@ -366,8 +373,8 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawPath(wallPath, wallPaint)
         }
 
-        // DIBUJAR LÍNEAS VERTICALES DE LÍMITE Y COTAS DE ALTITUD ROTADAS A 90 GRADOS COMPACTAS
-        cotaTextPaint.textSize = ((h * 0.035f) * fontScale).coerceIn(8f, 13f)
+        // DIBUJAR LÍNEAS VERTICALES DE LÍMITE Y COTAS DE ALTITUD
+        cotaTextPaint.textSize = ((h * 0.050f) * fontScale).coerceIn(10f, 18f)
 
         for (i in 0 until samples) {
             canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i], pointsYBase[i], cotaLinePaint)
@@ -375,8 +382,8 @@ class Altimetria3DView @JvmOverloads constructor(
             if (showCotas) {
                 val cotaText = "${pointElevations[i].toInt()} m"
                 canvas.save()
-                val textOffsetX = if (i == 0) pointsX[i] + 6f else pointsX[i] - 4f
-                val textOffsetY = pointsYBase[i] - 10f
+                val textOffsetX = if (i == 0) pointsX[i] + 8f else pointsX[i] - 5f
+                val textOffsetY = pointsYBase[i] - 12f
                 canvas.translate(textOffsetX, textOffsetY)
                 canvas.rotate(-90f)
                 canvas.drawText(cotaText, 0f, 0f, cotaTextPaint)
@@ -420,20 +427,24 @@ class Altimetria3DView @JvmOverloads constructor(
             }
         }
 
-        // DIBUJAR EJE X CON MARCAS DE DISTANCIA EN METROS SEGÚN ANTICIPACIÓN
+        // DIBUJAR EJE X CON MARCAS DE DISTANCIA EN METROS O KILÓMETROS SEGÚN ANTICIPACIÓN
         axisTextPaint.textSize = (h * 0.040f).coerceIn(9f, 13f)
         axisTextPaint.textAlign = Paint.Align.CENTER
-        val stepDistMeters = (totalMetersAhead / blocksCount).toInt()
 
         for (i in 0 until samples) {
-            val distLabel = "${i * stepDistMeters}m"
+            val m = (i * segmentDistMeters).toInt()
+            val distLabel = if (totalMetersAhead >= 1000.0) {
+                if (m < 1000) "${m}m" else "${m / 1000}km"
+            } else {
+                "${m}m"
+            }
             val px = pointsX[i]
             val pyBase = pointsYBase[i]
 
             canvas.drawText(distLabel, px, pyBase + 12f, axisTextPaint)
         }
 
-        // DIBUJAR PORCENTAJES (%) DENTRO DE CADA BLOQUE 3D CENTRADOS PERFECTAMENTE (100% VISIBLES SIN CORTES)
+        // DIBUJAR PORCENTAJES (%) DEBAJO DE LA BASE DE LA GRÁFICA 3D
         val fontBaseSize = (h * 0.042f) * fontScale
 
         for (i in 0 until samples - 1) {
@@ -445,15 +456,13 @@ class Altimetria3DView @JvmOverloads constructor(
             }
 
             val midX = (pointsX[i] + pointsX[i + 1]) / 2f
-            val midYTop = (pointsYTop[i] + pointsYTop[i + 1]) / 2f
             val midYBase = (pointsYBase[i] + pointsYBase[i + 1]) / 2f
-            val centerY = (midYTop + midYBase) / 2f
 
             val blockW = abs(pointsX[i + 1] - pointsX[i])
             val calcFontSize = (blockW * 0.28f * fontScale).coerceIn(10f, fontBaseSize.coerceAtLeast(16f))
             percentTextPaint.textSize = calcFontSize
 
-            val textY = centerY + (calcFontSize * 0.35f)
+            val textY = midYBase + calcFontSize + 18f
             canvas.drawText(pctStr, midX, textY, percentTextPaint)
         }
 
