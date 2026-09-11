@@ -291,14 +291,12 @@ class Altimetria3DView @JvmOverloads constructor(
 
         var accumulatedElev = currentElevation
 
-        // 1. Calcular altitud exacta en metros para cada punto del perfil
-        for (i in 0 until samples) {
-            val grade = if (i < nextBlocks.size) nextBlocks[i].toDouble() else ((i % 4) * 2.5 + 2.0)
-
-            if (i > 0) {
-                val segmentMeters = blockSizeMeters.coerceAtLeast(20.0)
-                accumulatedElev += (segmentMeters * (grade / 100.0))
-            }
+        // 1. Calcular altitud exacta en metros para cada punto del perfil (Corregido índice de bloque segmentMeters * grade / 100)
+        pointElevations[0] = accumulatedElev.toFloat()
+        for (i in 1 until samples) {
+            val segmentGrade = if (i - 1 < nextBlocks.size) nextBlocks[i - 1].toDouble() else 4.0
+            val segmentMeters = blockSizeMeters.coerceAtLeast(20.0)
+            accumulatedElev += (segmentMeters * (segmentGrade / 100.0))
             pointElevations[i] = accumulatedElev.toFloat()
         }
 
@@ -374,7 +372,7 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i + 1], pointsYTop[i + 1], lineStrokePaint)
         }
 
-        // DIBUJAR RAMPA DURA (≥ 10% para ≥ 20m) CON FLECHA Y INDICADOR FLOTANTE (SIEMPRE CON 1 DECIMAL)
+        // DIBUJAR RAMPA DURA (≥ 10% para ≥ 20m) CON FLECHA Y INDICADOR FLOTANTE (Muestra exactamente 1 decimal alineado)
         if (showRamps) {
             for (i in 0 until samples - 1) {
                 val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
@@ -414,16 +412,12 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawLine(pointsX[i], pointsYBase[i], pointsX[i], pointsYBase[i] + 5f, gridPaint)
         }
 
-        // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D
+        // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D (Alineado exactamente con el % de rampa)
         val fontBaseSize = (h * 0.045f) * fontScale
 
         for (i in 0 until samples - 1) {
             val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
-            val pctStr = if (blockSizeMeters <= 50.0) {
-                if (grade % 1.0f == 0.0f) "%.0f%%".format(grade) else "%.1f%%".format(grade)
-            } else {
-                "%.0f%%".format(grade)
-            }
+            val pctStr = "%.1f%%".format(grade)
 
             val midX = (pointsX[i] + pointsX[i + 1]) / 2f
             val midYTop = (pointsYTop[i] + pointsYTop[i + 1]) / 2f
@@ -449,20 +443,22 @@ class Altimetria3DView @JvmOverloads constructor(
 
     private fun getGradeColor(grade: Double): String {
         return when {
-            grade < 3.0 -> "#22C55E" // Verde
-            grade < 6.0 -> "#EAB308" // Amarillo
-            grade < 9.0 -> "#F97316" // Naranja
-            grade < 12.0 -> "#EF4444" // Rojo
-            else -> "#A855F7"         // Violeta rampa dura
+            grade < 0.0 -> "#3B82F6"  // Azul descensos
+            grade < 4.0 -> "#10B981"  // Verde (0% - 4%)
+            grade < 8.0 -> "#0EA5E9"  // Celeste (4% - 8%)
+            grade < 10.0 -> "#F59E0B" // Amarillo Ocre (8% - 10%)
+            grade < 15.0 -> "#EF4444" // Rojo Carmesí (10% - 15%)
+            else -> "#A855F7"         // Violeta rampa muy dura (> 15%)
         }
     }
 
     private fun getDarkGradeColor(grade: Double): String {
         return when {
-            grade < 3.0 -> "#15803D"  // Verde oscuro
-            grade < 6.0 -> "#B45309"  // Amarillo/Ocre oscuro
-            grade < 9.0 -> "#C2410C"  // Naranja oscuro
-            grade < 12.0 -> "#B91C1C" // Rojo oscuro
+            grade < 0.0 -> "#1E40AF"  // Azul oscuro descensos
+            grade < 4.0 -> "#15803D"  // Verde oscuro
+            grade < 8.0 -> "#0284C7"  // Celeste/Azul oscuro
+            grade < 10.0 -> "#B45309"  // Amarillo/Ocre oscuro
+            grade < 15.0 -> "#B91C1C" // Rojo oscuro
             else -> "#6B21A8"         // Violeta/Púrpura oscuro
         }
     }
