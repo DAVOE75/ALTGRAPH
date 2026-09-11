@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
 import android.util.AttributeSet
@@ -72,17 +73,7 @@ class Altimetria3DView @JvmOverloads constructor(
         typeface = Typeface.DEFAULT_BOLD
     }
 
-    private val subTitleLabelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#38BDF8")
-        typeface = Typeface.DEFAULT_BOLD
-    }
-
     private val liveGradePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#38BDF8")
-        typeface = Typeface.DEFAULT_BOLD
-    }
-
-    private val maxGradePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#38BDF8")
         typeface = Typeface.DEFAULT_BOLD
     }
@@ -90,7 +81,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private val axisTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#64748B")
         typeface = Typeface.DEFAULT_BOLD
-        textAlign = Paint.Align.CENTER
+        textAlign = Paint.Align.LEFT
     }
 
     private val percentTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -110,6 +101,17 @@ class Altimetria3DView @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
 
+    private val tagBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#18181B")
+        style = Paint.Style.FILL
+    }
+
+    private val tagBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#38BDF8")
+        strokeWidth = 2.5f
+        style = Paint.Style.STROKE
+    }
+
     private var nextBlocks: List<Float> = emptyList()
     private var currentElevation: Double = 350.0
     private var maxElevation: Double = 727.0
@@ -125,6 +127,7 @@ class Altimetria3DView @JvmOverloads constructor(
 
     private val wallPath = Path()
     private val arrowPath = Path()
+    private val tagRect = RectF()
 
     fun update3DData(
         blocks: List<Float>,
@@ -159,9 +162,7 @@ class Altimetria3DView @JvmOverloads constructor(
         this.rotate90 = rotate90
 
         FontHelper.applyFontToPaint(titlePaint, fontFamilyKey)
-        FontHelper.applyFontToPaint(subTitleLabelPaint, fontFamilyKey)
         FontHelper.applyFontToPaint(liveGradePaint, fontFamilyKey)
-        FontHelper.applyFontToPaint(maxGradePaint, fontFamilyKey)
         FontHelper.applyFontToPaint(percentTextPaint, fontFamilyKey)
         FontHelper.applyFontToPaint(rampTextPaint, fontFamilyKey)
         FontHelper.applyFontToPaint(cotaTextPaint, fontFamilyKey)
@@ -193,39 +194,15 @@ class Altimetria3DView @JvmOverloads constructor(
         // 1. Fondo Oscuro
         canvas.drawRect(0f, 0f, w, h, bgPaint)
 
-        // 2. Encabezado Título ("Altimetría 3D")
+        // 2. Título "Altimetría 3D" discreto en la parte superior izquierda
         val titleText = context.getString(R.string.data_type_altimetria_3d_title)
-        titlePaint.textSize = ((h * 0.065f) * fontScale).coerceIn(14f, 22f)
-        canvas.drawText(titleText, 20f, h * 0.06f, titlePaint)
-
-        // Etiqueta PENDIENTE ACTUAL
-        val labelCurrentGrade = context.getString(R.string.label_current_gradient)
-        subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(11f, 18f)
-        canvas.drawText(labelCurrentGrade, 20f, h * 0.11f, subTitleLabelPaint)
-
-        // Número PENDIENTE ACTUAL (Grande)
-        val liveGradeText = "%.1f%%".format(currentGrade)
-        liveGradePaint.textSize = ((h * 0.14f) * fontScale).coerceIn(20f, 44f)
-        liveGradePaint.color = Color.parseColor(getGradeColor(currentGrade))
-        canvas.drawText(liveGradeText, 20f, h * 0.20f, liveGradePaint)
-
-        // PENDIENTE MÁXIMA DEL TRAMO VISIBLE (Opcional según preferencia del usuario)
-        if (showMaxGrade) {
-            val tramoMaxGrade = if (nextBlocks.isNotEmpty()) nextBlocks.maxOrNull()?.toDouble() ?: 12.8 else 12.8
-            val labelMaxGrade = context.getString(R.string.label_max_gradient_tramo)
-            subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(10f, 15f)
-            canvas.drawText(labelMaxGrade, 20f, h * 0.26f, subTitleLabelPaint)
-
-            val maxGradeText = "%.1f%%".format(tramoMaxGrade)
-            maxGradePaint.textSize = ((h * 0.13f) * fontScale).coerceIn(18f, 38f)
-            maxGradePaint.color = Color.parseColor(getGradeColor(tramoMaxGrade))
-            canvas.drawText(maxGradeText, 20f, h * 0.35f, maxGradePaint)
-        }
+        titlePaint.textSize = ((h * 0.055f) * fontScale).coerceIn(12f, 20f)
+        canvas.drawText(titleText, 16f, h * 0.06f, titlePaint)
 
         // 3. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)
 
-        // 4. Perfil 3D Gigante con Rejilla Trasera en Perspectiva 3D, Cotas Verticales y Marcadores
+        // 4. Perfil 3D a Pantalla Completa (Full Bleed) con Globo Flotante de Pendiente Actual
         draw3DRibbonAndWalls(canvas, w, h)
     }
 
@@ -277,7 +254,6 @@ class Altimetria3DView @JvmOverloads constructor(
                 canvas.drawLine(x1, y1, x2, y2, gridPaint)
             }
 
-            // Etiqueta de altitud sobre el eje Z en perspectiva 3D
             val labelX = (pointsX[0] - 28f).coerceAtLeast(6f)
             val labelY = pointsYBase[0] - (ratio * maxPeakHeight) + 4f
             canvas.drawText("${elevMark}m", labelX, labelY, axisTextPaint)
@@ -297,11 +273,11 @@ class Altimetria3DView @JvmOverloads constructor(
         val blocksCount = (totalMetersAhead / blockSizeMeters.coerceAtLeast(10.0)).toInt().coerceIn(2, 10)
         val samples = blocksCount + 1
 
-        // HUELLA 3D AMPLIADA A PANTALLA COMPLETA (Llena todo el espacio negro)
+        // HUELLA 3D A PANTALLA COMPLETA 100% (Sin bloqueo por texto a la izquierda)
         val startX = w * 0.02f
         val endX = w * 0.98f
         val baseGroundY = h * 0.94f
-        val maxPeakHeight = h * 0.65f // Expande el pico de la montaña para llenar el 65% de la altura
+        val maxPeakHeight = h * 0.70f // Montaña 3D expandida al 70% de la altura total de pantalla
 
         val stepX = (endX - startX) / (samples - 1).coerceAtLeast(1)
 
@@ -372,12 +348,12 @@ class Altimetria3DView @JvmOverloads constructor(
         cotaTextPaint.textSize = ((h * 0.050f) * fontScale).coerceIn(10f, 18f)
 
         for (i in 0 until samples) {
-            canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i], pointsYBase[i] + 8f, cotaLinePaint)
+            canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i], pointsYBase[i] + 10f, cotaLinePaint)
 
             if (showCotas) {
                 val cotaText = "${pointElevations[i].toInt()} m"
                 canvas.save()
-                canvas.translate(pointsX[i] - 5f, pointsYBase[i] - 6f)
+                canvas.translate(pointsX[i] - 5f, pointsYBase[i] - 8f)
                 canvas.rotate(-90f)
                 canvas.drawText(cotaText, 0f, 0f, cotaTextPaint)
                 canvas.restore()
@@ -393,7 +369,7 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i + 1], pointsYTop[i + 1], lineStrokePaint)
         }
 
-        // DIBUJAR RAMPA DURA (≥ 10% para ≥ 20m) CON FLECHA Y INDICADOR FLOTANTE (SIEMPRE CON 1 DECIMAL)
+        // DIBUJAR RAMPA DURA (≥ 10% para ≥ 20m) CON FLECHA Y INDICADOR FLOTANTE
         if (showRamps) {
             for (i in 0 until samples - 1) {
                 val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
@@ -458,13 +434,51 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawText(pctStr, midX, textY, percentTextPaint)
         }
 
-        // DIBUJAR MARCADOR BEACON 3D DEL CICLISTA
+        // DIBUJAR MARCADOR BEACON 3D DEL CICLISTA Y GLOBO FLOTANTE DE PENDIENTE ACTUAL (Conforme la bici avanza)
         val riderIdx = 0
         val rx = pointsX[riderIdx]
         val ry = pointsYTop[riderIdx]
 
         canvas.drawCircle(rx, ry, 22f, beaconHaloPaint)
         canvas.drawCircle(rx, ry, 10f, beaconPaint)
+
+        // GLOBO FLOTANTE 3D CON PENDIENTE ACTUAL EN TIEMPO REAL SOBRE EL CICLISTA
+        drawRiderLiveGradeBalloon(canvas, w, h, rx, ry)
+    }
+
+    private fun drawRiderLiveGradeBalloon(canvas: Canvas, w: Float, h: Float, rx: Float, ry: Float) {
+        val gradeColorHex = getGradeColor(currentGrade)
+        liveGradePaint.color = Color.parseColor(gradeColorHex)
+
+        val fontFontSize = ((h * 0.12f) * fontScale).coerceIn(20f, 42f)
+        liveGradePaint.textSize = fontFontSize
+
+        val balloonText = "📍 %.1f%%".format(currentGrade)
+        val textW = liveGradePaint.measureText(balloonText)
+        val rectW = textW + 24f
+        val rectH = fontFontSize + 16f
+
+        val rectL = (rx + 12f).coerceAtMost(w - rectW - 12f)
+        val rectT = (ry - rectH - 24f).coerceAtLeast(12f)
+        val rectR = rectL + rectW
+        val rectB = rectT + rectH
+
+        tagRect.set(rectL, rectT, rectR, rectB)
+
+        // Fondo del globo flotante en tono oscuro
+        tagBgPaint.color = Color.parseColor("#18181B")
+        canvas.drawRoundRect(tagRect, 14f, 14f, tagBgPaint)
+
+        // Borde del globo en el color dinámico de la rampa actual
+        tagBorderPaint.color = Color.parseColor(gradeColorHex)
+        canvas.drawRoundRect(tagRect, 14f, 14f, tagBorderPaint)
+
+        // Puntero conector desde la bici hacia el globo
+        canvas.drawLine(rx, ry, rectL + (rectW / 2f), rectB, tagBorderPaint)
+
+        // Texto de la pendiente actual dentro del globo
+        val txtY = rectT + (rectH * 0.70f)
+        canvas.drawText(balloonText, rectL + 12f, txtY, liveGradePaint)
     }
 
     private fun getGradeColor(grade: Double): String {
