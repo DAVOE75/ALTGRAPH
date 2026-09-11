@@ -120,8 +120,9 @@ class AltimetriaStrategyCalculator {
             val distanceDiff = point.distance - currentBlockStartDistance
 
             if (distanceDiff >= blockSize) {
-                val grade = ((point.elevation - currentBlockStartElevation) / distanceDiff) * 100.0
-                val distanceKm = distanceDiff / 1000.0
+                val distMeters = distanceDiff.coerceAtLeast(1.0)
+                val grade = ((point.elevation - currentBlockStartElevation) / distMeters) * 100.0
+                val distanceKm = distMeters / 1000.0
 
                 if (grade > maxRampPct) {
                     maxRampPct = grade
@@ -138,6 +139,18 @@ class AltimetriaStrategyCalculator {
 
                 currentBlockStartDistance = point.distance
                 currentBlockStartElevation = point.elevation
+            }
+        }
+
+        // Si quedan metros al final del tramo inferior al tamaño de bloque completo
+        if (nextBlocks.size < 10 && routePoints.isNotEmpty() && currentBlockStartDistance < routePoints.last().distance) {
+            val remainingDist = (routePoints.last().distance - currentBlockStartDistance).coerceAtLeast(1.0)
+            if (remainingDist > 10.0) {
+                val lastGrade = ((routePoints.last().elevation - currentBlockStartElevation) / remainingDist) * 100.0
+                nextBlocks.add(lastGrade.toFloat())
+                if (attackAlertsEnabled && lastGrade > thresholdAttack) {
+                    attack = true
+                }
             }
         }
 
