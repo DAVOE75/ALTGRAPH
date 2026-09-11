@@ -196,7 +196,7 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private fun drawRenderContent(canvas: Canvas, w: Float, h: Float) {
-        // 1. Fondo Oscuro
+        // 1. Fondo Oscuro Pura
         canvas.drawRect(0f, 0f, w, h, bgPaint)
 
         // 2. Encabezado Título ("Altimetría 3D")
@@ -228,27 +228,8 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawText(maxGradeText, 18f, h * 0.43f, maxGradePaint)
         }
 
-        // 3. Rejilla Isometrica 3D de Suelo
-        drawIsometricGrid(canvas, w, h)
-
-        // 4. Perfil 3D con Rampas dentro del Rango [rampMinSlope, rampMaxSlope] Delimitado por el Usuario
+        // 3. Perfil 3D Limpio con Malla Trasera de Altitud (Sin líneas de suelo sobrantes por abajo)
         draw3DRibbonAndWalls(canvas, w, h)
-    }
-
-    private fun drawIsometricGrid(canvas: Canvas, w: Float, h: Float) {
-        val groundY = h * 0.88f
-        val gridLines = 5
-
-        for (i in 0..gridLines) {
-            val ratio = i.toFloat() / gridLines
-            val x1 = w * 0.04f + ratio * (w * 0.25f)
-            val y1 = groundY - ratio * (h * 0.12f)
-
-            val x2 = w * 0.78f + ratio * (w * 0.25f)
-            val y2 = groundY - ratio * (h * 0.12f)
-
-            canvas.drawLine(x1, y1, x2, y2, gridPaint)
-        }
     }
 
     private fun draw3DBackwallGrid(
@@ -313,7 +294,7 @@ class Altimetria3DView @JvmOverloads constructor(
         val totalMicroSamples = (majorBlocksCount * microSubDivisions) + 1
 
         val startX = w * 0.08f
-        val endX = w * 0.98f
+        val endX = w * 0.99f
         val baseGroundY = h * 0.88f
         val maxPeakHeight = h * 0.52f
 
@@ -408,7 +389,7 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawPath(wallPath, wallPaint)
         }
 
-        // DIBUJAR LÍNEAS DIVISORIAS PRINCIPALES DE KILÓMETRO REFORZADAS Y NÍTIDAS
+        // DIBUJAR LÍNEAS DIVISORIAS PRINCIPALES DE KILÓMETRO REFORZADAS Y NÍTIDAS (Sin sobresalir por abajo)
         for (k in 0 until majorSamples) {
             val px = majorX[k]
             val pyTop = majorYTop[k]
@@ -494,12 +475,13 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawText(distLabel, px, pyBase + 12f, axisTextPaint)
         }
 
-        // DIBUJAR PORCENTAJES PROMEDIO (%) DE CADA KILÓMETRO CENTRADOS EN CADA SECCIÓN
+        // DIBUJAR PORCENTAJES PROMEDIO REALES (%) DE CADA KILÓMETRO CENTRADOS EN CADA SECCIÓN (Con signo negativo en bajadas)
         val fontBaseSize = (h * 0.045f) * fontScale
 
         for (k in 0 until majorBlocksCount) {
-            val avgGrade = if (k < nextBlocks.size) nextBlocks[k] else 4.0f
-            val pctStr = "%.1f%%".format(avgGrade)
+            val deltaElev = majorElevations[k + 1] - majorElevations[k]
+            val kmAvgGrade = (deltaElev / majorDistMeters.toDouble()) * 100.0
+            val pctStr = "%.1f%%".format(kmAvgGrade)
 
             val midX = (majorX[k] + majorX[k + 1]) / 2f
             val midYTop = (majorYTop[k] + majorYTop[k + 1]) / 2f
