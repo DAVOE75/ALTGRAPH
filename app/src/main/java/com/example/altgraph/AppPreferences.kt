@@ -75,6 +75,26 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_USE_TOPOGRAPHIC_CALCULATION, false)
         set(value) = prefs.edit().putBoolean(KEY_USE_TOPOGRAPHIC_CALCULATION, value).apply()
 
+    var showHairpins: Boolean
+        get() = prefs.getBoolean(KEY_SHOW_HAIRPINS, true)
+        set(value) = prefs.edit().putBoolean(KEY_SHOW_HAIRPINS, value).apply()
+
+    var showPoiTowns: Boolean
+        get() = prefs.getBoolean(KEY_SHOW_POI_TOWNS, true)
+        set(value) = prefs.edit().putBoolean(KEY_SHOW_POI_TOWNS, value).apply()
+
+    var showPoiWater: Boolean
+        get() = prefs.getBoolean(KEY_SHOW_POI_WATER, true)
+        set(value) = prefs.edit().putBoolean(KEY_SHOW_POI_WATER, value).apply()
+
+    var showPoiViewpoints: Boolean
+        get() = prefs.getBoolean(KEY_SHOW_POI_VIEWPOINTS, true)
+        set(value) = prefs.edit().putBoolean(KEY_SHOW_POI_VIEWPOINTS, value).apply()
+
+    var showPoiSummits: Boolean
+        get() = prefs.getBoolean(KEY_SHOW_POI_SUMMITS, true)
+        set(value) = prefs.edit().putBoolean(KEY_SHOW_POI_SUMMITS, value).apply()
+
     companion object {
         private const val PREFS_NAME = "altgraph_settings"
         private const val KEY_FONT_FAMILY = "font_family_key"
@@ -94,6 +114,11 @@ class AppPreferences(context: Context) {
         private const val KEY_RAMP_MIN_SLOPE = "ramp_min_slope_pct"
         private const val KEY_RAMP_MAX_SLOPE = "ramp_max_slope_pct"
         private const val KEY_USE_TOPOGRAPHIC_CALCULATION = "use_topographic_calculation"
+        private const val KEY_SHOW_HAIRPINS = "show_hairpins"
+        private const val KEY_SHOW_POI_TOWNS = "show_poi_towns"
+        private const val KEY_SHOW_POI_WATER = "show_poi_water"
+        private const val KEY_SHOW_POI_VIEWPOINTS = "show_poi_viewpoints"
+        private const val KEY_SHOW_POI_SUMMITS = "show_poi_summits"
 
         @Volatile
         private var INSTANCE: AppPreferences? = null

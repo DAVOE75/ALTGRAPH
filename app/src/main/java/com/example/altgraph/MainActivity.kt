@@ -274,34 +274,6 @@ class MainActivity : Activity() {
         lookaheadCard.addView(lookaheadValueText)
         lookaheadCard.addView(lookaheadRow)
 
-        // Opción: Tamaño de Bloque 3D y Perfil (50m, 100m, 250m, 500m, 1km) -> Movidp a Pestaña 3D
-        val blockCard = createCardContainer()
-        val blockLabel = createSectionLabel(getString(R.string.setting_block_size))
-        val currentBlockText = if (prefs.blockSizeMeters >= 1000.0) "${(prefs.blockSizeMeters / 1000).toInt()} km" else "${prefs.blockSizeMeters.toInt()} m"
-        val blockValueText = createValueText(currentBlockText)
-        val blockRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        }
-
-        val blockButtons = mutableListOf<Button>()
-        val blockSizes = listOf(50.0, 100.0, 250.0, 500.0, 1000.0)
-
-        blockSizes.forEach { size ->
-            val labelStr = if (size >= 1000.0) "${(size / 1000).toInt()}km" else "${size.toInt()}m"
-            val btn = createSegmentButton(labelStr, prefs.blockSizeMeters == size) {
-                prefs.blockSizeMeters = size
-                blockValueText.text = if (size >= 1000.0) "${(size / 1000).toInt()} km" else "${size.toInt()} m"
-                updateSegmentActiveStates(blockButtons, blockSizes.indexOf(size))
-            }
-            blockButtons.add(btn)
-            blockRow.addView(btn)
-        }
-
-        blockCard.addView(blockLabel)
-        blockCard.addView(blockValueText)
-        blockCard.addView(blockRow)
-
         // Opción: Mostrar Cotas en 3D
         val showCotasCard = createCardContainer()
         val switchShowCotas = Switch(this).apply {
@@ -389,6 +361,62 @@ class MainActivity : Activity() {
         rampMaxCard.addView(rampMaxLabel)
         rampMaxCard.addView(rampMaxValueText)
         rampMaxCard.addView(rampMaxRow)
+        
+        // Opción: Mostrar Curvas de Herradura
+        val showHairpinsCard = createCardContainer()
+        val switchShowHairpins = Switch(this).apply {
+            text = getString(R.string.setting_show_hairpins)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.showHairpins
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.showHairpins = isChecked
+            }
+        }
+        showHairpinsCard.addView(switchShowHairpins)
+        
+        // Opción: Filtro de Puntos de Interés (Hitos) con 4 conmutadores específicos
+        val poiFilterCard = createCardContainer()
+        val poiFilterLabel = createSectionLabel(getString(R.string.setting_poi_filter))
+        
+        val switchTowns = Switch(this).apply {
+            text = getString(R.string.setting_poi_towns)
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.showPoiTowns
+            setOnCheckedChangeListener { _, isChecked -> prefs.showPoiTowns = isChecked }
+            setPadding(0, 4, 0, 4)
+        }
+        val switchWater = Switch(this).apply {
+            text = getString(R.string.setting_poi_water)
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.showPoiWater
+            setOnCheckedChangeListener { _, isChecked -> prefs.showPoiWater = isChecked }
+            setPadding(0, 4, 0, 4)
+        }
+        val switchViewpoints = Switch(this).apply {
+            text = getString(R.string.setting_poi_viewpoints)
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.showPoiViewpoints
+            setOnCheckedChangeListener { _, isChecked -> prefs.showPoiViewpoints = isChecked }
+            setPadding(0, 4, 0, 4)
+        }
+        val switchSummits = Switch(this).apply {
+            text = getString(R.string.setting_poi_summits)
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.showPoiSummits
+            setOnCheckedChangeListener { _, isChecked -> prefs.showPoiSummits = isChecked }
+            setPadding(0, 4, 0, 4)
+        }
+
+        poiFilterCard.addView(poiFilterLabel)
+        poiFilterCard.addView(switchTowns)
+        poiFilterCard.addView(switchWater)
+        poiFilterCard.addView(switchViewpoints)
+        poiFilterCard.addView(switchSummits)
 
         // Opción: Método de Cálculo Topográfico
         val topographicCard = createCardContainer()
@@ -417,17 +445,46 @@ class MainActivity : Activity() {
         showMaxGradCard.addView(switchShowMaxGrad)
 
         tab3dContainer.addView(lookaheadCard)
-        tab3dContainer.addView(blockCard)
         tab3dContainer.addView(showCotasCard)
         tab3dContainer.addView(showRampsCard)
         tab3dContainer.addView(rampMinCard)
         tab3dContainer.addView(rampMaxCard)
+        tab3dContainer.addView(showHairpinsCard)
+        tab3dContainer.addView(poiFilterCard)
         tab3dContainer.addView(topographicCard)
         tab3dContainer.addView(showMaxGradCard)
 
         // ==========================================
         // PESTAÑA 3: 📊 ESTRATEGA 2D
         // ==========================================
+
+        // Opción: Tamaño de Bloque (50m, 100m, 250m, 500m, 1km)
+        val blockCard = createCardContainer()
+        val blockLabel = createSectionLabel(getString(R.string.setting_block_size))
+        val currentBlockText = if (prefs.blockSizeMeters >= 1000.0) "${(prefs.blockSizeMeters / 1000).toInt()} km" else "${prefs.blockSizeMeters.toInt()} m"
+        val blockValueText = createValueText(currentBlockText)
+        val blockRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
+
+        val blockButtons = mutableListOf<Button>()
+        val blockSizes = listOf(50.0, 100.0, 250.0, 500.0, 1000.0)
+
+        blockSizes.forEach { size ->
+            val labelStr = if (size >= 1000.0) "${(size / 1000).toInt()}km" else "${size.toInt()}m"
+            val btn = createSegmentButton(labelStr, prefs.blockSizeMeters == size) {
+                prefs.blockSizeMeters = size
+                blockValueText.text = if (size >= 1000.0) "${(size / 1000).toInt()} km" else "${size.toInt()} m"
+                updateSegmentActiveStates(blockButtons, blockSizes.indexOf(size))
+            }
+            blockButtons.add(btn)
+            blockRow.addView(btn)
+        }
+
+        blockCard.addView(blockLabel)
+        blockCard.addView(blockValueText)
+        blockCard.addView(blockRow)
 
         // Opción: Tramos Visibles
         val visibleBlocksCard = createCardContainer()
@@ -512,6 +569,7 @@ class MainActivity : Activity() {
         attackCard.addView(attackValueText)
         attackCard.addView(attackRow)
 
+        tab2dContainer.addView(blockCard)
         tab2dContainer.addView(visibleBlocksCard)
         tab2dContainer.addView(showPctCard)
         tab2dContainer.addView(alertCard)

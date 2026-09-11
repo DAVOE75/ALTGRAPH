@@ -47,6 +47,12 @@
     <string name="setting_show_max_gradient">Mostrar Pendiente Máxima en Encabezado 3D</string>
     <string name="setting_rotate_90_cw">Girar Gráfico 90° (Modo Horizontal / Apaisado)</string>
     <string name="setting_use_topographic">Usar Método de Cálculo de Pendiente Topográfico (Proyección Horizontal)</string>
+    <string name="setting_show_hairpins">Mostrar Curvas de Herradura (Líneas Negras)</string>
+    <string name="setting_poi_filter">Filtro de Puntos de Interés (Hitos)</string>
+    <string name="setting_poi_towns">🏘️ Pueblos y Ciudades</string>
+    <string name="setting_poi_water">💧 Fuentes de Agua</string>
+    <string name="setting_poi_viewpoints">📸 Miradores y Panorámicas</string>
+    <string name="setting_poi_summits">📡 Cimas y Puertos</string>
     <string name="font_normal">Normal</string>
     <string name="font_large">Large</string>
     <string name="font_xl">Extra Gr.</string>

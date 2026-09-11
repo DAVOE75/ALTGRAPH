@@ -3,9 +3,11 @@ package com.example.altgraph
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.DashPathEffect
 import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
 import android.util.AttributeSet
@@ -110,6 +112,40 @@ class Altimetria3DView @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
 
+    private val tagBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#18181B")
+        style = Paint.Style.FILL
+    }
+
+    private val tagBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#38BDF8")
+        strokeWidth = 2.5f
+        style = Paint.Style.STROKE
+    }
+
+    private val hairpinLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#111827") // Negro muy oscuro
+        strokeWidth = 5f
+        style = Paint.Style.STROKE
+    }
+
+    private val poiLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#9CA3AF")
+        strokeWidth = 2.5f
+        style = Paint.Style.STROKE
+        pathEffect = DashPathEffect(floatArrayOf(8f, 8f), 0f)
+    }
+    
+    private val poiBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#A0000000") // Semi-transparente
+        style = Paint.Style.FILL
+    }
+
+    private val poiTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        typeface = Typeface.DEFAULT_BOLD
+    }
+
     private var nextBlocks: List<Float> = emptyList()
     private var currentElevation: Double = 350.0
     private var maxElevation: Double = 727.0
@@ -124,9 +160,14 @@ class Altimetria3DView @JvmOverloads constructor(
     private var rotate90: Boolean = false
     private var rampMinSlope: Double = 10.0
     private var rampMaxSlope: Double = 15.0
+    private var showHairpins: Boolean = true
+    private var showPois: Boolean = true
+    private var hairpins: List<Double> = emptyList()
+    private var pois: List<Poi> = emptyList()
 
     private val wallPath = Path()
     private val arrowPath = Path()
+    private val tagRect = RectF()
 
     fun update3DData(
         blocks: List<Float>,
@@ -143,7 +184,11 @@ class Altimetria3DView @JvmOverloads constructor(
         fontFamilyKey: String = "sans-serif-condensed",
         rotate90: Boolean = false,
         rampMinSlope: Double = 10.0,
-        rampMaxSlope: Double = 15.0
+        rampMaxSlope: Double = 15.0,
+        showHairpins: Boolean = true,
+        showPois: Boolean = true,
+        hairpins: List<Double> = emptyList(),
+        pois: List<Poi> = emptyList()
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -163,6 +208,10 @@ class Altimetria3DView @JvmOverloads constructor(
         this.rotate90 = rotate90
         this.rampMinSlope = rampMinSlope
         this.rampMaxSlope = rampMaxSlope
+        this.showHairpins = showHairpins
+        this.showPois = showPois
+        this.hairpins = hairpins
+        this.pois = pois
 
         FontHelper.applyFontToPaint(titlePaint, fontFamilyKey)
         FontHelper.applyFontToPaint(subTitleLabelPaint, fontFamilyKey)
@@ -172,6 +221,7 @@ class Altimetria3DView @JvmOverloads constructor(
         FontHelper.applyFontToPaint(rampTextPaint, fontFamilyKey)
         FontHelper.applyFontToPaint(cotaTextPaint, fontFamilyKey)
         FontHelper.applyFontToPaint(axisTextPaint, fontFamilyKey)
+        FontHelper.applyFontToPaint(poiTextPaint, fontFamilyKey)
 
         postInvalidate()
     }
@@ -196,7 +246,7 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private fun drawRenderContent(canvas: Canvas, w: Float, h: Float) {
-        // 1. Fondo Oscuro Pura
+        // 1. Fondo Oscuro
         canvas.drawRect(0f, 0f, w, h, bgPaint)
 
         // 2. Encabezado Título ("Altimetría 3D")
@@ -228,8 +278,27 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawText(maxGradeText, 18f, h * 0.43f, maxGradePaint)
         }
 
-        // 3. Perfil 3D Limpio con Malla Trasera de Altitud (Sin líneas de suelo sobrantes por abajo)
+        // 3. Rejilla Isometrica 3D de Suelo
+        drawIsometricGrid(canvas, w, h)
+
+        // 4. Perfil 3D con Hitos y Herraduras
         draw3DRibbonAndWalls(canvas, w, h)
+    }
+
+    private fun drawIsometricGrid(canvas: Canvas, w: Float, h: Float) {
+        val groundY = h * 0.88f
+        val gridLines = 5
+
+        for (i in 0..gridLines) {
+            val ratio = i.toFloat() / gridLines
+            val x1 = w * 0.04f + ratio * (w * 0.25f)
+            val y1 = groundY - ratio * (h * 0.12f)
+
+            val x2 = w * 0.78f + ratio * (w * 0.25f)
+            val y2 = groundY - ratio * (h * 0.12f)
+
+            canvas.drawLine(x1, y1, x2, y2, gridPaint)
+        }
     }
 
     private fun draw3DBackwallGrid(
@@ -281,7 +350,6 @@ class Altimetria3DView @JvmOverloads constructor(
     private fun draw3DRibbonAndWalls(canvas: Canvas, w: Float, h: Float) {
         val totalMetersAhead = lookaheadMeters.toDouble().coerceIn(200.0, 10000.0)
 
-        // Divisores principales (ej. 1 km o blockSizeMeters)
         val majorBlocksCount = if (totalMetersAhead > 1000.0) {
             (totalMetersAhead / 1000.0).toInt().coerceIn(2, 10)
         } else {
@@ -289,7 +357,6 @@ class Altimetria3DView @JvmOverloads constructor(
         }
         val majorSamples = majorBlocksCount + 1
 
-        // SUB-DIVISIÓN MICRO-RELIEVE (Bloques finos de 50m dentro de cada kilómetro)
         val microSubDivisions = if (totalMetersAhead >= 1000.0) 20 else 2
         val totalMicroSamples = (majorBlocksCount * microSubDivisions) + 1
 
@@ -310,7 +377,6 @@ class Altimetria3DView @JvmOverloads constructor(
         var accumulatedElev = currentElevation
         microElevations[0] = accumulatedElev.toFloat()
 
-        // 1. Calcular micro-elevación y gradiente de 50m para cada sub-tramo
         for (i in 0 until totalMicroSamples - 1) {
             val majorBlockIdx = (i / microSubDivisions).coerceAtMost(nextBlocks.size - 1)
             val baseGrade = if (majorBlockIdx < nextBlocks.size) nextBlocks[majorBlockIdx].toDouble() else 4.0
@@ -324,7 +390,6 @@ class Altimetria3DView @JvmOverloads constructor(
             microElevations[i + 1] = accumulatedElev.toFloat()
         }
 
-        // 2. Escala estricta matemática de altitud
         val minElev = microElevations.minOrNull() ?: currentElevation.toFloat()
         val maxElev = microElevations.maxOrNull() ?: (minElev + 50f)
         val elevRange = (maxElev - minElev).coerceAtLeast(15f)
@@ -344,7 +409,6 @@ class Altimetria3DView @JvmOverloads constructor(
             microYBase[i] = pYBase
         }
 
-        // Extraer puntos de divisores principales (ej. Cada 1 km)
         val majorX = FloatArray(majorSamples)
         val majorYTop = FloatArray(majorSamples)
         val majorYBase = FloatArray(majorSamples)
@@ -358,10 +422,9 @@ class Altimetria3DView @JvmOverloads constructor(
             majorElevations[k] = microElevations[microIdx]
         }
 
-        // DIBUJAR REJILLA TRASERA DE ALTITUD EN PERSPECTIVA 3D
         draw3DBackwallGrid(canvas, w, h, majorX, majorYBase, majorSamples, maxPeakHeight, minElev, maxElev)
 
-        // DIBUJAR PAREDES DE EXTROSIÓN 3D CON SOMBRA DE OCLUSIÓN PERSPECTIVA EN BAJADAS
+        // Dibujar curvas de herradura (Si están habilitadas) detrás de la cinta pero sobre la pared
         for (i in 0 until totalMicroSamples - 1) {
             val grade = microGrades[i]
 
@@ -389,7 +452,28 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawPath(wallPath, wallPaint)
         }
 
-        // DIBUJAR LÍNEAS DIVISORIAS PRINCIPALES DE KILÓMETRO REFORZADAS Y NÍTIDAS (Sin sobresalir por abajo)
+        // Trazar Curvas de Herradura
+        if (showHairpins) {
+            for (hpRelDist in hairpins) {
+                if (hpRelDist > totalMetersAhead) continue
+                
+                val progress = (hpRelDist / totalMetersAhead).toFloat()
+                val curveOffset = sin(progress * Math.PI * 1.5).toFloat() * (w * 0.08f)
+                val px = startX + (endX - startX) * progress + curveOffset
+
+                val exactIndexF = progress * (totalMicroSamples - 1)
+                val idx = exactIndexF.toInt().coerceIn(0, totalMicroSamples - 2)
+                val rem = exactIndexF - idx
+                val pyTop = microYTop[idx] + rem * (microYTop[idx + 1] - microYTop[idx])
+                val pyBase = microYBase[idx] + rem * (microYBase[idx + 1] - microYBase[idx])
+
+                canvas.drawLine(px, pyTop, px, pyBase, hairpinLinePaint)
+            }
+        }
+
+        // Cotas
+        cotaTextPaint.textSize = ((h * 0.050f) * fontScale).coerceIn(10f, 18f)
+
         for (k in 0 until majorSamples) {
             val px = majorX[k]
             val pyTop = majorYTop[k]
@@ -409,7 +493,7 @@ class Altimetria3DView @JvmOverloads constructor(
             }
         }
 
-        // DIBUJAR CINTA SUPERIOR 3D CONTINUA
+        // Cinta Superior
         for (i in 0 until totalMicroSamples - 1) {
             val grade = microGrades[i]
             val darkStrokeColor = getDarkGradeColor(grade.toDouble())
@@ -418,7 +502,45 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawLine(microX[i], microYTop[i], microX[i + 1], microYTop[i + 1], lineStrokePaint)
         }
 
-        // DIBUJAR LAS RAMPAS MÁS DURAS DENTRO DEL RANGO DELIMITADO POR EL USUARIO [rampMinSlope, rampMaxSlope]
+        // Puntos de Interés (Hitos)
+        if (showPois) {
+            poiTextPaint.textSize = ((h * 0.040f) * fontScale).coerceIn(10f, 16f)
+
+            for (poi in pois) {
+                val relDist = poi.relativeDistance
+                if (relDist > totalMetersAhead) continue
+
+                val progress = (relDist / totalMetersAhead).toFloat()
+                val curveOffset = sin(progress * Math.PI * 1.5).toFloat() * (w * 0.08f)
+                val px = startX + (endX - startX) * progress + curveOffset
+
+                val exactIndexF = progress * (totalMicroSamples - 1)
+                val idx = exactIndexF.toInt().coerceIn(0, totalMicroSamples - 2)
+                val rem = exactIndexF - idx
+                val pyTop = microYTop[idx] + rem * (microYTop[idx + 1] - microYTop[idx])
+
+                val labelY = pyTop - (h * 0.16f)
+                
+                // Línea discontinua apuntando al hito
+                canvas.drawLine(px, pyTop, px, labelY + 12f, poiLinePaint)
+
+                // Etiqueta del hito
+                val text = "${poi.icon} ${poi.name}"
+                val textWidth = poiTextPaint.measureText(text)
+                
+                val rectL = px - (textWidth / 2f) - 12f
+                val rectT = labelY - poiTextPaint.textSize - 12f
+                val rectR = px + (textWidth / 2f) + 12f
+                val rectB = labelY + 12f
+                
+                tagRect.set(rectL, rectT, rectR, rectB)
+                
+                canvas.drawRoundRect(tagRect, 10f, 10f, poiBgPaint)
+                canvas.drawText(text, px, labelY, poiTextPaint)
+            }
+        }
+
+        // Flechas Rampas
         if (showRamps) {
             for (k in 0 until majorBlocksCount) {
                 val startIdx = k * microSubDivisions
@@ -432,32 +554,33 @@ class Altimetria3DView @JvmOverloads constructor(
                     }
                 }
 
-                val topSteepRamps = steepRampsInKm.sortedByDescending { it.second }.take(3)
+                val topSteepRamps = steepRampsInKm.sortedByDescending { it.second }.take(2)
 
                 for ((i, grade) in topSteepRamps) {
                     val midX = (microX[i] + microX[i + 1]) / 2f
                     val midY = (microYTop[i] + microYTop[i + 1]) / 2f
 
-                    val arrowTopY = midY - (h * 0.16f)
-                    val arrowBottomY = midY - 8f
+                    // Evitar superposición con POIs levantando más la flecha
+                    val arrowTopY = midY - (h * 0.12f)
+                    val arrowBottomY = midY - 6f
 
                     canvas.drawLine(midX, arrowTopY, midX, arrowBottomY, rampArrowPaint)
 
                     arrowPath.reset()
                     arrowPath.moveTo(midX, arrowBottomY)
-                    arrowPath.lineTo(midX - 6f, arrowBottomY - 10f)
-                    arrowPath.lineTo(midX + 6f, arrowBottomY - 10f)
+                    arrowPath.lineTo(midX - 5f, arrowBottomY - 8f)
+                    arrowPath.lineTo(midX + 5f, arrowBottomY - 8f)
                     arrowPath.close()
                     canvas.drawPath(arrowPath, rampArrowHeadPaint)
 
-                    rampTextPaint.textSize = ((h * 0.065f) * fontScale).coerceIn(12f, 22f)
+                    rampTextPaint.textSize = ((h * 0.055f) * fontScale).coerceIn(10f, 18f)
                     val rampLabel = "%.1f%%".format(grade)
-                    canvas.drawText(rampLabel, midX, arrowTopY - 6f, rampTextPaint)
+                    canvas.drawText(rampLabel, midX, arrowTopY - 4f, rampTextPaint)
                 }
             }
         }
 
-        // DIBUJAR EJE X CON MARCAS PRINCIPALES EN KM / M
+        // Eje X Marcas
         axisTextPaint.textSize = (h * 0.040f).coerceIn(9f, 13f)
         axisTextPaint.textAlign = Paint.Align.CENTER
         val majorDistMeters = (totalMetersAhead / majorBlocksCount).toInt()
@@ -475,13 +598,12 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawText(distLabel, px, pyBase + 12f, axisTextPaint)
         }
 
-        // DIBUJAR PORCENTAJES PROMEDIO REALES (%) DE CADA KILÓMETRO CENTRADOS EN CADA SECCIÓN (Con signo negativo en bajadas)
+        // Porcentajes Centrados en Bloques
         val fontBaseSize = (h * 0.045f) * fontScale
 
         for (k in 0 until majorBlocksCount) {
-            val deltaElev = majorElevations[k + 1] - majorElevations[k]
-            val kmAvgGrade = (deltaElev / majorDistMeters.toDouble()) * 100.0
-            val pctStr = "%.1f%%".format(kmAvgGrade)
+            val avgGrade = if (k < nextBlocks.size) nextBlocks[k] else 4.0f
+            val pctStr = "%.1f%%".format(avgGrade)
 
             val midX = (majorX[k] + majorX[k + 1]) / 2f
             val midYTop = (majorYTop[k] + majorYTop[k + 1]) / 2f
@@ -496,7 +618,7 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawText(pctStr, midX, textY, percentTextPaint)
         }
 
-        // DIBUJAR MARCADOR BEACON 3D DEL CICLISTA
+        // Marcador del Ciclista
         val riderIdx = 0
         val rx = microX[riderIdx]
         val ry = microYTop[riderIdx]
@@ -507,23 +629,23 @@ class Altimetria3DView @JvmOverloads constructor(
 
     private fun getGradeColor(grade: Double): String {
         return when {
-            grade < 0.0 -> "#3B82F6"  // Azul descensos
-            grade < 4.0 -> "#10B981"  // Verde (0% - 4%)
-            grade < 8.0 -> "#0EA5E9"  // Celeste (4% - 8%)
-            grade < 10.0 -> "#F59E0B" // Amarillo Ocre (8% - 10%)
-            grade < 15.0 -> "#EF4444" // Rojo Carmesí (10% - 15%)
-            else -> "#A855F7"         // Violeta rampa dura
+            grade < 0.0 -> "#3B82F6"
+            grade < 4.0 -> "#10B981"
+            grade < 8.0 -> "#0EA5E9"
+            grade < 10.0 -> "#F59E0B"
+            grade < 15.0 -> "#EF4444"
+            else -> "#A855F7"
         }
     }
 
     private fun getDarkGradeColor(grade: Double): String {
         return when {
-            grade < 0.0 -> "#1E40AF"  // Azul oscuro descensos
-            grade < 4.0 -> "#15803D"  // Verde oscuro
-            grade < 8.0 -> "#0284C7"  // Celeste/Azul oscuro
-            grade < 10.0 -> "#B45309"  // Amarillo/Ocre oscuro
-            grade < 15.0 -> "#B91C1C" // Rojo oscuro
-            else -> "#6B21A8"         // Violeta/Púrpura oscuro
+            grade < 0.0 -> "#1E40AF"
+            grade < 4.0 -> "#15803D"
+            grade < 8.0 -> "#0284C7"
+            grade < 10.0 -> "#B45309"
+            grade < 15.0 -> "#B91C1C"
+            else -> "#6B21A8"
         }
     }
 }

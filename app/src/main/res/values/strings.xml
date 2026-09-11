@@ -47,6 +47,12 @@
     <string name="setting_show_max_gradient">Show Section Max Gradient in 3D Header</string>
     <string name="setting_rotate_90_cw">Rotate Graph 90° Clockwise (Landscape Mode)</string>
     <string name="setting_use_topographic">Use Topographic Slope Calculation Method</string>
+    <string name="setting_show_hairpins">Show Hairpin Bends (Black Lines)</string>
+    <string name="setting_poi_filter">Points of Interest Filter (POIs)</string>
+    <string name="setting_poi_towns">🏘️ Towns &amp; Cities</string>
+    <string name="setting_poi_water">💧 Water Springs</string>
+    <string name="setting_poi_viewpoints">📸 Viewpoints</string>
+    <string name="setting_poi_summits">📡 Summits &amp; Passes</string>
     <string name="font_normal">Normal</string>
     <string name="font_large">Large</string>
     <string name="font_xl">XL</string>

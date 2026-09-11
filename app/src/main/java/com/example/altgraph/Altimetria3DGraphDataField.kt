@@ -102,7 +102,11 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     fontFamilyKey = prefs.fontFamilyKey,
                     rotate90 = prefs.rotate90Clockwise,
                     rampMinSlope = prefs.rampMinSlopePct,
-                    rampMaxSlope = prefs.rampMaxSlopePct
+                    rampMaxSlope = prefs.rampMaxSlopePct,
+                    showHairpins = prefs.showHairpins,
+                    showPois = (prefs.showPoiTowns || prefs.showPoiWater || prefs.showPoiViewpoints || prefs.showPoiSummits),
+                    hairpins = strategy.hairpins,
+                    pois = strategy.pois
                 )
 
                 val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)

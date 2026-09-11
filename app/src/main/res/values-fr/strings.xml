@@ -47,6 +47,12 @@
     <string name="setting_show_max_gradient">Afficher Pente Max dans l\'En-tête 3D</string>
     <string name="setting_rotate_90_cw">Pivoter Graphique 90° (Mode Paysage)</string>
     <string name="setting_use_topographic">Utiliser la méthode de calcul topographique (Projection horizontale)</string>
+    <string name="setting_show_hairpins">Afficher Virages en Épingle (Lignes Noires)</string>
+    <string name="setting_poi_filter">Filtre des Points d\'Intérêt (POIs)</string>
+    <string name="setting_poi_towns">🏘️ Villes et Villages</string>
+    <string name="setting_poi_water">💧 Points d\'Eau</string>
+    <string name="setting_poi_viewpoints">📸 Points de Vue</string>
+    <string name="setting_poi_summits">📡 Sommets et Cols</string>
     <string name="font_normal">Normale</string>
     <string name="font_large">Grande</string>
     <string name="font_xl">Très Gr.</string>
