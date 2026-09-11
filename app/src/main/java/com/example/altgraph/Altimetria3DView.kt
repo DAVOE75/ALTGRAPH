@@ -11,6 +11,7 @@ import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.Typeface
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import kotlin.math.abs
 import kotlin.math.sin
@@ -112,19 +113,8 @@ class Altimetria3DView @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
 
-    private val tagBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#18181B")
-        style = Paint.Style.FILL
-    }
-
-    private val tagBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#38BDF8")
-        strokeWidth = 2.5f
-        style = Paint.Style.STROKE
-    }
-
     private val hairpinLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#111827") // Negro muy oscuro
+        color = Color.parseColor("#111827")
         strokeWidth = 5f
         style = Paint.Style.STROKE
     }
@@ -137,13 +127,37 @@ class Altimetria3DView @JvmOverloads constructor(
     }
     
     private val poiBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#A0000000") // Semi-transparente
+        color = Color.parseColor("#A0000000")
         style = Paint.Style.FILL
     }
 
     private val poiTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         typeface = Typeface.DEFAULT_BOLD
+    }
+
+    // Zoom Controls Overlay Paints
+    private val zoomBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#E018181B")
+        style = Paint.Style.FILL
+    }
+
+    private val zoomBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#38BDF8")
+        strokeWidth = 2f
+        style = Paint.Style.STROKE
+    }
+
+    private val zoomTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        typeface = Typeface.DEFAULT_BOLD
+        textAlign = Paint.Align.CENTER
+    }
+
+    private val zoomBtnPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#38BDF8")
+        typeface = Typeface.DEFAULT_BOLD
+        textAlign = Paint.Align.CENTER
     }
 
     private var nextBlocks: List<Float> = emptyList()
@@ -226,6 +240,70 @@ class Altimetria3DView @JvmOverloads constructor(
         postInvalidate()
     }
 
+    override fun performClick(): Boolean {
+        super.performClick()
+        return true
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            val touchX = event.x
+            val touchY = event.y
+            val w = width.toFloat()
+            val h = height.toFloat()
+
+            val pillW = (w * 0.38f).coerceIn(120f, 210f)
+            val pillH = (h * 0.15f).coerceIn(28f, 44f)
+            val right = w - 16f
+            val left = right - pillW
+            val top = 16f
+            val bottom = top + pillH
+            val btnW = pillW * 0.28f
+
+            if (touchY in top..bottom) {
+                // Tapped [-] button (Alejar / Zoom Out)
+                if (touchX >= left && touchX <= left + btnW + 10f) {
+                    performClick()
+                    zoomOut()
+                    return true
+                }
+                // Tapped [+] button (Acercar / Zoom In)
+                if (touchX >= right - btnW - 10f && touchX <= right) {
+                    performClick()
+                    zoomIn()
+                    return true
+                }
+            }
+        }
+        return super.onTouchEvent(event)
+    }
+
+    private fun zoomIn() {
+        val curr = lookaheadMeters
+        val nextVal = when {
+            curr > 1000 -> curr - 1000
+            curr == 1000 -> 500
+            curr > 200 -> curr - 50
+            else -> 200
+        }
+        lookaheadMeters = nextVal
+        AppPreferences.getInstance(context).lookaheadMeters3d = nextVal
+        postInvalidate()
+    }
+
+    private fun zoomOut() {
+        val curr = lookaheadMeters
+        val nextVal = when {
+            curr < 500 -> curr + 50
+            curr == 500 -> 1000
+            curr < 10000 -> curr + 1000
+            else -> 10000
+        }
+        lookaheadMeters = nextVal
+        AppPreferences.getInstance(context).lookaheadMeters3d = nextVal
+        postInvalidate()
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
@@ -265,7 +343,7 @@ class Altimetria3DView @JvmOverloads constructor(
         liveGradePaint.color = Color.parseColor(getGradeColor(currentGrade))
         canvas.drawText(liveGradeText, 18f, h * 0.25f, liveGradePaint)
 
-        // PENDIENTE MÁXIMA DEL TRAMO VISIBLE (Opcional según preferencia del usuario)
+        // PENDIENTE MÁXIMA DEL TRAMO VISIBLE
         if (showMaxGrade) {
             val tramoMaxGrade = if (nextBlocks.isNotEmpty()) nextBlocks.maxOrNull()?.toDouble() ?: 12.8 else 12.8
             val labelMaxGrade = context.getString(R.string.label_max_gradient_tramo)
@@ -278,27 +356,54 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawText(maxGradeText, 18f, h * 0.43f, maxGradePaint)
         }
 
-        // 3. Rejilla Isometrica 3D de Suelo
-        drawIsometricGrid(canvas, w, h)
+        // 3. Controles de Zoom Táctil en Esquina Superior Derecha [–] 🔍 500m [+]
+        drawZoomOverlay(canvas, w, h)
 
         // 4. Perfil 3D con Hitos y Herraduras
         draw3DRibbonAndWalls(canvas, w, h)
     }
 
-    private fun drawIsometricGrid(canvas: Canvas, w: Float, h: Float) {
-        val groundY = h * 0.88f
-        val gridLines = 5
+    private fun drawZoomOverlay(canvas: Canvas, w: Float, h: Float) {
+        val zoomText = if (lookaheadMeters < 1000) "${lookaheadMeters}m" else "${lookaheadMeters / 1000}km"
 
-        for (i in 0..gridLines) {
-            val ratio = i.toFloat() / gridLines
-            val x1 = w * 0.04f + ratio * (w * 0.25f)
-            val y1 = groundY - ratio * (h * 0.12f)
+        val pillW = (w * 0.38f).coerceIn(120f, 210f)
+        val pillH = (h * 0.15f).coerceIn(28f, 44f)
 
-            val x2 = w * 0.78f + ratio * (w * 0.25f)
-            val y2 = groundY - ratio * (h * 0.12f)
+        val marginR = 16f
+        val marginT = 16f
 
-            canvas.drawLine(x1, y1, x2, y2, gridPaint)
-        }
+        val right = w - marginR
+        val left = right - pillW
+        val top = marginT
+        val bottom = top + pillH
+
+        val rect = RectF(left, top, right, bottom)
+        canvas.drawRoundRect(rect, pillH / 2f, pillH / 2f, zoomBgPaint)
+        canvas.drawRoundRect(rect, pillH / 2f, pillH / 2f, zoomBorderPaint)
+
+        val btnW = pillW * 0.28f
+        val textSize = (pillH * 0.55f)
+
+        // Botón [-] (Zoom Out / Alejar)
+        zoomBtnPaint.textSize = textSize
+        val minusX = left + (btnW / 2f)
+        val centerY = top + (pillH / 2f) + (textSize * 0.32f)
+        canvas.drawText("–", minusX, centerY, zoomBtnPaint)
+
+        // Línea divisoria izquierda
+        canvas.drawLine(left + btnW, top + 4f, left + btnW, bottom - 4f, zoomBorderPaint)
+
+        // Texto central (ej. 🔍 500m / 🔍 1km)
+        zoomTextPaint.textSize = (pillH * 0.46f)
+        val labelX = left + (pillW / 2f)
+        canvas.drawText("🔍 $zoomText", labelX, centerY, zoomTextPaint)
+
+        // Línea divisoria derecha
+        canvas.drawLine(right - btnW, top + 4f, right - btnW, bottom - 4f, zoomBorderPaint)
+
+        // Botón [+] (Zoom In / Acercar)
+        val plusX = right - (btnW / 2f)
+        canvas.drawText("+", plusX, centerY, zoomBtnPaint)
     }
 
     private fun draw3DBackwallGrid(
@@ -318,7 +423,6 @@ class Altimetria3DView @JvmOverloads constructor(
 
         val elevRange = (maxElev - minElev).coerceAtLeast(10f)
 
-        // 1. Líneas horizontales de altitud en PERSPECTIVA ISOMÉTRICA 3D
         for (k in 0..steps) {
             val ratio = k.toFloat() / steps
             val elevMark = (minElev + (ratio * elevRange)).toInt()
@@ -338,7 +442,6 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawText("${elevMark}m", labelX, labelY, axisTextPaint)
         }
 
-        // 2. Columnas verticales de rejilla en PERSPECTIVA ISOMÉTRICA 3D
         for (j in 0 until samples) {
             val x = pointsX[j]
             val yBottom = pointsYBase[j]
@@ -424,12 +527,11 @@ class Altimetria3DView @JvmOverloads constructor(
 
         draw3DBackwallGrid(canvas, w, h, majorX, majorYBase, majorSamples, maxPeakHeight, minElev, maxElev)
 
-        // Dibujar curvas de herradura (Si están habilitadas) detrás de la cinta pero sobre la pared
         for (i in 0 until totalMicroSamples - 1) {
             val grade = microGrades[i]
 
             val fillColor = if (grade < 0.0f) {
-                Color.parseColor("#1E3A8A") // Azul sombra oculta
+                Color.parseColor("#1E3A8A")
             } else {
                 Color.parseColor(getGradeColor(grade.toDouble()))
             }
@@ -452,7 +554,6 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawPath(wallPath, wallPaint)
         }
 
-        // Trazar Curvas de Herradura
         if (showHairpins) {
             for (hpRelDist in hairpins) {
                 if (hpRelDist > totalMetersAhead) continue
@@ -471,7 +572,6 @@ class Altimetria3DView @JvmOverloads constructor(
             }
         }
 
-        // Cotas
         cotaTextPaint.textSize = ((h * 0.050f) * fontScale).coerceIn(10f, 18f)
 
         for (k in 0 until majorSamples) {
@@ -493,7 +593,6 @@ class Altimetria3DView @JvmOverloads constructor(
             }
         }
 
-        // Cinta Superior
         for (i in 0 until totalMicroSamples - 1) {
             val grade = microGrades[i]
             val darkStrokeColor = getDarkGradeColor(grade.toDouble())
@@ -502,7 +601,6 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawLine(microX[i], microYTop[i], microX[i + 1], microYTop[i + 1], lineStrokePaint)
         }
 
-        // Puntos de Interés (Hitos)
         if (showPois) {
             poiTextPaint.textSize = ((h * 0.040f) * fontScale).coerceIn(10f, 16f)
 
@@ -521,10 +619,8 @@ class Altimetria3DView @JvmOverloads constructor(
 
                 val labelY = pyTop - (h * 0.16f)
                 
-                // Línea discontinua apuntando al hito
                 canvas.drawLine(px, pyTop, px, labelY + 12f, poiLinePaint)
 
-                // Etiqueta del hito
                 val text = "${poi.icon} ${poi.name}"
                 val textWidth = poiTextPaint.measureText(text)
                 
@@ -540,7 +636,6 @@ class Altimetria3DView @JvmOverloads constructor(
             }
         }
 
-        // Flechas Rampas
         if (showRamps) {
             for (k in 0 until majorBlocksCount) {
                 val startIdx = k * microSubDivisions
@@ -560,7 +655,6 @@ class Altimetria3DView @JvmOverloads constructor(
                     val midX = (microX[i] + microX[i + 1]) / 2f
                     val midY = (microYTop[i] + microYTop[i + 1]) / 2f
 
-                    // Evitar superposición con POIs levantando más la flecha
                     val arrowTopY = midY - (h * 0.12f)
                     val arrowBottomY = midY - 6f
 
@@ -580,7 +674,6 @@ class Altimetria3DView @JvmOverloads constructor(
             }
         }
 
-        // Eje X Marcas
         axisTextPaint.textSize = (h * 0.040f).coerceIn(9f, 13f)
         axisTextPaint.textAlign = Paint.Align.CENTER
         val majorDistMeters = (totalMetersAhead / majorBlocksCount).toInt()
@@ -598,7 +691,6 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawText(distLabel, px, pyBase + 12f, axisTextPaint)
         }
 
-        // Porcentajes Centrados en Bloques
         val fontBaseSize = (h * 0.045f) * fontScale
 
         for (k in 0 until majorBlocksCount) {
@@ -618,7 +710,6 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawText(pctStr, midX, textY, percentTextPaint)
         }
 
-        // Marcador del Ciclista
         val riderIdx = 0
         val rx = microX[riderIdx]
         val ry = microYTop[riderIdx]
