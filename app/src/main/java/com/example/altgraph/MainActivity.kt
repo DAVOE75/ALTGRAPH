@@ -110,22 +110,24 @@ class MainActivity : Activity() {
         fontCard.addView(fontValueText)
         fontCard.addView(fontSpinner)
 
-        // Section 1: Block Size Card
+        // Section 1: Block Size Card (50m, 100m, 250m, 500m, 1km)
         val blockCard = createCardContainer()
         val blockLabel = createSectionLabel(getString(R.string.setting_block_size))
-        val blockValueText = createValueText("${prefs.blockSizeMeters.toInt()} m")
+        val currentBlockText = if (prefs.blockSizeMeters >= 1000.0) "${(prefs.blockSizeMeters / 1000).toInt()} km" else "${prefs.blockSizeMeters.toInt()} m"
+        val blockValueText = createValueText(currentBlockText)
         val blockRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         }
 
         val blockButtons = mutableListOf<Button>()
-        val blockSizes = listOf(50.0, 100.0, 250.0, 500.0)
+        val blockSizes = listOf(50.0, 100.0, 250.0, 500.0, 1000.0)
 
         blockSizes.forEach { size ->
-            val btn = createSegmentButton("${size.toInt()}m", prefs.blockSizeMeters == size) {
+            val labelStr = if (size >= 1000.0) "${(size / 1000).toInt()}km" else "${size.toInt()}m"
+            val btn = createSegmentButton(labelStr, prefs.blockSizeMeters == size) {
                 prefs.blockSizeMeters = size
-                blockValueText.text = "${size.toInt()} m"
+                blockValueText.text = if (size >= 1000.0) "${(size / 1000).toInt()} km" else "${size.toInt()} m"
                 updateSegmentActiveStates(blockButtons, blockSizes.indexOf(size))
             }
             blockButtons.add(btn)

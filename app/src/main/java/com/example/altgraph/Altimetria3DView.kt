@@ -225,7 +225,7 @@ class Altimetria3DView @JvmOverloads constructor(
         // 3. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)
 
-        // 4. Perfil 3D adaptable desde 200m hasta 10 km
+        // 4. Perfil 3D con % de Inclinación Ubicados Justo en Medio de los Bloques
         draw3DRibbonAndWalls(canvas, w, h)
     }
 
@@ -292,10 +292,8 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private fun draw3DRibbonAndWalls(canvas: Canvas, w: Float, h: Float) {
-        // PERMITIR ESCALA COMPLETA DE ANTICIPACIÓN HASTA 10 KM (10000m)
         val totalMetersAhead = lookaheadMeters.toDouble().coerceIn(200.0, 10000.0)
 
-        // Determinar número de muestras/bloques según anticipación (200m-500m o 1km-10km)
         val blocksCount = if (totalMetersAhead > 1000.0) {
             (totalMetersAhead / 1000.0).toInt().coerceIn(2, 10)
         } else {
@@ -373,7 +371,7 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawPath(wallPath, wallPaint)
         }
 
-        // DIBUJAR LÍNEAS VERTICALES DE LÍMITE Y COTAS DE ALTITUD
+        // DIBUJAR LÍNEAS VERTICALES DE LÍMITE Y COTAS DE ALTITUD EN CADA TRAMO ROTADAS A 90 GRADOS
         cotaTextPaint.textSize = ((h * 0.050f) * fontScale).coerceIn(10f, 18f)
 
         for (i in 0 until samples) {
@@ -444,8 +442,8 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawText(distLabel, px, pyBase + 12f, axisTextPaint)
         }
 
-        // DIBUJAR PORCENTAJES (%) DEBAJO DE LA BASE DE LA GRÁFICA 3D
-        val fontBaseSize = (h * 0.042f) * fontScale
+        // DIBUJAR PORCENTAJES (%) DIRECTAMENTE EN MEDIO DE CADA BLOQUE 3D (IGUAL QUE EN LA IMAGEN)
+        val fontBaseSize = (h * 0.045f) * fontScale
 
         for (i in 0 until samples - 1) {
             val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
@@ -456,13 +454,15 @@ class Altimetria3DView @JvmOverloads constructor(
             }
 
             val midX = (pointsX[i] + pointsX[i + 1]) / 2f
+            val midYTop = (pointsYTop[i] + pointsYTop[i + 1]) / 2f
             val midYBase = (pointsYBase[i] + pointsYBase[i + 1]) / 2f
+            val centerY = (midYTop + midYBase) / 2f
 
             val blockW = abs(pointsX[i + 1] - pointsX[i])
-            val calcFontSize = (blockW * 0.28f * fontScale).coerceIn(10f, fontBaseSize.coerceAtLeast(16f))
+            val calcFontSize = (blockW * 0.30f * fontScale).coerceIn(10f, fontBaseSize.coerceAtLeast(18f))
             percentTextPaint.textSize = calcFontSize
 
-            val textY = midYBase + calcFontSize + 18f
+            val textY = centerY + (calcFontSize * 0.35f)
             canvas.drawText(pctStr, midX, textY, percentTextPaint)
         }
 
