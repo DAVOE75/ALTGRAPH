@@ -203,7 +203,7 @@ class Altimetria3DView @JvmOverloads constructor(
         subTitleLabelPaint.textSize = ((h * 0.045f) * fontScale).coerceIn(10f, 16f)
         canvas.drawText(labelCurrentGrade, 18f, h * 0.14f, subTitleLabelPaint)
 
-        // Número PENDIENTE ACTUAL (Grande)
+        // Número PENDIENTE ACTUAL
         val liveGradeText = "%.1f%%".format(currentGrade)
         liveGradePaint.textSize = ((h * 0.13f) * fontScale).coerceIn(20f, 42f)
         liveGradePaint.color = Color.parseColor(getGradeColor(currentGrade))
@@ -225,17 +225,17 @@ class Altimetria3DView @JvmOverloads constructor(
         // 3. Rejilla Isometrica 3D de Suelo
         drawIsometricGrid(canvas, w, h)
 
-        // 4. Perfil 3D con Cotas Verticales Colgadas desde Arriba
+        // 4. Perfil 3D con Cotas Ubicadas en la Parte Inferior (Dentro del Relieve)
         draw3DRibbonAndWalls(canvas, w, h)
     }
 
     private fun drawIsometricGrid(canvas: Canvas, w: Float, h: Float) {
-        val groundY = h * 0.88f
+        val groundY = h * 0.94f
         val gridLines = 5
 
         for (i in 0..gridLines) {
             val ratio = i.toFloat() / gridLines
-            val x1 = w * 0.04f + ratio * (w * 0.25f)
+            val x1 = w * 0.02f + ratio * (w * 0.25f)
             val y1 = groundY - ratio * (h * 0.12f)
 
             val x2 = w * 0.78f + ratio * (w * 0.25f)
@@ -296,10 +296,10 @@ class Altimetria3DView @JvmOverloads constructor(
         val blocksCount = (totalMetersAhead / blockSizeMeters.coerceAtLeast(10.0)).toInt().coerceIn(2, 10)
         val samples = blocksCount + 1
 
-        val startX = w * 0.08f
-        val endX = w * 0.98f
-        val baseGroundY = h * 0.88f
-        val maxPeakHeight = h * 0.52f
+        val startX = w * 0.02f
+        val endX = w * 0.99f  // Estirada a la derecha
+        val baseGroundY = h * 0.94f
+        val maxPeakHeight = h * 0.58f
 
         val stepX = (endX - startX) / (samples - 1).coerceAtLeast(1)
 
@@ -366,18 +366,19 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawPath(wallPath, wallPaint)
         }
 
-        // DIBUJAR LÍNEAS VERTICALES DE LÍMITE Y COTAS DE ALTITUD ROTADAS A 90 GRADOS COLGANDO DESDE ARRIBA (JUSTO DEBAJO DE LA CINTA/CUMBRE, COMO EN LA IMAGEN)
+        // DIBUJAR LÍNEAS VERTICALES DE LÍMITE Y COTAS DE ALTITUD EN CADA TRAMO ROTADAS A 90 GRADOS (UBICADAS ABAJO JUNTO A LA BASE, COMO EN LA IMAGEN DE MUESTRA)
         cotaTextPaint.textSize = ((h * 0.050f) * fontScale).coerceIn(10f, 18f)
 
         for (i in 0 until samples) {
+            // Línea vertical limpia terminada exactamente en la base (sin líneas sobresalientes abajo)
             canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i], pointsYBase[i], cotaLinePaint)
 
             if (showCotas) {
                 val cotaText = "${pointElevations[i].toInt()} m"
                 canvas.save()
                 val textOffsetX = if (i == 0) pointsX[i] + 8f else pointsX[i] - 5f
-                // Anclar justo debajo de la superficie de la cinta superior (pointsYTop[i] + 18f)
-                val textOffsetY = pointsYTop[i] + 18f
+                // Ubicar cota en la parte inferior pegada a la base dentro del cuerpo de la montaña
+                val textOffsetY = pointsYBase[i] - 12f
                 canvas.translate(textOffsetX, textOffsetY)
                 canvas.rotate(-90f)
                 canvas.drawText(cotaText, 0f, 0f, cotaTextPaint)
@@ -421,7 +422,7 @@ class Altimetria3DView @JvmOverloads constructor(
             }
         }
 
-        // DIBUJAR EJE X CON MARCAS DE DISTANCIA EN METROS SEGÚN ANTICIPACIÓN
+        // DIBUJAR EJE X CON MARCAS DE DISTANCIA EN METROS SEGÚN ANTICIPACIÓN (Limpias sobre la base)
         axisTextPaint.textSize = (h * 0.040f).coerceIn(9f, 13f)
         axisTextPaint.textAlign = Paint.Align.CENTER
         val stepDistMeters = (totalMetersAhead / blocksCount).toInt()
