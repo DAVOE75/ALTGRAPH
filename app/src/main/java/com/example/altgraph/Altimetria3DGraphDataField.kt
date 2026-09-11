@@ -1,8 +1,13 @@
 package com.example.altgraph
 
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.os.Build
 import android.view.View
 import android.widget.RemoteViews
 import io.hammerhead.karooext.KarooSystemService
@@ -27,6 +32,11 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
     private var streamJob: Job? = null
     private val calculator = AltimetriaStrategyCalculator()
     private var karooSystem: KarooSystemService? = null
+    private var zoomReceiver: BroadcastReceiver? = null
+
+    companion object {
+        const val ACTION_CYCLE_3D_ZOOM = "com.example.altgraph.ACTION_CYCLE_3D_ZOOM"
+    }
 
     override fun startStream(emitter: Emitter<StreamState>) {
         streamJob = scope.launch {
@@ -55,6 +65,34 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
 
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
         emitter.onNext(UpdateGraphicConfig(showHeader = false))
+
+        if (zoomReceiver == null) {
+            zoomReceiver = object : BroadcastReceiver() {
+                override fun onReceive(ctx: Context?, intent: Intent?) {
+                    if (intent?.action == ACTION_CYCLE_3D_ZOOM && ctx != null) {
+                        val prefs = AppPreferences.getInstance(ctx)
+                        val curr = prefs.lookaheadMeters3d
+                        val nextVal = when {
+                            curr < 350 -> 350
+                            curr < 500 -> 500
+                            curr < 1000 -> 1000
+                            curr < 2000 -> 2000
+                            curr < 5000 -> 5000
+                            curr < 10000 -> 10000
+                            else -> 200
+                        }
+                        prefs.lookaheadMeters3d = nextVal
+                    }
+                }
+            }
+            val filter = IntentFilter(ACTION_CYCLE_3D_ZOOM)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.applicationContext.registerReceiver(zoomReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+            } else {
+                @Suppress("UnspecifiedRegisterReceiverFlag")
+                context.applicationContext.registerReceiver(zoomReceiver, filter)
+            }
+        }
 
         if (karooSystem == null) {
             val system = KarooSystemService(context)
@@ -117,6 +155,19 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                 val remoteViews = RemoteViews(context.packageName, R.layout.view_remote_graphic)
                 remoteViews.setImageViewBitmap(R.id.img_graphic, bitmap)
 
+                if (prefs.show3dZoomControls) {
+                    val intent = Intent(ACTION_CYCLE_3D_ZOOM).apply {
+                        setPackage(context.packageName)
+                    }
+                    val pendingIntent = PendingIntent.getBroadcast(
+                        context,
+                        0,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                    remoteViews.setOnClickPendingIntent(R.id.img_graphic, pendingIntent)
+                }
+
                 emitter.updateView(remoteViews)
 
                 delay(1000)
@@ -125,6 +176,12 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
 
         emitter.setCancellable {
             viewJob.cancel()
+            zoomReceiver?.let {
+                try {
+                    context.applicationContext.unregisterReceiver(it)
+                } catch (e: Exception) {}
+            }
+            zoomReceiver = null
             karooSystem?.disconnect()
             karooSystem = null
         }
