@@ -136,7 +136,8 @@ class Altimetria3DView @JvmOverloads constructor(
         lookaheadMeters: Int = 350,
         showCotas: Boolean = true,
         showRamps: Boolean = true,
-        showMaxGrade: Boolean = true
+        showMaxGrade: Boolean = true,
+        fontFamilyKey: String = "sans-serif-condensed"
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -153,6 +154,17 @@ class Altimetria3DView @JvmOverloads constructor(
         this.showCotas = showCotas
         this.showRamps = showRamps
         this.showMaxGrade = showMaxGrade
+
+        val tf = FontHelper.getTypeface(fontFamilyKey)
+        titlePaint.typeface = tf
+        subTitleLabelPaint.typeface = tf
+        liveGradePaint.typeface = tf
+        maxGradePaint.typeface = tf
+        percentTextPaint.typeface = tf
+        rampTextPaint.typeface = tf
+        cotaTextPaint.typeface = tf
+        axisTextPaint.typeface = tf
+
         postInvalidate()
     }
 
@@ -375,7 +387,6 @@ class Altimetria3DView @JvmOverloads constructor(
                     canvas.drawPath(arrowPath, rampArrowHeadPaint)
 
                     rampTextPaint.textSize = ((h * 0.065f) * fontScale).coerceIn(12f, 22f)
-                    // LAS RAMPAS SIEMPRE SE FORMATAN CON EXACTAMENTE 1 DECIMAL
                     val rampLabel = "%.1f%%".format(grade)
                     canvas.drawText(rampLabel, midX, arrowTopY - 6f, rampTextPaint)
                 }

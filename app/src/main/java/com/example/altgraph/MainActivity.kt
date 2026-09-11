@@ -7,10 +7,13 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
+import android.widget.Spinner
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
@@ -56,7 +59,7 @@ class MainActivity : Activity() {
         }
 
         val subtitle = TextView(this).apply {
-            text = "${getString(R.string.title_settings)} • v0.2.1"
+            text = "${getString(R.string.title_settings)} • v0.2.2"
             textSize = 13f
             setTextColor(Color.parseColor("#A1A1AA"))
             gravity = Gravity.CENTER
@@ -66,6 +69,46 @@ class MainActivity : Activity() {
         headerCard.addView(logo)
         headerCard.addView(title)
         headerCard.addView(subtitle)
+
+        // Section 0: DESPLEGABLE TIPO DE LETRA (SPINNER - EL PRIMERO EN EL PANEL)
+        val fontCard = createCardContainer()
+        val fontLabel = createSectionLabel(getString(R.string.setting_font_family))
+        val currentFontOpt = FontHelper.options.find { it.key == prefs.fontFamilyKey } ?: FontHelper.options[0]
+        val fontValueText = createValueText(currentFontOpt.labelEs)
+
+        val fontSpinner = Spinner(this).apply {
+            val adapter = ArrayAdapter(
+                this@MainActivity,
+                android.R.layout.simple_spinner_dropdown_item,
+                FontHelper.options.map { it.labelEs }
+            )
+            setAdapter(adapter)
+
+            val selectedIndex = FontHelper.options.indexOfFirst { it.key == prefs.fontFamilyKey }
+            if (selectedIndex >= 0) setSelection(selectedIndex)
+
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val opt = FontHelper.options[position]
+                    prefs.fontFamilyKey = opt.key
+                    fontValueText.text = opt.labelEs
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = 8
+                bottomMargin = 8
+            }
+        }
+
+        fontCard.addView(fontLabel)
+        fontCard.addView(fontValueText)
+        fontCard.addView(fontSpinner)
 
         // Section 1: Block Size Card
         val blockCard = createCardContainer()
@@ -356,6 +399,7 @@ class MainActivity : Activity() {
         }
 
         rootLayout.addView(headerCard)
+        rootLayout.addView(fontCard)
         rootLayout.addView(blockCard)
         rootLayout.addView(visibleBlocksCard)
         rootLayout.addView(lookaheadCard)

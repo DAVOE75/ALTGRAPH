@@ -98,7 +98,8 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     lookaheadMeters = prefs.lookaheadMeters3d,
                     showCotas = prefs.show3dCotas,
                     showRamps = prefs.show3dRamps,
-                    showMaxGrade = prefs.showMaxGradient
+                    showMaxGrade = prefs.showMaxGradient,
+                    fontFamilyKey = prefs.fontFamilyKey
                 )
 
                 val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)

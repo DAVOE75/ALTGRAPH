@@ -7,6 +7,10 @@ class AppPreferences(context: Context) {
 
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
+    var fontFamilyKey: String
+        get() = prefs.getString(KEY_FONT_FAMILY, "sans-serif-condensed") ?: "sans-serif-condensed"
+        set(value) = prefs.edit().putString(KEY_FONT_FAMILY, value).apply()
+
     var blockSizeMeters: Double
         get() = prefs.getFloat(KEY_BLOCK_SIZE, 100.0f).toDouble()
         set(value) = prefs.edit().putFloat(KEY_BLOCK_SIZE, value.toFloat()).apply()
@@ -57,6 +61,7 @@ class AppPreferences(context: Context) {
 
     companion object {
         private const val PREFS_NAME = "altgraph_settings"
+        private const val KEY_FONT_FAMILY = "font_family_key"
         private const val KEY_BLOCK_SIZE = "block_size_meters"
         private const val KEY_THRESHOLD_ATTACK = "threshold_attack_pct"
         private const val KEY_TARGET_VAM = "target_vam"
