@@ -407,7 +407,7 @@ class Altimetria3DView @JvmOverloads constructor(
             drawZoomOverlay(canvas, w, h)
         }
 
-        // 4. Perfil 3D con Ampliación y Desplazamiento
+        // 4. Perfil 3D con Ampliación y Desplazamiento Proporcional Estricto
         draw3DRibbonAndWalls(canvas, w, h)
     }
 
@@ -531,13 +531,12 @@ class Altimetria3DView @JvmOverloads constructor(
         var accumulatedElev = currentElevation
         microElevations[0] = accumulatedElev.toFloat()
 
+        // Cálculo de pendiente física pura estricta sin ruido ni deformación por ondas sinusoidales
         for (i in 0 until totalMicroSamples - 1) {
             val majorBlockIdx = (i / microSubDivisions).coerceAtMost(nextBlocks.size - 1)
             val baseGrade = if (majorBlockIdx < nextBlocks.size) nextBlocks[majorBlockIdx].toDouble() else 4.0
 
-            val distMeters = i * microDistMeters
-            val microVariation = (sin(distMeters / 60.0) * 3.5) + (sin(distMeters / 140.0) * 4.5)
-            val microGrade = (baseGrade + microVariation).coerceIn(-6.0, 22.0).toFloat()
+            val microGrade = baseGrade.coerceIn(-15.0, 30.0).toFloat()
 
             microGrades[i] = microGrade
             accumulatedElev += (microDistMeters * (microGrade / 100.0))
