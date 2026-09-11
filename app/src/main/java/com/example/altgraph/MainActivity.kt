@@ -37,22 +37,22 @@ class MainActivity : Activity() {
         val rootLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
-            setPadding(24, 24, 24, 32)
+            setPadding(20, 20, 20, 28)
         }
 
-        // Header Card
+        // 1. Header Card (Logo, Título y Versión)
         val headerCard = createCardContainer()
         val logo = ImageView(this).apply {
             setImageResource(R.drawable.ic_altigraph_logo)
-            layoutParams = LinearLayout.LayoutParams(140, 140).apply {
+            layoutParams = LinearLayout.LayoutParams(120, 120).apply {
                 gravity = Gravity.CENTER_HORIZONTAL
-                bottomMargin = 12
+                bottomMargin = 8
             }
         }
 
         val title = TextView(this).apply {
             text = getString(R.string.app_name)
-            textSize = 26f
+            textSize = 24f
             typeface = Typeface.DEFAULT_BOLD
             setTextColor(Color.WHITE)
             gravity = Gravity.CENTER
@@ -60,17 +60,85 @@ class MainActivity : Activity() {
 
         val subtitle = TextView(this).apply {
             text = "${getString(R.string.title_settings)} • v0.2.3"
-            textSize = 13f
+            textSize = 12f
             setTextColor(Color.parseColor("#A1A1AA"))
             gravity = Gravity.CENTER
-            setPadding(0, 4, 0, 8)
+            setPadding(0, 2, 0, 4)
         }
 
         headerCard.addView(logo)
         headerCard.addView(title)
         headerCard.addView(subtitle)
 
-        // Section 0: DESPLEGABLE TIPO DE LETRA (SPINNER - EL PRIMERO EN EL PANEL)
+        // 2. Bar de Pestañas Categorizadas
+        val tabBar = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = 16
+            }
+        }
+
+        // Contenedores de las 4 Pestañas
+        val tabEstiloContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val tab3dContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val tab2dContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val tabVamContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+
+        val tabContainers = listOf(
+            tabEstiloContainer,
+            tab3dContainer,
+            tab2dContainer,
+            tabVamContainer
+        )
+
+        val tabTitles = listOf("🎨 Estilo", "🏔️ 3D", "📊 2D", "🚴 VAM")
+        val tabButtons = mutableListOf<Button>()
+
+        fun selectTab(activeIdx: Int) {
+            tabContainers.forEachIndexed { idx, container ->
+                container.visibility = if (idx == activeIdx) View.VISIBLE else View.GONE
+            }
+            tabButtons.forEachIndexed { idx, btn ->
+                if (idx == activeIdx) {
+                    btn.setTextColor(Color.BLACK)
+                    btn.background = GradientDrawable().apply {
+                        setColor(Color.parseColor("#38BDF8"))
+                        cornerRadius = 18f
+                    }
+                } else {
+                    btn.setTextColor(Color.WHITE)
+                    btn.background = GradientDrawable().apply {
+                        setColor(Color.parseColor("#27272A"))
+                        cornerRadius = 18f
+                    }
+                }
+            }
+        }
+
+        tabTitles.forEachIndexed { idx, titleStr ->
+            val btn = Button(this).apply {
+                text = titleStr
+                textSize = 12f
+                typeface = Typeface.DEFAULT_BOLD
+                setPadding(4, 12, 4, 12)
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f).apply {
+                    leftMargin = 3
+                    rightMargin = 3
+                }
+                setOnClickListener { selectTab(idx) }
+            }
+            tabButtons.add(btn)
+            tabBar.addView(btn)
+        }
+
+        // ==========================================
+        // PESTAÑA 1: 🎨 ESTILO Y APARIENCIA
+        // ==========================================
+
+        // Opción: Tipografía (Dropdown Spinner)
         val fontCard = createCardContainer()
         val fontLabel = createSectionLabel(getString(R.string.setting_font_family))
         val currentFontOpt = FontHelper.options.find { it.key == prefs.fontFamilyKey } ?: FontHelper.options[0]
@@ -101,8 +169,8 @@ class MainActivity : Activity() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply {
-                topMargin = 8
-                bottomMargin = 8
+                topMargin = 4
+                bottomMargin = 4
             }
         }
 
@@ -110,66 +178,53 @@ class MainActivity : Activity() {
         fontCard.addView(fontValueText)
         fontCard.addView(fontSpinner)
 
-        // Section 1: Block Size Card (50m, 100m, 250m, 500m, 1km)
-        val blockCard = createCardContainer()
-        val blockLabel = createSectionLabel(getString(R.string.setting_block_size))
-        val currentBlockText = if (prefs.blockSizeMeters >= 1000.0) "${(prefs.blockSizeMeters / 1000).toInt()} km" else "${prefs.blockSizeMeters.toInt()} m"
-        val blockValueText = createValueText(currentBlockText)
-        val blockRow = LinearLayout(this).apply {
+        // Opción: Girar 90° Modo Apaisado
+        val rotate90Card = createCardContainer()
+        val switchRotate90 = Switch(this).apply {
+            text = getString(R.string.setting_rotate_90_cw)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.rotate90Clockwise
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.rotate90Clockwise = isChecked
+            }
+        }
+        rotate90Card.addView(switchRotate90)
+
+        // Opción: Tamaño de Letra 3D
+        val font3dCard = createCardContainer()
+        val font3dLabel = createSectionLabel(getString(R.string.setting_font_size_3d))
+        val fontScales = listOf(1.0f to getString(R.string.font_normal), 1.25f to getString(R.string.font_large), 1.5f to getString(R.string.font_xl))
+        val currentFontLabel = fontScales.find { it.first == prefs.fontSize3dScale }?.second ?: getString(R.string.font_normal)
+        val font3dValueText = createValueText(currentFontLabel)
+        val font3dRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         }
 
-        val blockButtons = mutableListOf<Button>()
-        val blockSizes = listOf(50.0, 100.0, 250.0, 500.0, 1000.0)
-
-        blockSizes.forEach { size ->
-            val labelStr = if (size >= 1000.0) "${(size / 1000).toInt()}km" else "${size.toInt()}m"
-            val btn = createSegmentButton(labelStr, prefs.blockSizeMeters == size) {
-                prefs.blockSizeMeters = size
-                blockValueText.text = if (size >= 1000.0) "${(size / 1000).toInt()} km" else "${size.toInt()} m"
-                updateSegmentActiveStates(blockButtons, blockSizes.indexOf(size))
+        val fontButtons = mutableListOf<Button>()
+        fontScales.forEach { (scale, labelStr) ->
+            val btn = createSegmentButton(labelStr, prefs.fontSize3dScale == scale) {
+                prefs.fontSize3dScale = scale
+                font3dValueText.text = labelStr
+                updateSegmentActiveStates(fontButtons, fontScales.indexOfFirst { it.first == scale })
             }
-            blockButtons.add(btn)
-            blockRow.addView(btn)
+            fontButtons.add(btn)
+            font3dRow.addView(btn)
         }
 
-        blockCard.addView(blockLabel)
-        blockCard.addView(blockValueText)
-        blockCard.addView(blockRow)
+        font3dCard.addView(font3dLabel)
+        font3dCard.addView(font3dValueText)
+        font3dCard.addView(font3dRow)
 
-        // Section 2: Visible Blocks Count Card (1 a 10 tramos, por defecto 5)
-        val visibleBlocksCard = createCardContainer()
-        val visibleBlocksLabel = createSectionLabel(getString(R.string.setting_visible_blocks_count))
-        val visibleBlocksValueText = createValueText("${prefs.visibleBlocksCount} tramos")
-        val visibleBlocksRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        }
+        tabEstiloContainer.addView(fontCard)
+        tabEstiloContainer.addView(rotate90Card)
+        tabEstiloContainer.addView(font3dCard)
 
-        val visibleMinusBtn = createActionButton("- 1") {
-            if (prefs.visibleBlocksCount > 1) {
-                prefs.visibleBlocksCount -= 1
-                visibleBlocksValueText.text = "${prefs.visibleBlocksCount} tramos"
-            }
-        }
+        // ==========================================
+        // PESTAÑA 2: 🏔️ ALTIMETRÍA 3D
+        // ==========================================
 
-        val visiblePlusBtn = createActionButton("+ 1") {
-            if (prefs.visibleBlocksCount < 10) {
-                prefs.visibleBlocksCount += 1
-                visibleBlocksValueText.text = "${prefs.visibleBlocksCount} tramos"
-            }
-        }
-
-        visibleBlocksRow.addView(visibleMinusBtn)
-        visibleBlocksRow.addView(visiblePlusBtn)
-
-        visibleBlocksCard.addView(visibleBlocksLabel)
-        visibleBlocksCard.addView(visibleBlocksValueText)
-        visibleBlocksCard.addView(visibleBlocksRow)
-
-        // Helper para formatear distancia de anticipación (m / km)
         fun formatLookaheadText(meters: Int): String {
             return if (meters < 1000) {
                 "$meters m"
@@ -178,7 +233,7 @@ class MainActivity : Activity() {
             }
         }
 
-        // Section 3: 3D Lookahead Distance Card (50m a 500m -> 1km -> 2km... 10km)
+        // Opción: Anticipación 3D
         val lookaheadCard = createCardContainer()
         val lookaheadLabel = createSectionLabel(getString(R.string.setting_lookahead_meters_3d))
         val lookaheadValueText = createValueText(formatLookaheadText(prefs.lookaheadMeters3d))
@@ -219,144 +274,7 @@ class MainActivity : Activity() {
         lookaheadCard.addView(lookaheadValueText)
         lookaheadCard.addView(lookaheadRow)
 
-        // Section 4: Attack Threshold Card
-        val attackCard = createCardContainer()
-        val attackLabel = createSectionLabel(getString(R.string.setting_attack_threshold))
-        val attackValueText = createValueText("${prefs.thresholdAttackPct.toInt()}%")
-        val attackRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        }
-
-        val attackButtons = mutableListOf<Button>()
-        val thresholds = listOf(8.0, 10.0, 12.0, 15.0)
-
-        thresholds.forEach { thresh ->
-            val btn = createSegmentButton("${thresh.toInt()}%", prefs.thresholdAttackPct == thresh) {
-                prefs.thresholdAttackPct = thresh
-                attackValueText.text = "${thresh.toInt()}%"
-                updateSegmentActiveStates(attackButtons, thresholds.indexOf(thresh))
-            }
-            attackButtons.add(btn)
-            attackRow.addView(btn)
-        }
-
-        attackCard.addView(attackLabel)
-        attackCard.addView(attackValueText)
-        attackCard.addView(attackRow)
-
-        // Section 5: Target VAM Card
-        val vamCard = createCardContainer()
-        val vamLabel = createSectionLabel(getString(R.string.setting_target_vam))
-        val vamValueText = createValueText("${prefs.targetVam} m/h")
-        val vamRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        }
-
-        val vamMinusBtn = createActionButton("- 50 m/h") {
-            if (prefs.targetVam > 500) {
-                prefs.targetVam -= 50
-                vamValueText.text = "${prefs.targetVam} m/h"
-            }
-        }
-
-        val vamPlusBtn = createActionButton("+ 50 m/h") {
-            if (prefs.targetVam < 2000) {
-                prefs.targetVam += 50
-                vamValueText.text = "${prefs.targetVam} m/h"
-            }
-        }
-
-        vamRow.addView(vamMinusBtn)
-        vamRow.addView(vamPlusBtn)
-
-        vamCard.addView(vamLabel)
-        vamCard.addView(vamValueText)
-        vamCard.addView(vamRow)
-
-        // Section 6: Asphalt Quality Card (Con 1 solo decimal y Bueno por defecto)
-        val asphaltCard = createCardContainer()
-        val asphaltLabel = createSectionLabel(getString(R.string.setting_asphalt_factor))
-        val currentAsphaltQuality = FatigueGradeCalculator.AsphaltQuality.entries.find { abs(it.factor - prefs.asphaltFactor) < 0.05 } ?: FatigueGradeCalculator.AsphaltQuality.GOOD
-        val asphaltValueText = createValueText("${currentAsphaltQuality.labelEs} (TA = %.1f)".format(Locale.US, currentAsphaltQuality.factor))
-        val asphaltRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        }
-
-        val asphaltButtons = mutableListOf<Button>()
-        val qualities = FatigueGradeCalculator.AsphaltQuality.entries
-
-        qualities.forEach { q ->
-            val isActive = abs(prefs.asphaltFactor - q.factor) < 0.05
-            val btn = createSegmentButton(q.labelEs.take(6), isActive) {
-                prefs.asphaltFactor = q.factor
-                asphaltValueText.text = "${q.labelEs} (TA = %.1f)".format(Locale.US, q.factor)
-                updateSegmentActiveStates(asphaltButtons, qualities.indexOf(q))
-            }
-            asphaltButtons.add(btn)
-            asphaltRow.addView(btn)
-        }
-
-        asphaltCard.addView(asphaltLabel)
-        asphaltCard.addView(asphaltValueText)
-        asphaltCard.addView(asphaltRow)
-
-        // Section 7: 3D Font Size Scale Card
-        val font3dCard = createCardContainer()
-        val font3dLabel = createSectionLabel(getString(R.string.setting_font_size_3d))
-        val fontScales = listOf(1.0f to getString(R.string.font_normal), 1.25f to getString(R.string.font_large), 1.5f to getString(R.string.font_xl))
-        val currentFontLabel = fontScales.find { it.first == prefs.fontSize3dScale }?.second ?: getString(R.string.font_normal)
-        val font3dValueText = createValueText(currentFontLabel)
-        val font3dRow = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        }
-
-        val fontButtons = mutableListOf<Button>()
-        fontScales.forEach { (scale, labelStr) ->
-            val btn = createSegmentButton(labelStr, prefs.fontSize3dScale == scale) {
-                prefs.fontSize3dScale = scale
-                font3dValueText.text = labelStr
-                updateSegmentActiveStates(fontButtons, fontScales.indexOfFirst { it.first == scale })
-            }
-            fontButtons.add(btn)
-            font3dRow.addView(btn)
-        }
-
-        font3dCard.addView(font3dLabel)
-        font3dCard.addView(font3dValueText)
-        font3dCard.addView(font3dRow)
-
-        // Section 8: Toggle Rotate 90° Clockwise Card (Modo Horizontal / Apaisado)
-        val rotate90Card = createCardContainer()
-        val switchRotate90 = Switch(this).apply {
-            text = getString(R.string.setting_rotate_90_cw)
-            textSize = 15f
-            setTextColor(Color.WHITE)
-            isChecked = prefs.rotate90Clockwise
-            setOnCheckedChangeListener { _, isChecked ->
-                prefs.rotate90Clockwise = isChecked
-            }
-        }
-        rotate90Card.addView(switchRotate90)
-
-        // Section 9: Toggle Show % in Profile Blocks Card
-        val showPctCard = createCardContainer()
-        val switchShowPct = Switch(this).apply {
-            text = getString(R.string.setting_show_block_percentages)
-            textSize = 15f
-            setTextColor(Color.WHITE)
-            isChecked = prefs.showBlockPercentages
-            setOnCheckedChangeListener { _, isChecked ->
-                prefs.showBlockPercentages = isChecked
-            }
-        }
-        showPctCard.addView(switchShowPct)
-
-        // Section 10: Toggle Show 3D Cotas Card
+        // Opción: Mostrar Cotas en 3D
         val showCotasCard = createCardContainer()
         val switchShowCotas = Switch(this).apply {
             text = getString(R.string.setting_show_3d_cotas)
@@ -369,7 +287,7 @@ class MainActivity : Activity() {
         }
         showCotasCard.addView(switchShowCotas)
 
-        // Section 11: Toggle Show 3D Ramp Callouts Card
+        // Opción: Mostrar Rampas Duras
         val showRampsCard = createCardContainer()
         val switchShowRamps = Switch(this).apply {
             text = getString(R.string.setting_show_3d_ramps)
@@ -382,7 +300,7 @@ class MainActivity : Activity() {
         }
         showRampsCard.addView(switchShowRamps)
 
-        // Section 11b: Ramp Minimum Slope (%) Card
+        // Opción: Pendiente Mínima de Rampa
         val rampMinCard = createCardContainer()
         val rampMinLabel = createSectionLabel(getString(R.string.setting_ramp_min_slope))
         val rampMinValueText = createValueText("${prefs.rampMinSlopePct.toInt()}%")
@@ -413,7 +331,7 @@ class MainActivity : Activity() {
         rampMinCard.addView(rampMinValueText)
         rampMinCard.addView(rampMinRow)
 
-        // Section 11c: Ramp Maximum Slope (%) Card
+        // Opción: Pendiente Máxima de Rampa
         val rampMaxCard = createCardContainer()
         val rampMaxLabel = createSectionLabel(getString(R.string.setting_ramp_max_slope))
         val rampMaxValueText = createValueText("${prefs.rampMaxSlopePct.toInt()}%")
@@ -444,7 +362,7 @@ class MainActivity : Activity() {
         rampMaxCard.addView(rampMaxValueText)
         rampMaxCard.addView(rampMaxRow)
 
-        // Section 12: Toggle Show Max Gradient Readout Card
+        // Opción: Pendiente Máxima en Encabezado
         val showMaxGradCard = createCardContainer()
         val switchShowMaxGrad = Switch(this).apply {
             text = getString(R.string.setting_show_max_gradient)
@@ -457,7 +375,90 @@ class MainActivity : Activity() {
         }
         showMaxGradCard.addView(switchShowMaxGrad)
 
-        // Section 13: Toggle Attack Alerts Card
+        tab3dContainer.addView(lookaheadCard)
+        tab3dContainer.addView(showCotasCard)
+        tab3dContainer.addView(showRampsCard)
+        tab3dContainer.addView(rampMinCard)
+        tab3dContainer.addView(rampMaxCard)
+        tab3dContainer.addView(showMaxGradCard)
+
+        // ==========================================
+        // PESTAÑA 3: 📊 ESTRATEGA 2D
+        // ==========================================
+
+        // Opción: Tamaño de Bloque (50m, 100m, 250m, 500m, 1km)
+        val blockCard = createCardContainer()
+        val blockLabel = createSectionLabel(getString(R.string.setting_block_size))
+        val currentBlockText = if (prefs.blockSizeMeters >= 1000.0) "${(prefs.blockSizeMeters / 1000).toInt()} km" else "${prefs.blockSizeMeters.toInt()} m"
+        val blockValueText = createValueText(currentBlockText)
+        val blockRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
+
+        val blockButtons = mutableListOf<Button>()
+        val blockSizes = listOf(50.0, 100.0, 250.0, 500.0, 1000.0)
+
+        blockSizes.forEach { size ->
+            val labelStr = if (size >= 1000.0) "${(size / 1000).toInt()}km" else "${size.toInt()}m"
+            val btn = createSegmentButton(labelStr, prefs.blockSizeMeters == size) {
+                prefs.blockSizeMeters = size
+                blockValueText.text = if (size >= 1000.0) "${(size / 1000).toInt()} km" else "${size.toInt()} m"
+                updateSegmentActiveStates(blockButtons, blockSizes.indexOf(size))
+            }
+            blockButtons.add(btn)
+            blockRow.addView(btn)
+        }
+
+        blockCard.addView(blockLabel)
+        blockCard.addView(blockValueText)
+        blockCard.addView(blockRow)
+
+        // Opción: Tramos Visibles
+        val visibleBlocksCard = createCardContainer()
+        val visibleBlocksLabel = createSectionLabel(getString(R.string.setting_visible_blocks_count))
+        val visibleBlocksValueText = createValueText("${prefs.visibleBlocksCount} tramos")
+        val visibleBlocksRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
+
+        val visibleMinusBtn = createActionButton("- 1") {
+            if (prefs.visibleBlocksCount > 1) {
+                prefs.visibleBlocksCount -= 1
+                visibleBlocksValueText.text = "${prefs.visibleBlocksCount} tramos"
+            }
+        }
+
+        val visiblePlusBtn = createActionButton("+ 1") {
+            if (prefs.visibleBlocksCount < 10) {
+                prefs.visibleBlocksCount += 1
+                visibleBlocksValueText.text = "${prefs.visibleBlocksCount} tramos"
+            }
+        }
+
+        visibleBlocksRow.addView(visibleMinusBtn)
+        visibleBlocksRow.addView(visiblePlusBtn)
+
+        visibleBlocksCard.addView(visibleBlocksLabel)
+        visibleBlocksCard.addView(visibleBlocksValueText)
+        visibleBlocksCard.addView(visibleBlocksRow)
+
+        // Opción: Mostrar % en Bloques
+        val showPctCard = createCardContainer()
+        val switchShowPct = Switch(this).apply {
+            text = getString(R.string.setting_show_block_percentages)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.showBlockPercentages
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.showBlockPercentages = isChecked
+            }
+        }
+        showPctCard.addView(switchShowPct)
+
+        // Opción: Alertas de Ataque
         val alertCard = createCardContainer()
         val switchAlerts = Switch(this).apply {
             text = getString(R.string.setting_enable_alerts)
@@ -470,7 +471,105 @@ class MainActivity : Activity() {
         }
         alertCard.addView(switchAlerts)
 
-        // Save & Exit Button
+        // Opción: Umbral de Ataque
+        val attackCard = createCardContainer()
+        val attackLabel = createSectionLabel(getString(R.string.setting_attack_threshold))
+        val attackValueText = createValueText("${prefs.thresholdAttackPct.toInt()}%")
+        val attackRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
+
+        val attackButtons = mutableListOf<Button>()
+        val thresholds = listOf(8.0, 10.0, 12.0, 15.0)
+
+        thresholds.forEach { thresh ->
+            val btn = createSegmentButton("${thresh.toInt()}%", prefs.thresholdAttackPct == thresh) {
+                prefs.thresholdAttackPct = thresh
+                attackValueText.text = "${thresh.toInt()}%"
+                updateSegmentActiveStates(attackButtons, thresholds.indexOf(thresh))
+            }
+            attackButtons.add(btn)
+            attackRow.addView(btn)
+        }
+
+        attackCard.addView(attackLabel)
+        attackCard.addView(attackValueText)
+        attackCard.addView(attackRow)
+
+        tab2dContainer.addView(blockCard)
+        tab2dContainer.addView(visibleBlocksCard)
+        tab2dContainer.addView(showPctCard)
+        tab2dContainer.addView(alertCard)
+        tab2dContainer.addView(attackCard)
+
+        // ==========================================
+        // PESTAÑA 4: 🚴 RENDIMIENTO Y VAM
+        // ==========================================
+
+        // Opción: VAM Objetivo
+        val vamCard = createCardContainer()
+        val vamLabel = createSectionLabel(getString(R.string.setting_target_vam))
+        val vamValueText = createValueText("${prefs.targetVam} m/h")
+        val vamRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
+
+        val vamMinusBtn = createActionButton("- 50 m/h") {
+            if (prefs.targetVam > 500) {
+                prefs.targetVam -= 50
+                vamValueText.text = "${prefs.targetVam} m/h"
+            }
+        }
+
+        val vamPlusBtn = createActionButton("+ 50 m/h") {
+            if (prefs.targetVam < 2000) {
+                prefs.targetVam += 50
+                vamValueText.text = "${prefs.targetVam} m/h"
+            }
+        }
+
+        vamRow.addView(vamMinusBtn)
+        vamRow.addView(vamPlusBtn)
+
+        vamCard.addView(vamLabel)
+        vamCard.addView(vamValueText)
+        vamCard.addView(vamRow)
+
+        // Opción: Calidad de Asfalto (TA)
+        val asphaltCard = createCardContainer()
+        val asphaltLabel = createSectionLabel(getString(R.string.setting_asphalt_factor))
+        val currentAsphaltQuality = FatigueGradeCalculator.AsphaltQuality.entries.find { abs(it.factor - prefs.asphaltFactor) < 0.05 } ?: FatigueGradeCalculator.AsphaltQuality.GOOD
+        val asphaltValueText = createValueText("${currentAsphaltQuality.labelEs} (TA = %.1f)".format(Locale.US, currentAsphaltQuality.factor))
+        val asphaltRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
+
+        val asphaltButtons = mutableListOf<Button>()
+        val qualities = FatigueGradeCalculator.AsphaltQuality.entries
+
+        qualities.forEach { q ->
+            val isActive = abs(prefs.asphaltFactor - q.factor) < 0.05
+            val btn = createSegmentButton(q.labelEs.take(6), isActive) {
+                prefs.asphaltFactor = q.factor
+                asphaltValueText.text = "${q.labelEs} (TA = %.1f)".format(Locale.US, q.factor)
+                updateSegmentActiveStates(asphaltButtons, qualities.indexOf(q))
+            }
+            asphaltButtons.add(btn)
+            asphaltRow.addView(btn)
+        }
+
+        asphaltCard.addView(asphaltLabel)
+        asphaltCard.addView(asphaltValueText)
+        asphaltCard.addView(asphaltRow)
+
+        tabVamContainer.addView(vamCard)
+        tabVamContainer.addView(asphaltCard)
+
+        // Botón de Guardar y Salir Fijado al Final
         val saveExitButton = Button(this).apply {
             text = "💾 " + getString(R.string.btn_save_and_exit)
             textSize = 16f
@@ -478,9 +577,9 @@ class MainActivity : Activity() {
             setTextColor(Color.BLACK)
             background = GradientDrawable().apply {
                 setColor(Color.parseColor("#22C55E"))
-                cornerRadius = 24f
+                cornerRadius = 22f
             }
-            setPadding(32, 24, 32, 24)
+            setPadding(28, 20, 28, 20)
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -495,26 +594,18 @@ class MainActivity : Activity() {
         }
 
         rootLayout.addView(headerCard)
-        rootLayout.addView(fontCard)
-        rootLayout.addView(blockCard)
-        rootLayout.addView(visibleBlocksCard)
-        rootLayout.addView(lookaheadCard)
-        rootLayout.addView(attackCard)
-        rootLayout.addView(vamCard)
-        rootLayout.addView(asphaltCard)
-        rootLayout.addView(font3dCard)
-        rootLayout.addView(rotate90Card)
-        rootLayout.addView(showPctCard)
-        rootLayout.addView(showCotasCard)
-        rootLayout.addView(showRampsCard)
-        rootLayout.addView(rampMinCard)
-        rootLayout.addView(rampMaxCard)
-        rootLayout.addView(showMaxGradCard)
-        rootLayout.addView(alertCard)
+        rootLayout.addView(tabBar)
+        rootLayout.addView(tabEstiloContainer)
+        rootLayout.addView(tab3dContainer)
+        rootLayout.addView(tab2dContainer)
+        rootLayout.addView(tabVamContainer)
         rootLayout.addView(saveExitButton)
 
         scrollView.addView(rootLayout)
         setContentView(scrollView)
+
+        // Seleccionar pestaña por defecto (Tab 0: Estilo)
+        selectTab(0)
     }
 
     private fun createCardContainer(): LinearLayout {
@@ -524,14 +615,14 @@ class MainActivity : Activity() {
             background = GradientDrawable().apply {
                 setColor(Color.parseColor("#18181B"))
                 setStroke(2, Color.parseColor("#27272A"))
-                cornerRadius = 24f
+                cornerRadius = 20f
             }
-            setPadding(24, 20, 24, 20)
+            setPadding(20, 16, 20, 16)
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply {
-                bottomMargin = 16
+                bottomMargin = 12
             }
         }
     }
@@ -550,23 +641,23 @@ class MainActivity : Activity() {
     private fun createValueText(textStr: String): TextView {
         return TextView(this).apply {
             text = textStr
-            textSize = 20f
+            textSize = 18f
             typeface = Typeface.DEFAULT_BOLD
             setTextColor(Color.WHITE)
             gravity = Gravity.CENTER
-            setPadding(0, 0, 0, 12)
+            setPadding(0, 0, 0, 10)
         }
     }
 
     private fun createSegmentButton(textStr: String, isActive: Boolean, onClick: () -> Unit): Button {
         return Button(this).apply {
             text = textStr
-            textSize = 12f
+            textSize = 11f
             typeface = Typeface.DEFAULT_BOLD
-            setPadding(8, 12, 8, 12)
+            setPadding(6, 10, 6, 10)
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f).apply {
-                leftMargin = 4
-                rightMargin = 4
+                leftMargin = 3
+                rightMargin = 3
             }
             applyButtonStyle(this, isActive)
             setOnClickListener { onClick() }
@@ -576,12 +667,12 @@ class MainActivity : Activity() {
     private fun createActionButton(textStr: String, onClick: () -> Unit): Button {
         return Button(this).apply {
             text = textStr
-            textSize = 14f
+            textSize = 13f
             typeface = Typeface.DEFAULT_BOLD
-            setPadding(16, 16, 16, 16)
+            setPadding(12, 12, 12, 12)
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f).apply {
-                leftMargin = 8
-                rightMargin = 8
+                leftMargin = 6
+                rightMargin = 6
             }
             applyButtonStyle(this, false)
             setOnClickListener { onClick() }
@@ -599,13 +690,13 @@ class MainActivity : Activity() {
             btn.setTextColor(Color.BLACK)
             btn.background = GradientDrawable().apply {
                 setColor(Color.parseColor("#38BDF8"))
-                cornerRadius = 16f
+                cornerRadius = 14f
             }
         } else {
             btn.setTextColor(Color.WHITE)
             btn.background = GradientDrawable().apply {
                 setColor(Color.parseColor("#27272A"))
-                cornerRadius = 16f
+                cornerRadius = 14f
             }
         }
     }
