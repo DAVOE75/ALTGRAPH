@@ -53,6 +53,7 @@
     <string name="setting_poi_water">💧 Points d\'Eau</string>
     <string name="setting_poi_viewpoints">📸 Points de Vue</string>
     <string name="setting_poi_summits">📡 Sommets et Cols</string>
+    <string name="setting_show_3d_zoom">Activer le Zoom Tactile (🔍) sur Graphique 3D</string>
     <string name="font_normal">Normale</string>
     <string name="font_large">Grande</string>
     <string name="font_xl">Très Gr.</string>

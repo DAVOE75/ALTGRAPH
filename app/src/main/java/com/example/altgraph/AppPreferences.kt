@@ -95,6 +95,10 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_SHOW_POI_SUMMITS, true)
         set(value) = prefs.edit().putBoolean(KEY_SHOW_POI_SUMMITS, value).apply()
 
+    var show3dZoomControls: Boolean
+        get() = prefs.getBoolean(KEY_SHOW_3D_ZOOM, true)
+        set(value) = prefs.edit().putBoolean(KEY_SHOW_3D_ZOOM, value).apply()
+
     companion object {
         private const val PREFS_NAME = "altgraph_settings"
         private const val KEY_FONT_FAMILY = "font_family_key"
@@ -119,6 +123,7 @@ class AppPreferences(context: Context) {
         private const val KEY_SHOW_POI_WATER = "show_poi_water"
         private const val KEY_SHOW_POI_VIEWPOINTS = "show_poi_viewpoints"
         private const val KEY_SHOW_POI_SUMMITS = "show_poi_summits"
+        private const val KEY_SHOW_3D_ZOOM = "show_3d_zoom_controls"
 
         @Volatile
         private var INSTANCE: AppPreferences? = null

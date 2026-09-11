@@ -217,9 +217,23 @@ class MainActivity : Activity() {
         font3dCard.addView(font3dValueText)
         font3dCard.addView(font3dRow)
 
+        // Opción: Controles de Zoom Táctil (🔍)
+        val showZoomCard = createCardContainer()
+        val switchShowZoom = Switch(this).apply {
+            text = getString(R.string.setting_show_3d_zoom)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.show3dZoomControls
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.show3dZoomControls = isChecked
+            }
+        }
+        showZoomCard.addView(switchShowZoom)
+
         tabEstiloContainer.addView(fontCard)
         tabEstiloContainer.addView(rotate90Card)
         tabEstiloContainer.addView(font3dCard)
+        tabEstiloContainer.addView(showZoomCard)
 
         // ==========================================
         // PESTAÑA 2: 🏔️ ALTIMETRÍA 3D

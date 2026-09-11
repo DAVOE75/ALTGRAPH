@@ -53,6 +53,7 @@
     <string name="setting_poi_water">💧 Wasserquellen</string>
     <string name="setting_poi_viewpoints">📸 Aussichtspunkte</string>
     <string name="setting_poi_summits">📡 Gipfel &amp; Pässe</string>
+    <string name="setting_show_3d_zoom">Touch-Zoom-Steuerung (🔍) im 3D-Diagramm aktivieren</string>
     <string name="font_normal">Normal</string>
     <string name="font_large">Groß</string>
     <string name="font_xl">Sehr Groß</string>

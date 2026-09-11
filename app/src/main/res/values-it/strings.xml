@@ -53,6 +53,7 @@
     <string name="setting_poi_water">💧 Fontane d\'Acqua</string>
     <string name="setting_poi_viewpoints">📸 Punti Panoramici</string>
     <string name="setting_poi_summits">📡 Vette e Passi</string>
+    <string name="setting_show_3d_zoom">Attiva Controlli Zoom Tattile (🔍) sul Grafico 3D</string>
     <string name="font_normal">Normale</string>
     <string name="font_large">Grande</string>
     <string name="font_xl">Molto Gr.</string>

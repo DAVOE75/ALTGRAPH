@@ -178,6 +178,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private var showPois: Boolean = true
     private var hairpins: List<Double> = emptyList()
     private var pois: List<Poi> = emptyList()
+    private var showZoomControls: Boolean = true
 
     private val wallPath = Path()
     private val arrowPath = Path()
@@ -202,7 +203,8 @@ class Altimetria3DView @JvmOverloads constructor(
         showHairpins: Boolean = true,
         showPois: Boolean = true,
         hairpins: List<Double> = emptyList(),
-        pois: List<Poi> = emptyList()
+        pois: List<Poi> = emptyList(),
+        showZoomControls: Boolean = true
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -226,6 +228,7 @@ class Altimetria3DView @JvmOverloads constructor(
         this.showPois = showPois
         this.hairpins = hairpins
         this.pois = pois
+        this.showZoomControls = showZoomControls
 
         FontHelper.applyFontToPaint(titlePaint, fontFamilyKey)
         FontHelper.applyFontToPaint(subTitleLabelPaint, fontFamilyKey)
@@ -246,6 +249,8 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (!showZoomControls) return super.onTouchEvent(event)
+
         if (event.action == MotionEvent.ACTION_DOWN) {
             val touchX = event.x
             val touchY = event.y
@@ -356,8 +361,10 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawText(maxGradeText, 18f, h * 0.43f, maxGradePaint)
         }
 
-        // 3. Controles de Zoom Táctil en Esquina Superior Derecha [–] 🔍 500m [+]
-        drawZoomOverlay(canvas, w, h)
+        // 3. Controles de Zoom Táctil en Esquina Superior Derecha [–] 🔍 500m [+] (Si están habilitados)
+        if (showZoomControls) {
+            drawZoomOverlay(canvas, w, h)
+        }
 
         // 4. Perfil 3D con Hitos y Herraduras
         draw3DRibbonAndWalls(canvas, w, h)
