@@ -155,15 +155,14 @@ class Altimetria3DView @JvmOverloads constructor(
         this.showRamps = showRamps
         this.showMaxGrade = showMaxGrade
 
-        val tf = FontHelper.getTypeface(fontFamilyKey)
-        titlePaint.typeface = tf
-        subTitleLabelPaint.typeface = tf
-        liveGradePaint.typeface = tf
-        maxGradePaint.typeface = tf
-        percentTextPaint.typeface = tf
-        rampTextPaint.typeface = tf
-        cotaTextPaint.typeface = tf
-        axisTextPaint.typeface = tf
+        FontHelper.applyFontToPaint(titlePaint, fontFamilyKey)
+        FontHelper.applyFontToPaint(subTitleLabelPaint, fontFamilyKey)
+        FontHelper.applyFontToPaint(liveGradePaint, fontFamilyKey)
+        FontHelper.applyFontToPaint(maxGradePaint, fontFamilyKey)
+        FontHelper.applyFontToPaint(percentTextPaint, fontFamilyKey)
+        FontHelper.applyFontToPaint(rampTextPaint, fontFamilyKey)
+        FontHelper.applyFontToPaint(cotaTextPaint, fontFamilyKey)
+        FontHelper.applyFontToPaint(axisTextPaint, fontFamilyKey)
 
         postInvalidate()
     }
