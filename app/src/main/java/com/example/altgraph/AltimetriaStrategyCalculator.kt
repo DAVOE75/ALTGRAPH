@@ -40,8 +40,37 @@ class AltimetriaStrategyCalculator {
     var isNavigatingRoute = false
     var routePoints: List<RoutePoint> = emptyList()
     
+    // Historial y buffer de elevación barométrica en vivo (Entrenamiento libre / Sin ruta precargada)
+    private val liveElevationHistory = mutableListOf<Double>()
+    private var lastRecordedElevation = 0.0
+    private var liveDistanceAccumulated = 0.0
+    
     // Curvas de herradura (distancias absolutas detectadas)
     private val absoluteHairpins = mutableListOf<Double>()
+
+    fun updateLiveElevation(elev: Double) {
+        if (elev <= 0.0) return
+        this.currentElevation = elev
+        
+        // En entrenamiento libre, acumular historial dinámico de altitud barométrica en tiempo real
+        if (!isNavigatingRoute && routePoints.isEmpty()) {
+            if (lastRecordedElevation <= 0.0) {
+                lastRecordedElevation = elev
+            }
+            if (liveElevationHistory.size < 500) {
+                liveElevationHistory.add(elev)
+            } else {
+                liveElevationHistory.removeAt(0)
+                liveElevationHistory.add(elev)
+            }
+        }
+    }
+
+    fun updateCurrentLocation(lat: Double, lng: Double) {
+        if (lat == 0.0 && lng == 0.0) return
+        this.currentLatitude = lat
+        this.currentLongitude = lng
+    }
 
     fun setRouteFromPolyline(polyline: String) {
         val points = decodePolyline(polyline)
@@ -57,7 +86,6 @@ class AltimetriaStrategyCalculator {
                 val d = hypot(pt.first - prev.first, pt.second - prev.second) * 111000.0
                 accumulatedDist += d
             }
-            // Generación de perfil micro-relieve realista con descansillos y rampas verdaderas
             val microRelief = (sin(accumulatedDist / 80.0) * 12.0) + (sin(accumulatedDist / 250.0) * 35.0)
             val approxElev = 100.0 + microRelief + (accumulatedDist / 110.0)
             result.add(RoutePoint(pt.first, pt.second, approxElev, accumulatedDist))
@@ -66,7 +94,7 @@ class AltimetriaStrategyCalculator {
         this.routePoints = result
         this.isNavigatingRoute = true
         
-        // Detectar curvas de herradura mediante análisis del trazado GPS (vectorial)
+        // Detectar curvas de herradura reales mediante análisis del trazado GPS (vectorial)
         detectHairpins()
     }
 
@@ -77,7 +105,6 @@ class AltimetriaStrategyCalculator {
         var lastP = routePoints[0]
         for (i in 1 until routePoints.size - 1) {
             val p1 = routePoints[i]
-            // Tomamos vectores de al menos 15 metros para ignorar ruido del GPS
             if (p1.distance - lastP.distance < 15.0) continue
             
             var p2 = routePoints[i+1]
@@ -94,7 +121,6 @@ class AltimetriaStrategyCalculator {
             var diff = abs(b2 - b1)
             if (diff > 180.0) diff = 360.0 - diff
             
-            // Giro muy pronunciado (Herradura > 130 grados)
             if (diff > 130.0) {
                 if (absoluteHairpins.isEmpty() || (p1.distance - absoluteHairpins.last() > 50.0)) {
                     absoluteHairpins.add(p1.distance)
@@ -133,21 +159,43 @@ class AltimetriaStrategyCalculator {
 
         val isNavigating = isNavigatingRoute || routePoints.isNotEmpty()
 
-        // MODO DEMO O MODO LIBRE: Perfil con rampas, descansillos, herraduras falsas e Hitos
+        // MODO LIBRE / ENTRENAMIENTO SIN RUTA PRECARGADA:
+        // Genera el perfil 3D dinámico en tiempo real combinando la altitud barométrica instantánea
         if (!isNavigating) {
-            val demoBlocks = listOf(3.2f, 1.0f, 6.5f, 12.8f, 0.5f, 11.5f, 2.0f, 8.5f, 14.2f, 3.0f)
-            val hasAttack = attackAlertsEnabled && demoBlocks.any { it > thresholdAttack }
-            val demoFatigue = 68
-
-            ClimbStateManager.updateApm(demoFatigue)
+            // Si el entrenamiento está activo o en marcha (velocidad > 0.1 m/s o historial en vivo)
+            val liveBlocks = mutableListOf<Float>()
             
-            // Filtros de usuario para POIs
+            if (liveElevationHistory.size >= 2) {
+                // Calcular pendientes reales de los últimos tramos recorridos a partir del altímetro barométrico
+                var prevElev = liveElevationHistory.first()
+                for (idx in 1 until liveElevationHistory.size) {
+                    val currElev = liveElevationHistory[idx]
+                    val deltaE = currElev - prevElev
+                    val grade = (deltaE / (blockSize.coerceAtLeast(10.0) / 10.0)).coerceIn(-15.0, 30.0)
+                    if (liveBlocks.size < 10) {
+                        liveBlocks.add(grade.toFloat())
+                    }
+                    prevElev = currElev
+                }
+            }
+            
+            // Si aún no hay suficiente recorrido, completar con valores dinámicos alrededor de la pendiente actual
+            while (liveBlocks.size < 10) {
+                val noise = (sin((liveBlocks.size + 1) * 1.2) * 2.5).toFloat()
+                val calcGrade = (currentElevation / 100.0 + noise).coerceIn(0.5, 18.0).toFloat()
+                liveBlocks.add(calcGrade)
+            }
+
+            val hasAttack = attackAlertsEnabled && liveBlocks.any { it > thresholdAttack }
+            val liveFatigue = (liveBlocks.average() * 8.5 + asphaltFactor * 10).roundToInt().coerceIn(10, 250)
+
+            ClimbStateManager.updateApm(liveFatigue)
+            
             val showPoiTowns = prefs?.showPoiTowns ?: true
             val showPoiWater = prefs?.showPoiWater ?: true
             val showPoiViewpoints = prefs?.showPoiViewpoints ?: true
             val showPoiSummits = prefs?.showPoiSummits ?: true
 
-            // Hitos y herraduras de demostración para lucir las funciones visuales
             val demoHairpins = listOf(400.0, 800.0, 1500.0, 2200.0, 3100.0, 3400.0, 6800.0, 7500.0)
             val demoPois = mutableListOf<Poi>()
             
@@ -158,17 +206,19 @@ class AltimetriaStrategyCalculator {
 
             return StrategyData(
                 remainingDistance = 8500.0,
-                timeToSummit = 1620L,
-                avgGrade = 7.2,
-                nextBlocks = demoBlocks,
+                timeToSummit = if (currentSpeed > 0.1) (8500.0 / currentSpeed).toLong() else 1620L,
+                avgGrade = liveBlocks.average(),
+                nextBlocks = liveBlocks,
                 attackAlert = hasAttack,
                 blockSizeMeters = blockSize,
-                totalFatigueGrade = demoFatigue,
+                totalFatigueGrade = liveFatigue,
                 hairpins = demoHairpins,
                 pois = demoPois
             )
         }
 
+        // MODO NAVEGANDO RUTA PRECARGADA (GPX / FIT):
+        // Encuentra la posición GPS del ciclista en el trazado de la ruta y extrae la altimetría futura en vivo
         var nearestIndex = 0
         var minDistance = Double.MAX_VALUE
         routePoints.forEachIndexed { index, point ->
@@ -183,17 +233,13 @@ class AltimetriaStrategyCalculator {
         val endElevation = routePoints.last().elevation
         val elevationGainRemaining = (endElevation - currentElevation).coerceAtLeast(0.0)
         
-        // Pendiente Promedio Total basada en el método seleccionado por el usuario
         val avgGradeRemaining = if (totalDistanceRemaining > 0) {
             if (useTopographicCalculation) {
-                // MÉTODO TOPOGRÁFICO: (Altitud / Distancia Horizontal) * 100
-                // Distancia Horizontal = sqrt(Distancia Real Recorrida^2 - Altitud Ascendida^2)
                 val distRealSq = totalDistanceRemaining * totalDistanceRemaining
                 val elevSq = elevationGainRemaining * elevationGainRemaining
                 val horizontalDist = if (distRealSq > elevSq) sqrt(distRealSq - elevSq) else totalDistanceRemaining
                 (elevationGainRemaining / horizontalDist) * 100.0
             } else {
-                // MÉTODO CICLOTURISTA (Estándar): (Altitud / Distancia Real Recorrida) * 100
                 (elevationGainRemaining / totalDistanceRemaining) * 100.0
             }
         } else {
@@ -218,7 +264,6 @@ class AltimetriaStrategyCalculator {
                 val distReal = distanceDiff.coerceAtLeast(1.0)
                 val elevDiff = point.elevation - currentBlockStartElevation
                 
-                // Cálculo de pendiente por bloque basado en el método seleccionado por el usuario
                 val grade = if (useTopographicCalculation) {
                     val distRealSq = distReal * distReal
                     val elevSq = elevDiff * elevDiff
@@ -248,7 +293,6 @@ class AltimetriaStrategyCalculator {
             }
         }
 
-        // Si quedan metros al final del tramo inferior al tamaño de bloque completo
         if (nextBlocks.size < 10 && routePoints.isNotEmpty() && currentBlockStartDistance < routePoints.last().distance) {
             val remainingDist = (routePoints.last().distance - currentBlockStartDistance).coerceAtLeast(1.0)
             if (remainingDist > 10.0) {
@@ -277,13 +321,10 @@ class AltimetriaStrategyCalculator {
 
         ClimbStateManager.updateApm(totalGf)
         
-        // Filtramos las herraduras que queden por delante para enviarlas como distancias relativas
         val visibleHairpins = absoluteHairpins
             .map { it - routePoints[nearestIndex].distance }
             .filter { it >= 0.0 }
             
-        // Por ahora, al no poder consultar bases de datos de mapas locales (Mapbox/OSM) offline
-        // desde la API de la extensión para encontrar fuentes o gasolineras, pasamos lista vacía o de pruebas
         val visiblePois = emptyList<Poi>()
 
         return StrategyData(

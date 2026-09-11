@@ -17,6 +17,7 @@ import io.hammerhead.karooext.internal.ViewEmitter
 import io.hammerhead.karooext.models.DataPoint
 import io.hammerhead.karooext.models.DataType
 import io.hammerhead.karooext.models.OnNavigationState
+import io.hammerhead.karooext.models.OnStreamState
 import io.hammerhead.karooext.models.StreamState
 import io.hammerhead.karooext.models.UpdateGraphicConfig
 import io.hammerhead.karooext.models.ViewConfig
@@ -98,12 +99,41 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
             val system = KarooSystemService(context)
             system.connect { connected ->
                 if (connected) {
+                    // Consumidor 1: Polilínea e Itinerario de Ruta Precargada (GPX / FIT)
                     system.addConsumer<OnNavigationState> { navEvent ->
                         val state = navEvent.state
                         if (state is OnNavigationState.NavigationState.NavigatingRoute) {
                             calculator.setRouteFromPolyline(state.routePolyline)
                         } else {
                             calculator.clearRoute()
+                        }
+                    }
+
+                    // Consumidor 2: Velocidad Instantánea en tiempo real (m/s)
+                    system.addConsumer(OnStreamState.StartStreaming("SPEED")) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val spd = streamState.dataPoint.values[DataType.Field.SINGLE] ?: 0.0
+                            calculator.currentSpeed = spd
+                        }
+                    }
+
+                    // Consumidor 3: Altitud Barométrica Instantánea en tiempo real (metros)
+                    system.addConsumer(OnStreamState.StartStreaming("ELEVATION")) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val elev = streamState.dataPoint.values[DataType.Field.SINGLE] ?: 0.0
+                            calculator.updateLiveElevation(elev)
+                        }
+                    }
+
+                    // Consumidor 4: Posición GPS en tiempo real (Latitud / Longitud)
+                    system.addConsumer(OnStreamState.StartStreaming("POSITION")) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val lat = streamState.dataPoint.values["latitude"] ?: streamState.dataPoint.values[DataType.Field.SINGLE] ?: 0.0
+                            val lng = streamState.dataPoint.values["longitude"] ?: 0.0
+                            calculator.updateCurrentLocation(lat, lng)
                         }
                     }
                 }
