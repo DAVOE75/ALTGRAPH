@@ -2,11 +2,11 @@
   <img src="art/logo.png" alt="ALTGRAPH Logo" width="160" />
 </p>
 
-# ALTGRAPH (v0.2.2)
+# ALTGRAPH (v0.2.3)
 
 **ALTGRAPH** es una extensión avanzada de altimetría y rendimiento para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3) desarrollada por **David García Pascual** con el SDK oficial `karoo-ext`.
 
-Proporciona análisis dinámico de puertos de montaña, gráficos 3D en perspectiva isométrica con extrusión de paredes de montaña, cotas verticales a 90°, etiquetas de % serigrafiadas en cada bloque sin recuadros, indicadores de rampas duras (≥10%), alertas de ataque, ritmo **VAM** dual con velocidad recomendada y cálculo científico del **Grado de Fatiga (GF)**.
+Proporciona análisis dinámico de puertos de montaña, gráficos 3D en perspectiva isométrica con extrusión de paredes de montaña, sub-seccionado de micro-bloques de 50m dentro de cada kilómetro, selección de fuentes tipográficas Open-Source (Google Sans / Condensed), modo apaisado rotado a 90° a pantalla completa, globo flotante 3D de pendiente instantánea, delimitación personalizada de rango de rampas, ritmo **VAM** dual con velocidad recomendada y cálculo científico del **Grado de Fatiga (GF)**.
 
 ---
 
@@ -17,34 +17,43 @@ La extensión detecta automáticamente el idioma de tu sistema Karoo:
 
 ---
 
-## 🚀 Características y Campos de Datos (v0.2.2)
+## 🚀 Novedades y Características (v0.2.3)
 
-* 🏔️ **Altimetría 3D (`altimetria_3d`)**:
-  * Perfil en perspectiva isométrica 3D ampliada a pantalla completa con relieve extruido y sombras en degradado.
-  * Porcentajes del **% de inclinación** serigrafiados directamente sobre cada bloque con **escalado de fuente personalizable** (`Normal`, `Grande`, `Extra Gr.`).
-  * Cotas de altitud en metros rotadas a 90° corriendo en paralelo a las líneas verticales de separación de tramo (conmutador opcional `Sí / No`).
-  * Flechas señalizadoras e indicadores de rampas duras (≥10%) exclusivas para subidas (conmutador opcional `Sí / No`).
-  * Distancia de anticipación en el Eje X configurable desde **200 m a 500 m** (en pasos de 50m).
+* 🔤 **Desplegable de Tipo de Letra (Google Sans / Condensed)**:
+  * Selección de fuente Open-Source directamente desde el panel de control de la app:
+    * **`Condensed (Estrecha y Alta)`**: Fuente condensada de Google/Android que dibuja números estilizados, estrechos y altos para ver las cifras de % y métricas en tamaño gigante de un vistazo.
+    * **`Sans-Serif (Estándar)`**: Fuente sans-serif estándar de Android.
+    * **`Sans Medium`**: Versión con trazo de peso medio.
+    * **`Sans Black (Extra Gruesa)`**: Versión con trazo pesado de alta densidad.
+    * **`Monospace Digital`**: Dígitos monospaciados tipo marcador digital.
+
+* 🔄 **Modo Apaisado Rotado 90° (Landscape Mode)**:
+  * Opción en el panel para girar la gráfica 90° a la derecha en el sentido de las agujas del reloj (`Sí / No`).
+  * Expande el lienzo de $480\text{px}$ a un **ancho apaisado gigante de $800\text{px}$**, liberando la compresión de píxeles y permitiendo que la montaña 3D y la tipografía luzcan con el máximo tamaño y limpieza visual.
+
+* 🏔️ **Sub-Seccionado de Micro-Bloques de 50m dentro de cada Kilómetro**:
+  * Al configurar la vista por kilómetros ($1\text{km}$ a $10\text{km}$), la montaña 3D no traza una línea recta plana, sino que divide cada kilómetro en **20 micro-bloques de 50m** con sus colores independientes (azul descensos, verde llanos, naranja repechos, rojo rampas).
+  * Refleja de forma continua los **descansillos, llanos y rampas duras reales** dentro de cada kilómetro.
+
+* 📍 **Globo Flotante 3D de Pendiente Actual sobre el Ciclista**:
+  * Cápsula flotante **`📍 7.2%`** unida por un puntero al marcador del ciclista (*Beacon*) que te acompaña sobre el relieve 3D con el color dinámico de la rampa instantánea.
+
+* 🚩 **Rango Personalizado de Rampas Duras Delimitado**:
+  * Ajuste de **Pendiente Mínima** (por defecto $10\%$) y **Pendiente Máxima** (por defecto $15\%$) para señalar con flecha roja las 2 o 3 rampas más duras contenidas en ese intervalo.
+
+* 📏 **Anticipación Progresiva 3D (200m a 10 km)**:
+  * Secuencia de anticipación de $50\text{m}$ en $50\text{m}$ hasta $500\text{m}$, salto a **`1 km`** y escala de $1\text{km}$ en $1\text{km}$ hasta **`10 km`**.
 
 * 📊 **Estratega de Altimetría (`altimetria_graph`)**:
-  * Visualización del perfil por bloques ajustables de distancia (50m, 100m, 250m, 500m) con **número de tramos visibles personalizable (1 a 10, por defecto 5)**.
-  * Etiquetas del % de inclinación serigrafiadas dentro de cada bloque.
+  * Perfil por bloques ajustables de distancia (50m, 100m, 250m, 500m, 1km) con **número de tramos visibles personalizable (1 a 10, por defecto 5)**.
   * Alertas visuales de ataque (**¡ATACA! / ATTACK!**) al detectar rampas >10%.
-  * Distancia restante a la cima, tiempo estimado y pendiente media restante.
 
 * ⛰️ **Índice Grado de Fatiga GF (`fatigue_grade`)**:
-  * Cálculo científico de la dureza acumulada de la subida restante basado en la fórmula:
+  * Cálculo científico de la dureza acumulada de la subida restante basándose en el modelo científico:
     $$\text{GF} = \sum \text{DU}^* + \text{TA} + \left(\frac{\text{PMx}}{5}\right)$$
-  * Ponderación según porcentaje de pendiente ($\text{DU}^*$), tipo de asfalto ($\text{TA}$) y rampa máxima ($\text{PMx}$).
-  * Clasificación automática por categorías (5ª Cat, 4ª Cat, 3ª Cat, 2ª Cat, 1ª Cat, Especial HC).
 
 * 🚴 **Ritmo VAM Objetivo (`climb_pacing`) — *Opción C Dual***:
-  * Asistente de ritmo basado en **VAM (m/h)**.
-  * Muestra la VAM instantánea (`850 m/h`) junto a la velocidad objetivo requerida (`12.5 km/h`) en la pendiente actual y la insignia de estado (`🟢 EN RITMO`, `🔴 SOBREESFUERZO`, `🔵 POR DEBAJO`).
-
-* 📈 **Tendencia 3D y Rampa Máxima (`gradient_trend`)**:
-  * Indicador de tendencia en tiempo real (↗️ Endureciendo, ➔ Estable, ↘️ Suavizando) anticipándose al retraso del sensor barométrico.
-  * Registro de la pendiente máxima (% max) alcanzada en el tramo.
+  * Asistente de VAM instantánea (`850 m/h`) junto a la velocidad objetivo requerida (`12.5 km/h`) en la pendiente actual.
 
 ---
 

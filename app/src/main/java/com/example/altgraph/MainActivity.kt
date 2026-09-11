@@ -59,7 +59,7 @@ class MainActivity : Activity() {
         }
 
         val subtitle = TextView(this).apply {
-            text = "${getString(R.string.title_settings)} • v0.2.2"
+            text = "${getString(R.string.title_settings)} • v0.2.3"
             textSize = 13f
             setTextColor(Color.parseColor("#A1A1AA"))
             gravity = Gravity.CENTER
