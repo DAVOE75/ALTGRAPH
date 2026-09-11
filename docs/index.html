@@ -231,6 +231,7 @@
             border-radius: 12px;
             margin-bottom: 10px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            background-color: #000;
         }
 
         .gallery-card p {
@@ -443,7 +444,7 @@
 
     <header>
         <div class="logo-container">
-            <img src="../art/logo.png" alt="ALTGRAPH Logo">
+            <img src="../art/logo.png" onerror="this.onerror=null; this.src='art/logo.png';" alt="ALTGRAPH Logo">
             <h1>ALTGRAPH</h1>
         </div>
         <div class="nav-right">
@@ -462,7 +463,7 @@
     </header>
 
     <section class="hero">
-        <img src="../art/logo.png" alt="ALTGRAPH Logo" class="main-logo">
+        <img src="../art/logo.png" onerror="this.onerror=null; this.src='art/logo.png';" alt="ALTGRAPH Logo" class="main-logo">
         <h2 id="hero-title">Domina la montaña con <span>ALTGRAPH v0.2.3</span></h2>
         <p id="hero-desc">Extensión avanzada desarrollada por <strong>David García Pascual</strong>. Análisis dinámico de puertos, perfil 3D en relieve, fuentes Google Sans Condensed, modo apaisado rotado a 90°, globo flotante 3D, ritmo VAM e <strong>Índice Grado de Fatiga (GF)</strong> para <strong>Hammerhead Karoo 2 y Karoo 3</strong>.</p>
 
@@ -485,23 +486,23 @@
         <h3 class="gallery-title" id="gallery-main-title">📸 Galería de Capturas en Karoo 3 Real</h3>
         <div class="gallery-grid">
             <div class="gallery-card">
-                <img src="art/screenshot_3d_profile.png" alt="Perfil Altimetría 3D">
+                <img src="../art/screenshot_3d_profile.png" onerror="this.onerror=null; this.src='art/screenshot_3d_profile.png';" alt="Perfil Altimetría 3D">
                 <p id="g1-label">🏔️ Altimetría 3D y Globo Flotante</p>
             </div>
             <div class="gallery-card">
-                <img src="art/screenshot_settings_estilo.png" alt="Pestaña Estilo">
+                <img src="../art/screenshot_settings_estilo.png" onerror="this.onerror=null; this.src='art/screenshot_settings_estilo.png';" alt="Pestaña Estilo">
                 <p id="g2-label">🎨 Panel Pestaña Estilo</p>
             </div>
             <div class="gallery-card">
-                <img src="art/screenshot_settings_3d.png" alt="Pestaña 3D">
+                <img src="../art/screenshot_settings_3d.png" onerror="this.onerror=null; this.src='art/screenshot_settings_3d.png';" alt="Pestaña 3D">
                 <p id="g3-label">🏔️ Panel Pestaña 3D</p>
             </div>
             <div class="gallery-card">
-                <img src="art/screenshot_settings_2d.png" alt="Pestaña 2D">
+                <img src="../art/screenshot_settings_2d.png" onerror="this.onerror=null; this.src='art/screenshot_settings_2d.png';" alt="Pestaña 2D">
                 <p id="g4-label">📊 Panel Pestaña 2D</p>
             </div>
             <div class="gallery-card">
-                <img src="art/screenshot_settings_vam.png" alt="Pestaña VAM">
+                <img src="../art/screenshot_settings_vam.png" onerror="this.onerror=null; this.src='art/screenshot_settings_vam.png';" alt="Pestaña VAM">
                 <p id="g5-label">🚴 Panel Pestaña VAM</p>
             </div>
         </div>
@@ -743,7 +744,7 @@
                 f2Desc: "Expands the graph to a full-screen 800px width, liberating pixel compression.",
                 f3Title: "📍 Floating 3D Slope Balloon Tag",
                 f3Desc: "Real-time slope tag (<code>📍 7.2%</code>) attached to the cyclist beacon advancing along the profile.",
-                f4Title: "🌈 50m Micro-Block Sub-Segmenting",
+                f4Title: "RS 50m Micro-Block Sub-Segmenting",
                 f4Desc: "20 micro-blocks of 50m per kilometer rendering real flats, dips, and steep ramps.",
                 f5Title: "🚩 Custom Steep Ramp Range (10%-15%)",
                 f5Desc: "Red callout arrows marking the top 2-3 steepest ramps within your exact configured range.",
@@ -752,7 +753,7 @@
                 secFieldsTitle: "Detailed Breakdown of the 5 Data Fields",
                 c1Title: "3D Altimetry",
                 c1Tag: "Flagship Data Field",
-                c1Desc: "3D isometric graphical field with 50m micro-block sub-segmenting inside kilometers, floating 3D rider balloon, and 90° landscape mode.",
+                c1Desc: "3D isometric graphical field with 50m micro-block sub-segmenting inside kilometer blocks, floating 3D rider balloon, and 90° landscape mode.",
                 c1Bullets: `<li><strong>Lookahead Scale</strong>: Progressive lookahead from 200m to 500m and 1km steps up to 10km.</li><li><strong>50m Sub-Segmenting</strong>: Renders real flat rest sections and steep ramp surges inside every kilometer.</li><li><strong>Floating 3D Balloon</strong>: Instantaneous slope indicator (<code>📍 7.2%</code>) over rider beacon.</li><li><strong>Ramp Range Filtering</strong>: Custom Minimum (10%) and Maximum (15%) range for red arrows.</li><li><strong>90° Landscape Mode</strong>: Giant 800px x 480px full-bleed canvas.</li>`,
                 c2Title: "Altimetry Profile & Strategy",
                 c2Tag: "2D Profile & Strategy",
@@ -764,7 +765,7 @@
                 c3Bullets: `<li><strong>Piecewise Hardness Model</strong>: Weighted DU* based on gradient ranges (0-3%, 3-9%, 9-20%, >20%).</li><li><strong>Asphalt Quality Factor (TA)</strong>: Configurable to Very Good (0.1), Good (0.5), Regular (1.2), Poor (1.7).</li><li><strong>Max Ramp Penalty</strong>: Adds PMx / 5 factor to overall climb difficulty.</li><li><strong>Official Rating</strong>: Automatically categorizes climbs (Category 5 to Special/HC).</li>`,
                 c4Title: "ClimbPacing VAM Target (Option C)",
                 c4Tag: "Dual Pacing Assistant",
-                c4Desc: "Pacing assistant to meter your effort on climbs by calculating recommended speed in km/h based on current gradient.",
+                c4Desc: "Pacing assistant with instantaneous VAM (`850 m/h`), recommended target speed (`12.5 km/h`), and status badge.",
                 c4Bullets: `<li><strong>Primary VAM Readout</strong>: Instantaneous VAM in m/h (e.g. 850 m/h) + Target VAM.</li><li><strong>Recommended Speed</strong>: Recommends target speed in km/h for the slope (e.g. 12.5 km/h).</li><li><strong>Status Badge</strong>: Color-coded badge showing 🟢 ON PACE, 🔴 OVERPACING, or 🔵 UNDERPACING.</li><li><strong>Custom Target</strong>: Target VAM adjustable from 500 m/h to 2000 m/h in settings.</li>`,
                 c5Title: "3D Gradient Trend & Max Ramp",
                 c5Tag: "Gradient Trend Tracker",
