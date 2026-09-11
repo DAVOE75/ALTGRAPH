@@ -43,8 +43,9 @@
     <string name="setting_show_3d_cotas">Mostrar Cotas de Altitud en Gráfico 3D</string>
     <string name="setting_show_3d_ramps">Mostrar Indicadores de Rampas Duras (≥10%) en 3D</string>
     <string name="setting_show_max_gradient">Mostrar Pendiente Máxima en Encabezado 3D</string>
+    <string name="setting_rotate_90_cw">Girar Gráfico 90° (Modo Horizontal / Apaisado)</string>
     <string name="font_normal">Normal</string>
-    <string name="font_large">Grande</string>
+    <string name="font_large">Large</string>
     <string name="font_xl">Extra Gr.</string>
     <string name="status_saved">Ajustes Guardados Automáticamente</string>
     <string name="btn_save_and_exit">Guardar y Salir</string>

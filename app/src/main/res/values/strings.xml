@@ -43,6 +43,7 @@
     <string name="setting_show_3d_cotas">Show Altitude Labels in 3D Graph</string>
     <string name="setting_show_3d_ramps">Show Steep Ramp Callouts (≥10%) in 3D Graph</string>
     <string name="setting_show_max_gradient">Show Section Max Gradient in 3D Header</string>
+    <string name="setting_rotate_90_cw">Rotate Graph 90° Clockwise (Landscape Mode)</string>
     <string name="font_normal">Normal</string>
     <string name="font_large">Large</string>
     <string name="font_xl">XL</string>

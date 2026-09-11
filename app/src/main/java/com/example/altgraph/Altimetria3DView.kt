@@ -121,6 +121,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private var showCotas: Boolean = true
     private var showRamps: Boolean = true
     private var showMaxGrade: Boolean = true
+    private var rotate90: Boolean = false
 
     private val wallPath = Path()
     private val arrowPath = Path()
@@ -137,7 +138,8 @@ class Altimetria3DView @JvmOverloads constructor(
         showCotas: Boolean = true,
         showRamps: Boolean = true,
         showMaxGrade: Boolean = true,
-        fontFamilyKey: String = "sans-serif-condensed"
+        fontFamilyKey: String = "sans-serif-condensed",
+        rotate90: Boolean = false
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -154,6 +156,7 @@ class Altimetria3DView @JvmOverloads constructor(
         this.showCotas = showCotas
         this.showRamps = showRamps
         this.showMaxGrade = showMaxGrade
+        this.rotate90 = rotate90
 
         FontHelper.applyFontToPaint(titlePaint, fontFamilyKey)
         FontHelper.applyFontToPaint(subTitleLabelPaint, fontFamilyKey)
@@ -175,6 +178,18 @@ class Altimetria3DView @JvmOverloads constructor(
 
         if (w <= 0 || h <= 0) return
 
+        if (rotate90) {
+            canvas.save()
+            canvas.translate(w, 0f)
+            canvas.rotate(90f)
+            drawRenderContent(canvas, h, w)
+            canvas.restore()
+        } else {
+            drawRenderContent(canvas, w, h)
+        }
+    }
+
+    private fun drawRenderContent(canvas: Canvas, w: Float, h: Float) {
         // 1. Fondo Oscuro
         canvas.drawRect(0f, 0f, w, h, bgPaint)
 
@@ -291,7 +306,7 @@ class Altimetria3DView @JvmOverloads constructor(
 
         var accumulatedElev = currentElevation
 
-        // 1. Calcular altitud exacta en metros para cada punto del perfil (Corregido índice de bloque segmentMeters * grade / 100)
+        // 1. Calcular altitud exacta en metros para cada punto del perfil
         pointElevations[0] = accumulatedElev.toFloat()
         for (i in 1 until samples) {
             val segmentGrade = if (i - 1 < nextBlocks.size) nextBlocks[i - 1].toDouble() else 4.0
@@ -372,7 +387,7 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawLine(pointsX[i], pointsYTop[i], pointsX[i + 1], pointsYTop[i + 1], lineStrokePaint)
         }
 
-        // DIBUJAR RAMPA DURA (≥ 10% para ≥ 20m) CON FLECHA Y INDICADOR FLOTANTE (Muestra exactamente 1 decimal alineado)
+        // DIBUJAR RAMPA DURA (≥ 10% para ≥ 20m) CON FLECHA Y INDICADOR FLOTANTE (SIEMPRE CON 1 DECIMAL)
         if (showRamps) {
             for (i in 0 until samples - 1) {
                 val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
@@ -412,12 +427,16 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawLine(pointsX[i], pointsYBase[i], pointsX[i], pointsYBase[i] + 5f, gridPaint)
         }
 
-        // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D (Alineado exactamente con el % de rampa)
+        // DIBUJAR PORCENTAJES (%) DIRECTAMENTE SOBRE CADA BLOQUE 3D
         val fontBaseSize = (h * 0.045f) * fontScale
 
         for (i in 0 until samples - 1) {
             val grade = if (i < nextBlocks.size) nextBlocks[i] else 4.0f
-            val pctStr = "%.1f%%".format(grade)
+            val pctStr = if (blockSizeMeters <= 50.0) {
+                if (grade % 1.0f == 0.0f) "%.0f%%".format(grade) else "%.1f%%".format(grade)
+            } else {
+                "%.0f%%".format(grade)
+            }
 
             val midX = (pointsX[i] + pointsX[i + 1]) / 2f
             val midYTop = (pointsYTop[i] + pointsYTop[i + 1]) / 2f

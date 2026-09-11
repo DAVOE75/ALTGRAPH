@@ -309,7 +309,20 @@ class MainActivity : Activity() {
         font3dCard.addView(font3dValueText)
         font3dCard.addView(font3dRow)
 
-        // Section 8: Toggle Show % in Profile Blocks Card
+        // Section 8: Toggle Rotate 90° Clockwise Card (Modo Horizontal / Apaisado)
+        val rotate90Card = createCardContainer()
+        val switchRotate90 = Switch(this).apply {
+            text = getString(R.string.setting_rotate_90_cw)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.rotate90Clockwise
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.rotate90Clockwise = isChecked
+            }
+        }
+        rotate90Card.addView(switchRotate90)
+
+        // Section 9: Toggle Show % in Profile Blocks Card
         val showPctCard = createCardContainer()
         val switchShowPct = Switch(this).apply {
             text = getString(R.string.setting_show_block_percentages)
@@ -322,7 +335,7 @@ class MainActivity : Activity() {
         }
         showPctCard.addView(switchShowPct)
 
-        // Section 9: Toggle Show 3D Cotas Card
+        // Section 10: Toggle Show 3D Cotas Card
         val showCotasCard = createCardContainer()
         val switchShowCotas = Switch(this).apply {
             text = getString(R.string.setting_show_3d_cotas)
@@ -335,7 +348,7 @@ class MainActivity : Activity() {
         }
         showCotasCard.addView(switchShowCotas)
 
-        // Section 10: Toggle Show 3D Ramp Callouts Card
+        // Section 11: Toggle Show 3D Ramp Callouts Card
         val showRampsCard = createCardContainer()
         val switchShowRamps = Switch(this).apply {
             text = getString(R.string.setting_show_3d_ramps)
@@ -348,7 +361,7 @@ class MainActivity : Activity() {
         }
         showRampsCard.addView(switchShowRamps)
 
-        // Section 11: Toggle Show Max Gradient Readout Card
+        // Section 12: Toggle Show Max Gradient Readout Card
         val showMaxGradCard = createCardContainer()
         val switchShowMaxGrad = Switch(this).apply {
             text = getString(R.string.setting_show_max_gradient)
@@ -361,7 +374,7 @@ class MainActivity : Activity() {
         }
         showMaxGradCard.addView(switchShowMaxGrad)
 
-        // Section 12: Toggle Attack Alerts Card
+        // Section 13: Toggle Attack Alerts Card
         val alertCard = createCardContainer()
         val switchAlerts = Switch(this).apply {
             text = getString(R.string.setting_enable_alerts)
@@ -407,6 +420,7 @@ class MainActivity : Activity() {
         rootLayout.addView(vamCard)
         rootLayout.addView(asphaltCard)
         rootLayout.addView(font3dCard)
+        rootLayout.addView(rotate90Card)
         rootLayout.addView(showPctCard)
         rootLayout.addView(showCotasCard)
         rootLayout.addView(showRampsCard)

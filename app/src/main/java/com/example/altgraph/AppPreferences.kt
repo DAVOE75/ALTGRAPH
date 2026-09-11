@@ -55,6 +55,10 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_SHOW_MAX_GRADIENT, true)
         set(value) = prefs.edit().putBoolean(KEY_SHOW_MAX_GRADIENT, value).apply()
 
+    var rotate90Clockwise: Boolean
+        get() = prefs.getBoolean(KEY_ROTATE_90_CW, false)
+        set(value) = prefs.edit().putBoolean(KEY_ROTATE_90_CW, value).apply()
+
     var visibleBlocksCount: Int
         get() = prefs.getInt(KEY_VISIBLE_BLOCKS_COUNT, 5)
         set(value) = prefs.edit().putInt(KEY_VISIBLE_BLOCKS_COUNT, value.coerceIn(1, 10)).apply()
@@ -73,6 +77,7 @@ class AppPreferences(context: Context) {
         private const val KEY_SHOW_3D_COTAS = "show_3d_cotas"
         private const val KEY_SHOW_3D_RAMPS = "show_3d_ramps"
         private const val KEY_SHOW_MAX_GRADIENT = "show_max_gradient"
+        private const val KEY_ROTATE_90_CW = "rotate_90_cw"
         private const val KEY_VISIBLE_BLOCKS_COUNT = "visible_blocks_count"
 
         @Volatile
