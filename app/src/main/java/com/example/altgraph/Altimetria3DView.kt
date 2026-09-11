@@ -252,15 +252,19 @@ class Altimetria3DView @JvmOverloads constructor(
         pointsX: FloatArray,
         pointsYBase: FloatArray,
         samples: Int,
-        maxPeakHeight: Float
+        maxPeakHeight: Float,
+        minElev: Float,
+        maxElev: Float
     ) {
         val steps = 4
         axisTextPaint.textSize = (h * 0.038f).coerceIn(9f, 13f)
 
-        // 1. Líneas horizontales de altitud en PERSPECTIVA ISOMÉTRICA 3D
+        val elevRange = (maxElev - minElev).coerceAtLeast(10f)
+
+        // 1. Líneas horizontales de altitud en PERSPECTIVA ISOMÉTRICA 3D ajustadas exactamente a la altitud real
         for (k in 0..steps) {
             val ratio = k.toFloat() / steps
-            val elevMark = (currentElevation + (k * 100)).toInt()
+            val elevMark = (minElev + (ratio * elevRange)).toInt()
 
             for (j in 0 until samples - 1) {
                 val x1 = pointsX[j]
@@ -272,7 +276,7 @@ class Altimetria3DView @JvmOverloads constructor(
                 canvas.drawLine(x1, y1, x2, y2, gridPaint)
             }
 
-            // Etiqueta de altitud sobre el eje Z en perspectiva 3D
+            // Etiqueta de altitud sobre el eje Z en perspectiva 3D con coincidencia 100% con las cotas del perfil
             val labelX = (pointsX[0] - 28f).coerceAtLeast(10f)
             val labelY = pointsYBase[0] - (ratio * maxPeakHeight) + 4f
             canvas.drawText("${elevMark}m", labelX, labelY, axisTextPaint)
@@ -335,8 +339,8 @@ class Altimetria3DView @JvmOverloads constructor(
             pointsYBase[i] = pYBase
         }
 
-        // DIBUJAR REJILLA TRASERA DE ALTITUD EN PERSPECTIVA 3D (Por detrás de la montaña)
-        draw3DBackwallGrid(canvas, w, h, pointsX, pointsYBase, samples, maxPeakHeight)
+        // DIBUJAR REJILLA TRASERA DE ALTITUD EN PERSPECTIVA 3D (Alineada al 100% con minElev y maxElev)
+        draw3DBackwallGrid(canvas, w, h, pointsX, pointsYBase, samples, maxPeakHeight, minElev, maxElev)
 
         // DIBUJAR PAREDES DE EXTROSIÓN 3D (Relieve)
         for (i in 0 until samples - 1) {
