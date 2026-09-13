@@ -27,7 +27,8 @@ data class StrategyData(
     val blockSizeMeters: Double,
     val totalFatigueGrade: Int,
     val hairpins: List<Double>,
-    val pois: List<Poi>
+    val pois: List<Poi>,
+    val curvatureOffsets: List<Float> = emptyList()
 )
 
 class AltimetriaStrategyCalculator {
@@ -43,7 +44,6 @@ class AltimetriaStrategyCalculator {
     // Historial y buffer de elevación barométrica en vivo (Entrenamiento libre / Sin ruta precargada)
     private val liveElevationHistory = mutableListOf<Double>()
     private var lastRecordedElevation = 0.0
-    private var liveDistanceAccumulated = 0.0
     
     // Curvas de herradura (distancias absolutas detectadas)
     private val absoluteHairpins = mutableListOf<Double>()
@@ -160,13 +160,10 @@ class AltimetriaStrategyCalculator {
         val isNavigating = isNavigatingRoute || routePoints.isNotEmpty()
 
         // MODO LIBRE / ENTRENAMIENTO SIN RUTA PRECARGADA:
-        // Genera el perfil 3D dinámico en tiempo real combinando la altitud barométrica instantánea
         if (!isNavigating) {
-            // Si el entrenamiento está activo o en marcha (velocidad > 0.1 m/s o historial en vivo)
             val liveBlocks = mutableListOf<Float>()
             
             if (liveElevationHistory.size >= 2) {
-                // Calcular pendientes reales de los últimos tramos recorridos a partir del altímetro barométrico
                 var prevElev = liveElevationHistory.first()
                 for (idx in 1 until liveElevationHistory.size) {
                     val currElev = liveElevationHistory[idx]
@@ -179,7 +176,6 @@ class AltimetriaStrategyCalculator {
                 }
             }
             
-            // Si aún no hay suficiente recorrido, completar con valores dinámicos alrededor de la pendiente actual
             while (liveBlocks.size < 10) {
                 val noise = (sin((liveBlocks.size + 1) * 1.2) * 2.5).toFloat()
                 val calcGrade = (currentElevation / 100.0 + noise).coerceIn(0.5, 18.0).toFloat()
@@ -204,6 +200,9 @@ class AltimetriaStrategyCalculator {
             if (showPoiViewpoints) demoPois.add(Poi(4200.0, "📸", "Mirador", PoiType.VIEWPOINT))
             if (showPoiSummits) demoPois.add(Poi(8500.0, "📡", "Miserat-Xillibre", PoiType.SUMMIT))
 
+            // Offsets estéticos de curvatura para demo
+            val demoCurvatures = List(50) { idx -> (sin(idx * 0.3) * 0.8).toFloat() }
+
             return StrategyData(
                 remainingDistance = 8500.0,
                 timeToSummit = if (currentSpeed > 0.1) (8500.0 / currentSpeed).toLong() else 1620L,
@@ -213,12 +212,13 @@ class AltimetriaStrategyCalculator {
                 blockSizeMeters = blockSize,
                 totalFatigueGrade = liveFatigue,
                 hairpins = demoHairpins,
-                pois = demoPois
+                pois = demoPois,
+                curvatureOffsets = demoCurvatures
             )
         }
 
         // MODO NAVEGANDO RUTA PRECARGADA (GPX / FIT):
-        // Encuentra la posición GPS del ciclista en el trazado de la ruta y extrae la altimetría futura en vivo
+        // Encuentra la posición GPS del ciclista en el trazado y calcula la curvatura real de la carretera
         var nearestIndex = 0
         var minDistance = Double.MAX_VALUE
         routePoints.forEachIndexed { index, point ->
@@ -327,6 +327,35 @@ class AltimetriaStrategyCalculator {
             
         val visiblePois = emptyList<Poi>()
 
+        // Cálculo de curvatura real de la carretera GPS por orientación vectorial (Heading Delta)
+        val curvatureOffsets = mutableListOf<Float>()
+        if (routePoints.size > nearestIndex + 1) {
+            val startP = routePoints[nearestIndex]
+            var initialBearing = 0.0
+            if (nearestIndex < routePoints.size - 1) {
+                val p1 = routePoints[nearestIndex + 1]
+                initialBearing = bearing(startP.latitude, startP.longitude, p1.latitude, p1.longitude)
+            }
+
+            var cumOffset = 0.0
+            curvatureOffsets.add(0.0f)
+
+            for (i in nearestIndex + 1 until routePoints.size) {
+                val prevP = routePoints[i - 1]
+                val currP = routePoints[i]
+                val segDist = (currP.distance - prevP.distance).coerceAtLeast(1.0)
+
+                val curBearing = bearing(prevP.latitude, prevP.longitude, currP.latitude, currP.longitude)
+                var angleDiff = curBearing - initialBearing
+                while (angleDiff > 180.0) angleDiff -= 360.0
+                while (angleDiff < -180.0) angleDiff += 360.0
+
+                val lateralMeters = sin(Math.toRadians(angleDiff)) * (segDist / 20.0)
+                cumOffset += lateralMeters
+                curvatureOffsets.add(cumOffset.coerceIn(-1.5, 1.5).toFloat())
+            }
+        }
+
         return StrategyData(
             remainingDistance = totalDistanceRemaining,
             timeToSummit = secondsRemaining,
@@ -336,7 +365,8 @@ class AltimetriaStrategyCalculator {
             blockSizeMeters = blockSize,
             totalFatigueGrade = totalGf,
             hairpins = visibleHairpins,
-            pois = visiblePois
+            pois = visiblePois,
+            curvatureOffsets = curvatureOffsets
         )
     }
 

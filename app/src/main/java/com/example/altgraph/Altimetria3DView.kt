@@ -173,6 +173,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private var hairpins: List<Double> = emptyList()
     private var pois: List<Poi> = emptyList()
     private var showZoomControls: Boolean = true
+    private var curvatureOffsets: List<Float> = emptyList()
 
     // Interactive Zoom & Pan
     private var zoomScale: Float = 1.0f
@@ -204,7 +205,8 @@ class Altimetria3DView @JvmOverloads constructor(
         showPois: Boolean = true,
         hairpins: List<Double> = emptyList(),
         pois: List<Poi> = emptyList(),
-        showZoomControls: Boolean = true
+        showZoomControls: Boolean = true,
+        curvatureOffsets: List<Float> = emptyList()
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -229,6 +231,7 @@ class Altimetria3DView @JvmOverloads constructor(
         this.hairpins = hairpins
         this.pois = pois
         this.showZoomControls = showZoomControls
+        this.curvatureOffsets = curvatureOffsets
 
         FontHelper.applyFontToPaint(titlePaint, fontFamilyKey)
         FontHelper.applyFontToPaint(subTitleLabelPaint, fontFamilyKey)
@@ -376,7 +379,7 @@ class Altimetria3DView @JvmOverloads constructor(
         liveGradePaint.color = Color.parseColor(getGradeColor(currentGrade))
         canvas.drawText(liveGradeText, col1X, h * 0.23f, liveGradePaint)
 
-        // COLUMNA 2: PENDIENTE MEDIA DEL TRAMO VISIBLE (Calculada de la gráfica en pantalla)
+        // COLUMNA 2: PENDIENTE MEDIA DEL TRAMO VISIBLE
         val tramoAvgGrade = if (nextBlocks.isNotEmpty()) nextBlocks.average() else currentGrade
         val labelAvgGrade = context.getString(R.string.label_avg_gradient_tramo)
         canvas.drawText(labelAvgGrade, col2X, h * 0.13f, subTitleLabelPaint)
@@ -386,7 +389,7 @@ class Altimetria3DView @JvmOverloads constructor(
         liveGradePaint.color = Color.parseColor(getGradeColor(tramoAvgGrade))
         canvas.drawText(avgGradeText, col2X, h * 0.23f, liveGradePaint)
 
-        // COLUMNA 3: PENDIENTE MÁXIMA DEL TRAMO VISIBLE (Opcional según preferencia)
+        // COLUMNA 3: PENDIENTE MÁXIMA DEL TRAMO VISIBLE
         if (showMaxGrade) {
             val tramoMaxGrade = if (nextBlocks.isNotEmpty()) nextBlocks.maxOrNull()?.toDouble() ?: 12.8 else 12.8
             val labelMaxGrade = context.getString(R.string.label_max_gradient_tramo)
@@ -403,7 +406,7 @@ class Altimetria3DView @JvmOverloads constructor(
             drawZoomOverlay(canvas, w, h)
         }
 
-        // 4. Perfil 3D con Ampliación y Desplazamiento Proporcional Estricto
+        // 4. Perfil 3D con Curvatura Real de la Carretera GPS
         draw3DRibbonAndWalls(canvas, w, h)
     }
 
@@ -534,7 +537,13 @@ class Altimetria3DView @JvmOverloads constructor(
 
         for (i in 0 until totalMicroSamples) {
             val progress = i.toFloat() / (totalMicroSamples - 1)
-            val curveOffset = sin(progress * Math.PI * 1.5).toFloat() * (w * 0.08f)
+            
+            // Usar la curvatura real de la carretera trazada en el GPX (o sinuositad dinámica)
+            val curveOffset = if (i < curvatureOffsets.size) {
+                curvatureOffsets[i] * (w * 0.08f)
+            } else {
+                sin(progress * Math.PI * 1.5).toFloat() * (w * 0.08f)
+            }
 
             val px = startX + (i * microStepX) + curveOffset - panOffsetX
             val normalizedHeight = ((microElevations[i] - minElev) / elevRange).coerceIn(0f, 1f)

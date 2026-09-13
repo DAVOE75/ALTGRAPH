@@ -175,7 +175,8 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     showPois = (prefs.showPoiTowns || prefs.showPoiWater || prefs.showPoiViewpoints || prefs.showPoiSummits),
                     hairpins = strategy.hairpins,
                     pois = strategy.pois,
-                    showZoomControls = prefs.show3dZoomControls
+                    showZoomControls = prefs.show3dZoomControls,
+                    curvatureOffsets = strategy.curvatureOffsets
                 )
 
                 val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
