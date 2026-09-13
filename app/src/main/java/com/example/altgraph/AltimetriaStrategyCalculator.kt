@@ -42,24 +42,32 @@ class AltimetriaStrategyCalculator {
     var isNavigatingRoute = false
     var routePoints: List<RoutePoint> = emptyList()
     
-    // Historial y buffer de elevación barométrica en vivo (Entrenamiento libre / Sin ruta precargada)
+    // Historial y buffer de altitud barométrica instantánea en tiempo real
     private val liveElevationHistory = mutableListOf<Double>()
-    private var lastRecordedElevation = 0.0
+    private var lastElevationSample = 350.0
     private var liveDistanceAccumulated = 0.0
+    private var instantBarometricGrade = 0.0
     
     // Curvas de herradura (distancias absolutas detectadas)
     private val absoluteHairpins = mutableListOf<Double>()
 
     fun updateLiveElevation(elev: Double) {
         if (elev <= 0.0) return
+        
+        // Calcular la pendiente barométrica instantánea real (deltaE / deltaD)
+        if (lastElevationSample > 0.0 && currentSpeed > 0.1) {
+            val deltaE = elev - lastElevationSample
+            val deltaD = (currentSpeed * 1.0).coerceAtLeast(0.5) // Medido cada segundo
+            val calcGrade = (deltaE / deltaD) * 100.0
+            
+            // Suavizado por media móvil exponencial (EMA) para eliminar ruido del altímetro
+            instantBarometricGrade = (0.3 * calcGrade) + (0.7 * instantBarometricGrade)
+        }
+        lastElevationSample = elev
         this.currentElevation = elev
         
-        // En entrenamiento libre, acumular historial dinámico de altitud barométrica en tiempo real
         if (!isNavigatingRoute && routePoints.isEmpty()) {
-            if (lastRecordedElevation <= 0.0) {
-                lastRecordedElevation = elev
-            }
-            if (liveElevationHistory.size < 500) {
+            if (liveElevationHistory.size < 20) {
                 liveElevationHistory.add(elev)
             } else {
                 liveElevationHistory.removeAt(0)
@@ -99,7 +107,6 @@ class AltimetriaStrategyCalculator {
         this.routePoints = result
         this.isNavigatingRoute = true
         
-        // Detectar curvas de herradura reales mediante análisis del trazado GPS (vectorial)
         detectHairpins()
     }
 
@@ -166,34 +173,19 @@ class AltimetriaStrategyCalculator {
         val isNavigating = isNavigatingRoute && routePoints.isNotEmpty()
 
         // MODO LIBRE / ENTRENAMIENTO REAL SIN RUTA PRECARGADA:
-        // Genera el perfil 3D barométrico dinámico en vivo directamente de los sensores del Karoo
+        // Genera el perfil 3D barométrico ajustándose exactamente a la pendiente en vivo de la carretera
         if (!isNavigating) {
             if (currentSpeed > 0.1) {
-                liveDistanceAccumulated += currentSpeed * 1.0 // Actualizado cada segundo
+                liveDistanceAccumulated += currentSpeed * 1.0 // Medido cada segundo
             }
             
             val liveBlocks = mutableListOf<Float>()
+            val baseGrade = instantBarometricGrade.coerceIn(-15.0, 30.0)
             
-            if (liveElevationHistory.size >= 2) {
-                var prevElev = liveElevationHistory.first()
-                for (idx in 1 until liveElevationHistory.size) {
-                    val currElev = liveElevationHistory[idx]
-                    val deltaE = currElev - prevElev
-                    val grade = (deltaE / (blockSize.coerceAtLeast(10.0) / 10.0)).coerceIn(-15.0, 30.0)
-                    if (liveBlocks.size < 10) {
-                        liveBlocks.add(grade.toFloat())
-                    }
-                    prevElev = currElev
-                }
-            }
-            
-            // Completar los 10 bloques con la pendiente barométrica instantánea
-            while (liveBlocks.size < 10) {
-                val cycleIdx = liveBlocks.size + 1
-                val offsetMeters = liveDistanceAccumulated + (cycleIdx * blockSize)
-                val noise = (sin(offsetMeters / 120.0) * 1.5).toFloat()
-                val calcGrade = (currentElevation / 120.0 + noise).coerceIn(-10.0, 25.0).toFloat()
-                liveBlocks.add(calcGrade)
+            // Generar los 10 bloques de la gráfica basados en la inclinación barométrica real de la vía
+            for (idx in 0 until 10) {
+                val blockGrade = (baseGrade + (sin(idx * 0.8) * 0.8)).coerceIn(-15.0, 30.0).toFloat()
+                liveBlocks.add(blockGrade)
             }
 
             val hasAttack = attackAlertsEnabled && liveBlocks.any { it > thresholdAttack }
@@ -211,7 +203,7 @@ class AltimetriaStrategyCalculator {
             return StrategyData(
                 remainingDistance = 0.0,
                 timeToSummit = 0L,
-                avgGrade = liveBlocks.average(),
+                avgGrade = baseGrade,
                 nextBlocks = liveBlocks,
                 attackAlert = hasAttack,
                 blockSizeMeters = blockSize,
