@@ -1,9 +1,9 @@
 {
   "label": "ALTGRAPH",
   "packageName": "com.example.altgraph",
-  "latestApkUrl": "https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/releases/app-debug.apk",
-  "latestVersion": "0.2.1",
-  "latestVersionCode": 2,
+  "latestApkUrl": "https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/releases/ALTGRAPH-v0.3.0.apk",
+  "latestVersion": "0.3.0",
+  "latestVersionCode": 6,
   "iconUrl": "https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png",
   "developer": "David García Pascual",
   "description": "Extensión de altimetría 3D en relieve, alertas de ataque, ritmo VAM e Índice Grado de Fatiga (GF) para Hammerhead Karoo"
