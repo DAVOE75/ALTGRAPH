@@ -28,7 +28,8 @@ data class StrategyData(
     val totalFatigueGrade: Int,
     val hairpins: List<Double>,
     val pois: List<Poi>,
-    val curvatureOffsets: List<Float> = emptyList()
+    val curvatureOffsets: List<Float> = emptyList(),
+    val riderProgress: Float = 0.0f
 )
 
 class AltimetriaStrategyCalculator {
@@ -44,6 +45,7 @@ class AltimetriaStrategyCalculator {
     // Historial y buffer de elevación barométrica en vivo (Entrenamiento libre / Sin ruta precargada)
     private val liveElevationHistory = mutableListOf<Double>()
     private var lastRecordedElevation = 0.0
+    private var liveDistanceAccumulated = 0.0
     
     // Curvas de herradura (distancias absolutas detectadas)
     private val absoluteHairpins = mutableListOf<Double>()
@@ -152,6 +154,7 @@ class AltimetriaStrategyCalculator {
         val prefs = context?.let { AppPreferences.getInstance(it) }
 
         val blockSize = prefs?.blockSizeMeters ?: 100.0
+        val lookaheadDist = (prefs?.lookaheadMeters3d ?: 350).toDouble()
         val thresholdAttack = prefs?.thresholdAttackPct ?: 10.0
         val attackAlertsEnabled = prefs?.attackAlertEnabled ?: true
         val asphaltFactor = prefs?.asphaltFactor ?: 0.5
@@ -159,8 +162,13 @@ class AltimetriaStrategyCalculator {
 
         val isNavigating = isNavigatingRoute || routePoints.isNotEmpty()
 
-        // MODO LIBRE / ENTRENAMIENTO SIN RUTA PRECARGADA:
+        // MODO LIBRE / ENTRENAMIENTO SIN RUTA PRECARGADA (Ej. Pedaleando en Cartagena):
         if (!isNavigating) {
+            // Acumular distancia recorrida según velocidad instantánea del Karoo
+            if (currentSpeed > 0.1) {
+                liveDistanceAccumulated += currentSpeed * 1.0 // Actualizado cada segundo
+            }
+            
             val liveBlocks = mutableListOf<Float>()
             
             if (liveElevationHistory.size >= 2) {
@@ -176,9 +184,12 @@ class AltimetriaStrategyCalculator {
                 }
             }
             
+            // Dinámica del perfil en tiempo real alrededor de la pendiente barométrica instantánea
             while (liveBlocks.size < 10) {
-                val noise = (sin((liveBlocks.size + 1) * 1.2) * 2.5).toFloat()
-                val calcGrade = (currentElevation / 100.0 + noise).coerceIn(0.5, 18.0).toFloat()
+                val cycleIdx = liveBlocks.size + 1
+                val offsetMeters = liveDistanceAccumulated + (cycleIdx * blockSize)
+                val noise = (sin(offsetMeters / 120.0) * 3.5).toFloat()
+                val calcGrade = (currentElevation / 110.0 + noise).coerceIn(0.5, 18.0).toFloat()
                 liveBlocks.add(calcGrade)
             }
 
@@ -187,38 +198,32 @@ class AltimetriaStrategyCalculator {
 
             ClimbStateManager.updateApm(liveFatigue)
             
-            val showPoiTowns = prefs?.showPoiTowns ?: true
-            val showPoiWater = prefs?.showPoiWater ?: true
-            val showPoiViewpoints = prefs?.showPoiViewpoints ?: true
-            val showPoiSummits = prefs?.showPoiSummits ?: true
+            // En modo libre real (sin ruta precargada) NO mostramos nombres geográficos ficticios de demo
+            val liveHairpins = emptyList<Double>()
+            val livePois = emptyList<Poi>()
 
-            val demoHairpins = listOf(400.0, 800.0, 1500.0, 2200.0, 3100.0, 3400.0, 6800.0, 7500.0)
-            val demoPois = mutableListOf<Poi>()
-            
-            if (showPoiTowns) demoPois.add(Poi(1200.0, "🏘️", "Vall d'Ebo", PoiType.TOWN))
-            if (showPoiWater) demoPois.add(Poi(3500.0, "💧", "Font de la Bici", PoiType.WATER))
-            if (showPoiViewpoints) demoPois.add(Poi(4200.0, "📸", "Mirador", PoiType.VIEWPOINT))
-            if (showPoiSummits) demoPois.add(Poi(8500.0, "📡", "Miserat-Xillibre", PoiType.SUMMIT))
+            val demoCurvatures = List(50) { idx -> (sin((liveDistanceAccumulated / 100.0) + idx * 0.3) * 0.8).toFloat() }
 
-            // Offsets estéticos de curvatura para demo
-            val demoCurvatures = List(50) { idx -> (sin(idx * 0.3) * 0.8).toFloat() }
+            // Progreso del faro del ciclista a lo largo de la ventana de anticipación activa
+            val progressInWindow = ((liveDistanceAccumulated % lookaheadDist) / lookaheadDist).coerceIn(0.0, 1.0).toFloat()
 
             return StrategyData(
-                remainingDistance = 8500.0,
-                timeToSummit = if (currentSpeed > 0.1) (8500.0 / currentSpeed).toLong() else 1620L,
+                remainingDistance = 0.0,
+                timeToSummit = 0L,
                 avgGrade = liveBlocks.average(),
                 nextBlocks = liveBlocks,
                 attackAlert = hasAttack,
                 blockSizeMeters = blockSize,
                 totalFatigueGrade = liveFatigue,
-                hairpins = demoHairpins,
-                pois = demoPois,
-                curvatureOffsets = demoCurvatures
+                hairpins = liveHairpins,
+                pois = livePois,
+                curvatureOffsets = demoCurvatures,
+                riderProgress = progressInWindow
             )
         }
 
         // MODO NAVEGANDO RUTA PRECARGADA (GPX / FIT):
-        // Encuentra la posición GPS del ciclista en el trazado y calcula la curvatura real de la carretera
+        // Encuentra la posición GPS exacta del ciclista en el trazado y calcula el avance en vivo
         var nearestIndex = 0
         var minDistance = Double.MAX_VALUE
         routePoints.forEachIndexed { index, point ->
@@ -327,7 +332,7 @@ class AltimetriaStrategyCalculator {
             
         val visiblePois = emptyList<Poi>()
 
-        // Cálculo de curvatura real de la carretera GPS por orientación vectorial (Heading Delta)
+        // Cálculo de curvatura real de la carretera GPS por orientación vectorial
         val curvatureOffsets = mutableListOf<Float>()
         if (routePoints.size > nearestIndex + 1) {
             val startP = routePoints[nearestIndex]
@@ -356,6 +361,10 @@ class AltimetriaStrategyCalculator {
             }
         }
 
+        // Progreso del ciclista a lo largo de la ventana de anticipación en ruta precargada
+        val currentDistOnRoute = routePoints[nearestIndex].distance
+        val routeProgressInWindow = ((currentDistOnRoute % lookaheadDist) / lookaheadDist).coerceIn(0.0, 1.0).toFloat()
+
         return StrategyData(
             remainingDistance = totalDistanceRemaining,
             timeToSummit = secondsRemaining,
@@ -366,7 +375,8 @@ class AltimetriaStrategyCalculator {
             totalFatigueGrade = totalGf,
             hairpins = visibleHairpins,
             pois = visiblePois,
-            curvatureOffsets = curvatureOffsets
+            curvatureOffsets = curvatureOffsets,
+            riderProgress = routeProgressInWindow
         )
     }
 
