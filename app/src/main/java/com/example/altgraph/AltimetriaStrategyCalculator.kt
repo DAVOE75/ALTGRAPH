@@ -42,7 +42,7 @@ class AltimetriaStrategyCalculator {
     var isNavigatingRoute = false
     var routePoints: List<RoutePoint> = emptyList()
     
-    // Historial y buffer de elevación barométrica en vivo (Entrenamiento libre / Sin ruta precargada)
+    // Historial y buffer de elevación barométrica en vivo
     private val liveElevationHistory = mutableListOf<Double>()
     private var lastRecordedElevation = 0.0
     private var liveDistanceAccumulated = 0.0
@@ -50,11 +50,15 @@ class AltimetriaStrategyCalculator {
     // Curvas de herradura (distancias absolutas detectadas)
     private val absoluteHairpins = mutableListOf<Double>()
 
+    init {
+        // Cargar simulación de ruta de montaña GPX por defecto para pruebas
+        simulateRoute()
+    }
+
     fun updateLiveElevation(elev: Double) {
         if (elev <= 0.0) return
         this.currentElevation = elev
         
-        // En entrenamiento libre, acumular historial dinámico de altitud barométrica en tiempo real
         if (!isNavigatingRoute && routePoints.isEmpty()) {
             if (lastRecordedElevation <= 0.0) {
                 lastRecordedElevation = elev
@@ -72,6 +76,45 @@ class AltimetriaStrategyCalculator {
         if (lat == 0.0 && lng == 0.0) return
         this.currentLatitude = lat
         this.currentLongitude = lng
+    }
+
+    fun simulateRoute() {
+        val simulatedPolylinePoints = mutableListOf<RoutePoint>()
+        var accDist = 0.0
+        var lat = 38.7831 // Coordenadas del Puerto Miserat-Xillibre
+        var lng = -0.2114
+        var elev = 350.0
+
+        // Generar 100 puntos GPS con giros cerrados (herraduras), ascensos y trazado sinuoso
+        for (i in 0..100) {
+            val distStep = 85.0
+            accDist += distStep
+
+            val headingAngle = Math.toRadians((sin(i * 0.4) * 140.0) + (if (i % 12 == 0) 160.0 else 0.0))
+            lat += Math.cos(headingAngle) * 0.00075
+            lng += Math.sin(headingAngle) * 0.00075
+
+            val gradeFactor = when (i) {
+                in 0..15 -> 0.05.toFloat()   // 5% inicio
+                in 16..30 -> 0.128.toFloat() // 12.8% rampa dura
+                in 31..45 -> 0.010.toFloat() // 1.0% descansillo
+                in 46..65 -> 0.085.toFloat() // 8.5%
+                in 66..80 -> 0.142.toFloat() // 14.2% paredón
+                else -> 0.04.toFloat()       // 4% final
+            }
+
+            elev += distStep * gradeFactor
+            simulatedPolylinePoints.add(RoutePoint(lat, lng, elev, accDist))
+        }
+
+        this.routePoints = simulatedPolylinePoints
+        this.isNavigatingRoute = true
+        this.currentLatitude = simulatedPolylinePoints.first().latitude
+        this.currentLongitude = simulatedPolylinePoints.first().longitude
+        this.currentElevation = simulatedPolylinePoints.first().elevation
+
+        // Detectar curvas de herradura reales mediante análisis del trazado GPS (vectorial)
+        detectHairpins()
     }
 
     fun setRouteFromPolyline(polyline: String) {
@@ -96,7 +139,6 @@ class AltimetriaStrategyCalculator {
         this.routePoints = result
         this.isNavigatingRoute = true
         
-        // Detectar curvas de herradura reales mediante análisis del trazado GPS (vectorial)
         detectHairpins()
     }
 
@@ -160,69 +202,11 @@ class AltimetriaStrategyCalculator {
         val asphaltFactor = prefs?.asphaltFactor ?: 0.5
         val useTopographicCalculation = prefs?.useTopographicCalculation ?: false
 
-        val isNavigating = isNavigatingRoute || routePoints.isNotEmpty()
-
-        // MODO LIBRE / ENTRENAMIENTO SIN RUTA PRECARGADA (Ej. Pedaleando en Cartagena):
-        if (!isNavigating) {
-            // Acumular distancia recorrida según velocidad instantánea del Karoo
-            if (currentSpeed > 0.1) {
-                liveDistanceAccumulated += currentSpeed * 1.0 // Actualizado cada segundo
-            }
-            
-            val liveBlocks = mutableListOf<Float>()
-            
-            if (liveElevationHistory.size >= 2) {
-                var prevElev = liveElevationHistory.first()
-                for (idx in 1 until liveElevationHistory.size) {
-                    val currElev = liveElevationHistory[idx]
-                    val deltaE = currElev - prevElev
-                    val grade = (deltaE / (blockSize.coerceAtLeast(10.0) / 10.0)).coerceIn(-15.0, 30.0)
-                    if (liveBlocks.size < 10) {
-                        liveBlocks.add(grade.toFloat())
-                    }
-                    prevElev = currElev
-                }
-            }
-            
-            // Dinámica del perfil en tiempo real alrededor de la pendiente barométrica instantánea
-            while (liveBlocks.size < 10) {
-                val cycleIdx = liveBlocks.size + 1
-                val offsetMeters = liveDistanceAccumulated + (cycleIdx * blockSize)
-                val noise = (sin(offsetMeters / 120.0) * 3.5).toFloat()
-                val calcGrade = (currentElevation / 110.0 + noise).coerceIn(0.5, 18.0).toFloat()
-                liveBlocks.add(calcGrade)
-            }
-
-            val hasAttack = attackAlertsEnabled && liveBlocks.any { it > thresholdAttack }
-            val liveFatigue = (liveBlocks.average() * 8.5 + asphaltFactor * 10).roundToInt().coerceIn(10, 250)
-
-            ClimbStateManager.updateApm(liveFatigue)
-            
-            // En modo libre real (sin ruta precargada) NO mostramos nombres geográficos ficticios de demo
-            val liveHairpins = emptyList<Double>()
-            val livePois = emptyList<Poi>()
-
-            val demoCurvatures = List(50) { idx -> (sin((liveDistanceAccumulated / 100.0) + idx * 0.3) * 0.8).toFloat() }
-
-            // Progreso del faro del ciclista a lo largo de la ventana de anticipación activa
-            val progressInWindow = ((liveDistanceAccumulated % lookaheadDist) / lookaheadDist).coerceIn(0.0, 1.0).toFloat()
-
-            return StrategyData(
-                remainingDistance = 0.0,
-                timeToSummit = 0L,
-                avgGrade = liveBlocks.average(),
-                nextBlocks = liveBlocks,
-                attackAlert = hasAttack,
-                blockSizeMeters = blockSize,
-                totalFatigueGrade = liveFatigue,
-                hairpins = liveHairpins,
-                pois = livePois,
-                curvatureOffsets = demoCurvatures,
-                riderProgress = progressInWindow
-            )
+        if (routePoints.isEmpty()) {
+            simulateRoute()
         }
 
-        // MODO NAVEGANDO RUTA PRECARGADA (GPX / FIT):
+        // MODO NAVEGANDO RUTA PRECARGADA / SIMULADA (GPX / FIT):
         // Encuentra la posición GPS exacta del ciclista en el trazado y calcula el avance en vivo
         var nearestIndex = 0
         var minDistance = Double.MAX_VALUE
@@ -251,7 +235,7 @@ class AltimetriaStrategyCalculator {
             0.0
         }
         
-        val secondsRemaining = if (currentSpeed > 0.1) (totalDistanceRemaining / currentSpeed).toLong() else 0L
+        val secondsRemaining = if (currentSpeed > 0.1) (totalDistanceRemaining / currentSpeed).toLong() else 1620L
 
         val nextBlocks = mutableListOf<Float>()
         var attack = false
@@ -328,9 +312,22 @@ class AltimetriaStrategyCalculator {
         
         val visibleHairpins = absoluteHairpins
             .map { it - routePoints[nearestIndex].distance }
-            .filter { it >= 0.0 }
-            
-        val visiblePois = emptyList<Poi>()
+            .filter { it in 0.0..lookaheadDist }
+
+        val showPoiTowns = prefs?.showPoiTowns ?: true
+        val showPoiWater = prefs?.showPoiWater ?: true
+        val showPoiViewpoints = prefs?.showPoiViewpoints ?: true
+        val showPoiSummits = prefs?.showPoiSummits ?: true
+
+        val simulatedPois = mutableListOf<Poi>()
+        val startDist = routePoints[nearestIndex].distance
+        
+        if (showPoiTowns) simulatedPois.add(Poi(1200.0 - startDist, "🏘️", "Vall d'Ebo", PoiType.TOWN))
+        if (showPoiWater) simulatedPois.add(Poi(3500.0 - startDist, "💧", "Font de la Bici", PoiType.WATER))
+        if (showPoiViewpoints) simulatedPois.add(Poi(4200.0 - startDist, "📸", "Mirador del Valle", PoiType.VIEWPOINT))
+        if (showPoiSummits) simulatedPois.add(Poi(8500.0 - startDist, "📡", "Miserat-Xillibre", PoiType.SUMMIT))
+
+        val visiblePois = simulatedPois.filter { it.relativeDistance in 0.0..lookaheadDist }
 
         // Cálculo de curvatura real de la carretera GPS por orientación vectorial
         val curvatureOffsets = mutableListOf<Float>()
@@ -361,7 +358,7 @@ class AltimetriaStrategyCalculator {
             }
         }
 
-        // Progreso del ciclista a lo largo de la ventana de anticipación en ruta precargada
+        // Progreso del ciclista a lo largo de la ventana de anticipación en ruta
         val currentDistOnRoute = routePoints[nearestIndex].distance
         val routeProgressInWindow = ((currentDistOnRoute % lookaheadDist) / lookaheadDist).coerceIn(0.0, 1.0).toFloat()
 
