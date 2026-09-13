@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="page-title">ALTGRAPH v0.3.0 STABLE - Extensión de Altimetría 3D y Rendimiento por David García Pascual</title>
-    <meta name="description" content="Extensión avanzada para ciclocomputadores Hammerhead Karoo 2 y 3 desarrollada por David García Pascual. Análisis de puertos de montaña, visión 3D en relief, cálculo topográfico, detección de herraduras, fuentes Google Sans Condensed, modo apaisado 90°, alertas de ataque, ritmo VAM e Índice Grado de Fatiga (GF).">
+    <meta name="description" content="Extensión avanzada para ciclocomputadores Hammerhead Karoo 2 y 3 desarrollada por David García Pascual. Análisis de puertos de montaña, visión 3D en relieve, cálculo topográfico, detección de herraduras, fuentes Google Sans Condensed, modo apaisado 90°, alertas de ataque, ritmo VAM e Índice Grado de Fatiga (GF).">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -191,6 +191,37 @@
             background-color: var(--card-bg);
             color: var(--text-main);
             border: 1px solid var(--card-border);
+        }
+
+        /* VIDEO DEMO SECTION */
+        .video-section {
+            max-width: 1100px;
+            margin: 0 auto 50px auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .video-container {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-blue);
+            border-radius: 24px;
+            padding: 20px;
+            max-width: 420px;
+            margin: 0 auto;
+            box-shadow: 0 15px 35px rgba(56, 189, 248, 0.2);
+        }
+
+        .video-container video {
+            width: 100%;
+            border-radius: 16px;
+            display: block;
+        }
+
+        .video-container p {
+            margin-top: 12px;
+            font-weight: 700;
+            color: var(--accent-blue);
+            font-size: 0.95rem;
         }
 
         /* GALLERY SECTION */
@@ -451,6 +482,7 @@
         </div>
         <div class="nav-right">
             <nav class="nav-links">
+                <a href="#video" id="nav-video">Vídeo Demo</a>
                 <a href="#gallery" id="nav-gallery">Capturas</a>
                 <a href="#features" id="nav-fields">Campos</a>
                 <a href="#install" id="nav-install">Instalación</a>
@@ -469,7 +501,7 @@
     <section class="hero">
         <img src="../art/logo.png" onerror="this.onerror=null; this.src='art/logo.png';" alt="ALTGRAPH Logo" class="main-logo">
         <h2 id="hero-title">Domina la montaña con <span>ALTGRAPH v0.3.0 STABLE</span></h2>
-        <p id="hero-desc">Extensión avanzada desarrollada por <strong>David García Pascual</strong>. Análisis dinámico de puertos, perfil 3D en relieve con cálculo topográfico, fuentes Google Sans Condensed, modo apaisado rotado a 90°, lectura triple de pendiente (Actual, Media y Máx), herraduras GPS e <strong>Índice Grado de Fatiga (GF)</strong> para <strong>Hammerhead Karoo 2 y Karoo 3</strong>.</p>
+        <p id="hero-desc">Extensión avanzada desarrollada por <strong>David García Pascual</strong>. Análisis dinámico de puertos, perfil 3D en relief con cálculo topográfico, fuentes Google Sans Condensed, modo apaisado rotado a 90°, lectura triple de pendiente (Actual, Media y Máx), herraduras GPS e <strong>Índice Grado de Fatiga (GF)</strong> para <strong>Hammerhead Karoo 2 y Karoo 3</strong>.</p>
 
         <div class="badges">
             <span class="badge">v0.3.0 Stable Release</span>
@@ -485,13 +517,24 @@
         </div>
     </section>
 
+    <!-- SECCION VIDEO DEMO EN VIVO EN KAROO 3 -->
+    <section class="video-section" id="video">
+        <div class="video-container">
+            <video autoplay loop muted playsinline controls>
+                <source src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/altgraph_demo.mp4" type="video/mp4">
+                Tu navegador no soporta reproducción de vídeo HTML5.
+            </video>
+            <p id="video-label">🎥 Grabación en Pantalla Real de Karoo 3</p>
+        </div>
+    </section>
+
     <!-- GALERIA DE CAPTURAS REALES -->
     <section class="gallery-section" id="gallery">
         <h3 class="gallery-title" id="gallery-main-title">📸 Galería de Capturas en Karoo 3 Real</h3>
         <div class="gallery-grid">
             <div class="gallery-card">
                 <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile.png" alt="Perfil Altimetría 3D">
-                <p id="g1-label">🏔️ Altimetría 3D e Encabezado Triple</p>
+                <p id="g1-label">🏔️ Altimetría 3D y Encabezado Triple</p>
             </div>
             <div class="gallery-card">
                 <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_estilo.png" alt="Pestaña Estilo">
@@ -534,7 +577,7 @@
                 </div>
                 <div class="feature-item">
                     <h4 id="f4-title">🏎️ Curvas de Herradura (Tornanti)</h4>
-                    <p id="f4-desc">Cálculo matemático vectorial GPS de giros cerrados (>120°) con marcas de herradura del 20% en el relieve.</p>
+                    <p id="f4-desc">Cálculo matemático vectorial GPS de giros cerrados (>120°) con marcas de herradura del 20% en el relief.</p>
                 </div>
                 <div class="feature-item">
                     <h4 id="f5-title">📍 Filtro de Puntos de Interés (POIs)</h4>
@@ -650,6 +693,7 @@
         const translations = {
             es: {
                 pageTitle: "ALTGRAPH v0.3.0 STABLE - Extensión de Altimetría 3D y Rendimiento por David García Pascual",
+                navVideo: "Vídeo Demo",
                 navGallery: "Capturas",
                 navFields: "Campos",
                 navInstall: "Instalación",
@@ -657,6 +701,7 @@
                 heroDesc: "Extensión avanzada desarrollada por <strong>David García Pascual</strong>. Análisis dinámico de puertos, perfil 3D en relieve con cálculo topográfico, fuentes Google Sans Condensed, modo apaisado rotado a 90°, lectura triple de pendiente (Actual, Media y Máx), herraduras GPS e <strong>Índice Grado de Fatiga (GF)</strong> para <strong>Hammerhead Karoo 2 y Karoo 3</strong>.",
                 btnDownload: "Descargar APK (v0.3.0)",
                 btnManual: "Ver Manual de Usuario",
+                videoLabel: "🎥 Grabación en Pantalla Real de Karoo 3",
                 galleryMainTitle: "📸 Galería de Capturas en Karoo 3 Real",
                 g1Label: "🏔️ Altimetría 3D y Encabezado Triple",
                 g2Label: "🎨 Panel Pestaña Estilo",
@@ -701,6 +746,7 @@
             },
             en: {
                 pageTitle: "ALTGRAPH v0.3.0 STABLE - 3D Altimetry & Performance Extension by David García Pascual",
+                navVideo: "Demo Video",
                 navGallery: "Screenshots",
                 navFields: "Fields",
                 navInstall: "Installation",
@@ -708,6 +754,7 @@
                 heroDesc: "Advanced extension developed by <strong>David García Pascual</strong>. Dynamic climb analysis, 3D relief profile with topographic calculation, Google Sans Condensed fonts, 90° landscape mode, triple header readout (Live, Avg & Max Slope), GPS hairpins, dual VAM pacing, and <strong>Fatigue Grade (GF) Index</strong> for <strong>Hammerhead Karoo 2 and Karoo 3</strong>.",
                 btnDownload: "Download APK (v0.3.0)",
                 btnManual: "View User Manual",
+                videoLabel: "🎥 Real Karoo 3 Screen Recording",
                 galleryMainTitle: "📸 Real Karoo 3 Screenshots Gallery",
                 g1Label: "🏔️ 3D Altimetry & Triple Header",
                 g2Label: "🎨 Style Tab Settings",
@@ -752,6 +799,7 @@
             },
             fr: {
                 pageTitle: "ALTGRAPH v0.3.0 STABLE - Extension d'Altimétrie 3D et Performance par David García Pascual",
+                navVideo: "Vidéo Démo",
                 navGallery: "Captures",
                 navFields: "Champs",
                 navInstall: "Installation",
@@ -759,6 +807,7 @@
                 heroDesc: "Extension avancée développée par <strong>David García Pascual</strong>. Analyse dynamique des cols, profil 3D en relief avec calcul topographique, polices Google Sans Condensed, mode paysage 90°, affichage triple (Actuelle, Moyenne, Max), virages en épingle GPS, rythme VAM et <strong>Indice de Fatigue (GF)</strong> pour <strong>Hammerhead Karoo 2 et Karoo 3</strong>.",
                 btnDownload: "Télécharger APK (v0.3.0)",
                 btnManual: "Voir Manuel Utilisateur",
+                videoLabel: "🎥 Enregistrement d'Écran sur Karoo 3 Réel",
                 galleryMainTitle: "📸 Galerie de Captures sur Karoo 3 Réel",
                 g1Label: "🏔️ Altimétrie 3D et En-tête Triple",
                 g2Label: "🎨 Panneau Onglet Style",
@@ -803,13 +852,15 @@
             },
             it: {
                 pageTitle: "ALTGRAPH v0.3.0 STABLE - Estensione di Altimetria 3D e Prestazioni di David García Pascual",
+                navVideo: "Video Demo",
                 navGallery: "Screenshot",
                 navFields: "Campi",
                 navInstall: "Installazione",
                 heroTitle: "Domina le salite con <span>ALTGRAPH v0.3.0 STABLE</span>",
-                heroDesc: "Estensione avanzata sviluppata da <strong>David García Pascual</strong>. Analisi dinamica delle salite, profilo 3D in rilievo con calcolo topografico, font Google Sans Condensed, modalità orizzontale 90°, tripla lettura della pendenza (Attuale, Media e Max), tornanti GPS, ritmo VAM e <strong>Indice Grado di Fatica (GF)</strong> per <strong>Hammerhead Karoo 2 e Karoo 3</strong>.",
+                heroDesc: "Estensione avanzata sviluppata da <strong>David García Pascual</strong>. Analisi dinamica delle salite, profilo 3D in rilievo con calcolo topografico, font Google Sans Condensed, modalità orizzontale 90°, tripla lettura della pendenza (Attuale, Media e Max), tornanti GPS, ritmo VAM e <strong>Indice Grado di Fatiga (GF)</strong> per <strong>Hammerhead Karoo 2 e Karoo 3</strong>.",
                 btnDownload: "Scarica APK (v0.3.0)",
                 btnManual: "Vedi Manuale Utente",
+                videoLabel: "🎥 Registrazione Schermo su Karoo 3 Reale",
                 galleryMainTitle: "📸 Galleria di Screenshot su Karoo 3 Reale",
                 g1Label: "🏔️ Altimetria 3D e Tripla Lettura",
                 g2Label: "🎨 Pannello Scheda Stile",
@@ -842,7 +893,7 @@
                 c3Bullets: `<li><strong>Modello Ponderato per Tratti</strong>: DU* ponderata in base agli intervalli di pendenza (0-3%, 3-9%, 9-20%, >20%).</li><li><strong>Fattore Asfalto (TA)</strong>: Configurabile in Molto Buono (0.1), Buono (0.5), Regolare (1.2), Pessimo (1.7).</li><li><strong>Penalizzazione per Rampa Massima</strong>: Aggiunge il fattore PMx / 5 alla difficoltà della salita.</li><li><strong>Classificazione Ufficiale</strong>: Categorizza la salita automaticamente (dalla 5ª Categoria a Fuori Categoria HC).</li>`,
                 c4Title: "Ritmo VAM Obiettivo (Opzione C)",
                 c4Tag: "Dual Pacing Assistant",
-                c4Desc: "Assistente di ritmo per dosare lo sforzo in salita calcolando la velocità raccomandata in km/h in base alla pendenzaattuale.",
+                c4Desc: "Assistente di ritmo per dosare lo sforzo in salita calcolando la velocità raccomandata in km/h in base alla pendenza attuale.",
                 c4Bullets: `<li><strong>Lettura VAM Principale</strong>: VAM istantanea in m/h (es. 850 m/h) + VAM Obiettivo.</li><li><strong>Velocità Raccomandata</strong>: Indica a quale velocità esatta in km/h devi salire (es. 12.5 km/h).</li><li><strong>Badge di Stato</strong>: Pillola colorata che indica 🟢 A RITMO, 🔴 FUORI GIRI o 🔵 SOTTO RITMO.</li><li><strong>Regolazione Personalizzata</strong>: VAM obiettivo regolabile da 500 m/h a 2000 m/h nelle impostazioni.</li>`,
                 c5Title: "Tendenza 3D e Rampa Massima",
                 c5Tag: "Gradient Trend Tracker",
@@ -854,6 +905,7 @@
             },
             de: {
                 pageTitle: "ALTGRAPH v0.3.0 STABLE - 3D Altimetrie & Leistungs-Erweiterung von David García Pascual",
+                navVideo: "Demo-Video",
                 navGallery: "Screenshots",
                 navFields: "Felder",
                 navInstall: "Installation",
@@ -861,6 +913,7 @@
                 heroDesc: "Fortschrittliche Erweiterung, entwickelt von <strong>David García Pascual</strong>. Dynamische Anstiegsanalyse, 3D-Reliefprofil mit topografischer Berechnung, Google Sans Condensed Schriftarten, 90° Querformat, dreifache Steigungsanzeige (Aktuell, Durchschnitt & Max), GPS-Haarnadelkurven, VAM-Pacing und <strong>Ermüdungsgrad (GF) Index</strong> für <strong>Hammerhead Karoo 2 und Karoo 3</strong>.",
                 btnDownload: "APK Herunterladen (v0.3.0)",
                 btnManual: "Benutzerhandbuch ansehen",
+                videoLabel: "🎥 Bildschirmaufnahme auf echtem Karoo 3",
                 galleryMainTitle: "📸 Echte Karoo 3 Screenshots Galerie",
                 g1Label: "🏔️ 3D Altimetrie & Dreifach-Header",
                 g2Label: "🎨 Stil-Tab-Einstellungen",
@@ -898,6 +951,7 @@
                 c5Title: "3D Steigungstrend & Max Ramp",
                 c5Tag: "Gradient Trend Tracker",
                 c5Desc: "Unmittelbarer Steigungstrend-Sensor, der die Verzögerung des barometrischen Höhenmessers eliminiert und die maximale Rampensteilheit aufzeichnet.",
+                c5Bullets: `<li><strong>Kurz-/Langzeit-Stochastikfilter</strong>: Antizipiert, ob die Steigung steiler oder flacher wird.</li><li><strong>Visuelle Indikatoren</strong>: Vektorpfeile (↗️ WIRD STEILER, ➔ KONSTANT, ↘️ WIRD FLACHER).</li><li><strong>Maximaler Rampen-Peak</strong>: Zeichnet den steilsten erreichten %-Wert im Abschnitt auf und behält ihn bei.</li>`,
                 installTitle: "🚀 Schnelle Installation auf Ihrem Hammerhead Karoo",
                 installSteps: `<li>Verbinden Sie Ihren Hammerhead Karoo 2 oder Karoo 3 über ein USB-Kabel mit aktiviertem <strong>USB-Debugging</strong> mit dem Computer.</li><li>Laden Sie die neueste Datei <code>ALTGRAPH-v0.3.0.apk</code> aus unserem GitHub-Repository herunter.</li><li>Führen Sie den Befehl in Ihrem Terminal aus: <code>adb install -r ALTGRAPH-v0.3.0.apk</code></li><li>Gehen Sie auf Ihrem Karoo zu <strong>Einstellungen &gt; Fahrprofile</strong>, bearbeiten Sie eine Datenseite und fügen Sie Felder aus der Kategorie <strong>ALTGRAPH</strong> hinzu.</li><li>Öffnen Sie das <strong>ALTGRAPH-Einstellungspanel</strong> (in Tabs organisiert) aus Ihrem Karoo-App-Launcher, um alle Einstellungen anzupassen.</li>`,
                 footerText: `ALTGRAPH v0.3.0 STABLE &bull; Entwickelt von David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Quellcode auf GitHub</a>`
@@ -909,6 +963,7 @@
             if (!t) return;
 
             document.getElementById('page-title').innerText = t.pageTitle;
+            if (document.getElementById('nav-video')) document.getElementById('nav-video').innerText = t.navVideo;
             document.getElementById('nav-gallery').innerText = t.navGallery;
             document.getElementById('nav-fields').innerText = t.navFields;
             document.getElementById('nav-install').innerText = t.navInstall;
@@ -918,6 +973,7 @@
             document.getElementById('btn-download').innerText = t.btnDownload;
             document.getElementById('btn-manual').innerText = t.btnManual;
 
+            if (document.getElementById('video-label')) document.getElementById('video-label').innerText = t.videoLabel;
             document.getElementById('gallery-main-title').innerText = t.galleryMainTitle;
             document.getElementById('g1-label').innerText = t.g1Label;
             document.getElementById('g2-label').innerText = t.g2Label;
