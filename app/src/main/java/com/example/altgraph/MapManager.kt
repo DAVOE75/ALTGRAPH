@@ -30,8 +30,8 @@ object MapManager {
 
     const val CNIG_PORTAL_URL = "https://centrodedescargas.cnig.es/CentroDescargas/mapas-moviles"
 
-    // Servidor espejo HTTP 200 OK directo de descarga de mapas vectoriales
-    private const val BASE_MAP_URL = "https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/USER_MANUAL.md"
+    // Enlace de descarga directa del paquete de mapas topográficos vectoriales HD reales (1,2 GB a 3,4 GB)
+    private const val BASE_MAP_URL = "https://ftp.snt.utwente.nl/pub/misc/openandromaps/maps/europe/Spain_Portugal.zip"
 
     val PROVINCES = listOf(
         ProvinceMapInfo("Álava", BASE_MAP_URL),
@@ -134,6 +134,25 @@ object MapManager {
         return result
     }
 
+    fun deleteInstalledMapPackage(path: String): Boolean {
+        return try {
+            val file = File(path)
+            if (file.exists()) file.delete() else false
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun deleteAllInstalledMaps(context: Context): Int {
+        var count = 0
+        getInstalledMaps(context).forEach { pkg ->
+            if (deleteInstalledMapPackage(pkg.path)) {
+                count++
+            }
+        }
+        return count
+    }
+
     fun installDownloadedMapsFromStorage(): Int {
         var movedCount = 0
         val targetDir = MAP_DIRS[0]
@@ -148,7 +167,7 @@ object MapManager {
             if (dDir.exists() && dDir.isDirectory) {
                 dDir.listFiles()?.forEach { f ->
                     val name = f.name.lowercase()
-                    if (name.endsWith(".mbtiles") || name.endsWith(".map") || name.endsWith(".zip") || name.endsWith(".md")) {
+                    if (name.endsWith(".mbtiles") || name.endsWith(".map") || name.endsWith(".zip")) {
                         val destFile = File(targetDir, f.name)
                         try {
                             if (f.renameTo(destFile) || f.copyTo(destFile, overwrite = true).exists()) {
@@ -194,12 +213,12 @@ object MapManager {
                     return@launch
                 }
 
-                val totalBytes = connection.contentLengthLong.let { if (it > 0) it else 35_000_000L }
+                val totalBytes = connection.contentLengthLong.let { if (it > 0) it else 1_200_000_000L } // ~1,2 GB
                 var downloadedBytes = 0L
 
                 val inputStream = connection.inputStream
                 val outputStream = FileOutputStream(targetFile)
-                val buffer = ByteArray(8192)
+                val buffer = ByteArray(16384)
                 var bytesRead: Int
 
                 while (inputStream.read(buffer).also { bytesRead = it } != -1) {
@@ -236,11 +255,14 @@ object MapManager {
     }
 
     fun formatBytes(bytes: Long): String {
-        val mb = bytes / (1024.0 * 1024.0)
-        return if (mb >= 1024) {
-            "%.2f GB".format(mb / 1024.0)
-        } else {
-            "%.1f MB".format(mb)
+        val kb = bytes / 1024.0
+        val mb = kb / 1024.0
+        val gb = mb / 1024.0
+        return when {
+            gb >= 1.0 -> "%.2f GB".format(gb)
+            mb >= 1.0 -> "%.1f MB".format(mb)
+            kb >= 1.0 -> "%.1f KB".format(kb)
+            else -> "$bytes B"
         }
     }
 }
