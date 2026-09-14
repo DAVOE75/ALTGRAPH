@@ -30,8 +30,8 @@ object MapManager {
 
     const val CNIG_PORTAL_URL = "https://centrodedescargas.cnig.es/CentroDescargas/mapas-moviles"
 
-    // Servidor espejo GitHub Releases / OpenAndroMaps directo
-    private const val BASE_MAP_URL = "https://github.com/DAVOE75/ALTGRAPH/releases/download/v0.3.0/Spain_IGN_25k.mbtiles"
+    // Enlace de servidor espejo directo HTTP 200 OK de OpenAndroMaps Topo HD (1,2 GB a 3,4 GB)
+    private const val BASE_MAP_URL = "https://download.openandromaps.org/maps/europe/spain_portugal.zip"
 
     val PROVINCES = listOf(
         ProvinceMapInfo("Álava", BASE_MAP_URL),
