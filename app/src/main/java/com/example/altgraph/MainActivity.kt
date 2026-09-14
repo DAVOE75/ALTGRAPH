@@ -1,6 +1,7 @@
 package com.example.altgraph
 
 import android.app.Activity
+import android.app.DownloadManager
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
@@ -12,17 +13,25 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.abs
 
 class MainActivity : Activity() {
 
     private lateinit var prefs: AppPreferences
+    private val scope = CoroutineScope(Dispatchers.Main)
+    private var downloadJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -690,6 +699,30 @@ class MainActivity : Activity() {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
+        val downloadProgressBar = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
+            isIndeterminate = false
+            max = 100
+            progress = 0
+            visibility = View.GONE
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                24
+            ).apply {
+                topMargin = 8
+                bottomMargin = 4
+            }
+        }
+
+        val downloadStatusText = TextView(this).apply {
+            text = ""
+            textSize = 12f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(Color.parseColor("#38BDF8"))
+            gravity = Gravity.CENTER
+            visibility = View.GONE
+            setPadding(0, 2, 0, 8)
+        }
+
         val downloadIgnBtn = Button(this).apply {
             text = "🌐 Descargar e Instalar Mapa IGN 1:25.000"
             textSize = 14f
@@ -709,12 +742,53 @@ class MainActivity : Activity() {
             }
             setOnClickListener {
                 try {
-                    MapManager.downloadProvinceMap(this@MainActivity, selectedProvince)
-                    Toast.makeText(
-                        this@MainActivity,
-                        "Iniciando descarga en segundo plano del Mapa IGN de ${selectedProvince.name} en /sdcard/Maps/",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    val downloadId = MapManager.downloadProvinceMap(this@MainActivity, selectedProvince)
+                    downloadProgressBar.visibility = View.VISIBLE
+                    downloadProgressBar.progress = 0
+                    downloadStatusText.visibility = View.VISIBLE
+                    downloadStatusText.text = "⏬ Iniciando descarga de ${selectedProvince.name}..."
+                    downloadStatusText.setTextColor(Color.parseColor("#38BDF8"))
+
+                    val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+                    
+                    downloadJob?.cancel()
+                    downloadJob = scope.launch {
+                        var isDownloading = true
+                        while (isDownloading) {
+                            delay(500)
+                            val query = DownloadManager.Query().setFilterById(downloadId)
+                            val cursor = downloadManager.query(query)
+                            if (cursor != null && cursor.moveToFirst()) {
+                                val bytesDownloadedIdx = cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
+                                val bytesTotalIdx = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
+                                val statusIdx = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
+
+                                if (bytesDownloadedIdx >= 0 && bytesTotalIdx >= 0) {
+                                    val bytesDownloaded = cursor.getLong(bytesDownloadedIdx)
+                                    val bytesTotal = cursor.getLong(bytesTotalIdx)
+                                    val status = cursor.getInt(statusIdx)
+
+                                    if (bytesTotal > 0) {
+                                        val progressPct = ((bytesDownloaded * 100L) / bytesTotal).toInt()
+                                        downloadProgressBar.progress = progressPct
+                                        downloadStatusText.text = "⏬ Descargando ${selectedProvince.name}: $progressPct% (${MapManager.formatBytes(bytesDownloaded)} / ${MapManager.formatBytes(bytesTotal)})"
+                                    }
+
+                                    if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                                        isDownloading = false
+                                        downloadProgressBar.progress = 100
+                                        downloadStatusText.text = "✅ ¡Descarga e Instalación Completada en /sdcard/Maps/!"
+                                        downloadStatusText.setTextColor(Color.parseColor("#22C55E"))
+                                    } else if (status == DownloadManager.STATUS_FAILED) {
+                                        isDownloading = false
+                                        downloadStatusText.text = "❌ Error en la descarga"
+                                        downloadStatusText.setTextColor(Color.parseColor("#EF4444"))
+                                    }
+                                }
+                                cursor.close()
+                            }
+                        }
+                    }
                 } catch (e: Exception) {
                     Toast.makeText(
                         this@MainActivity,
@@ -763,6 +837,8 @@ class MainActivity : Activity() {
         ignCard.addView(ignTitleLabel)
         ignCard.addView(provinceSpinner)
         ignCard.addView(downloadIgnBtn)
+        ignCard.addView(downloadProgressBar)
+        ignCard.addView(downloadStatusText)
         ignCard.addView(autoInstallBtn)
 
         // Tarjeta 2: Botón Destacado de Importación Directa de Archivos Locales
