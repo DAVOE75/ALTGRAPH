@@ -708,18 +708,62 @@ class MainActivity : Activity() {
                 bottomMargin = 6
             }
             setOnClickListener {
-                MapManager.downloadProvinceMap(this@MainActivity, selectedProvince)
-                Toast.makeText(
-                    this@MainActivity,
-                    "Iniciando descarga del Mapa IGN 1:25.000 de ${selectedProvince.name}...",
-                    Toast.LENGTH_LONG
-                ).show()
+                try {
+                    MapManager.downloadProvinceMap(this@MainActivity, selectedProvince)
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Iniciando descarga en segundo plano del Mapa IGN de ${selectedProvince.name} en /sdcard/Maps/",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Iniciando descarga en segundo plano...",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+
+        val autoInstallBtn = Button(this).apply {
+            text = "⚡ Instalar Mapas Descargados en /sdcard/Maps/"
+            textSize = 13f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(Color.WHITE)
+            background = GradientDrawable().apply {
+                setColor(Color.parseColor("#22C55E"))
+                cornerRadius = 18f
+            }
+            setPadding(14, 12, 14, 12)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = 4
+                bottomMargin = 4
+            }
+            setOnClickListener {
+                val moved = MapManager.installDownloadedMapsFromStorage()
+                if (moved > 0) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "¡Éxito! $moved archivo(s) instalados correctamente en /sdcard/Maps/",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Comprobando /sdcard/Maps/...",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
             }
         }
 
         ignCard.addView(ignTitleLabel)
         ignCard.addView(provinceSpinner)
         ignCard.addView(downloadIgnBtn)
+        ignCard.addView(autoInstallBtn)
 
         // Tarjeta 2: Botón Destacado de Importación Directa de Archivos Locales
         val importMapCard = createCardContainer()

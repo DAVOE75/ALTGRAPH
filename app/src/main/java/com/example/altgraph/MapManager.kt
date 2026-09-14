@@ -108,6 +108,35 @@ object MapManager {
         return result
     }
 
+    fun installDownloadedMapsFromStorage(): Int {
+        var movedCount = 0
+        val targetDir = MAP_DIRS[0]
+        if (!targetDir.exists()) targetDir.mkdirs()
+
+        val downloadDirs = listOf(
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+            File(Environment.getExternalStorageDirectory(), "Download")
+        )
+
+        downloadDirs.forEach { dDir ->
+            if (dDir.exists() && dDir.isDirectory) {
+                dDir.listFiles()?.forEach { f ->
+                    val name = f.name.lowercase()
+                    if (name.endsWith(".mbtiles") || name.endsWith(".map") || name.endsWith(".zip")) {
+                        val destFile = File(targetDir, f.name)
+                        try {
+                            if (f.renameTo(destFile) || f.copyTo(destFile, overwrite = true).exists()) {
+                                movedCount++
+                                if (f.exists()) f.delete()
+                            }
+                        } catch (e: Exception) {}
+                    }
+                }
+            }
+        }
+        return movedCount
+    }
+
     fun downloadProvinceMap(context: Context, province: ProvinceMapInfo): Long {
         val mapsDir = MAP_DIRS.firstOrNull { it.exists() } ?: MAP_DIRS[0]
         if (!mapsDir.exists()) {
