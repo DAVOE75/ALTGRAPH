@@ -746,7 +746,7 @@ class MainActivity : Activity() {
                     downloadProgressBar.visibility = View.VISIBLE
                     downloadProgressBar.progress = 0
                     downloadStatusText.visibility = View.VISIBLE
-                    downloadStatusText.text = "⏬ Iniciando descarga de ${selectedProvince.name}..."
+                    downloadStatusText.text = "⏬ Conectando servidor IGN para ${selectedProvince.name}..."
                     downloadStatusText.setTextColor(Color.parseColor("#38BDF8"))
 
                     val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
@@ -762,6 +762,7 @@ class MainActivity : Activity() {
                                 val bytesDownloadedIdx = cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
                                 val bytesTotalIdx = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
                                 val statusIdx = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
+                                val reasonIdx = cursor.getColumnIndex(DownloadManager.COLUMN_REASON)
 
                                 if (bytesDownloadedIdx >= 0 && bytesTotalIdx >= 0) {
                                     val bytesDownloaded = cursor.getLong(bytesDownloadedIdx)
@@ -772,6 +773,8 @@ class MainActivity : Activity() {
                                         val progressPct = ((bytesDownloaded * 100L) / bytesTotal).toInt()
                                         downloadProgressBar.progress = progressPct
                                         downloadStatusText.text = "⏬ Descargando ${selectedProvince.name}: $progressPct% (${MapManager.formatBytes(bytesDownloaded)} / ${MapManager.formatBytes(bytesTotal)})"
+                                    } else if (bytesDownloaded > 0) {
+                                        downloadStatusText.text = "⏬ Descargando ${selectedProvince.name}: ${MapManager.formatBytes(bytesDownloaded)}"
                                     }
 
                                     if (status == DownloadManager.STATUS_SUCCESSFUL) {
@@ -781,7 +784,8 @@ class MainActivity : Activity() {
                                         downloadStatusText.setTextColor(Color.parseColor("#22C55E"))
                                     } else if (status == DownloadManager.STATUS_FAILED) {
                                         isDownloading = false
-                                        downloadStatusText.text = "❌ Error en la descarga"
+                                        val reasonCode = if (reasonIdx >= 0) cursor.getInt(reasonIdx) else 0
+                                        downloadStatusText.text = "❌ Error $reasonCode. Revisa conexión WiFi del Karoo."
                                         downloadStatusText.setTextColor(Color.parseColor("#EF4444"))
                                     }
                                 }
