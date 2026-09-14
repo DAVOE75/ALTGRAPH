@@ -660,27 +660,56 @@ class MainActivity : Activity() {
         // ==========================================
         // PESTAÑA 5: 🗺️ CARTOGRAFÍA Y MAPAS PERSONALIZADOS (BikeSpot / OpenAndroMaps / OSM)
         // ==========================================
-        val mapCard = createCardContainer()
-        val mapTitleLabel = createSectionLabel(getString(R.string.setting_custom_maps_title))
+        
+        // Tarjeta 1: Botón Destacado de Importación Directa de Mapas
+        val importMapCard = createCardContainer()
+        val importTitleLabel = createSectionLabel("📂 IMPORTACIÓN DIRECTA DE MAPAS")
+        val importMapBtn = Button(this).apply {
+            text = "📂 Importar Mapa (.mbtiles / .map)"
+            textSize = 15f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(Color.BLACK)
+            background = GradientDrawable().apply {
+                setColor(Color.parseColor("#38BDF8"))
+                cornerRadius = 18f
+            }
+            setPadding(18, 16, 18, 16)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = 8
+                bottomMargin = 8
+            }
+            setOnClickListener {
+                Toast.makeText(this@MainActivity, "Copia tus archivos .mbtiles o .map a la carpeta /sdcard/Maps/ de tu Karoo", Toast.LENGTH_LONG).show()
+            }
+        }
+        importMapCard.addView(importTitleLabel)
+        importMapCard.addView(importMapBtn)
+
+        // Tarjeta 2: Estado de Almacenamiento y Ajustes de Capa
+        val mapStatusCard = createCardContainer()
+        val mapStatusTitleLabel = createSectionLabel(getString(R.string.setting_custom_maps_title))
         val mapDescText = TextView(this).apply {
             text = getString(R.string.setting_custom_maps_desc)
-            textSize = 12f
+            textSize = 11f
             setTextColor(Color.parseColor("#A1A1AA"))
             gravity = Gravity.CENTER
-            setPadding(0, 4, 0, 12)
+            setPadding(0, 2, 0, 8)
         }
 
         val freeStorage = MapManager.getFreeStorageBytes()
-        val storageInfoText = createValueText("💾 Espacio Disponible: ${MapManager.formatBytes(freeStorage)}")
+        val storageInfoText = createValueText("💾 Espacio Libres: ${MapManager.formatBytes(freeStorage)}")
 
         val installedMaps = MapManager.getInstalledMaps(this)
         val installedCountText = TextView(this).apply {
-            text = "🗺️ Paquetes de Mapas Instalados: ${installedMaps.size}"
+            text = "🗺️ Mapas Instalados: ${installedMaps.size}"
             textSize = 14f
             typeface = Typeface.DEFAULT_BOLD
             setTextColor(Color.WHITE)
             gravity = Gravity.CENTER
-            setPadding(0, 0, 0, 12)
+            setPadding(0, 0, 0, 8)
         }
 
         val switchMapOverlay = Switch(this).apply {
@@ -693,18 +722,14 @@ class MainActivity : Activity() {
             }
         }
 
-        val importMapBtn = createActionButton("📂 Importar Mapa (.mbtiles / .map)") {
-            Toast.makeText(this, "Copia tus archivos .mbtiles o .map directamente a la carpeta /sdcard/Maps/ de tu Karoo", Toast.LENGTH_LONG).show()
-        }
+        mapStatusCard.addView(mapStatusTitleLabel)
+        mapStatusCard.addView(mapDescText)
+        mapStatusCard.addView(storageInfoText)
+        mapStatusCard.addView(installedCountText)
+        mapStatusCard.addView(switchMapOverlay)
 
-        mapCard.addView(mapTitleLabel)
-        mapCard.addView(mapDescText)
-        mapCard.addView(storageInfoText)
-        mapCard.addView(installedCountText)
-        mapCard.addView(switchMapOverlay)
-        mapCard.addView(importMapBtn)
-
-        tabMapasContainer.addView(mapCard)
+        tabMapasContainer.addView(importMapCard)
+        tabMapasContainer.addView(mapStatusCard)
 
         // Botón de Guardar y Salir Fijado al Final
         val saveExitButton = Button(this).apply {
