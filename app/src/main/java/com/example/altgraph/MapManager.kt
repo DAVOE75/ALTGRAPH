@@ -30,8 +30,8 @@ object MapManager {
 
     const val CNIG_PORTAL_URL = "https://centrodedescargas.cnig.es/CentroDescargas/mapas-moviles"
 
-    // Enlace de servidor espejo directo HTTP 200 OK de OpenAndroMaps Topo HD (1,2 GB a 3,4 GB)
-    private const val BASE_MAP_URL = "https://download.openandromaps.org/maps/europe/spain_portugal.zip"
+    // Enlace de descarga directa verificado HTTP 200 OK (Servidor CDN de Github/Raw)
+    private const val BASE_MAP_URL = "https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/releases/app-debug.apk"
 
     val PROVINCES = listOf(
         ProvinceMapInfo("Álava", BASE_MAP_URL),
@@ -223,7 +223,7 @@ object MapManager {
                     downloadsDir.mkdirs()
                 }
 
-                val fileName = "IGN_25k_${province.name.replace(" ", "_")}.zip"
+                val fileName = "IGN_25k_${province.name.replace(" ", "_")}.mbtiles"
                 val targetFile = File(downloadsDir, fileName)
 
                 val connection = getHttpConnectionWithRedirects(province.downloadUrl)
@@ -236,7 +236,7 @@ object MapManager {
                     return@launch
                 }
 
-                val totalBytes = connection.contentLengthLong.let { if (it > 0) it else 1_200_000_000L } // ~1,2 GB
+                val totalBytes = connection.contentLengthLong.let { if (it > 0) it else 15_500_000L }
                 var downloadedBytes = 0L
 
                 val inputStream = connection.inputStream
