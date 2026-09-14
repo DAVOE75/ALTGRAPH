@@ -6,6 +6,8 @@ import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.Rect
+import android.graphics.RectF
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.View
@@ -38,7 +40,7 @@ class AltgraphMapView @JvmOverloads constructor(
 
     private val roadPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#38BDF8")
-        strokeWidth = 8f
+        strokeWidth = 10f
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
@@ -115,20 +117,28 @@ class AltgraphMapView @JvmOverloads constructor(
 
         if (w <= 0 || h <= 0) return
 
-        // 1. Fondo Topográfico
-        canvas.drawRect(0f, 0f, w, h, bgPaint)
+        // 1. Dibujar Teselas Vectoriales Reales .mbtiles si están instaladas en /sdcard/Maps/
+        val tileBitmap = MbtilesTileReader.getTileBitmapForLocation(currentLat, currentLng)
+        if (tileBitmap != null) {
+            val srcRect = Rect(0, 0, tileBitmap.width, tileBitmap.height)
+            val dstRect = RectF(0f, 0f, w, h)
+            canvas.drawBitmap(tileBitmap, srcRect, dstRect, null)
+        } else {
+            // Fondo Topográfico Vectorial de Respaldo
+            canvas.drawRect(0f, 0f, w, h, bgPaint)
 
-        // 2. Curvas de Nivel Topográficas HD
-        val numContours = 6
-        for (i in 1..numContours) {
-            val cy = h * (i.toFloat() / (numContours + 1))
-            roadPath.reset()
-            roadPath.moveTo(0f, cy + sin(i * 1.5).toFloat() * 20f)
-            roadPath.quadTo(w / 2f, cy - 30f, w, cy + cos(i * 1.5).toFloat() * 20f)
-            canvas.drawPath(roadPath, contourLinePaint)
+            // Curvas de Nivel Topográficas HD a Pantalla Completa
+            val numContours = if (h > 400f) 12 else 6
+            for (i in 1..numContours) {
+                val cy = h * (i.toFloat() / (numContours + 1))
+                roadPath.reset()
+                roadPath.moveTo(0f, cy + sin(i * 1.5).toFloat() * 25f)
+                roadPath.quadTo(w / 2f, cy - 35f, w, cy + cos(i * 1.5).toFloat() * 25f)
+                canvas.drawPath(roadPath, contourLinePaint)
+            }
         }
 
-        // 3. Trazado de la Carretera / Ruta GPS
+        // 2. Trazado Vectorial de la Carretera / Ruta GPS
         if (routePolylinePoints.size >= 2) {
             roadPath.reset()
             val startPt = routePolylinePoints.first()
@@ -138,46 +148,46 @@ class AltgraphMapView @JvmOverloads constructor(
 
             for (idx in 1 until routePolylinePoints.size) {
                 val pt = routePolylinePoints[idx]
-                val px = startX + ((pt.second - startPt.second) * 12000.0).toFloat().coerceIn(0f, w * 0.8f)
-                val py = startY - ((pt.first - startPt.first) * 12000.0).toFloat().coerceIn(0f, h * 0.7f)
+                val px = startX + ((pt.second - startPt.second) * 14000.0).toFloat().coerceIn(0f, w * 0.85f)
+                val py = startY - ((pt.first - startPt.first) * 14000.0).toFloat().coerceIn(0f, h * 0.8f)
                 roadPath.lineTo(px, py)
             }
             canvas.drawPath(roadPath, roadPaint)
         }
 
-        // 4. Faro del Ciclista en Posición GPS Activa
-        val rx = w * 0.45f
-        val ry = h * 0.55f
-        canvas.drawCircle(rx, ry, 28f, riderHaloPaint)
-        canvas.drawCircle(rx, ry, 12f, riderBeaconPaint)
+        // 3. Faro del Ciclista en Posición GPS Activa
+        val rx = w * 0.50f
+        val ry = h * 0.50f
+        canvas.drawCircle(rx, ry, 32f, riderHaloPaint)
+        canvas.drawCircle(rx, ry, 14f, riderBeaconPaint)
 
         // Flecha de Dirección de Marcha
         arrowPath.reset()
-        arrowPath.moveTo(rx, ry - 14f)
-        arrowPath.lineTo(rx - 7f, ry + 6f)
-        arrowPath.lineTo(rx, ry + 2f)
-        arrowPath.lineTo(rx + 7f, ry + 6f)
+        arrowPath.moveTo(rx, ry - 16f)
+        arrowPath.lineTo(rx - 8f, ry + 8f)
+        arrowPath.lineTo(rx, ry + 3f)
+        arrowPath.lineTo(rx + 8f, ry + 8f)
         arrowPath.close()
         canvas.drawPath(arrowPath, arrowPaint)
 
-        // 5. Encabezado e Insignia Topográfica Superior
-        titleTextPaint.textSize = (h * 0.085f).coerceIn(16f, 26f)
-        canvas.drawText("🗺️ MAPA TOPO ALTGRAPH", 16f, h * 0.12f, titleTextPaint)
+        // 4. Encabezado e Insignia Topográfica Superior
+        titleTextPaint.textSize = (h * 0.055f).coerceIn(16f, 26f)
+        canvas.drawText("🗺️ MAPA TOPO ALTGRAPH", 20f, h * 0.08f, titleTextPaint)
 
         val speedText = "%.1f km/h".format(currentSpeedKmh)
         val elevText = "${currentElevation.toInt()} m"
-        infoTextPaint.textSize = (h * 0.075f).coerceIn(14f, 22f)
-        canvas.drawText("$speedText  •  $elevText", 16f, h * 0.22f, infoTextPaint)
+        infoTextPaint.textSize = (h * 0.045f).coerceIn(14f, 22f)
+        canvas.drawText("$speedText  •  $elevText", 20f, h * 0.14f, infoTextPaint)
 
-        // 6. Escala Gráfica de Distancia (200m)
+        // 5. Escala Gráfica de Distancia (200m)
         val scaleW = w * 0.25f
-        val scaleX = w - scaleW - 16f
-        val scaleY = h - 20f
+        val scaleX = w - scaleW - 20f
+        val scaleY = h - 25f
         canvas.drawLine(scaleX, scaleY, scaleX + scaleW, scaleY, gridPaint)
         canvas.drawLine(scaleX, scaleY - 6f, scaleX, scaleY + 6f, gridPaint)
         canvas.drawLine(scaleX + scaleW, scaleY - 6f, scaleX + scaleW, scaleY + 6f, gridPaint)
 
-        infoTextPaint.textSize = (h * 0.050f).coerceIn(10f, 14f)
+        infoTextPaint.textSize = (h * 0.035f).coerceIn(10f, 14f)
         canvas.drawText("200 m", scaleX + (scaleW / 4f), scaleY - 6f, infoTextPaint)
     }
 }
