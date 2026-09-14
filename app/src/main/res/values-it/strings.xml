@@ -58,7 +58,7 @@
     <string name="setting_poi_viewpoints">📸 Punti Panoramici</string>
     <string name="setting_poi_summits">📡 Vette e Passi</string>
     <string name="setting_show_3d_zoom">Attiva Controlli Zoom Tattile (🔍) sul Grafico 3D</string>
-    <string name="setting_custom_maps_title">Gestore di Cartografia Personalizzata (BikeSpot / OSM)</string>
+    <string name="setting_custom_maps_title">Gestore di Cartografia Personalizzata</string>
     <string name="setting_custom_maps_desc">Rileva e importa pacchetti di mappe vettoriali offline ad alta definizione (.mbtiles / .map) per Karoo</string>
     <string name="font_normal">Normale</string>
     <string name="font_large">Grande</string>

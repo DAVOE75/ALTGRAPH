@@ -87,31 +87,37 @@ object MapManager {
     private val MAP_DIRS = listOf(
         File(Environment.getExternalStorageDirectory(), "Maps"),
         File(Environment.getExternalStorageDirectory(), "Hammerhead/maps"),
+        File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), ""),
+        File(Environment.getExternalStorageDirectory(), "Download"),
         File(Environment.getExternalStorageDirectory(), "Android/data/io.hammerhead.rideapp/files/maps")
     )
 
     fun getInstalledMaps(context: Context): List<MapPackage> {
         val result = mutableListOf<MapPackage>()
+        val processedNames = mutableSetOf<String>()
 
         MAP_DIRS.forEach { dir ->
             if (dir.exists() && dir.isDirectory) {
                 dir.listFiles()?.forEach { file ->
-                    val name = file.name.lowercase()
-                    if (name.endsWith(".mbtiles") || name.endsWith(".map") || name.endsWith(".zip")) {
-                        val format = when {
-                            name.endsWith(".mbtiles") -> "MBTiles (IGN 1:25.000 / BikeSpot)"
-                            name.endsWith(".map") -> "Mapsforge (OpenAndroMaps)"
-                            else -> "Archive Package"
-                        }
-                        result.add(
-                            MapPackage(
-                                name = file.name,
-                                sizeBytes = file.length(),
-                                path = file.absolutePath,
-                                format = format,
-                                isCustom = true
+                    if (!processedNames.contains(file.name)) {
+                        processedNames.add(file.name)
+                        val name = file.name.lowercase()
+                        if (name.endsWith(".mbtiles") || name.endsWith(".map") || name.endsWith(".zip")) {
+                            val format = when {
+                                name.endsWith(".mbtiles") -> "MBTiles Vector HD Map"
+                                name.endsWith(".map") -> "Mapsforge Vector Map"
+                                else -> "Archive Map Package"
+                            }
+                            result.add(
+                                MapPackage(
+                                    name = file.name,
+                                    sizeBytes = file.length(),
+                                    path = file.absolutePath,
+                                    format = format,
+                                    isCustom = true
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }

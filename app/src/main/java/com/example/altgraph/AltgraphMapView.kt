@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.Path
-import android.graphics.RectF
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.view.View
@@ -60,17 +59,6 @@ class AltgraphMapView @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
 
-    private val badgeBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#E018181B")
-        style = Paint.Style.FILL
-    }
-
-    private val badgeBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#38BDF8")
-        strokeWidth = 2f
-        style = Paint.Style.STROKE
-    }
-
     private val titleTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         typeface = Typeface.DEFAULT_BOLD
@@ -96,7 +84,6 @@ class AltgraphMapView @JvmOverloads constructor(
 
     private val roadPath = Path()
     private val arrowPath = Path()
-    private val badgeRect = RectF()
 
     fun updateMapData(
         lat: Double,

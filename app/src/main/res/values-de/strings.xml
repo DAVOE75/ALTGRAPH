@@ -58,7 +58,7 @@
     <string name="setting_poi_viewpoints">📸 Aussichtspunkte</string>
     <string name="setting_poi_summits">📡 Gipfel &amp; Pässe</string>
     <string name="setting_show_3d_zoom">Touch-Zoom-Steuerung (🔍) im 3D-Diagramm aktivieren</string>
-    <string name="setting_custom_maps_title">Benutzerdefinierte Kartografie-Verwaltung (BikeSpot / OSM)</string>
+    <string name="setting_custom_maps_title">Benutzerdefinierte Kartografie-Verwaltung</string>
     <string name="setting_custom_maps_desc">Erkennt und importiert hochauflösende Vektorkarten-Pakete (.mbtiles / .map) für Karoo</string>
     <string name="font_normal">Normal</string>
     <string name="font_large">Groß</string>
