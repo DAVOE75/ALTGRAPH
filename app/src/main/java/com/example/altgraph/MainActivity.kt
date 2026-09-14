@@ -661,25 +661,85 @@ class MainActivity : Activity() {
         // PESTAÑA 5: 🗺️ CARTOGRAFÍA Y MAPAS PERSONALIZADOS (BikeSpot / OpenAndroMaps / OSM)
         // ==========================================
         
-        // Tarjeta 1: Botón Destacado de Importación Directa de Mapas
-        val importMapCard = createCardContainer()
-        val importTitleLabel = createSectionLabel("📂 IMPORTACIÓN DIRECTA DE MAPAS")
-        val importMapBtn = Button(this).apply {
-            text = "📂 Importar Mapa (.mbtiles / .map)"
-            textSize = 15f
+        // Tarjeta 1: Descarga Directa IGN 1:25.000 por Provincias (50 Provincias de España)
+        val ignCard = createCardContainer()
+        val ignTitleLabel = createSectionLabel("🌐 DESCARGA DIRECTA IGN 1:25.000 POR PROVINCIA")
+        
+        val provinceSpinner = Spinner(this).apply {
+            val adapter = ArrayAdapter(
+                this@MainActivity,
+                android.R.layout.simple_spinner_dropdown_item,
+                MapManager.PROVINCES.map { "🗺️ Provincia de ${it.name}" }
+            )
+            setAdapter(adapter)
+
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = 4
+                bottomMargin = 8
+            }
+        }
+
+        var selectedProvince = MapManager.PROVINCES[0]
+        provinceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedProvince = MapManager.PROVINCES[position]
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        val downloadIgnBtn = Button(this).apply {
+            text = "🌐 Descargar e Instalar Mapa IGN 1:25.000"
+            textSize = 14f
             typeface = Typeface.DEFAULT_BOLD
             setTextColor(Color.BLACK)
             background = GradientDrawable().apply {
                 setColor(Color.parseColor("#38BDF8"))
                 cornerRadius = 18f
             }
-            setPadding(18, 16, 18, 16)
+            setPadding(16, 14, 16, 14)
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply {
-                topMargin = 8
-                bottomMargin = 8
+                topMargin = 6
+                bottomMargin = 6
+            }
+            setOnClickListener {
+                MapManager.downloadProvinceMap(this@MainActivity, selectedProvince)
+                Toast.makeText(
+                    this@MainActivity,
+                    "Iniciando descarga del Mapa IGN 1:25.000 de ${selectedProvince.name}...",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+
+        ignCard.addView(ignTitleLabel)
+        ignCard.addView(provinceSpinner)
+        ignCard.addView(downloadIgnBtn)
+
+        // Tarjeta 2: Botón Destacado de Importación Directa de Archivos Locales
+        val importMapCard = createCardContainer()
+        val importTitleLabel = createSectionLabel("📂 IMPORTACIÓN DIRECTA DE ARCHIVOS LOCALES")
+        val importMapBtn = Button(this).apply {
+            text = "📂 Importar Mapa Local (.mbtiles / .map)"
+            textSize = 14f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(Color.WHITE)
+            background = GradientDrawable().apply {
+                setColor(Color.parseColor("#27272A"))
+                cornerRadius = 18f
+            }
+            setPadding(16, 12, 16, 12)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = 4
+                bottomMargin = 4
             }
             setOnClickListener {
                 Toast.makeText(this@MainActivity, "Copia tus archivos .mbtiles o .map a la carpeta /sdcard/Maps/ de tu Karoo", Toast.LENGTH_LONG).show()
@@ -688,7 +748,7 @@ class MainActivity : Activity() {
         importMapCard.addView(importTitleLabel)
         importMapCard.addView(importMapBtn)
 
-        // Tarjeta 2: Estado de Almacenamiento y Ajustes de Capa
+        // Tarjeta 3: Estado de Almacenamiento y Ajustes de Capa
         val mapStatusCard = createCardContainer()
         val mapStatusTitleLabel = createSectionLabel(getString(R.string.setting_custom_maps_title))
         val mapDescText = TextView(this).apply {
@@ -728,6 +788,7 @@ class MainActivity : Activity() {
         mapStatusCard.addView(installedCountText)
         mapStatusCard.addView(switchMapOverlay)
 
+        tabMapasContainer.addView(ignCard)
         tabMapasContainer.addView(importMapCard)
         tabMapasContainer.addView(mapStatusCard)
 
