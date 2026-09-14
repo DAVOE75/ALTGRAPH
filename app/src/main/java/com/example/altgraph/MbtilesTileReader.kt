@@ -5,6 +5,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Environment
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.zip.ZipInputStream
 import kotlin.math.PI
 import kotlin.math.floor
 import kotlin.math.ln
@@ -16,11 +19,45 @@ object MbtilesTileReader {
         val mapsDir = File(Environment.getExternalStorageDirectory(), "Maps")
         if (!mapsDir.exists() || !mapsDir.isDirectory) return null
 
-        val mbtilesFiles = mapsDir.listFiles()?.filter { it.name.lowercase().endsWith(".mbtiles") }
-        if (mbtilesFiles.isNullOrEmpty()) return null
+        val allFiles = mapsDir.listFiles() ?: return null
 
-        val mbtilesFile = mbtilesFiles.first()
+        // Descomprimir automáticamente cualquier archivo .zip presente en /sdcard/Maps/
+        allFiles.filter { it.name.lowercase().endsWith(".zip") }.forEach { zipFile ->
+            try {
+                val zis = ZipInputStream(FileInputStream(zipFile))
+                var entry = zis.nextEntry
+                while (entry != null) {
+                    val entryName = entry.name.lowercase()
+                    if (entryName.endsWith(".mbtiles") || entryName.endsWith(".map")) {
+                        val outFile = File(mapsDir, File(entry.name).name)
+                        if (!outFile.exists()) {
+                            val fos = FileOutputStream(outFile)
+                            zis.copyTo(fos)
+                            fos.flush()
+                            fos.close()
+                        }
+                    }
+                    zis.closeEntry()
+                    entry = zis.nextEntry
+                }
+                zis.close()
+            } catch (e: Exception) {}
+        }
 
+        val mapFiles = mapsDir.listFiles()?.filter {
+            val n = it.name.lowercase()
+            n.endsWith(".mbtiles") || n.endsWith(".map")
+        }
+        if (mapFiles.isNullOrEmpty()) return null
+
+        val mapFile = mapFiles.first()
+        if (mapFile.name.lowercase().endsWith(".mbtiles")) {
+            return readFromMbtilesDatabase(mapFile, lat, lng, zoom)
+        }
+        return null
+    }
+
+    private fun readFromMbtilesDatabase(mbtilesFile: File, lat: Double, lng: Double, zoom: Int): Bitmap? {
         return try {
             val db = SQLiteDatabase.openDatabase(mbtilesFile.absolutePath, null, SQLiteDatabase.OPEN_READONLY)
             val tileX = floor((lng + 180.0) / 360.0 * (1 shl zoom)).toInt()
