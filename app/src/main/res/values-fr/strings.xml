@@ -9,6 +9,9 @@
     <string name="data_type_altimetria_3d_title">Altimétrie 3D</string>
     <string name="data_type_altimetria_3d_desc">Profil 3D en perspective isométrique avec relief de pente</string>
 
+    <string name="data_type_altgraph_map_title">Carte Topo ALTGRAPH</string>
+    <string name="data_type_altgraph_map_desc">Carte topographique vectorielle HD avec ombrage du relief et balise cycliste</string>
+
     <string name="data_type_fatigue_grade_title">Indice de Fatigue (GF)</string>
     <string name="data_type_fatigue_grade_desc">Indice scientifique de difficulté et fatigue de la montée</string>
 

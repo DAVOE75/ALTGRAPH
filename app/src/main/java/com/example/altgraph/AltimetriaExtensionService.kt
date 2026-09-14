@@ -9,6 +9,7 @@ class AltimetriaExtensionService : KarooExtension("altgraph", "0.3.0") {
         get() = listOf(
             AltimetriaGraphDataType("altgraph"),
             Altimetria3DGraphDataType("altgraph"),
+            AltgraphMapDataField("altgraph"),
             FatigueGradeDataField("altgraph"),
             ClimbPacingDataField("altgraph"),
             GradientTrendDataField("altgraph")

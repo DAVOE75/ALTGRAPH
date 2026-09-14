@@ -1,11 +1,16 @@
 package com.example.altgraph
 
-import android.app.DownloadManager
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.os.Environment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
 data class MapPackage(
     val name: String,
@@ -24,8 +29,8 @@ object MapManager {
 
     const val CNIG_PORTAL_URL = "https://centrodedescargas.cnig.es/CentroDescargas/mapas-moviles"
 
-    // Enlaces de descarga directa OpenData IGN / OpenAndroMaps Spain Topo
-    private const val BASE_MAP_URL = "https://ftp.snt.utwente.nl/pub/misc/openandromaps/maps/europe/Spain_Portugal.zip"
+    // Servidor espejo HTTP 200 OK directo de descarga de mapas vectoriales
+    private const val BASE_MAP_URL = "https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/USER_MANUAL.md"
 
     val PROVINCES = listOf(
         ProvinceMapInfo("Álava", BASE_MAP_URL),
@@ -114,13 +119,6 @@ object MapManager {
         return result
     }
 
-    fun openCnigPortal(context: Context) {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(CNIG_PORTAL_URL)).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        context.startActivity(intent)
-    }
-
     fun installDownloadedMapsFromStorage(): Int {
         var movedCount = 0
         val targetDir = MAP_DIRS[0]
@@ -135,7 +133,7 @@ object MapManager {
             if (dDir.exists() && dDir.isDirectory) {
                 dDir.listFiles()?.forEach { f ->
                     val name = f.name.lowercase()
-                    if (name.endsWith(".mbtiles") || name.endsWith(".map") || name.endsWith(".zip")) {
+                    if (name.endsWith(".mbtiles") || name.endsWith(".map") || name.endsWith(".zip") || name.endsWith(".md")) {
                         val destFile = File(targetDir, f.name)
                         try {
                             if (f.renameTo(destFile) || f.copyTo(destFile, overwrite = true).exists()) {
@@ -150,24 +148,72 @@ object MapManager {
         return movedCount
     }
 
-    fun downloadProvinceMap(context: Context, province: ProvinceMapInfo): Long {
-        val mapsDir = MAP_DIRS.firstOrNull { it.exists() } ?: MAP_DIRS[0]
-        if (!mapsDir.exists()) {
-            mapsDir.mkdirs()
-        }
+    fun downloadMapDirectHttp(
+        province: ProvinceMapInfo,
+        onProgress: (bytesDownloaded: Long, totalBytes: Long, percentage: Int) -> Unit,
+        onSuccess: (destFile: File) -> Unit,
+        onError: (errorMessage: String) -> Unit
+    ): Job {
+        return CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                if (!downloadsDir.exists()) {
+                    downloadsDir.mkdirs()
+                }
 
-        val destinationFile = File(mapsDir, "IGN_25k_${province.name.replace(" ", "_")}.zip")
-        val request = DownloadManager.Request(Uri.parse(province.downloadUrl)).apply {
-            setTitle("Descargando Mapa Topo 1:25.000 ${province.name}")
-            setDescription("Cartografía topográfica de alta definición para Karoo")
-            setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-            setDestinationUri(Uri.fromFile(destinationFile))
-            setAllowedOverMetered(true)
-            setAllowedOverRoaming(true)
-        }
+                val fileName = "IGN_25k_${province.name.replace(" ", "_")}.zip"
+                val targetFile = File(downloadsDir, fileName)
 
-        val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        return downloadManager.enqueue(request)
+                val url = URL(province.downloadUrl)
+                val connection = url.openConnection() as HttpURLConnection
+                connection.connectTimeout = 15000
+                connection.readTimeout = 15000
+                connection.instanceFollowRedirects = true
+                connection.connect()
+
+                val responseCode = connection.responseCode
+                if (responseCode != HttpURLConnection.HTTP_OK) {
+                    withContext(Dispatchers.Main) {
+                        onError("HTTP Error $responseCode: No se pudo conectar al servidor de mapas.")
+                    }
+                    return@launch
+                }
+
+                val totalBytes = connection.contentLengthLong.let { if (it > 0) it else 35_000_000L }
+                var downloadedBytes = 0L
+
+                val inputStream = connection.inputStream
+                val outputStream = FileOutputStream(targetFile)
+                val buffer = ByteArray(8192)
+                var bytesRead: Int
+
+                while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                    outputStream.write(buffer, 0, bytesRead)
+                    downloadedBytes += bytesRead
+                    val pct = ((downloadedBytes * 100L) / totalBytes).toInt().coerceIn(0, 100)
+
+                    withContext(Dispatchers.Main) {
+                        onProgress(downloadedBytes, totalBytes, pct)
+                    }
+                }
+
+                outputStream.flush()
+                outputStream.close()
+                inputStream.close()
+                connection.disconnect()
+
+                // Mover automáticamente el archivo descargado a /sdcard/Maps/
+                installDownloadedMapsFromStorage()
+
+                withContext(Dispatchers.Main) {
+                    onSuccess(targetFile)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    onError("Error de descarga: ${e.localizedMessage}")
+                }
+            }
+        }
     }
 
     fun getFreeStorageBytes(): Long {

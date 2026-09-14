@@ -1,7 +1,6 @@
 package com.example.altgraph
 
 import android.app.Activity
-import android.app.DownloadManager
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
@@ -22,8 +21,6 @@ import android.widget.Toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.abs
 
@@ -741,65 +738,29 @@ class MainActivity : Activity() {
                 bottomMargin = 6
             }
             setOnClickListener {
-                try {
-                    val downloadId = MapManager.downloadProvinceMap(this@MainActivity, selectedProvince)
-                    downloadProgressBar.visibility = View.VISIBLE
-                    downloadProgressBar.progress = 0
-                    downloadStatusText.visibility = View.VISIBLE
-                    downloadStatusText.text = "⏬ Conectando servidor IGN para ${selectedProvince.name}..."
-                    downloadStatusText.setTextColor(Color.parseColor("#38BDF8"))
+                downloadProgressBar.visibility = View.VISIBLE
+                downloadProgressBar.progress = 0
+                downloadStatusText.visibility = View.VISIBLE
+                downloadStatusText.text = "⏬ Conectando servidor de mapas para ${selectedProvince.name}..."
+                downloadStatusText.setTextColor(Color.parseColor("#38BDF8"))
 
-                    val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
-                    
-                    downloadJob?.cancel()
-                    downloadJob = scope.launch {
-                        var isDownloading = true
-                        while (isDownloading) {
-                            delay(500)
-                            val query = DownloadManager.Query().setFilterById(downloadId)
-                            val cursor = downloadManager.query(query)
-                            if (cursor != null && cursor.moveToFirst()) {
-                                val bytesDownloadedIdx = cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)
-                                val bytesTotalIdx = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES)
-                                val statusIdx = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
-                                val reasonIdx = cursor.getColumnIndex(DownloadManager.COLUMN_REASON)
-
-                                if (bytesDownloadedIdx >= 0 && bytesTotalIdx >= 0) {
-                                    val bytesDownloaded = cursor.getLong(bytesDownloadedIdx)
-                                    val bytesTotal = cursor.getLong(bytesTotalIdx)
-                                    val status = cursor.getInt(statusIdx)
-
-                                    if (bytesTotal > 0) {
-                                        val progressPct = ((bytesDownloaded * 100L) / bytesTotal).toInt()
-                                        downloadProgressBar.progress = progressPct
-                                        downloadStatusText.text = "⏬ Descargando ${selectedProvince.name}: $progressPct% (${MapManager.formatBytes(bytesDownloaded)} / ${MapManager.formatBytes(bytesTotal)})"
-                                    } else if (bytesDownloaded > 0) {
-                                        downloadStatusText.text = "⏬ Descargando ${selectedProvince.name}: ${MapManager.formatBytes(bytesDownloaded)}"
-                                    }
-
-                                    if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                                        isDownloading = false
-                                        downloadProgressBar.progress = 100
-                                        downloadStatusText.text = "✅ ¡Descarga e Instalación Completada en /sdcard/Maps/!"
-                                        downloadStatusText.setTextColor(Color.parseColor("#22C55E"))
-                                    } else if (status == DownloadManager.STATUS_FAILED) {
-                                        isDownloading = false
-                                        val reasonCode = if (reasonIdx >= 0) cursor.getInt(reasonIdx) else 0
-                                        downloadStatusText.text = "❌ Error $reasonCode. Revisa conexión WiFi del Karoo."
-                                        downloadStatusText.setTextColor(Color.parseColor("#EF4444"))
-                                    }
-                                }
-                                cursor.close()
-                            }
-                        }
+                downloadJob?.cancel()
+                downloadJob = MapManager.downloadMapDirectHttp(
+                    province = selectedProvince,
+                    onProgress = { bytesDownloaded, totalBytes, percentage ->
+                        downloadProgressBar.progress = percentage
+                        downloadStatusText.text = "⏬ Descargando ${selectedProvince.name}: $percentage% (${MapManager.formatBytes(bytesDownloaded)} / ${MapManager.formatBytes(totalBytes)})"
+                    },
+                    onSuccess = { destFile ->
+                        downloadProgressBar.progress = 100
+                        downloadStatusText.text = "✅ ¡Descarga e Instalación Completada en /sdcard/Maps/!"
+                        downloadStatusText.setTextColor(Color.parseColor("#22C55E"))
+                    },
+                    onError = { errorMsg ->
+                        downloadStatusText.text = "❌ $errorMsg"
+                        downloadStatusText.setTextColor(Color.parseColor("#EF4444"))
                     }
-                } catch (e: Exception) {
-                    Toast.makeText(
-                        this@MainActivity,
-                        "Iniciando descarga en segundo plano...",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
+                )
             }
         }
 

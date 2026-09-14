@@ -9,6 +9,9 @@
     <string name="data_type_altimetria_3d_title">Altimetría 3D</string>
     <string name="data_type_altimetria_3d_desc">Perfil de altimetría e itinerario en perspectiva isométrica 3D con pendientes en relieve</string>
 
+    <string name="data_type_altgraph_map_title">Mapa Topográfico ALTGRAPH</string>
+    <string name="data_type_altgraph_map_desc">Mapa vectorial topográfico HD con sombreado de relieve, curvas de nivel y faro del ciclista</string>
+
     <string name="data_type_fatigue_grade_title">Grado de Fatiga (GF)</string>
     <string name="data_type_fatigue_grade_desc">Índice científico de Grado de Fatiga y dureza para clasificación de puertos</string>
 
