@@ -1,6 +1,7 @@
 package com.example.altgraph
 
 import android.content.Context
+import android.net.ConnectivityManager
 import android.os.Environment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -91,6 +92,14 @@ object MapManager {
         File(Environment.getExternalStorageDirectory(), "Download"),
         File(Environment.getExternalStorageDirectory(), "Android/data/io.hammerhead.rideapp/files/maps")
     )
+
+    fun isNetworkAvailable(context: Context): Boolean {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+        @Suppress("DEPRECATION")
+        val activeNetwork = cm?.activeNetworkInfo
+        @Suppress("DEPRECATION")
+        return activeNetwork != null && activeNetwork.isConnected
+    }
 
     fun getInstalledMaps(context: Context): List<MapPackage> {
         val result = mutableListOf<MapPackage>()

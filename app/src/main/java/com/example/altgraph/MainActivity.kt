@@ -720,6 +720,42 @@ class MainActivity : Activity() {
             setPadding(0, 2, 0, 8)
         }
 
+        // Tarjeta 3: Estado de Almacenamiento y Ajustes de Capa
+        val mapStatusCard = createCardContainer()
+        val mapStatusTitleLabel = createSectionLabel(getString(R.string.setting_custom_maps_title))
+        val mapDescText = TextView(this).apply {
+            text = getString(R.string.setting_custom_maps_desc)
+            textSize = 11f
+            setTextColor(Color.parseColor("#A1A1AA"))
+            gravity = Gravity.CENTER
+            setPadding(0, 2, 0, 8)
+        }
+
+        val freeStorage = MapManager.getFreeStorageBytes()
+        val storageInfoText = createValueText("💾 Espacio Libres: ${MapManager.formatBytes(freeStorage)}")
+
+        fun refreshInstalledMapsText(): String {
+            val installedMaps = MapManager.getInstalledMaps(this@MainActivity)
+            return if (installedMaps.isEmpty()) {
+                "🗺️ Mapas Instalados: 0"
+            } else {
+                val namesList = installedMaps.joinToString("\n") { mapPkg ->
+                    val sizeStr = MapManager.formatBytes(mapPkg.sizeBytes)
+                    "• ${mapPkg.name} ($sizeStr)"
+                }
+                "🗺️ Mapas Instalados: ${installedMaps.size}\n$namesList"
+            }
+        }
+
+        val installedCountText = TextView(this).apply {
+            text = refreshInstalledMapsText()
+            textSize = 13f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(Color.WHITE)
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 8)
+        }
+
         val downloadIgnBtn = Button(this).apply {
             text = "🌐 Descargar e Instalar Mapa IGN 1:25.000"
             textSize = 14f
@@ -738,6 +774,13 @@ class MainActivity : Activity() {
                 bottomMargin = 6
             }
             setOnClickListener {
+                if (!MapManager.isNetworkAvailable(this@MainActivity)) {
+                    downloadStatusText.visibility = View.VISIBLE
+                    downloadStatusText.text = "⚠️ Por favor conecta tu Karoo 3 a una red Wi-Fi para descargar mapas."
+                    downloadStatusText.setTextColor(Color.parseColor("#EAB308"))
+                    return@setOnClickListener
+                }
+
                 downloadProgressBar.visibility = View.VISIBLE
                 downloadProgressBar.progress = 0
                 downloadStatusText.visibility = View.VISIBLE
@@ -753,7 +796,8 @@ class MainActivity : Activity() {
                     },
                     onSuccess = { destFile ->
                         downloadProgressBar.progress = 100
-                        downloadStatusText.text = "✅ ¡Descarga e Instalación Completada en /sdcard/Maps/!"
+                        installedCountText.text = refreshInstalledMapsText()
+                        downloadStatusText.text = "✅ ¡Descarga e Instalación Completada en /sdcard/Maps/!\n${destFile.name}"
                         downloadStatusText.setTextColor(Color.parseColor("#22C55E"))
                     },
                     onError = { errorMsg ->
@@ -783,6 +827,7 @@ class MainActivity : Activity() {
             }
             setOnClickListener {
                 val moved = MapManager.installDownloadedMapsFromStorage()
+                installedCountText.text = refreshInstalledMapsText()
                 if (moved > 0) {
                     Toast.makeText(
                         this@MainActivity,
@@ -832,30 +877,6 @@ class MainActivity : Activity() {
         }
         importMapCard.addView(importTitleLabel)
         importMapCard.addView(importMapBtn)
-
-        // Tarjeta 3: Estado de Almacenamiento y Ajustes de Capa
-        val mapStatusCard = createCardContainer()
-        val mapStatusTitleLabel = createSectionLabel(getString(R.string.setting_custom_maps_title))
-        val mapDescText = TextView(this).apply {
-            text = getString(R.string.setting_custom_maps_desc)
-            textSize = 11f
-            setTextColor(Color.parseColor("#A1A1AA"))
-            gravity = Gravity.CENTER
-            setPadding(0, 2, 0, 8)
-        }
-
-        val freeStorage = MapManager.getFreeStorageBytes()
-        val storageInfoText = createValueText("💾 Espacio Libres: ${MapManager.formatBytes(freeStorage)}")
-
-        val installedMaps = MapManager.getInstalledMaps(this)
-        val installedCountText = TextView(this).apply {
-            text = "🗺️ Mapas Instalados: ${installedMaps.size}"
-            textSize = 14f
-            typeface = Typeface.DEFAULT_BOLD
-            setTextColor(Color.WHITE)
-            gravity = Gravity.CENTER
-            setPadding(0, 0, 0, 8)
-        }
 
         val switchMapOverlay = Switch(this).apply {
             text = "Activar Capa de Mapa Vectorial HD en Karoo"
