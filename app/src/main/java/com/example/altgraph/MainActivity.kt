@@ -70,7 +70,7 @@ class MainActivity : Activity() {
         headerCard.addView(title)
         headerCard.addView(subtitle)
 
-        // 2. Bar de Pestañas Categorizadas
+        // 2. Bar de Pestañas Categorizadas (5 Pestañas)
         val tabBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(
@@ -81,20 +81,22 @@ class MainActivity : Activity() {
             }
         }
 
-        // Contenedores de las 4 Pestañas
+        // Contenedores de las 5 Pestañas
         val tabEstiloContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val tab3dContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val tab2dContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val tabVamContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val tabMapasContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
 
         val tabContainers = listOf(
             tabEstiloContainer,
             tab3dContainer,
             tab2dContainer,
-            tabVamContainer
+            tabVamContainer,
+            tabMapasContainer
         )
 
-        val tabTitles = listOf("🎨 Estilo", "🏔️ 3D", "📊 2D", "🚴 VAM")
+        val tabTitles = listOf("🎨 Estilo", "🏔️ 3D", "📊 2D", "🚴 VAM", "🗺️ Mapas")
         val tabButtons = mutableListOf<Button>()
 
         fun selectTab(activeIdx: Int) {
@@ -121,12 +123,12 @@ class MainActivity : Activity() {
         tabTitles.forEachIndexed { idx, titleStr ->
             val btn = Button(this).apply {
                 text = titleStr
-                textSize = 12f
+                textSize = 11f
                 typeface = Typeface.DEFAULT_BOLD
-                setPadding(4, 12, 4, 12)
+                setPadding(2, 12, 2, 12)
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f).apply {
-                    leftMargin = 3
-                    rightMargin = 3
+                    leftMargin = 2
+                    rightMargin = 2
                 }
                 setOnClickListener { selectTab(idx) }
             }
@@ -655,6 +657,55 @@ class MainActivity : Activity() {
         tabVamContainer.addView(vamCard)
         tabVamContainer.addView(asphaltCard)
 
+        // ==========================================
+        // PESTAÑA 5: 🗺️ CARTOGRAFÍA Y MAPAS PERSONALIZADOS (BikeSpot / OpenAndroMaps / OSM)
+        // ==========================================
+        val mapCard = createCardContainer()
+        val mapTitleLabel = createSectionLabel(getString(R.string.setting_custom_maps_title))
+        val mapDescText = TextView(this).apply {
+            text = getString(R.string.setting_custom_maps_desc)
+            textSize = 12f
+            setTextColor(Color.parseColor("#A1A1AA"))
+            gravity = Gravity.CENTER
+            setPadding(0, 4, 0, 12)
+        }
+
+        val freeStorage = MapManager.getFreeStorageBytes()
+        val storageInfoText = createValueText("💾 Espacio Disponible: ${MapManager.formatBytes(freeStorage)}")
+
+        val installedMaps = MapManager.getInstalledMaps(this)
+        val installedCountText = TextView(this).apply {
+            text = "🗺️ Paquetes de Mapas Instalados: ${installedMaps.size}"
+            textSize = 14f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(Color.WHITE)
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 12)
+        }
+
+        val switchMapOverlay = Switch(this).apply {
+            text = "Activar Capa de Mapa Vectorial HD en Karoo"
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.showCustomMapOverlay
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.showCustomMapOverlay = isChecked
+            }
+        }
+
+        val importMapBtn = createActionButton("📂 Importar Mapa (.mbtiles / .map)") {
+            Toast.makeText(this, "Copia tus archivos .mbtiles o .map directamente a la carpeta /sdcard/Maps/ de tu Karoo", Toast.LENGTH_LONG).show()
+        }
+
+        mapCard.addView(mapTitleLabel)
+        mapCard.addView(mapDescText)
+        mapCard.addView(storageInfoText)
+        mapCard.addView(installedCountText)
+        mapCard.addView(switchMapOverlay)
+        mapCard.addView(importMapBtn)
+
+        tabMapasContainer.addView(mapCard)
+
         // Botón de Guardar y Salir Fijado al Final
         val saveExitButton = Button(this).apply {
             text = "💾 " + getString(R.string.btn_save_and_exit)
@@ -685,6 +736,7 @@ class MainActivity : Activity() {
         rootLayout.addView(tab3dContainer)
         rootLayout.addView(tab2dContainer)
         rootLayout.addView(tabVamContainer)
+        rootLayout.addView(tabMapasContainer)
         rootLayout.addView(saveExitButton)
 
         scrollView.addView(rootLayout)

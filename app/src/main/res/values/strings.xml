@@ -55,6 +55,8 @@
     <string name="setting_poi_viewpoints">📸 Viewpoints</string>
     <string name="setting_poi_summits">📡 Summits &amp; Passes</string>
     <string name="setting_show_3d_zoom">Enable Touch Zoom Controls (🔍) on 3D Graph</string>
+    <string name="setting_custom_maps_title">Custom Cartography &amp; Map Packages Manager (BikeSpot / OSM)</string>
+    <string name="setting_custom_maps_desc">Scans and imports high-definition vector offline map packages (.mbtiles / .map) with contour lines and hydrography for Karoo</string>
     <string name="font_normal">Normal</string>
     <string name="font_large">Large</string>
     <string name="font_xl">XL</string>
