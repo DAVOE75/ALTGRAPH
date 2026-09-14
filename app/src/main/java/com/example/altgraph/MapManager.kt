@@ -30,8 +30,8 @@ object MapManager {
 
     const val CNIG_PORTAL_URL = "https://centrodedescargas.cnig.es/CentroDescargas/mapas-moviles"
 
-    // Enlace de servidor espejo directo HTTP 200 OK de OpenAndroMaps Topo HD (1,2 GB a 3,4 GB)
-    private const val BASE_MAP_URL = "https://download.openandromaps.org/maps/europe/Spain_Portugal.zip"
+    // Servidor espejo GitHub Releases / OpenAndroMaps directo
+    private const val BASE_MAP_URL = "https://github.com/DAVOE75/ALTGRAPH/releases/download/v0.3.0/Spain_IGN_25k.mbtiles"
 
     val PROVINCES = listOf(
         ProvinceMapInfo("Álava", BASE_MAP_URL),
@@ -182,6 +182,34 @@ object MapManager {
         return movedCount
     }
 
+    private fun getHttpConnectionWithRedirects(initialUrl: String): HttpURLConnection {
+        var currentUrl = initialUrl
+        var redirects = 0
+        while (redirects < 5) {
+            val url = URL(currentUrl)
+            val conn = url.openConnection() as HttpURLConnection
+            conn.connectTimeout = 15000
+            conn.readTimeout = 15000
+            conn.instanceFollowRedirects = true
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 11; Karoo3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36")
+            conn.setRequestProperty("Accept", "*/*")
+            conn.connect()
+
+            val code = conn.responseCode
+            if (code == HttpURLConnection.HTTP_MOVED_PERM || code == HttpURLConnection.HTTP_MOVED_TEMP || code == 307 || code == 308) {
+                val loc = conn.getHeaderField("Location")
+                if (!loc.isNullOrEmpty()) {
+                    currentUrl = loc
+                    conn.disconnect()
+                    redirects++
+                    continue
+                }
+            }
+            return conn
+        }
+        return (URL(currentUrl).openConnection() as HttpURLConnection)
+    }
+
     fun downloadMapDirectHttp(
         province: ProvinceMapInfo,
         onProgress: (bytesDownloaded: Long, totalBytes: Long, percentage: Int) -> Unit,
@@ -198,18 +226,12 @@ object MapManager {
                 val fileName = "IGN_25k_${province.name.replace(" ", "_")}.zip"
                 val targetFile = File(downloadsDir, fileName)
 
-                val url = URL(province.downloadUrl)
-                val connection = url.openConnection() as HttpURLConnection
-                connection.connectTimeout = 15000
-                connection.readTimeout = 15000
-                connection.instanceFollowRedirects = true
-                connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Android; Karoo)")
-                connection.connect()
+                val connection = getHttpConnectionWithRedirects(province.downloadUrl)
 
                 val responseCode = connection.responseCode
-                if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_MOVED_TEMP && responseCode != HttpURLConnection.HTTP_MOVED_PERM) {
+                if (responseCode != HttpURLConnection.HTTP_OK) {
                     withContext(Dispatchers.Main) {
-                        onError("HTTP Error $responseCode: No se pudo conectar al servidor de mapas.")
+                        onError("HTTP Error $responseCode: Servidor de mapas no disponible.")
                     }
                     return@launch
                 }
