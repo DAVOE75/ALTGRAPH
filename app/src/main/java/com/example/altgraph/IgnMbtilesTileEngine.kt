@@ -25,10 +25,17 @@ object IgnMbtilesTileEngine {
 
     private val MAP_SEARCH_DIRS = listOf(
         File("/sdcard/offline/maps"),
-        File("/storage/emulated/0/offline/maps"),
-        File(Environment.getExternalStorageDirectory(), "offline/maps"),
+        File("/sdcard/maps"),
         File("/sdcard/Maps"),
-        File(Environment.getExternalStorageDirectory(), "Maps")
+        File("/sdcard/offline/Maps"),
+        File("/storage/emulated/0/offline/maps"),
+        File("/storage/emulated/0/maps"),
+        File("/storage/emulated/0/Maps"),
+        File(Environment.getExternalStorageDirectory(), "offline/maps"),
+        File(Environment.getExternalStorageDirectory(), "maps"),
+        File(Environment.getExternalStorageDirectory(), "Maps"),
+        File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), ""),
+        File(Environment.getExternalStorageDirectory(), "Download")
     )
 
     fun getInstalledIgnMaps(context: Context): List<IgnMapInfo> {
@@ -36,9 +43,49 @@ object IgnMbtilesTileEngine {
         val processedPaths = mutableSetOf<String>()
         val activeMapName = AppPreferences.getInstance(context).customMapProvider
 
+        val explicitCandidateFiles = listOf(
+            File("/sdcard/offline/maps/murcia_sureste.mbtiles"),
+            File("/sdcard/offline/maps/granada_este.mbtiles"),
+            File("/sdcard/offline/maps/albacete_sur.mbtiles"),
+            File("/sdcard/offline/maps/murcia_suroeste.mbtiles"),
+            File("/sdcard/offline/maps/alacant_oeste.mbtiles"),
+            File("/sdcard/offline/maps/albacete_este.mbtiles"),
+            File("/sdcard/offline/maps/murcia_noroeste.mbtiles"),
+            File("/sdcard/offline/maps/albacete_oeste.mbtiles"),
+            File("/sdcard/offline/maps/murcia_noreste.mbtiles"),
+            File("/sdcard/offline/maps/almeria_norte.mbtiles"),
+            File("/storage/emulated/0/offline/maps/murcia_sureste.mbtiles"),
+            File("/storage/emulated/0/offline/maps/granada_este.mbtiles"),
+            File("/storage/emulated/0/offline/maps/albacete_sur.mbtiles"),
+            File("/storage/emulated/0/offline/maps/murcia_suroeste.mbtiles"),
+            File("/storage/emulated/0/offline/maps/alacant_oeste.mbtiles"),
+            File("/storage/emulated/0/offline/maps/albacete_este.mbtiles"),
+            File("/storage/emulated/0/offline/maps/murcia_noroeste.mbtiles"),
+            File("/storage/emulated/0/offline/maps/albacete_oeste.mbtiles"),
+            File("/storage/emulated/0/offline/maps/murcia_noreste.mbtiles"),
+            File("/storage/emulated/0/offline/maps/almeria_norte.mbtiles")
+        )
+
+        explicitCandidateFiles.forEach { file ->
+            if (file.exists() && file.isFile && !processedPaths.contains(file.name.lowercase())) {
+                processedPaths.add(file.name.lowercase())
+                val isActive = file.name.equals(activeMapName, ignoreCase = true) || (activeMapName.isEmpty() && result.isEmpty())
+                result.add(
+                    IgnMapInfo(
+                        fileName = file.name,
+                        filePath = file.absolutePath,
+                        sizeBytes = file.length(),
+                        isActive = isActive
+                    )
+                )
+            }
+        }
+
         MAP_SEARCH_DIRS.forEach { dir ->
             if (dir.exists() && dir.isDirectory) {
-                dir.listFiles()?.forEach { file ->
+                val fileNames = dir.list()
+                fileNames?.forEach { fileName ->
+                    val file = File(dir, fileName)
                     if (file.isFile && file.name.lowercase().endsWith(".mbtiles") && !processedPaths.contains(file.name.lowercase())) {
                         processedPaths.add(file.name.lowercase())
                         val isActive = file.name.equals(activeMapName, ignoreCase = true) || (activeMapName.isEmpty() && result.isEmpty())
