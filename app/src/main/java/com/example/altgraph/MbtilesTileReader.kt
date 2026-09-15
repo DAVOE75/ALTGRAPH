@@ -41,7 +41,6 @@ object MbtilesTileReader {
 
         if (mbtilesFiles.isEmpty()) return null
 
-        // 1. Probar primero el mapa seleccionado como preferido en AppPreferences
         val prefs = AppPreferences.getInstance(context)
         val selectedMapName = prefs.customMapProvider
 
@@ -51,7 +50,6 @@ object MbtilesTileReader {
             if (bmp != null) return bmp
         }
 
-        // 2. Probar en orden todos los archivos .mbtiles encontrados (Soporte Multi-Fichero Provincial)
         mbtilesFiles.forEach { file ->
             val bmp = readFromMbtilesDatabase(file, lat, lng, zoom)
             if (bmp != null) return bmp
@@ -69,7 +67,7 @@ object MbtilesTileReader {
             var targetLng = inputLng
             var targetZoom = inputZoom
 
-            // 1. Cobertura geográfica desde la tabla metadata
+            // 1. Obtener la cobertura geográfica del archivo .mbtiles desde su tabla metadata
             try {
                 val boundsCursor = db.rawQuery("SELECT value FROM metadata WHERE name = 'bounds'", null)
                 if (boundsCursor.moveToFirst()) {
@@ -90,7 +88,7 @@ object MbtilesTileReader {
                 boundsCursor.close()
             } catch (e: Exception) {}
 
-            // 2. Zoom disponible
+            // 2. Obtener los niveles de zoom disponibles
             try {
                 val zoomCursor = db.rawQuery("SELECT MIN(zoom_level), MAX(zoom_level) FROM tiles", null)
                 if (zoomCursor.moveToFirst()) {
@@ -103,7 +101,7 @@ object MbtilesTileReader {
                 zoomCursor.close()
             } catch (e: Exception) {}
 
-            // 3. Coordenadas de tesela TMS y OSM
+            // 3. Coordenadas de tesela
             val tileX = floor((targetLng + 180.0) / 360.0 * (1 shl targetZoom)).toInt()
             val latRad = Math.toRadians(targetLat)
             val tileYOsm = floor((1.0 - ln(tan(latRad) + 1.0 / cos(latRad)) / PI) / 2.0 * (1 shl targetZoom)).toInt()
@@ -188,9 +186,9 @@ object MbtilesTileReader {
         val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        val bgPaint = Paint().apply { color = Color.parseColor("#0F172A"); style = Paint.Style.FILL }
-        val contourPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#334155"); strokeWidth = 2f; style = Paint.Style.STROKE }
-        val roadPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#38BDF8"); strokeWidth = 6f; style = Paint.Style.STROKE }
+        val bgPaint = Paint().apply { color = Color.parseColor("#F8FAFC"); style = Paint.Style.FILL }
+        val contourPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#CBD5E1"); strokeWidth = 2f; style = Paint.Style.STROKE }
+        val roadPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#0284C7"); strokeWidth = 8f; style = Paint.Style.STROKE }
 
         canvas.drawRect(0f, 0f, w.toFloat(), h.toFloat(), bgPaint)
 
@@ -206,7 +204,7 @@ object MbtilesTileReader {
             canvas.drawPath(path, contourPaint)
         }
 
-        roadPaint.strokeWidth = 8f
+        roadPaint.strokeWidth = 10f
         path.reset()
         path.moveTo(w * 0.2f, h.toFloat())
         path.cubicTo(w * 0.3f, h * 0.6f, w * 0.7f, h * 0.4f, w * 0.8f, 0f)

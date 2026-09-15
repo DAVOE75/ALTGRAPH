@@ -10,8 +10,6 @@ import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.util.AttributeSet
-import android.view.MotionEvent
-import android.view.ScaleGestureDetector
 import android.view.View
 import kotlin.math.cos
 import kotlin.math.sin
@@ -22,37 +20,26 @@ class AltgraphMapView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private var mapZoomFactor = 1.0f
-
-    private val scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-        override fun onScale(detector: ScaleGestureDetector): Boolean {
-            mapZoomFactor *= detector.scaleFactor
-            mapZoomFactor = mapZoomFactor.coerceIn(0.5f, 5.0f)
-            postInvalidate()
-            return true
-        }
-    })
-
     private val bgPaint = Paint().apply {
-        color = Color.parseColor("#09090B")
+        color = Color.parseColor("#F8FAFC") // Fondo Claro Topográfico Cream/Slate
         style = Paint.Style.FILL
     }
 
     private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#1F2937")
+        color = Color.parseColor("#64748B")
         strokeWidth = 1.5f
         style = Paint.Style.STROKE
     }
 
     private val contourLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#374151")
+        color = Color.parseColor("#CBD5E1")
         strokeWidth = 2.0f
         style = Paint.Style.STROKE
         pathEffect = DashPathEffect(floatArrayOf(12f, 8f), 0f)
     }
 
     private val roadPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#38BDF8")
+        color = Color.parseColor("#0284C7") // Azul Rey de Alto Contraste
         strokeWidth = 10f
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
@@ -60,12 +47,12 @@ class AltgraphMapView @JvmOverloads constructor(
     }
 
     private val riderBeaconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#38BDF8")
+        color = Color.parseColor("#0284C7")
         style = Paint.Style.FILL
     }
 
     private val riderHaloPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#4038BDF8")
+        color = Color.parseColor("#400284C7")
         style = Paint.Style.FILL
     }
 
@@ -75,24 +62,13 @@ class AltgraphMapView @JvmOverloads constructor(
     }
 
     private val titleTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
+        color = Color.parseColor("#0F172A")
         typeface = Typeface.DEFAULT_BOLD
     }
 
     private val infoTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#38BDF8")
+        color = Color.parseColor("#0369A1")
         typeface = Typeface.DEFAULT_BOLD
-    }
-
-    private val zoomBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#E018181B")
-        style = Paint.Style.FILL
-    }
-
-    private val zoomBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#38BDF8")
-        strokeWidth = 2f
-        style = Paint.Style.STROKE
     }
 
     private var currentLat = 0.0
@@ -126,35 +102,6 @@ class AltgraphMapView @JvmOverloads constructor(
         postInvalidate()
     }
 
-    override fun performClick(): Boolean {
-        super.performClick()
-        return true
-    }
-
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        scaleDetector.onTouchEvent(event)
-
-        if (event.action == MotionEvent.ACTION_UP) {
-            performClick()
-            val x = event.x
-            val y = event.y
-            val w = width.toFloat()
-
-            // Detección táctil en la píldora de Zoom [ - | + ]
-            val zoomPillRect = RectF(w - 180f, 20f, w - 20f, 90f)
-            if (zoomPillRect.contains(x, y)) {
-                if (x > w - 100f) {
-                    mapZoomFactor = (mapZoomFactor * 1.25f).coerceAtMost(5.0f)
-                } else {
-                    mapZoomFactor = (mapZoomFactor / 1.25f).coerceAtLeast(0.5f)
-                }
-                postInvalidate()
-                return true
-            }
-        }
-        return true
-    }
-
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
@@ -171,20 +118,14 @@ class AltgraphMapView @JvmOverloads constructor(
             mapLng = routePolylinePoints.first().second
         }
 
-        // ==========================================
-        // 1. ESCALADO DE MAPA POR GESTOS DE PELLIZCO
-        // ==========================================
-        canvas.save()
-        canvas.scale(mapZoomFactor, mapZoomFactor, w / 2f, h / 2f)
-
-        // Dibujar Teselas Vectoriales Reales .mbtiles
+        // 1. Dibujar Teselas Vectoriales Reales .mbtiles
         val tileBitmap = MbtilesTileReader.getTileBitmapForLocation(context, mapLat, mapLng)
         if (tileBitmap != null) {
             val srcRect = Rect(0, 0, tileBitmap.width, tileBitmap.height)
             val dstRect = RectF(0f, 0f, w, h)
             canvas.drawBitmap(tileBitmap, srcRect, dstRect, null)
         } else {
-            // Fondo Topográfico Vectorial de Respaldo
+            // Fondo Topográfico Claro de Respaldo
             canvas.drawRect(0f, 0f, w, h, bgPaint)
 
             // Curvas de Nivel Topográficas HD a Pantalla Completa
@@ -198,7 +139,7 @@ class AltgraphMapView @JvmOverloads constructor(
             }
         }
 
-        // Trazado Vectorial de la Carretera / Ruta GPS
+        // 2. Trazado Vectorial de la Carretera / Ruta GPS
         if (routePolylinePoints.size >= 2) {
             roadPath.reset()
             val startPt = routePolylinePoints.first()
@@ -215,7 +156,7 @@ class AltgraphMapView @JvmOverloads constructor(
             canvas.drawPath(roadPath, roadPaint)
         }
 
-        // Faro del Ciclista en Posición GPS Activa
+        // 3. Faro del Ciclista en Posición GPS Activa
         val rx = w * 0.50f
         val ry = h * 0.50f
         canvas.drawCircle(rx, ry, 32f, riderHaloPaint)
@@ -230,13 +171,7 @@ class AltgraphMapView @JvmOverloads constructor(
         arrowPath.close()
         canvas.drawPath(arrowPath, arrowPaint)
 
-        canvas.restore()
-
-        // ==========================================
-        // 2. ELEMENTOS HUD FIJOS (SUPERPOSICIÓN)
-        // ==========================================
-
-        // Encabezado Superior
+        // 4. Encabezado e Insignia Topográfica Superior
         titleTextPaint.textSize = (h * 0.055f).coerceIn(16f, 26f)
         canvas.drawText("🗺️ MAPA TOPO ALTGRAPH", 20f, h * 0.08f, titleTextPaint)
 
@@ -245,17 +180,7 @@ class AltgraphMapView @JvmOverloads constructor(
         infoTextPaint.textSize = (h * 0.045f).coerceIn(14f, 22f)
         canvas.drawText("$speedText  •  $elevText", 20f, h * 0.14f, infoTextPaint)
 
-        // Píldora de Controles Táctiles de Zoom [ – | + ]
-        val zoomPill = RectF(w - 180f, 20f, w - 20f, 90f)
-        canvas.drawRoundRect(zoomPill, 35f, 35f, zoomBgPaint)
-        canvas.drawRoundRect(zoomPill, 35f, 35f, zoomBorderPaint)
-
-        titleTextPaint.textSize = 24f
-        canvas.drawText("–", w - 145f, 62f, titleTextPaint)
-        canvas.drawLine(w - 100f, 30f, w - 100f, 80f, zoomBorderPaint)
-        canvas.drawText("+", w - 65f, 62f, titleTextPaint)
-
-        // Escala Gráfica de Distancia (200m)
+        // 5. Escala Gráfica de Distancia (200m)
         val scaleW = w * 0.25f
         val scaleX = w - scaleW - 20f
         val scaleY = h - 25f
@@ -264,6 +189,6 @@ class AltgraphMapView @JvmOverloads constructor(
         canvas.drawLine(scaleX + scaleW, scaleY - 6f, scaleX + scaleW, scaleY + 6f, gridPaint)
 
         infoTextPaint.textSize = (h * 0.035f).coerceIn(10f, 14f)
-        canvas.drawText("${(200 / mapZoomFactor).toInt()} m", scaleX + (scaleW / 4f), scaleY - 6f, infoTextPaint)
+        canvas.drawText("200 m", scaleX + (scaleW / 4f), scaleY - 6f, infoTextPaint)
     }
 }
