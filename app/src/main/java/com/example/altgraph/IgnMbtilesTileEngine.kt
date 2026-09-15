@@ -104,43 +104,55 @@ object IgnMbtilesTileEngine {
         return result
     }
 
-    fun getTileBitmap(context: Context, lat: Double, lng: Double, zoom: Int = 14): Bitmap? {
+    fun getTileBitmap(context: Context, lat: Double, lng: Double, preferredZoom: Int = 15): Bitmap? {
         val maps = getInstalledIgnMaps(context)
         if (maps.isEmpty()) return null
 
         val prefs = AppPreferences.getInstance(context)
         val selectedName = prefs.customMapProvider
-        val targetMap = maps.find { it.fileName.equals(selectedName, ignoreCase = true) } ?: maps.first()
 
-        if (activeDbPath != targetMap.filePath || activeDb == null || !activeDb!!.isOpen) {
-            try {
-                activeDb?.close()
-                val flags = SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
-                activeDb = SQLiteDatabase.openDatabase(targetMap.filePath, null, flags)
-                activeDbPath = targetMap.filePath
-            } catch (e: Exception) {
-                return null
-            }
+        // Buscar primero en el mapa seleccionado
+        val activeMaps = mutableListOf<IgnMapInfo>()
+        maps.find { it.fileName.equals(selectedName, ignoreCase = true) }?.let { activeMaps.add(it) }
+        activeMaps.addAll(maps.filter { !it.fileName.equals(selectedName, ignoreCase = true) })
+
+        activeMaps.forEach { mapInfo ->
+            val bmp = queryExactTileFromMap(mapInfo.filePath, lat, lng, preferredZoom)
+            if (bmp != null) return bmp
         }
 
-        val db = activeDb ?: return null
+        return null
+    }
 
+    private fun queryExactTileFromMap(mbtilesPath: String, inputLat: Double, inputLng: Double, preferredZoom: Int): Bitmap? {
         return try {
-            var targetLat = lat
-            var targetLng = lng
-            var targetZoom = zoom
+            if (activeDbPath != mbtilesPath || activeDb == null || !activeDb!!.isOpen) {
+                try {
+                    activeDb?.close()
+                    val flags = SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+                    activeDb = SQLiteDatabase.openDatabase(mbtilesPath, null, flags)
+                    activeDbPath = mbtilesPath
+                } catch (e: Exception) {
+                    return null
+                }
+            }
 
-            // 1. Obtener limites geográficos de la tabla metadata del mapa IGN
+            val db = activeDb ?: return null
+
+            var targetLat = inputLat
+            var targetLng = inputLng
+
+            // 1. Verificar si las coordenadas caen dentro de la cobertura bounds del mapa IGN
             try {
                 val cursor = db.rawQuery("SELECT value FROM metadata WHERE name = 'bounds'", null)
                 if (cursor.moveToFirst()) {
                     val boundsStr = cursor.getString(0)
                     val parts = boundsStr.split(",")
                     if (parts.size == 4) {
-                        val minLng = parts[0].toDoubleOrNull() ?: -18.0
-                        val minLat = parts[1].toDoubleOrNull() ?: 27.0
-                        val maxLng = parts[2].toDoubleOrNull() ?: 4.0
-                        val maxLat = parts[3].toDoubleOrNull() ?: 44.0
+                        val minLng = parts[0].toDoubleOrNull() ?: -2.5
+                        val minLat = parts[1].toDoubleOrNull() ?: 37.0
+                        val maxLng = parts[2].toDoubleOrNull() ?: -0.5
+                        val maxLat = parts[3].toDoubleOrNull() ?: 38.8
 
                         if (targetLat == 0.0 || targetLng == 0.0 || targetLat < minLat || targetLat > maxLat || targetLng < minLng || targetLng > maxLng) {
                             targetLat = (minLat + maxLat) / 2.0
@@ -151,47 +163,59 @@ object IgnMbtilesTileEngine {
                 cursor.close()
             } catch (e: Exception) {}
 
-            // 2. Obtener los niveles de zoom soportados por este fichero MBTiles del IGN
+            // 2. Obtener min and max zoom disponibles en la base de datos de este mapa IGN
+            var minZ = 11
+            var maxZ = 17
             try {
                 val zCursor = db.rawQuery("SELECT MIN(zoom_level), MAX(zoom_level) FROM tiles", null)
                 if (zCursor.moveToFirst()) {
-                    val minZ = zCursor.getInt(0)
-                    val maxZ = zCursor.getInt(1)
-                    if (maxZ > 0) {
-                        targetZoom = targetZoom.coerceIn(minZ, maxZ)
+                    val mz = zCursor.getInt(0)
+                    val xz = zCursor.getInt(1)
+                    if (xz > 0) {
+                        minZ = mz
+                        maxZ = xz
                     }
                 }
                 zCursor.close()
             } catch (e: Exception) {}
 
-            // 3. Convertir coordenadas GPS a indices de teselas TMS / OSM
-            val tileX = floor((targetLng + 180.0) / 360.0 * (1 shl targetZoom)).toInt()
-            val latRad = Math.toRadians(targetLat)
-            val tileYOsm = floor((1.0 - ln(tan(latRad) + 1.0 / cos(latRad)) / PI) / 2.0 * (1 shl targetZoom)).toInt()
-            val tileYTms = ((1 shl targetZoom) - 1) - tileYOsm
+            // 3. Probar los niveles de zoom disponibles desde el mayor detalle (maxZ) hacia el menor (minZ)
+            val zoomLevelsToTry = mutableListOf<Int>()
+            val startZoom = preferredZoom.coerceIn(minZ, maxZ)
+            zoomLevelsToTry.add(startZoom)
 
-            val queries = listOf(
-                "SELECT tile_data FROM tiles WHERE zoom_level = $targetZoom AND tile_column = $tileX AND tile_row = $tileYTms",
-                "SELECT tile_data FROM tiles WHERE zoom_level = $targetZoom AND tile_column = $tileX AND tile_row = $tileYOsm",
-                "SELECT tile_data FROM tiles WHERE zoom_level = $targetZoom LIMIT 1",
-                "SELECT tile_data FROM tiles LIMIT 1"
-            )
-
-            var bitmap: Bitmap? = null
-            for (querySql in queries) {
-                try {
-                    val c = db.rawQuery(querySql, null)
-                    if (c.moveToFirst()) {
-                        val blob = c.getBlob(0)
-                        if (blob != null && blob.isNotEmpty()) {
-                            bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.size)
-                        }
-                    }
-                    c.close()
-                    if (bitmap != null) break
-                } catch (e: Exception) {}
+            for (z in maxZ downTo minZ) {
+                if (!zoomLevelsToTry.contains(z)) {
+                    zoomLevelsToTry.add(z)
+                }
             }
-            bitmap
+
+            for (z in zoomLevelsToTry) {
+                val tileX = floor((targetLng + 180.0) / 360.0 * (1 shl z)).toInt()
+                val latRad = Math.toRadians(targetLat)
+                val tileYOsm = floor((1.0 - ln(tan(latRad) + 1.0 / cos(latRad)) / PI) / 2.0 * (1 shl z)).toInt()
+                val tileYTms = ((1 shl z) - 1) - tileYOsm
+
+                val queryTms = "SELECT tile_data FROM tiles WHERE zoom_level = $z AND tile_column = $tileX AND tile_row = $tileYTms"
+                val queryOsm = "SELECT tile_data FROM tiles WHERE zoom_level = $z AND tile_column = $tileX AND tile_row = $tileYOsm"
+
+                for (q in listOf(queryTms, queryOsm)) {
+                    try {
+                        val c = db.rawQuery(q, null)
+                        if (c.moveToFirst()) {
+                            val blob = c.getBlob(0)
+                            if (blob != null && blob.isNotEmpty()) {
+                                val bmp = BitmapFactory.decodeByteArray(blob, 0, blob.size)
+                                c.close()
+                                if (bmp != null) return bmp
+                            }
+                        }
+                        c.close()
+                    } catch (e: Exception) {}
+                }
+            }
+
+            null
         } catch (e: Exception) {
             null
         }
