@@ -18,6 +18,9 @@
     <string name="data_type_gradient_trend_title">Tendance 3D et Pente Max</string>
     <string name="data_type_gradient_trend_desc">Tendance de pente en temps réel et pic maximum du segment</string>
 
+    <string name="data_type_altgraph_map_title">Carte Topographique IGN (ALTGRAPH)</string>
+    <string name="data_type_altgraph_map_desc">Carte topographique IGN 1:25.000 MBTILES plein écran avec itinéraire et position GPS</string>
+
     <!-- UI Labels for AltimetriaView -->
     <string name="header_climb_strategist">STRATÈGE DE COL</string>
     <string name="label_dist_remaining">DIST. RESTANTE</string>

@@ -18,6 +18,9 @@
     <string name="data_type_gradient_trend_title">3D Steigungstrend &amp; Max Ramp</string>
     <string name="data_type_gradient_trend_desc">Echtzeit-Steigungstrend und maximale Rampe im Segment</string>
 
+    <string name="data_type_altgraph_map_title">Topografische Karte IGN (ALTGRAPH)</string>
+    <string name="data_type_altgraph_map_desc">Vollbild IGN 1:25.000 MBTILES topografische Karte mit Route und GPS-Position</string>
+
     <!-- UI Labels for AltimetriaView -->
     <string name="header_climb_strategist">STEIGUNGS-STRATEGE</string>
     <string name="label_dist_remaining">RESTDISTANZ</string>

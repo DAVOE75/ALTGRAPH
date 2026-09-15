@@ -18,6 +18,9 @@
     <string name="data_type_gradient_trend_title">Tendenza 3D e Pendenza Max</string>
     <string name="data_type_gradient_trend_desc">Tendenza della pendenza in tempo reale e picco massimo nel tratto</string>
 
+    <string name="data_type_altgraph_map_title">Mappa Topografica IGN (ALTGRAPH)</string>
+    <string name="data_type_altgraph_map_desc">Mappa topografica IGN 1:25.000 MBTILES a schermo intero con percorso e posizione GPS</string>
+
     <!-- UI Labels for AltimetriaView -->
     <string name="header_climb_strategist">STRATEGA DI SALITA</string>
     <string name="label_dist_remaining">DIST. RIMANENTE</string>

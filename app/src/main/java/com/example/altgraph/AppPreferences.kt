@@ -99,6 +99,10 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_SHOW_3D_ZOOM, true)
         set(value) = prefs.edit().putBoolean(KEY_SHOW_3D_ZOOM, value).apply()
 
+    var customMapProvider: String
+        get() = prefs.getString(KEY_CUSTOM_MAP_PROVIDER, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_CUSTOM_MAP_PROVIDER, value).apply()
+
     companion object {
         private const val PREFS_NAME = "altgraph_settings"
         private const val KEY_FONT_FAMILY = "font_family_key"
@@ -124,6 +128,7 @@ class AppPreferences(context: Context) {
         private const val KEY_SHOW_POI_VIEWPOINTS = "show_poi_viewpoints"
         private const val KEY_SHOW_POI_SUMMITS = "show_poi_summits"
         private const val KEY_SHOW_3D_ZOOM = "show_3d_zoom_controls"
+        private const val KEY_CUSTOM_MAP_PROVIDER = "custom_map_provider_key"
 
         @Volatile
         private var INSTANCE: AppPreferences? = null

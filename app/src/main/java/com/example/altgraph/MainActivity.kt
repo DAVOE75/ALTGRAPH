@@ -1,10 +1,15 @@
 package com.example.altgraph
 
 import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.Settings
 import android.view.Gravity
 import android.view.View
 import android.widget.AdapterView
@@ -23,11 +28,28 @@ import kotlin.math.abs
 class MainActivity : Activity() {
 
     private lateinit var prefs: AppPreferences
+    private lateinit var installedMapsListLayout: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         prefs = AppPreferences.getInstance(this)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                try {
+                    val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION).apply {
+                        data = Uri.parse("package:$packageName")
+                    }
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    try {
+                        val intent2 = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+                        startActivity(intent2)
+                    } catch (e2: Exception) {}
+                }
+            }
+        }
 
         val scrollView = ScrollView(this).apply {
             setBackgroundColor(Color.parseColor("#09090B"))
@@ -70,7 +92,7 @@ class MainActivity : Activity() {
         headerCard.addView(title)
         headerCard.addView(subtitle)
 
-        // 2. Bar de Pestañas Categorizadas (4 Pestañas)
+        // 2. Bar de Pestañas Categorizadas (5 Pestañas)
         val tabBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(
@@ -81,20 +103,22 @@ class MainActivity : Activity() {
             }
         }
 
-        // Contenedores de las 4 Pestañas
+        // Contenedores de las 5 Pestañas
         val tabEstiloContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val tab3dContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val tab2dContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val tabVamContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val tabMapasContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
 
         val tabContainers = listOf(
             tabEstiloContainer,
             tab3dContainer,
             tab2dContainer,
-            tabVamContainer
+            tabVamContainer,
+            tabMapasContainer
         )
 
-        val tabTitles = listOf("🎨 Estilo", "🏔️ 3D", "📊 2D", "🚴 VAM")
+        val tabTitles = listOf("🎨 Estilo", "🏔️ 3D", "📊 2D", "🚴 VAM", "🗺️ Mapas")
         val tabButtons = mutableListOf<Button>()
 
         fun selectTab(activeIdx: Int) {
@@ -121,12 +145,12 @@ class MainActivity : Activity() {
         tabTitles.forEachIndexed { idx, titleStr ->
             val btn = Button(this).apply {
                 text = titleStr
-                textSize = 12f
+                textSize = 11f
                 typeface = Typeface.DEFAULT_BOLD
-                setPadding(4, 12, 4, 12)
+                setPadding(2, 12, 2, 12)
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f).apply {
-                    leftMargin = 3
-                    rightMargin = 3
+                    leftMargin = 2
+                    rightMargin = 2
                 }
                 setOnClickListener { selectTab(idx) }
             }
@@ -655,6 +679,34 @@ class MainActivity : Activity() {
         tabVamContainer.addView(vamCard)
         tabVamContainer.addView(asphaltCard)
 
+        // ==========================================
+        // PESTAÑA 5: 🗺️ MAPAS IGN MBTILES INSTALADOS
+        // ==========================================
+
+        val ignMapCard = createCardContainer()
+        val ignMapTitleLabel = createSectionLabel("🗺️ CARTOGRAFÍA IGN MBTILES INSTALADA")
+        val ignMapDescText = TextView(this).apply {
+            text = "Para usar tus mapas de la web del IGN o CNIG en el Karoo 3, copia tus archivos .mbtiles en la carpeta:\nAlmacenamiento interno compartido > offline > maps"
+            textSize = 12f
+            setTextColor(Color.parseColor("#A1A1AA"))
+            gravity = Gravity.CENTER
+            setPadding(0, 4, 0, 12)
+        }
+
+        installedMapsListLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        ignMapCard.addView(ignMapTitleLabel)
+        ignMapCard.addView(ignMapDescText)
+        ignMapCard.addView(installedMapsListLayout)
+
+        tabMapasContainer.addView(ignMapCard)
+
         // Botón de Guardar y Salir Fijado al Final
         val saveExitButton = Button(this).apply {
             text = "💾 " + getString(R.string.btn_save_and_exit)
@@ -685,6 +737,7 @@ class MainActivity : Activity() {
         rootLayout.addView(tab3dContainer)
         rootLayout.addView(tab2dContainer)
         rootLayout.addView(tabVamContainer)
+        rootLayout.addView(tabMapasContainer)
         rootLayout.addView(saveExitButton)
 
         scrollView.addView(rootLayout)
@@ -692,6 +745,82 @@ class MainActivity : Activity() {
 
         // Seleccionar pestaña por defecto (Tab 0: Estilo)
         selectTab(0)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshInstalledMapsList()
+    }
+
+    private fun refreshInstalledMapsList() {
+        if (!::installedMapsListLayout.isInitialized) return
+        installedMapsListLayout.removeAllViews()
+        val installedMaps = IgnMbtilesTileEngine.getInstalledIgnMaps(this)
+
+        if (installedMaps.isEmpty()) {
+            val emptyText = TextView(this).apply {
+                text = "🗺️ No se han encontrado archivos .mbtiles en /sdcard/offline/maps/\n\nCopia tus archivos .mbtiles desde el PC para activarlos."
+                textSize = 12f
+                typeface = Typeface.DEFAULT_BOLD
+                setTextColor(Color.parseColor("#EAB308"))
+                gravity = Gravity.CENTER
+                setPadding(0, 8, 0, 8)
+            }
+            installedMapsListLayout.addView(emptyText)
+        } else {
+            val countText = TextView(this).apply {
+                text = "🗺️ Mapas IGN MBTILES Detectados: ${installedMaps.size}"
+                textSize = 13f
+                typeface = Typeface.DEFAULT_BOLD
+                setTextColor(Color.WHITE)
+                gravity = Gravity.CENTER
+                setPadding(0, 0, 0, 8)
+            }
+            installedMapsListLayout.addView(countText)
+
+            installedMaps.forEach { mapInfo ->
+                val row = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                    setPadding(0, 6, 0, 6)
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                }
+
+                val mapText = TextView(this).apply {
+                    val sizeMb = mapInfo.sizeBytes / (1024.0 * 1024.0)
+                    val sizeStr = if (sizeMb >= 1024.0) "%.2f GB".format(sizeMb / 1024.0) else "%.1f MB".format(sizeMb)
+                    text = "• ${mapInfo.fileName}\n  ($sizeStr)"
+                    textSize = 12f
+                    typeface = Typeface.DEFAULT_BOLD
+                    setTextColor(if (mapInfo.isActive) Color.parseColor("#38BDF8") else Color.WHITE)
+                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f)
+                }
+
+                val selectBtn = Button(this).apply {
+                    text = if (mapInfo.isActive) "ACTIVO" else "SELECCIONAR"
+                    textSize = 11f
+                    typeface = Typeface.DEFAULT_BOLD
+                    setTextColor(if (mapInfo.isActive) Color.BLACK else Color.WHITE)
+                    background = GradientDrawable().apply {
+                        setColor(if (mapInfo.isActive) Color.parseColor("#38BDF8") else Color.parseColor("#27272A"))
+                        cornerRadius = 12f
+                    }
+                    setPadding(10, 6, 10, 6)
+                    setOnClickListener {
+                        prefs.customMapProvider = mapInfo.fileName
+                        Toast.makeText(this@MainActivity, "Mapa activo: ${mapInfo.fileName}", Toast.LENGTH_SHORT).show()
+                        refreshInstalledMapsList()
+                    }
+                }
+
+                row.addView(mapText)
+                row.addView(selectBtn)
+                installedMapsListLayout.addView(row)
+            }
+        }
     }
 
     private fun createCardContainer(): LinearLayout {
@@ -776,13 +905,13 @@ class MainActivity : Activity() {
             btn.setTextColor(Color.BLACK)
             btn.background = GradientDrawable().apply {
                 setColor(Color.parseColor("#38BDF8"))
-                cornerRadius = 18f
+                cornerRadius = 14f
             }
         } else {
             btn.setTextColor(Color.WHITE)
             btn.background = GradientDrawable().apply {
                 setColor(Color.parseColor("#27272A"))
-                cornerRadius = 18f
+                cornerRadius = 14f
             }
         }
     }
