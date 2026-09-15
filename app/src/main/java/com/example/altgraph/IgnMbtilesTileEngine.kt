@@ -104,34 +104,32 @@ object IgnMbtilesTileEngine {
         return result
     }
 
-    fun getTileBitmap(context: Context, lat: Double, lng: Double, preferredZoom: Int = 15): Bitmap? {
+    fun getTileBitmap(context: Context, lat: Double, lng: Double, preferredZoom: Int = 14): Bitmap? {
         val maps = getInstalledIgnMaps(context)
         if (maps.isEmpty()) return null
 
         val prefs = AppPreferences.getInstance(context)
         val selectedName = prefs.customMapProvider
 
-        // Buscar primero en el mapa seleccionado
         val activeMaps = mutableListOf<IgnMapInfo>()
         maps.find { it.fileName.equals(selectedName, ignoreCase = true) }?.let { activeMaps.add(it) }
         activeMaps.addAll(maps.filter { !it.fileName.equals(selectedName, ignoreCase = true) })
 
-        activeMaps.forEach { mapInfo ->
-            val bmp = queryExactTileFromMap(mapInfo.filePath, lat, lng, preferredZoom)
+        for (mapInfo in activeMaps) {
+            val bmp = queryExactTileFromMap(context, mapInfo, lat, lng, preferredZoom)
             if (bmp != null) return bmp
         }
 
         return null
     }
 
-    private fun queryExactTileFromMap(mbtilesPath: String, inputLat: Double, inputLng: Double, preferredZoom: Int): Bitmap? {
+    private fun queryExactTileFromMap(context: Context, mapInfo: IgnMapInfo, inputLat: Double, inputLng: Double, preferredZoom: Int): Bitmap? {
         return try {
-            if (activeDbPath != mbtilesPath || activeDb == null || !activeDb!!.isOpen) {
+            if (activeDbPath != mapInfo.filePath || activeDb == null || !activeDb!!.isOpen) {
                 try {
                     activeDb?.close()
-                    val flags = SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
-                    activeDb = SQLiteDatabase.openDatabase(mbtilesPath, null, flags)
-                    activeDbPath = mbtilesPath
+                    activeDb = getReadableDatabase(context, mapInfo)
+                    activeDbPath = mapInfo.filePath
                 } catch (e: Exception) {
                     return null
                 }
@@ -142,17 +140,16 @@ object IgnMbtilesTileEngine {
             var targetLat = inputLat
             var targetLng = inputLng
 
-            // 1. Verificar si las coordenadas caen dentro de la cobertura bounds del mapa IGN
             try {
                 val cursor = db.rawQuery("SELECT value FROM metadata WHERE name = 'bounds'", null)
                 if (cursor.moveToFirst()) {
                     val boundsStr = cursor.getString(0)
                     val parts = boundsStr.split(",")
                     if (parts.size == 4) {
-                        val minLng = parts[0].toDoubleOrNull() ?: -2.5
-                        val minLat = parts[1].toDoubleOrNull() ?: 37.0
-                        val maxLng = parts[2].toDoubleOrNull() ?: -0.5
-                        val maxLat = parts[3].toDoubleOrNull() ?: 38.8
+                        val minLng = parts[0].toDoubleOrNull() ?: -18.0
+                        val minLat = parts[1].toDoubleOrNull() ?: 27.0
+                        val maxLng = parts[2].toDoubleOrNull() ?: 4.0
+                        val maxLat = parts[3].toDoubleOrNull() ?: 44.0
 
                         if (targetLat == 0.0 || targetLng == 0.0 || targetLat < minLat || targetLat > maxLat || targetLng < minLng || targetLng > maxLng) {
                             targetLat = (minLat + maxLat) / 2.0
@@ -163,7 +160,6 @@ object IgnMbtilesTileEngine {
                 cursor.close()
             } catch (e: Exception) {}
 
-            // 2. Obtener min and max zoom disponibles en la base de datos de este mapa IGN
             var minZ = 11
             var maxZ = 17
             try {
@@ -179,7 +175,6 @@ object IgnMbtilesTileEngine {
                 zCursor.close()
             } catch (e: Exception) {}
 
-            // 3. Probar los niveles de zoom disponibles desde el mayor detalle (maxZ) hacia el menor (minZ)
             val zoomLevelsToTry = mutableListOf<Int>()
             val startZoom = preferredZoom.coerceIn(minZ, maxZ)
             zoomLevelsToTry.add(startZoom)
@@ -207,7 +202,9 @@ object IgnMbtilesTileEngine {
                             if (blob != null && blob.isNotEmpty()) {
                                 val bmp = BitmapFactory.decodeByteArray(blob, 0, blob.size)
                                 c.close()
-                                if (bmp != null) return bmp
+                                if (bmp != null) {
+                                    return bmp
+                                }
                             }
                         }
                         c.close()
@@ -215,9 +212,49 @@ object IgnMbtilesTileEngine {
                 }
             }
 
+            val fallbacks = listOf(
+                "SELECT tile_data FROM tiles WHERE zoom_level = 14 LIMIT 1",
+                "SELECT tile_data FROM tiles WHERE zoom_level = 15 LIMIT 1",
+                "SELECT tile_data FROM tiles LIMIT 1"
+            )
+            for (fq in fallbacks) {
+                try {
+                    val fc = db.rawQuery(fq, null)
+                    if (fc.moveToFirst()) {
+                        val blob = fc.getBlob(0)
+                        if (blob != null && blob.isNotEmpty()) {
+                            val bmp = BitmapFactory.decodeByteArray(blob, 0, blob.size)
+                            fc.close()
+                            if (bmp != null) return bmp
+                        }
+                    }
+                    fc.close()
+                } catch (e: Exception) {}
+            }
+
             null
         } catch (e: Exception) {
             null
+        }
+    }
+
+    private fun getReadableDatabase(context: Context, mapInfo: IgnMapInfo): SQLiteDatabase? {
+        try {
+            val sourceFile = File(mapInfo.filePath)
+            if (!sourceFile.exists()) return null
+
+            val cacheFile = File(context.cacheDir, mapInfo.fileName)
+            if (!cacheFile.exists() || cacheFile.length() != sourceFile.length()) {
+                try {
+                    sourceFile.copyTo(cacheFile, overwrite = true)
+                } catch (e: Exception) {}
+            }
+
+            val fileToOpen = if (cacheFile.exists() && cacheFile.canRead()) cacheFile else sourceFile
+            val flags = SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+            return SQLiteDatabase.openDatabase(fileToOpen.absolutePath, null, flags)
+        } catch (e: Exception) {
+            return null
         }
     }
 
