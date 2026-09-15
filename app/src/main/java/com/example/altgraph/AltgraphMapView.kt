@@ -6,13 +6,17 @@ import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.Path
-import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.util.AttributeSet
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.view.View
+import kotlin.math.PI
 import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.math.floor
+import kotlin.math.ln
+import kotlin.math.tan
 
 class AltgraphMapView @JvmOverloads constructor(
     context: Context,
@@ -20,8 +24,24 @@ class AltgraphMapView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
+    private var mapZoomFactor = 1.0f
+    private var dragOffsetX = 0f
+    private var dragOffsetY = 0f
+    private var lastTouchX = 0f
+    private var lastTouchY = 0f
+    private var isDragging = false
+
+    private val scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            mapZoomFactor *= detector.scaleFactor
+            mapZoomFactor = mapZoomFactor.coerceIn(0.2f, 8.0f)
+            postInvalidate()
+            return true
+        }
+    })
+
     private val bgPaint = Paint().apply {
-        color = Color.parseColor("#F8FAFC") // Fondo Claro Topográfico Cream/Slate
+        color = Color.parseColor("#F8FAFC")
         style = Paint.Style.FILL
     }
 
@@ -31,15 +51,8 @@ class AltgraphMapView @JvmOverloads constructor(
         style = Paint.Style.STROKE
     }
 
-    private val contourLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#CBD5E1")
-        strokeWidth = 2.0f
-        style = Paint.Style.STROKE
-        pathEffect = DashPathEffect(floatArrayOf(12f, 8f), 0f)
-    }
-
     private val roadPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#0284C7") // Azul Rey de Alto Contraste
+        color = Color.parseColor("#0284C7")
         strokeWidth = 10f
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
@@ -69,6 +82,17 @@ class AltgraphMapView @JvmOverloads constructor(
     private val infoTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#0369A1")
         typeface = Typeface.DEFAULT_BOLD
+    }
+
+    private val zoomBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#E0F1F5F9")
+        style = Paint.Style.FILL
+    }
+
+    private val zoomBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#0284C7")
+        strokeWidth = 2f
+        style = Paint.Style.STROKE
     }
 
     private var currentLat = 0.0
@@ -102,6 +126,57 @@ class AltgraphMapView @JvmOverloads constructor(
         postInvalidate()
     }
 
+    override fun performClick(): Boolean {
+        super.performClick()
+        return true
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        scaleDetector.onTouchEvent(event)
+
+        val x = event.x
+        val y = event.y
+        val w = width.toFloat()
+
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                lastTouchX = x
+                lastTouchY = y
+                isDragging = true
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (isDragging && !scaleDetector.isInProgress) {
+                    dragOffsetX += (x - lastTouchX)
+                    dragOffsetY += (y - lastTouchY)
+                    lastTouchX = x
+                    lastTouchY = y
+                    postInvalidate()
+                }
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                isDragging = false
+                performClick()
+                
+                val zoomPillRect = RectF(w - 180f, 20f, w - 20f, 90f)
+                val resetPillRect = RectF(w - 280f, 20f, w - 200f, 90f)
+
+                if (zoomPillRect.contains(x, y)) {
+                    if (x > w - 100f) {
+                        mapZoomFactor = (mapZoomFactor * 1.5f).coerceAtMost(8.0f)
+                    } else {
+                        mapZoomFactor = (mapZoomFactor / 1.5f).coerceAtLeast(0.2f)
+                    }
+                    postInvalidate()
+                } else if (resetPillRect.contains(x, y)) {
+                    dragOffsetX = 0f
+                    dragOffsetY = 0f
+                    postInvalidate()
+                }
+            }
+        }
+        return true
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
@@ -110,7 +185,6 @@ class AltgraphMapView @JvmOverloads constructor(
 
         if (w <= 0 || h <= 0) return
 
-        // Usar las coordenadas de la ruta cargada si el GPS está en búsqueda (0.0, 0.0)
         var mapLat = currentLat
         var mapLng = currentLng
         if ((mapLat == 0.0 || mapLng == 0.0) && routePolylinePoints.isNotEmpty()) {
@@ -118,51 +192,83 @@ class AltgraphMapView @JvmOverloads constructor(
             mapLng = routePolylinePoints.first().second
         }
 
-        // 1. Dibujar Teselas Vectoriales Reales .mbtiles
-        val tileBitmap = MbtilesTileReader.getTileBitmapForLocation(context, mapLat, mapLng)
-        if (tileBitmap != null) {
-            val srcRect = Rect(0, 0, tileBitmap.width, tileBitmap.height)
-            val dstRect = RectF(0f, 0f, w, h)
-            canvas.drawBitmap(tileBitmap, srcRect, dstRect, null)
-        } else {
-            // Fondo Topográfico Claro de Respaldo
-            canvas.drawRect(0f, 0f, w, h, bgPaint)
+        if (mapLat == 0.0 && mapLng == 0.0) {
+            mapLat = 40.4168
+            mapLng = -3.7038
+        }
 
-            // Curvas de Nivel Topográficas HD a Pantalla Completa
-            val numContours = if (h > 400f) 12 else 6
-            for (i in 1..numContours) {
-                val cy = h * (i.toFloat() / (numContours + 1))
-                roadPath.reset()
-                roadPath.moveTo(0f, cy + sin(i * 1.5).toFloat() * 25f)
-                roadPath.quadTo(w / 2f, cy - 35f, w, cy + cos(i * 1.5).toFloat() * 25f)
-                canvas.drawPath(roadPath, contourLinePaint)
+        canvas.drawRect(0f, 0f, w, h, bgPaint)
+
+        MbtilesTileReader.initDb(context)
+
+        var baseZoom = 14
+        var scaleMultiplier = mapZoomFactor
+
+        while (scaleMultiplier > 1.8f && baseZoom < MbtilesTileReader.getMaxZoom()) {
+            baseZoom++
+            scaleMultiplier /= 2.0f
+        }
+        while (scaleMultiplier < 0.6f && baseZoom > MbtilesTileReader.getMinZoom()) {
+            baseZoom--
+            scaleMultiplier *= 2.0f
+        }
+
+        val tileSize = 256f
+        val n = (1 shl baseZoom).toDouble()
+        val centerX = (mapLng + 180.0) / 360.0 * n
+        val centerLatRad = Math.toRadians(mapLat)
+        val centerY = (1.0 - ln(tan(centerLatRad) + 1.0 / cos(centerLatRad)) / PI) / 2.0 * n
+
+        val scaledTileSize = tileSize * scaleMultiplier
+
+        val cx = (w / 2f) + dragOffsetX
+        val cy = (h / 2f) + dragOffsetY
+
+        val startCol = floor(centerX - (cx / scaledTileSize)).toInt() - 1
+        val endCol = floor(centerX + ((w - cx) / scaledTileSize)).toInt() + 1
+        val startRow = floor(centerY - (cy / scaledTileSize)).toInt() - 1
+        val endRow = floor(centerY + ((h - cy) / scaledTileSize)).toInt() + 1
+
+        for (col in startCol..endCol) {
+            for (row in startRow..endRow) {
+                val tileBmp = MbtilesTileReader.getTile(baseZoom, col, row)
+                if (tileBmp != null) {
+                    val pixelX = cx + (col - centerX).toFloat() * scaledTileSize
+                    val pixelY = cy + (row - centerY).toFloat() * scaledTileSize
+                    val dstRect = RectF(pixelX, pixelY, pixelX + scaledTileSize + 1f, pixelY + scaledTileSize + 1f)
+                    canvas.drawBitmap(tileBmp, null, dstRect, null)
+                }
             }
         }
 
-        // 2. Trazado Vectorial de la Carretera / Ruta GPS
-        if (routePolylinePoints.size >= 2) {
+        // Trazado de ruta GPS Exacto
+        if (routePolylinePoints.isNotEmpty()) {
             roadPath.reset()
-            val startPt = routePolylinePoints.first()
-            val startX = w * 0.15f
-            val startY = h * 0.85f
-            roadPath.moveTo(startX, startY)
+            var isFirst = true
+            for (pt in routePolylinePoints) {
+                val ptX = (pt.second + 180.0) / 360.0 * n
+                val ptLatRad = Math.toRadians(pt.first)
+                val ptY = (1.0 - ln(tan(ptLatRad) + 1.0 / cos(ptLatRad)) / PI) / 2.0 * n
 
-            for (idx in 1 until routePolylinePoints.size) {
-                val pt = routePolylinePoints[idx]
-                val px = startX + ((pt.second - startPt.second) * 14000.0).toFloat().coerceIn(0f, w * 0.85f)
-                val py = startY - ((pt.first - startPt.first) * 14000.0).toFloat().coerceIn(0f, h * 0.8f)
-                roadPath.lineTo(px, py)
+                val px = cx + (ptX - centerX).toFloat() * scaledTileSize
+                val py = cy + (ptY - centerY).toFloat() * scaledTileSize
+
+                if (isFirst) {
+                    roadPath.moveTo(px, py)
+                    isFirst = false
+                } else {
+                    roadPath.lineTo(px, py)
+                }
             }
             canvas.drawPath(roadPath, roadPaint)
         }
 
-        // 3. Faro del Ciclista en Posición GPS Activa
-        val rx = w * 0.50f
-        val ry = h * 0.50f
+        // Faro del Ciclista
+        val rx = (w / 2f) + dragOffsetX
+        val ry = (h / 2f) + dragOffsetY
         canvas.drawCircle(rx, ry, 32f, riderHaloPaint)
         canvas.drawCircle(rx, ry, 14f, riderBeaconPaint)
 
-        // Flecha de Dirección de Marcha
         arrowPath.reset()
         arrowPath.moveTo(rx, ry - 16f)
         arrowPath.lineTo(rx - 8f, ry + 8f)
@@ -171,7 +277,7 @@ class AltgraphMapView @JvmOverloads constructor(
         arrowPath.close()
         canvas.drawPath(arrowPath, arrowPaint)
 
-        // 4. Encabezado e Insignia Topográfica Superior
+        // Textos y Controles
         titleTextPaint.textSize = (h * 0.055f).coerceIn(16f, 26f)
         canvas.drawText("🗺️ MAPA TOPO ALTGRAPH", 20f, h * 0.08f, titleTextPaint)
 
@@ -180,7 +286,22 @@ class AltgraphMapView @JvmOverloads constructor(
         infoTextPaint.textSize = (h * 0.045f).coerceIn(14f, 22f)
         canvas.drawText("$speedText  •  $elevText", 20f, h * 0.14f, infoTextPaint)
 
-        // 5. Escala Gráfica de Distancia (200m)
+        val zoomPill = RectF(w - 180f, 20f, w - 20f, 90f)
+        val resetPill = RectF(w - 280f, 20f, w - 200f, 90f)
+        
+        canvas.drawRoundRect(zoomPill, 35f, 35f, zoomBgPaint)
+        canvas.drawRoundRect(zoomPill, 35f, 35f, zoomBorderPaint)
+        
+        canvas.drawRoundRect(resetPill, 35f, 35f, zoomBgPaint)
+        canvas.drawRoundRect(resetPill, 35f, 35f, zoomBorderPaint)
+
+        titleTextPaint.textSize = 24f
+        canvas.drawText("–", w - 145f, 62f, titleTextPaint)
+        canvas.drawLine(w - 100f, 30f, w - 100f, 80f, zoomBorderPaint)
+        canvas.drawText("+", w - 65f, 62f, titleTextPaint)
+        canvas.drawText("🎯", w - 260f, 60f, titleTextPaint)
+
+        // Escala Gráfica
         val scaleW = w * 0.25f
         val scaleX = w - scaleW - 20f
         val scaleY = h - 25f
@@ -189,6 +310,11 @@ class AltgraphMapView @JvmOverloads constructor(
         canvas.drawLine(scaleX + scaleW, scaleY - 6f, scaleX + scaleW, scaleY + 6f, gridPaint)
 
         infoTextPaint.textSize = (h * 0.035f).coerceIn(10f, 14f)
-        canvas.drawText("200 m", scaleX + (scaleW / 4f), scaleY - 6f, infoTextPaint)
+        
+        // Calcular los metros aproximados del ancho de la escala
+        val metersPerPixel = (156543.03 * cos(centerLatRad) / (1 shl baseZoom)) / scaleMultiplier
+        val scaleMeters = (scaleW * metersPerPixel).toInt()
+        
+        canvas.drawText("$scaleMeters m", scaleX + (scaleW / 4f), scaleY - 6f, infoTextPaint)
     }
 }

@@ -9,24 +9,28 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.os.Environment
+import android.util.LruCache
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.zip.GZIPInputStream
-import kotlin.math.PI
-import kotlin.math.floor
-import kotlin.math.ln
-import kotlin.math.tan
 
 object MbtilesTileReader {
 
-    fun getTileBitmapForLocation(context: Context, lat: Double, lng: Double, zoom: Int = 14): Bitmap? {
+    private var currentDb: SQLiteDatabase? = null
+    private var currentDbPath: String? = null
+    private var minZ = 10
+    private var maxZ = 16
+
+    private val tileCache = LruCache<String, Bitmap>(60)
+
+    fun initDb(context: Context) {
         val searchDirs = listOf(
             File("/sdcard/offline/maps"),
             File("/sdcard/offline"),
+            File("/sdcard/Maps"),
             File(Environment.getExternalStorageDirectory(), "offline/maps"),
-            File(Environment.getExternalStorageDirectory(), "offline"),
-            File("/sdcard/Maps")
+            File(Environment.getExternalStorageDirectory(), "offline")
         )
 
         val mbtilesFiles = mutableListOf<File>()
@@ -39,104 +43,72 @@ object MbtilesTileReader {
             }
         }
 
-        if (mbtilesFiles.isEmpty()) return null
+        if (mbtilesFiles.isEmpty()) return
 
         val prefs = AppPreferences.getInstance(context)
         val selectedMapName = prefs.customMapProvider
 
-        val preferredMap = mbtilesFiles.find { it.name.equals(selectedMapName, ignoreCase = true) }
-        if (preferredMap != null) {
-            val bmp = readFromMbtilesDatabase(preferredMap, lat, lng, zoom)
-            if (bmp != null) return bmp
+        var fileToOpen = mbtilesFiles.find { it.name.equals(selectedMapName, ignoreCase = true) }
+        if (fileToOpen == null) {
+            fileToOpen = mbtilesFiles.first()
         }
 
-        mbtilesFiles.forEach { file ->
-            val bmp = readFromMbtilesDatabase(file, lat, lng, zoom)
-            if (bmp != null) return bmp
-        }
+        if (currentDbPath != fileToOpen.absolutePath) {
+            currentDb?.close()
+            tileCache.evictAll()
+            try {
+                val flags = SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+                currentDb = SQLiteDatabase.openDatabase(fileToOpen.absolutePath, null, flags)
+                currentDbPath = fileToOpen.absolutePath
 
-        return null
+                val c = currentDb?.rawQuery("SELECT MIN(zoom_level), MAX(zoom_level) FROM tiles", null)
+                if (c != null && c.moveToFirst()) {
+                    minZ = c.getInt(0)
+                    maxZ = c.getInt(1)
+                    if (minZ == 0) minZ = 10
+                    if (maxZ == 0) maxZ = 16
+                }
+                c?.close()
+            } catch (e: Exception) {}
+        }
     }
 
-    private fun readFromMbtilesDatabase(mbtilesFile: File, inputLat: Double, inputLng: Double, inputZoom: Int): Bitmap? {
-        return try {
-            val flags = SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
-            val db = SQLiteDatabase.openDatabase(mbtilesFile.absolutePath, null, flags)
+    fun getMinZoom() = minZ
+    fun getMaxZoom() = maxZ
 
-            var targetLat = inputLat
-            var targetLng = inputLng
-            var targetZoom = inputZoom
+    fun getTile(zoom: Int, x: Int, y: Int): Bitmap? {
+        val db = currentDb ?: return null
 
-            // 1. Obtener la cobertura geográfica del archivo .mbtiles desde su tabla metadata
-            try {
-                val boundsCursor = db.rawQuery("SELECT value FROM metadata WHERE name = 'bounds'", null)
-                if (boundsCursor.moveToFirst()) {
-                    val boundsStr = boundsCursor.getString(0)
-                    val parts = boundsStr.split(",")
-                    if (parts.size == 4) {
-                        val minLng = parts[0].toDoubleOrNull() ?: -2.5
-                        val minLat = parts[1].toDoubleOrNull() ?: 37.0
-                        val maxLng = parts[2].toDoubleOrNull() ?: -0.5
-                        val maxLat = parts[3].toDoubleOrNull() ?: 38.8
+        val cacheKey = "${zoom}_${x}_${y}"
+        val cached = tileCache.get(cacheKey)
+        if (cached != null) return cached
 
-                        if (targetLat == 0.0 || targetLng == 0.0 || targetLat < minLat || targetLat > maxLat || targetLng < minLng || targetLng > maxLng) {
-                            targetLat = (minLat + maxLat) / 2.0
-                            targetLng = (minLng + maxLng) / 2.0
-                        }
-                    }
-                }
-                boundsCursor.close()
-            } catch (e: Exception) {}
+        val yTms = ((1 shl zoom) - 1) - y
 
-            // 2. Obtener los niveles de zoom disponibles
-            try {
-                val zoomCursor = db.rawQuery("SELECT MIN(zoom_level), MAX(zoom_level) FROM tiles", null)
-                if (zoomCursor.moveToFirst()) {
-                    val minZ = zoomCursor.getInt(0)
-                    val maxZ = zoomCursor.getInt(1)
-                    if (maxZ > 0) {
-                        targetZoom = targetZoom.coerceIn(minZ, maxZ)
-                    }
-                }
-                zoomCursor.close()
-            } catch (e: Exception) {}
-
-            // 3. Coordenadas de tesela
-            val tileX = floor((targetLng + 180.0) / 360.0 * (1 shl targetZoom)).toInt()
-            val latRad = Math.toRadians(targetLat)
-            val tileYOsm = floor((1.0 - ln(tan(latRad) + 1.0 / cos(latRad)) / PI) / 2.0 * (1 shl targetZoom)).toInt()
-            val tileYTms = ((1 shl targetZoom) - 1) - tileYOsm
-
+        var bitmap: Bitmap? = null
+        try {
             val queries = listOf(
-                "SELECT tile_data FROM tiles WHERE zoom_level = $targetZoom AND tile_column = $tileX AND tile_row = $tileYTms",
-                "SELECT tile_data FROM tiles WHERE zoom_level = $targetZoom AND tile_column = $tileX AND tile_row = $tileYOsm",
-                "SELECT images.tile_data FROM images INNER JOIN map ON images.tile_id = map.tile_id WHERE map.zoom_level = $targetZoom AND map.tile_column = $tileX AND map.tile_row = $tileYTms",
-                "SELECT images.tile_data FROM images INNER JOIN map ON images.tile_id = map.tile_id WHERE map.zoom_level = $targetZoom AND map.tile_column = $tileX AND map.tile_row = $tileYOsm",
-                "SELECT tile_data FROM map WHERE zoom_level = $targetZoom AND tile_column = $tileX AND tile_row = $tileYTms",
-                "SELECT tile_data FROM tiles LIMIT 1",
-                "SELECT images.tile_data FROM images INNER JOIN map ON images.tile_id = map.tile_id LIMIT 1"
+                "SELECT tile_data FROM tiles WHERE zoom_level = $zoom AND tile_column = $x AND tile_row = $yTms",
+                "SELECT tile_data FROM tiles WHERE zoom_level = $zoom AND tile_column = $x AND tile_row = $y"
             )
 
-            var bitmap: Bitmap? = null
             for (querySql in queries) {
-                try {
-                    val cursor = db.rawQuery(querySql, null)
-                    if (cursor.moveToFirst()) {
-                        val blob = cursor.getBlob(0)
-                        if (blob != null && blob.isNotEmpty()) {
-                            bitmap = decodeTileDataToBitmap(blob)
-                        }
+                val cursor = db.rawQuery(querySql, null)
+                if (cursor.moveToFirst()) {
+                    val blob = cursor.getBlob(0)
+                    if (blob != null && blob.isNotEmpty()) {
+                        bitmap = decodeTileDataToBitmap(blob)
                     }
-                    cursor.close()
-                    if (bitmap != null) break
-                } catch (e: Exception) {}
+                }
+                cursor.close()
+                if (bitmap != null) break
             }
+        } catch (e: Exception) {}
 
-            db.close()
-            bitmap
-        } catch (e: Exception) {
-            null
+        if (bitmap != null) {
+            tileCache.put(cacheKey, bitmap)
         }
+        return bitmap
     }
 
     private fun decodeTileDataToBitmap(blob: ByteArray): Bitmap? {
@@ -181,30 +153,30 @@ object MbtilesTileReader {
     }
 
     private fun renderVectorPbfToBitmap(pbfBytes: ByteArray): Bitmap {
-        val w = 512
-        val h = 512
+        val w = 256
+        val h = 256
         val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
         val bgPaint = Paint().apply { color = Color.parseColor("#F8FAFC"); style = Paint.Style.FILL }
         val contourPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#CBD5E1"); strokeWidth = 2f; style = Paint.Style.STROKE }
-        val roadPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#0284C7"); strokeWidth = 8f; style = Paint.Style.STROKE }
+        val roadPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.parseColor("#0284C7"); strokeWidth = 6f; style = Paint.Style.STROKE }
 
         canvas.drawRect(0f, 0f, w.toFloat(), h.toFloat(), bgPaint)
 
         val path = Path()
         val hashSeed = pbfBytes.fold(0) { acc, byte -> (acc + byte.toInt()) and 0x7FFFFFFF }
-        val numLines = (hashSeed % 12) + 6
+        val numLines = (hashSeed % 6) + 3
 
         for (i in 0 until numLines) {
             val y = (h / (numLines + 1)) * (i + 1)
             path.reset()
             path.moveTo(0f, y.toFloat())
-            path.cubicTo(w * 0.33f, y - 25f, w * 0.66f, y + 25f, w.toFloat(), y.toFloat())
+            path.cubicTo(w * 0.33f, y - 15f, w * 0.66f, y + 15f, w.toFloat(), y.toFloat())
             canvas.drawPath(path, contourPaint)
         }
 
-        roadPaint.strokeWidth = 10f
+        roadPaint.strokeWidth = 8f
         path.reset()
         path.moveTo(w * 0.2f, h.toFloat())
         path.cubicTo(w * 0.3f, h * 0.6f, w * 0.7f, h * 0.4f, w * 0.8f, 0f)
@@ -212,6 +184,4 @@ object MbtilesTileReader {
 
         return bitmap
     }
-
-    private fun cos(rad: Double): Double = kotlin.math.cos(rad)
 }
