@@ -30,8 +30,8 @@ object MapManager {
 
     const val CNIG_PORTAL_URL = "https://centrodedescargas.cnig.es/CentroDescargas/mapas-moviles"
 
-    // Enlace de descarga directa verificado HTTP 200 OK (Servidor CDN de Github/Raw)
-    private const val BASE_MAP_URL = "https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/releases/app-debug.apk"
+    // Enlace de servidor espejo GitHub Releases / OpenAndroMaps directo
+    private const val BASE_MAP_URL = "https://github.com/DAVOE75/ALTGRAPH/releases/download/v0.3.0/Spain_IGN_25k.mbtiles"
 
     val PROVINCES = listOf(
         ProvinceMapInfo("Álava", BASE_MAP_URL),
@@ -86,6 +86,7 @@ object MapManager {
     )
 
     private val MAP_DIRS = listOf(
+        File(Environment.getExternalStorageDirectory(), "offline/maps"),
         File(Environment.getExternalStorageDirectory(), "Maps"),
         File(Environment.getExternalStorageDirectory(), "Hammerhead/maps"),
         File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), ""),
@@ -236,7 +237,7 @@ object MapManager {
                     return@launch
                 }
 
-                val totalBytes = connection.contentLengthLong.let { if (it > 0) it else 15_500_000L }
+                val totalBytes = connection.contentLengthLong.let { if (it > 0) it else 350_000_000L } // ~350 MB
                 var downloadedBytes = 0L
 
                 val inputStream = connection.inputStream
@@ -259,7 +260,7 @@ object MapManager {
                 inputStream.close()
                 connection.disconnect()
 
-                // Mover automáticamente el archivo descargado a /sdcard/Maps/
+                // Mover automáticamente el archivo descargado a offline/maps/
                 installDownloadedMapsFromStorage()
 
                 withContext(Dispatchers.Main) {
