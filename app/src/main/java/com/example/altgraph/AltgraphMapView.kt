@@ -117,8 +117,8 @@ class AltgraphMapView @JvmOverloads constructor(
 
         if (w <= 0 || h <= 0) return
 
-        // 1. Dibujar Teselas Vectoriales Reales .mbtiles si están instaladas en /sdcard/Maps/
-        val tileBitmap = MbtilesTileReader.getTileBitmapForLocation(currentLat, currentLng)
+        // 1. Dibujar Teselas Vectoriales Reales .mbtiles si están instaladas en /sdcard/offline/maps/
+        val tileBitmap = MbtilesTileReader.getTileBitmapForLocation(context, currentLat, currentLng)
         if (tileBitmap != null) {
             val srcRect = Rect(0, 0, tileBitmap.width, tileBitmap.height)
             val dstRect = RectF(0f, 0f, w, h)

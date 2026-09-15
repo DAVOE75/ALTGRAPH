@@ -1,13 +1,11 @@
 package com.example.altgraph
 
+import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Environment
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.util.zip.ZipInputStream
 import kotlin.math.PI
 import kotlin.math.floor
 import kotlin.math.ln
@@ -15,45 +13,43 @@ import kotlin.math.tan
 
 object MbtilesTileReader {
 
-    fun getTileBitmapForLocation(lat: Double, lng: Double, zoom: Int = 14): Bitmap? {
-        val mapsDir = File(Environment.getExternalStorageDirectory(), "Maps")
-        if (!mapsDir.exists() || !mapsDir.isDirectory) return null
+    fun getTileBitmapForLocation(context: Context, lat: Double, lng: Double, zoom: Int = 14): Bitmap? {
+        val searchDirs = listOf(
+            File(Environment.getExternalStorageDirectory(), "offline/maps"),
+            File(Environment.getExternalStorageDirectory(), "offline"),
+            File(Environment.getExternalStorageDirectory(), "Maps"),
+            File("/sdcard/offline/maps"),
+            File("/sdcard/Maps")
+        )
 
-        val allFiles = mapsDir.listFiles() ?: return null
+        val mbtilesFiles = mutableListOf<File>()
 
-        // Descomprimir automáticamente cualquier archivo .zip presente en /sdcard/Maps/
-        allFiles.filter { it.name.lowercase().endsWith(".zip") }.forEach { zipFile ->
-            try {
-                val zis = ZipInputStream(FileInputStream(zipFile))
-                var entry = zis.nextEntry
-                while (entry != null) {
-                    val entryName = entry.name.lowercase()
-                    if (entryName.endsWith(".mbtiles") || entryName.endsWith(".map")) {
-                        val outFile = File(mapsDir, File(entry.name).name)
-                        if (!outFile.exists()) {
-                            val fos = FileOutputStream(outFile)
-                            zis.copyTo(fos)
-                            fos.flush()
-                            fos.close()
-                        }
-                    }
-                    zis.closeEntry()
-                    entry = zis.nextEntry
+        searchDirs.forEach { dir ->
+            if (dir.exists() && dir.isDirectory) {
+                dir.listFiles()?.filter { it.name.lowercase().endsWith(".mbtiles") }?.let {
+                    mbtilesFiles.addAll(it)
                 }
-                zis.close()
-            } catch (e: Exception) {}
+            }
         }
 
-        val mapFiles = mapsDir.listFiles()?.filter {
-            val n = it.name.lowercase()
-            n.endsWith(".mbtiles") || n.endsWith(".map")
-        }
-        if (mapFiles.isNullOrEmpty()) return null
+        if (mbtilesFiles.isEmpty()) return null
 
-        val mapFile = mapFiles.first()
-        if (mapFile.name.lowercase().endsWith(".mbtiles")) {
-            return readFromMbtilesDatabase(mapFile, lat, lng, zoom)
+        // Si el usuario seleccionó un mapa activo preferido en AppPreferences, usar ese primero
+        val prefs = AppPreferences.getInstance(context)
+        val selectedMapName = prefs.customMapProvider
+
+        val preferredMap = mbtilesFiles.find { it.name.equals(selectedMapName, ignoreCase = true) }
+        if (preferredMap != null) {
+            val bmp = readFromMbtilesDatabase(preferredMap, lat, lng, zoom)
+            if (bmp != null) return bmp
         }
+
+        // Probar cada archivo .mbtiles disponible (ej. murcia_sureste.mbtiles)
+        mbtilesFiles.forEach { file ->
+            val bmp = readFromMbtilesDatabase(file, lat, lng, zoom)
+            if (bmp != null) return bmp
+        }
+
         return null
     }
 
@@ -72,12 +68,12 @@ object MbtilesTileReader {
                     val boundsStr = boundsCursor.getString(0)
                     val parts = boundsStr.split(",")
                     if (parts.size == 4) {
-                        val minLng = parts[0].toDoubleOrNull() ?: -2.0
+                        val minLng = parts[0].toDoubleOrNull() ?: -2.5
                         val minLat = parts[1].toDoubleOrNull() ?: 37.0
                         val maxLng = parts[2].toDoubleOrNull() ?: -0.5
-                        val maxLat = parts[3].toDoubleOrNull() ?: 38.5
+                        val maxLat = parts[3].toDoubleOrNull() ?: 38.8
 
-                        // Si estamos sin fijar GPS (0.0, 0.0) o fuera del mapa, centramos en el medio del mapa .mbtiles
+                        // Si estamos sin fijar GPS (0.0, 0.0) o fuera del mapa, centramos en el medio del mapa .mbtiles (Murcia Sureste)
                         if (targetLat == 0.0 || targetLng == 0.0 || targetLat < minLat || targetLat > maxLat || targetLng < minLng || targetLng > maxLng) {
                             targetLat = (minLat + maxLat) / 2.0
                             targetLng = (minLng + maxLng) / 2.0
@@ -100,31 +96,37 @@ object MbtilesTileReader {
                 zoomCursor.close()
             } catch (e: Exception) {}
 
-            // 3. Buscar la tesela de imagen
+            // 3. Coordenadas de tesela TMS y OSM
             val tileX = floor((targetLng + 180.0) / 360.0 * (1 shl targetZoom)).toInt()
             val latRad = Math.toRadians(targetLat)
             val tileYOsm = floor((1.0 - ln(tan(latRad) + 1.0 / cos(latRad)) / PI) / 2.0 * (1 shl targetZoom)).toInt()
             val tileYTms = ((1 shl targetZoom) - 1) - tileYOsm
 
-            var cursor = db.rawQuery(
-                "SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?",
-                arrayOf(targetZoom.toString(), tileX.toString(), tileYTms.toString())
+            val queries = listOf(
+                "SELECT tile_data FROM tiles WHERE zoom_level = $targetZoom AND tile_column = $tileX AND tile_row = $tileYTms",
+                "SELECT tile_data FROM tiles WHERE zoom_level = $targetZoom AND tile_column = $tileX AND tile_row = $tileYOsm",
+                "SELECT images.tile_data FROM images INNER JOIN map ON images.tile_id = map.tile_id WHERE map.zoom_level = $targetZoom AND map.tile_column = $tileX AND map.tile_row = $tileYTms",
+                "SELECT images.tile_data FROM images INNER JOIN map ON images.tile_id = map.tile_id WHERE map.zoom_level = $targetZoom AND map.tile_column = $tileX AND map.tile_row = $tileYOsm",
+                "SELECT tile_data FROM map WHERE zoom_level = $targetZoom AND tile_column = $tileX AND tile_row = $tileYTms",
+                "SELECT tile_data FROM tiles LIMIT 1",
+                "SELECT images.tile_data FROM images INNER JOIN map ON images.tile_id = map.tile_id LIMIT 1"
             )
 
-            // Si no se encuentra en la coordenada TMS exacta, buscar cualquier tesela disponible para mostrar el mapa en pantalla
-            if (!cursor.moveToFirst()) {
-                cursor.close()
-                cursor = db.rawQuery("SELECT tile_data FROM tiles LIMIT 1", null)
+            var bitmap: Bitmap? = null
+            for (querySql in queries) {
+                try {
+                    val cursor = db.rawQuery(querySql, null)
+                    if (cursor.moveToFirst()) {
+                        val blob = cursor.getBlob(0)
+                        if (blob != null && blob.isNotEmpty()) {
+                            bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.size)
+                        }
+                    }
+                    cursor.close()
+                    if (bitmap != null) break
+                } catch (e: Exception) {}
             }
 
-            var bitmap: Bitmap? = null
-            if (cursor.moveToFirst()) {
-                val blob = cursor.getBlob(0)
-                if (blob != null && blob.isNotEmpty()) {
-                    bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.size)
-                }
-            }
-            cursor.close()
             db.close()
             bitmap
         } catch (e: Exception) {
