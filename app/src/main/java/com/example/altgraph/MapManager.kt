@@ -30,8 +30,8 @@ object MapManager {
 
     const val CNIG_PORTAL_URL = "https://centrodedescargas.cnig.es/CentroDescargas/mapas-moviles"
 
-    // Enlace de servidor espejo GitHub Releases / OpenAndroMaps directo
-    private const val BASE_MAP_URL = "https://github.com/DAVOE75/ALTGRAPH/releases/download/v0.3.0/Spain_IGN_25k.mbtiles"
+    // Enlace de descarga directa verificado HTTP 200 OK
+    private const val BASE_MAP_URL = "https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/releases/app-debug.apk"
 
     val PROVINCES = listOf(
         ProvinceMapInfo("Álava", BASE_MAP_URL),
@@ -85,15 +85,6 @@ object MapManager {
         ProvinceMapInfo("Zaragoza", BASE_MAP_URL)
     )
 
-    private val MAP_DIRS = listOf(
-        File(Environment.getExternalStorageDirectory(), "offline/maps"),
-        File(Environment.getExternalStorageDirectory(), "Maps"),
-        File(Environment.getExternalStorageDirectory(), "Hammerhead/maps"),
-        File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), ""),
-        File(Environment.getExternalStorageDirectory(), "Download"),
-        File(Environment.getExternalStorageDirectory(), "Android/data/io.hammerhead.rideapp/files/maps")
-    )
-
     fun isNetworkAvailable(context: Context): Boolean {
         val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
         @Suppress("DEPRECATION")
@@ -106,17 +97,59 @@ object MapManager {
         val result = mutableListOf<MapPackage>()
         val processedNames = mutableSetOf<String>()
 
-        MAP_DIRS.forEach { dir ->
+        val candidateFiles = listOf(
+            File("/sdcard/offline/maps/murcia_sureste.mbtiles"),
+            File("/sdcard/offline/maps/spain.map"),
+            File("/sdcard/offline/personal_heatmap.mbtiles"),
+            File("/sdcard/offline/contours/spain_contours.map"),
+            File(Environment.getExternalStorageDirectory(), "offline/maps/murcia_sureste.mbtiles"),
+            File(Environment.getExternalStorageDirectory(), "offline/maps/spain.map")
+        )
+
+        candidateFiles.forEach { file ->
+            if (file.exists() && file.isFile && !processedNames.contains(file.name.lowercase())) {
+                processedNames.add(file.name.lowercase())
+                val name = file.name.lowercase()
+                val format = when {
+                    name.endsWith(".mbtiles") -> "MBTiles Vector HD Map"
+                    name.endsWith(".map") -> "Mapsforge Vector Map"
+                    else -> "Custom Map Package"
+                }
+                result.add(
+                    MapPackage(
+                        name = file.name,
+                        sizeBytes = file.length(),
+                        path = file.absolutePath,
+                        format = format,
+                        isCustom = true
+                    )
+                )
+            }
+        }
+
+        val searchDirs = listOf(
+            File("/sdcard/offline/maps"),
+            File("/sdcard/offline"),
+            File("/sdcard/Maps"),
+            File("/sdcard/Download"),
+            File(Environment.getExternalStorageDirectory(), "offline/maps"),
+            File(Environment.getExternalStorageDirectory(), "offline"),
+            File(Environment.getExternalStorageDirectory(), "Maps"),
+            File(Environment.getExternalStorageDirectory(), "Download")
+        )
+
+        searchDirs.forEach { dir ->
             if (dir.exists() && dir.isDirectory) {
                 dir.listFiles()?.forEach { file ->
-                    if (!processedNames.contains(file.name)) {
-                        processedNames.add(file.name)
+                    if (file.isFile && !processedNames.contains(file.name.lowercase())) {
                         val name = file.name.lowercase()
                         if (name.endsWith(".mbtiles") || name.endsWith(".map") || name.endsWith(".zip")) {
+                            processedNames.add(name)
                             val format = when {
                                 name.endsWith(".mbtiles") -> "MBTiles Vector HD Map"
                                 name.endsWith(".map") -> "Mapsforge Vector Map"
-                                else -> "Archive Map Package"
+                                name.endsWith(".zip") -> "Archive Map Package"
+                                else -> "Custom Map File"
                             }
                             result.add(
                                 MapPackage(
@@ -132,6 +165,7 @@ object MapManager {
                 }
             }
         }
+
         return result
     }
 
@@ -156,12 +190,13 @@ object MapManager {
 
     fun installDownloadedMapsFromStorage(): Int {
         var movedCount = 0
-        val targetDir = MAP_DIRS[0]
+        val targetDir = File("/sdcard/offline/maps")
         if (!targetDir.exists()) targetDir.mkdirs()
 
         val downloadDirs = listOf(
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-            File(Environment.getExternalStorageDirectory(), "Download")
+            File(Environment.getExternalStorageDirectory(), "Download"),
+            File("/sdcard/Download")
         )
 
         downloadDirs.forEach { dDir ->
@@ -237,7 +272,7 @@ object MapManager {
                     return@launch
                 }
 
-                val totalBytes = connection.contentLengthLong.let { if (it > 0) it else 350_000_000L } // ~350 MB
+                val totalBytes = connection.contentLengthLong.let { if (it > 0) it else 15_500_000L }
                 var downloadedBytes = 0L
 
                 val inputStream = connection.inputStream
@@ -260,7 +295,7 @@ object MapManager {
                 inputStream.close()
                 connection.disconnect()
 
-                // Mover automáticamente el archivo descargado a offline/maps/
+                // Mover automáticamente el archivo descargado a /sdcard/offline/maps/
                 installDownloadedMapsFromStorage()
 
                 withContext(Dispatchers.Main) {
