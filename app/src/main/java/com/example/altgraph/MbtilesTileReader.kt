@@ -9,6 +9,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.os.Environment
+import android.util.Log
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -20,12 +21,14 @@ import kotlin.math.tan
 
 object MbtilesTileReader {
 
+    private const val TAG = "ALTGRAPH_MAP"
+
     fun getTileBitmapForLocation(context: Context, lat: Double, lng: Double, zoom: Int = 14): Bitmap? {
         val searchDirs = listOf(
+            File("/sdcard/offline/maps"),
+            File("/sdcard/offline"),
             File(Environment.getExternalStorageDirectory(), "offline/maps"),
             File(Environment.getExternalStorageDirectory(), "offline"),
-            File(Environment.getExternalStorageDirectory(), "Maps"),
-            File("/sdcard/offline/maps"),
             File("/sdcard/Maps")
         )
 
@@ -39,9 +42,10 @@ object MbtilesTileReader {
             }
         }
 
+        Log.d(TAG, "Lector MBTiles: Encontrados ${mbtilesFiles.size} archivos .mbtiles")
+
         if (mbtilesFiles.isEmpty()) return null
 
-        // Si el usuario seleccionó un mapa activo preferido en AppPreferences, usar ese primero
         val prefs = AppPreferences.getInstance(context)
         val selectedMapName = prefs.customMapProvider
 
@@ -51,7 +55,6 @@ object MbtilesTileReader {
             if (bmp != null) return bmp
         }
 
-        // Probar cada archivo .mbtiles disponible (ej. murcia_sureste.mbtiles)
         mbtilesFiles.forEach { file ->
             val bmp = readFromMbtilesDatabase(file, lat, lng, zoom)
             if (bmp != null) return bmp
@@ -61,8 +64,10 @@ object MbtilesTileReader {
     }
 
     private fun readFromMbtilesDatabase(mbtilesFile: File, inputLat: Double, inputLng: Double, inputZoom: Int): Bitmap? {
+        Log.d(TAG, "Abriendo mapa MBTiles: ${mbtilesFile.absolutePath} (${mbtilesFile.length()} bytes)")
         return try {
-            val db = SQLiteDatabase.openDatabase(mbtilesFile.absolutePath, null, SQLiteDatabase.OPEN_READONLY)
+            val flags = SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+            val db = SQLiteDatabase.openDatabase(mbtilesFile.absolutePath, null, flags)
 
             var targetLat = inputLat
             var targetLng = inputLng
@@ -73,6 +78,7 @@ object MbtilesTileReader {
                 val boundsCursor = db.rawQuery("SELECT value FROM metadata WHERE name = 'bounds'", null)
                 if (boundsCursor.moveToFirst()) {
                     val boundsStr = boundsCursor.getString(0)
+                    Log.d(TAG, "Metadata Bounds: $boundsStr")
                     val parts = boundsStr.split(",")
                     if (parts.size == 4) {
                         val minLng = parts[0].toDoubleOrNull() ?: -2.5
@@ -87,26 +93,33 @@ object MbtilesTileReader {
                     }
                 }
                 boundsCursor.close()
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+                Log.e(TAG, "Error leyendo metadata: ${e.message}")
+            }
 
-            // 2. Obtener los niveles de zoom disponibles en la base de datos
+            // 2. Obtener los niveles de zoom disponibles
             try {
                 val zoomCursor = db.rawQuery("SELECT MIN(zoom_level), MAX(zoom_level) FROM tiles", null)
                 if (zoomCursor.moveToFirst()) {
                     val minZ = zoomCursor.getInt(0)
                     val maxZ = zoomCursor.getInt(1)
+                    Log.d(TAG, "Zoom niveles disponibles: min=$minZ, max=$maxZ")
                     if (maxZ > 0) {
                         targetZoom = targetZoom.coerceIn(minZ, maxZ)
                     }
                 }
                 zoomCursor.close()
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+                Log.e(TAG, "Error leyendo niveles zoom: ${e.message}")
+            }
 
-            // 3. Coordenadas de tesela TMS y OSM
+            // 3. Coordenadas de tesela
             val tileX = floor((targetLng + 180.0) / 360.0 * (1 shl targetZoom)).toInt()
             val latRad = Math.toRadians(targetLat)
             val tileYOsm = floor((1.0 - ln(tan(latRad) + 1.0 / cos(latRad)) / PI) / 2.0 * (1 shl targetZoom)).toInt()
             val tileYTms = ((1 shl targetZoom) - 1) - tileYOsm
+
+            Log.d(TAG, "Buscando tesela: Z=$targetZoom, X=$tileX, Y_tms=$tileYTms, Y_osm=$tileYOsm para Lat=$targetLat, Lng=$targetLng")
 
             val queries = listOf(
                 "SELECT tile_data FROM tiles WHERE zoom_level = $targetZoom AND tile_column = $tileX AND tile_row = $tileYTms",
@@ -125,17 +138,21 @@ object MbtilesTileReader {
                     if (cursor.moveToFirst()) {
                         val blob = cursor.getBlob(0)
                         if (blob != null && blob.isNotEmpty()) {
+                            Log.d(TAG, "Encontrado Blob SQLite: ${blob.size} bytes con consulta: $querySql")
                             bitmap = decodeTileDataToBitmap(blob)
                         }
                     }
                     cursor.close()
                     if (bitmap != null) break
-                } catch (e: Exception) {}
+                } catch (e: Exception) {
+                    Log.e(TAG, "Consulta fallida: $querySql -> ${e.message}")
+                }
             }
 
             db.close()
             bitmap
         } catch (e: Exception) {
+            Log.e(TAG, "Error fatal abriendo MBTiles: ${e.message}")
             null
         }
     }
@@ -143,12 +160,11 @@ object MbtilesTileReader {
     private fun decodeTileDataToBitmap(blob: ByteArray): Bitmap? {
         if (blob.isEmpty()) return null
 
-        // 1. Si es imagen PNG / JPEG directa
         if (isPngOrJpeg(blob)) {
+            Log.d(TAG, "Tesela es imagen PNG/JPEG raster directa (${blob.size} bytes)")
             return BitmapFactory.decodeByteArray(blob, 0, blob.size)
         }
 
-        // 2. Si es una tesela vectorial MVT / PBF comprimida en GZIP
         var rawData = blob
         if (isGzip(blob)) {
             try {
@@ -161,14 +177,19 @@ object MbtilesTileReader {
                 }
                 gis.close()
                 rawData = baos.toByteArray()
-            } catch (e: Exception) {}
+                Log.d(TAG, "Descomprimida tesela GZIP PBF/MVT a ${rawData.size} bytes")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error descomprimiendo GZIP: ${e.message}")
+            }
         }
 
-        // Si se descomprimió la tesela vectorial o es imagen raster decodificable
         val directBmp = BitmapFactory.decodeByteArray(rawData, 0, rawData.size)
-        if (directBmp != null) return directBmp
+        if (directBmp != null) {
+            Log.d(TAG, "Bitmap decodificado con exito (${directBmp.width}x${directBmp.height})")
+            return directBmp
+        }
 
-        // 3. Renderizar la geometría vectorial PBF en un Mapa Topográfico Bitmap
+        Log.d(TAG, "Renderizando tesela vectorial PBF/MVT...")
         return renderVectorPbfToBitmap(rawData)
     }
 
@@ -183,7 +204,7 @@ object MbtilesTileReader {
         return isPng || isJpeg
     }
 
-    private fun renderVectorPbfToBitmap(pbfBytes: ByteArray): Bitmap? {
+    private fun renderVectorPbfToBitmap(pbfBytes: ByteArray): Bitmap {
         val w = 512
         val h = 512
         val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
