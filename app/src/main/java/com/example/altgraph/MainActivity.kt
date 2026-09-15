@@ -1,15 +1,10 @@
 package com.example.altgraph
 
 import android.app.Activity
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
 import android.view.Gravity
 import android.view.View
 import android.widget.AdapterView
@@ -17,24 +12,17 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import java.util.Locale
 import kotlin.math.abs
 
 class MainActivity : Activity() {
 
     private lateinit var prefs: AppPreferences
-    private val scope = CoroutineScope(Dispatchers.Main)
-    private var downloadJob: Job? = null
-    private lateinit var installedMapsListLayout: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,7 +70,7 @@ class MainActivity : Activity() {
         headerCard.addView(title)
         headerCard.addView(subtitle)
 
-        // 2. Bar de Pestañas Categorizadas (5 Pestañas)
+        // 2. Bar de Pestañas Categorizadas (4 Pestañas)
         val tabBar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(
@@ -93,22 +81,20 @@ class MainActivity : Activity() {
             }
         }
 
-        // Contenedores de las 5 Pestañas
+        // Contenedores de las 4 Pestañas
         val tabEstiloContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val tab3dContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val tab2dContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val tabVamContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        val tabMapasContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
 
         val tabContainers = listOf(
             tabEstiloContainer,
             tab3dContainer,
             tab2dContainer,
-            tabVamContainer,
-            tabMapasContainer
+            tabVamContainer
         )
 
-        val tabTitles = listOf("🎨 Estilo", "🏔️ 3D", "📊 2D", "🚴 VAM", "🗺️ Mapas")
+        val tabTitles = listOf("🎨 Estilo", "🏔️ 3D", "📊 2D", "🚴 VAM")
         val tabButtons = mutableListOf<Button>()
 
         fun selectTab(activeIdx: Int) {
@@ -135,12 +121,12 @@ class MainActivity : Activity() {
         tabTitles.forEachIndexed { idx, titleStr ->
             val btn = Button(this).apply {
                 text = titleStr
-                textSize = 11f
+                textSize = 12f
                 typeface = Typeface.DEFAULT_BOLD
-                setPadding(2, 12, 2, 12)
+                setPadding(4, 12, 4, 12)
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f).apply {
-                    leftMargin = 2
-                    rightMargin = 2
+                    leftMargin = 3
+                    rightMargin = 3
                 }
                 setOnClickListener { selectTab(idx) }
             }
@@ -669,227 +655,6 @@ class MainActivity : Activity() {
         tabVamContainer.addView(vamCard)
         tabVamContainer.addView(asphaltCard)
 
-        // ==========================================
-        // PESTAÑA 5: 🗺️ CARTOGRAFÍA Y MAPAS PERSONALIZADOS (BikeSpot / OpenAndroMaps / OSM)
-        // ==========================================
-        
-        // Tarjeta 1: Descarga Directa IGN 1:25.000 por Provincias (50 Provincias de España)
-        val ignCard = createCardContainer()
-        val ignTitleLabel = createSectionLabel("🌐 DESCARGA DIRECTA IGN 1:25.000 POR PROVINCIA")
-        
-        val provinceSpinner = Spinner(this).apply {
-            val adapter = ArrayAdapter(
-                this@MainActivity,
-                android.R.layout.simple_spinner_dropdown_item,
-                MapManager.PROVINCES.map { "🗺️ Provincia de ${it.name}" }
-            )
-            setAdapter(adapter)
-
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                topMargin = 4
-                bottomMargin = 8
-            }
-        }
-
-        var selectedProvince = MapManager.PROVINCES[0]
-        provinceSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedProvince = MapManager.PROVINCES[position]
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-
-        val downloadProgressBar = ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal).apply {
-            isIndeterminate = false
-            max = 100
-            progress = 0
-            visibility = View.GONE
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                24
-            ).apply {
-                topMargin = 8
-                bottomMargin = 4
-            }
-        }
-
-        val downloadStatusText = TextView(this).apply {
-            text = ""
-            textSize = 12f
-            typeface = Typeface.DEFAULT_BOLD
-            setTextColor(Color.parseColor("#38BDF8"))
-            gravity = Gravity.CENTER
-            visibility = View.GONE
-            setPadding(0, 2, 0, 8)
-        }
-
-        // Tarjeta 3: Estado de Almacenamiento y Ajustes de Capa
-        val mapStatusCard = createCardContainer()
-        val mapStatusTitleLabel = createSectionLabel(getString(R.string.setting_custom_maps_title))
-        val mapDescText = TextView(this).apply {
-            text = getString(R.string.setting_custom_maps_desc)
-            textSize = 11f
-            setTextColor(Color.parseColor("#A1A1AA"))
-            gravity = Gravity.CENTER
-            setPadding(0, 2, 0, 8)
-        }
-
-        val freeStorage = MapManager.getFreeStorageBytes()
-        val storageInfoText = createValueText("💾 Espacio Libres: ${MapManager.formatBytes(freeStorage)}")
-
-        installedMapsListLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        }
-
-        val downloadIgnBtn = Button(this).apply {
-            text = "🌐 Descargar e Instalar Mapa IGN 1:25.000"
-            textSize = 14f
-            typeface = Typeface.DEFAULT_BOLD
-            setTextColor(Color.BLACK)
-            background = GradientDrawable().apply {
-                setColor(Color.parseColor("#38BDF8"))
-                cornerRadius = 18f
-            }
-            setPadding(16, 14, 16, 14)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                topMargin = 6
-                bottomMargin = 6
-            }
-            setOnClickListener {
-                if (!MapManager.isNetworkAvailable(this@MainActivity)) {
-                    downloadStatusText.visibility = View.VISIBLE
-                    downloadStatusText.text = "⚠️ Por favor conecta tu Karoo 3 a una red Wi-Fi para descargar mapas."
-                    downloadStatusText.setTextColor(Color.parseColor("#EAB308"))
-                    return@setOnClickListener
-                }
-
-                downloadProgressBar.visibility = View.VISIBLE
-                downloadProgressBar.progress = 0
-                downloadStatusText.visibility = View.VISIBLE
-                downloadStatusText.text = "⏬ Conectando servidor de mapas para ${selectedProvince.name}..."
-                downloadStatusText.setTextColor(Color.parseColor("#38BDF8"))
-
-                downloadJob?.cancel()
-                downloadJob = MapManager.downloadMapDirectHttp(
-                    province = selectedProvince,
-                    onProgress = { bytesDownloaded, totalBytes, percentage ->
-                        downloadProgressBar.progress = percentage
-                        downloadStatusText.text = "⏬ Descargando ${selectedProvince.name}: $percentage% (${MapManager.formatBytes(bytesDownloaded)} / ${MapManager.formatBytes(totalBytes)})"
-                    },
-                    onSuccess = { destFile ->
-                        downloadProgressBar.progress = 100
-                        refreshInstalledMapsList()
-                        downloadStatusText.text = "✅ ¡Descarga e Instalación Completada en /sdcard/Maps/!\n${destFile.name}"
-                        downloadStatusText.setTextColor(Color.parseColor("#22C55E"))
-                    },
-                    onError = { errorMsg ->
-                        downloadStatusText.text = "❌ $errorMsg"
-                        downloadStatusText.setTextColor(Color.parseColor("#EF4444"))
-                    }
-                )
-            }
-        }
-
-        val autoInstallBtn = Button(this).apply {
-            text = "⚡ Instalar Mapas Descargados en /sdcard/Maps/"
-            textSize = 13f
-            typeface = Typeface.DEFAULT_BOLD
-            setTextColor(Color.WHITE)
-            background = GradientDrawable().apply {
-                setColor(Color.parseColor("#22C55E"))
-                cornerRadius = 18f
-            }
-            setPadding(14, 12, 14, 12)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                topMargin = 4
-                bottomMargin = 4
-            }
-            setOnClickListener {
-                val moved = MapManager.installDownloadedMapsFromStorage()
-                refreshInstalledMapsList()
-                if (moved > 0) {
-                    Toast.makeText(
-                        this@MainActivity,
-                        "¡Éxito! $moved archivo(s) instalados correctamente en /sdcard/Maps/",
-                        Toast.LENGTH_LONG
-                    ).show()
-                } else {
-                    Toast.makeText(
-                        this@MainActivity,
-                        "Comprobando /sdcard/Maps/...",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
-        }
-
-        ignCard.addView(ignTitleLabel)
-        ignCard.addView(provinceSpinner)
-        ignCard.addView(downloadIgnBtn)
-        ignCard.addView(downloadProgressBar)
-        ignCard.addView(downloadStatusText)
-        ignCard.addView(autoInstallBtn)
-
-        // Tarjeta 2: Botón Destacado de Importación Directa de Archivos Locales
-        val importMapCard = createCardContainer()
-        val importTitleLabel = createSectionLabel("📂 IMPORTACIÓN DIRECTA DE ARCHIVOS LOCALES")
-        val importMapBtn = Button(this).apply {
-            text = "📂 Importar Mapa Local (.mbtiles / .map)"
-            textSize = 14f
-            typeface = Typeface.DEFAULT_BOLD
-            setTextColor(Color.WHITE)
-            background = GradientDrawable().apply {
-                setColor(Color.parseColor("#27272A"))
-                cornerRadius = 18f
-            }
-            setPadding(16, 12, 16, 12)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                topMargin = 4
-                bottomMargin = 4
-            }
-            setOnClickListener {
-                Toast.makeText(this@MainActivity, "Copia tus archivos .mbtiles o .map a la carpeta /sdcard/Maps/ de tu Karoo", Toast.LENGTH_LONG).show()
-            }
-        }
-        importMapCard.addView(importTitleLabel)
-        importMapCard.addView(importMapBtn)
-
-        val switchMapOverlay = Switch(this).apply {
-            text = "Activar Capa de Mapa Vectorial HD en Karoo"
-            textSize = 14f
-            setTextColor(Color.WHITE)
-            isChecked = prefs.showCustomMapOverlay
-            setOnCheckedChangeListener { _, isChecked ->
-                prefs.showCustomMapOverlay = isChecked
-            }
-        }
-
-        mapStatusCard.addView(mapStatusTitleLabel)
-        mapStatusCard.addView(mapDescText)
-        mapStatusCard.addView(storageInfoText)
-        mapStatusCard.addView(installedMapsListLayout)
-        mapStatusCard.addView(switchMapOverlay)
-
-        tabMapasContainer.addView(ignCard)
-        tabMapasContainer.addView(importMapCard)
-        tabMapasContainer.addView(mapStatusCard)
-
         // Botón de Guardar y Salir Fijado al Final
         val saveExitButton = Button(this).apply {
             text = "💾 " + getString(R.string.btn_save_and_exit)
@@ -920,7 +685,6 @@ class MainActivity : Activity() {
         rootLayout.addView(tab3dContainer)
         rootLayout.addView(tab2dContainer)
         rootLayout.addView(tabVamContainer)
-        rootLayout.addView(tabMapasContainer)
         rootLayout.addView(saveExitButton)
 
         scrollView.addView(rootLayout)
@@ -928,82 +692,6 @@ class MainActivity : Activity() {
 
         // Seleccionar pestaña por defecto (Tab 0: Estilo)
         selectTab(0)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        refreshInstalledMapsList()
-    }
-
-    private fun refreshInstalledMapsList() {
-        if (!::installedMapsListLayout.isInitialized) return
-        installedMapsListLayout.removeAllViews()
-        val installedMaps = MapManager.getInstalledMaps(this)
-        
-        if (installedMaps.isEmpty()) {
-            val emptyText = TextView(this).apply {
-                text = "🗺️ Mapas Instalados: 0"
-                textSize = 13f
-                typeface = Typeface.DEFAULT_BOLD
-                setTextColor(Color.WHITE)
-                gravity = Gravity.CENTER
-                setPadding(0, 0, 0, 8)
-            }
-            installedMapsListLayout.addView(emptyText)
-        } else {
-            val countText = TextView(this).apply {
-                text = "🗺️ Mapas Instalados: ${installedMaps.size}"
-                textSize = 14f
-                typeface = Typeface.DEFAULT_BOLD
-                setTextColor(Color.WHITE)
-                gravity = Gravity.CENTER
-                setPadding(0, 0, 0, 8)
-            }
-            installedMapsListLayout.addView(countText)
-
-            installedMaps.forEach { mapPkg ->
-                val row = LinearLayout(this).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    gravity = Gravity.CENTER_VERTICAL
-                    setPadding(0, 4, 0, 4)
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    )
-                }
-
-                val mapInfoText = TextView(this).apply {
-                    text = "• ${mapPkg.name}\n  (${MapManager.formatBytes(mapPkg.sizeBytes)})"
-                    textSize = 12f
-                    typeface = Typeface.DEFAULT_BOLD
-                    setTextColor(Color.parseColor("#38BDF8"))
-                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f)
-                }
-
-                val deleteSingleBtn = Button(this).apply {
-                    text = "🗑️ Borrar"
-                    textSize = 11f
-                    typeface = Typeface.DEFAULT_BOLD
-                    setTextColor(Color.WHITE)
-                    background = GradientDrawable().apply {
-                        setColor(Color.parseColor("#EF4444"))
-                        cornerRadius = 12f
-                    }
-                    setPadding(10, 6, 10, 6)
-                    setOnClickListener {
-                        val deleted = MapManager.deleteInstalledMapPackage(mapPkg.path)
-                        if (deleted) {
-                            Toast.makeText(this@MainActivity, "Mapa ${mapPkg.name} eliminado", Toast.LENGTH_SHORT).show()
-                            refreshInstalledMapsList()
-                        }
-                    }
-                }
-
-                row.addView(mapInfoText)
-                row.addView(deleteSingleBtn)
-                installedMapsListLayout.addView(row)
-            }
-        }
     }
 
     private fun createCardContainer(): LinearLayout {
@@ -1088,13 +776,13 @@ class MainActivity : Activity() {
             btn.setTextColor(Color.BLACK)
             btn.background = GradientDrawable().apply {
                 setColor(Color.parseColor("#38BDF8"))
-                cornerRadius = 14f
+                cornerRadius = 18f
             }
         } else {
             btn.setTextColor(Color.WHITE)
             btn.background = GradientDrawable().apply {
                 setColor(Color.parseColor("#27272A"))
-                cornerRadius = 14f
+                cornerRadius = 18f
             }
         }
     }
