@@ -97,16 +97,32 @@ object MapManager {
         val result = mutableListOf<MapPackage>()
         val processedNames = mutableSetOf<String>()
 
-        val candidateFiles = listOf(
+        val knownFiles = listOf(
+            File("/storage/emulated/0/offline/maps/alacant_oeste.mbtiles"),
+            File("/storage/emulated/0/offline/maps/albacete_este.mbtiles"),
+            File("/storage/emulated/0/offline/maps/albacete_oeste.mbtiles"),
+            File("/storage/emulated/0/offline/maps/albacete_sur.mbtiles"),
+            File("/storage/emulated/0/offline/maps/almeria_norte.mbtiles"),
+            File("/storage/emulated/0/offline/maps/granada_este.mbtiles"),
+            File("/storage/emulated/0/offline/maps/murcia_noreste.mbtiles"),
+            File("/storage/emulated/0/offline/maps/murcia_noroeste.mbtiles"),
+            File("/storage/emulated/0/offline/maps/murcia_sureste.mbtiles"),
+            File("/storage/emulated/0/offline/maps/murcia_suroeste.mbtiles"),
+            File("/storage/emulated/0/offline/maps/spain.map"),
+            File("/sdcard/offline/maps/alacant_oeste.mbtiles"),
+            File("/sdcard/offline/maps/albacete_este.mbtiles"),
+            File("/sdcard/offline/maps/albacete_oeste.mbtiles"),
+            File("/sdcard/offline/maps/albacete_sur.mbtiles"),
+            File("/sdcard/offline/maps/almeria_norte.mbtiles"),
+            File("/sdcard/offline/maps/granada_este.mbtiles"),
+            File("/sdcard/offline/maps/murcia_noreste.mbtiles"),
+            File("/sdcard/offline/maps/murcia_noroeste.mbtiles"),
             File("/sdcard/offline/maps/murcia_sureste.mbtiles"),
-            File("/sdcard/offline/maps/spain.map"),
-            File("/sdcard/offline/personal_heatmap.mbtiles"),
-            File("/sdcard/offline/contours/spain_contours.map"),
-            File(Environment.getExternalStorageDirectory(), "offline/maps/murcia_sureste.mbtiles"),
-            File(Environment.getExternalStorageDirectory(), "offline/maps/spain.map")
+            File("/sdcard/offline/maps/murcia_suroeste.mbtiles"),
+            File("/sdcard/offline/maps/spain.map")
         )
 
-        candidateFiles.forEach { file ->
+        knownFiles.forEach { file ->
             if (file.exists() && file.isFile && !processedNames.contains(file.name.lowercase())) {
                 processedNames.add(file.name.lowercase())
                 val name = file.name.lowercase()
@@ -127,7 +143,11 @@ object MapManager {
             }
         }
 
-        val searchDirs = listOf(
+        val directDirs = listOf(
+            File("/storage/emulated/0/offline/maps"),
+            File("/storage/emulated/0/offline"),
+            File("/storage/emulated/0/Maps"),
+            File("/storage/emulated/0/Download"),
             File("/sdcard/offline/maps"),
             File("/sdcard/offline"),
             File("/sdcard/Maps"),
@@ -138,9 +158,11 @@ object MapManager {
             File(Environment.getExternalStorageDirectory(), "Download")
         )
 
-        searchDirs.forEach { dir ->
+        directDirs.forEach { dir ->
             if (dir.exists() && dir.isDirectory) {
-                dir.listFiles()?.forEach { file ->
+                val fileNames = dir.list()
+                fileNames?.forEach { fileName ->
+                    val file = File(dir, fileName)
                     if (file.isFile && !processedNames.contains(file.name.lowercase())) {
                         val name = file.name.lowercase()
                         if (name.endsWith(".mbtiles") || name.endsWith(".map") || name.endsWith(".zip")) {
@@ -148,8 +170,7 @@ object MapManager {
                             val format = when {
                                 name.endsWith(".mbtiles") -> "MBTiles Vector HD Map"
                                 name.endsWith(".map") -> "Mapsforge Vector Map"
-                                name.endsWith(".zip") -> "Archive Map Package"
-                                else -> "Custom Map File"
+                                else -> "Archive Map Package"
                             }
                             result.add(
                                 MapPackage(
@@ -165,7 +186,6 @@ object MapManager {
                 }
             }
         }
-
         return result
     }
 

@@ -1,11 +1,15 @@
 package com.example.altgraph
 
 import android.app.Activity
-import android.app.DownloadManager
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.Settings
 import android.view.Gravity
 import android.view.View
 import android.widget.AdapterView
@@ -22,8 +26,6 @@ import android.widget.Toast
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.math.abs
 
@@ -32,6 +34,7 @@ class MainActivity : Activity() {
     private lateinit var prefs: AppPreferences
     private val scope = CoroutineScope(Dispatchers.Main)
     private var downloadJob: Job? = null
+    private lateinit var installedMapsListLayout: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -737,86 +740,13 @@ class MainActivity : Activity() {
         val freeStorage = MapManager.getFreeStorageBytes()
         val storageInfoText = createValueText("💾 Espacio Libres: ${MapManager.formatBytes(freeStorage)}")
 
-        val installedMapsListLayout = LinearLayout(this).apply {
+        installedMapsListLayout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
         }
-
-        fun refreshInstalledMapsList() {
-            installedMapsListLayout.removeAllViews()
-            val installedMaps = MapManager.getInstalledMaps(this@MainActivity)
-            
-            if (installedMaps.isEmpty()) {
-                val emptyText = TextView(this@MainActivity).apply {
-                    text = "🗺️ Mapas Instalados: 0"
-                    textSize = 13f
-                    typeface = Typeface.DEFAULT_BOLD
-                    setTextColor(Color.WHITE)
-                    gravity = Gravity.CENTER
-                    setPadding(0, 0, 0, 8)
-                }
-                installedMapsListLayout.addView(emptyText)
-            } else {
-                val countText = TextView(this@MainActivity).apply {
-                    text = "🗺️ Mapas Instalados: ${installedMaps.size}"
-                    textSize = 14f
-                    typeface = Typeface.DEFAULT_BOLD
-                    setTextColor(Color.WHITE)
-                    gravity = Gravity.CENTER
-                    setPadding(0, 0, 0, 8)
-                }
-                installedMapsListLayout.addView(countText)
-
-                installedMaps.forEach { mapPkg ->
-                    val row = LinearLayout(this@MainActivity).apply {
-                        orientation = LinearLayout.HORIZONTAL
-                        gravity = Gravity.CENTER_VERTICAL
-                        setPadding(0, 4, 0, 4)
-                        layoutParams = LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT
-                        )
-                    }
-
-                    val mapInfoText = TextView(this@MainActivity).apply {
-                        text = "• ${mapPkg.name}\n  (${MapManager.formatBytes(mapPkg.sizeBytes)})"
-                        textSize = 12f
-                        typeface = Typeface.DEFAULT_BOLD
-                        setTextColor(Color.parseColor("#38BDF8"))
-                        layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f)
-                    }
-
-                    val deleteSingleBtn = Button(this@MainActivity).apply {
-                        text = "🗑️ Borrar"
-                        textSize = 11f
-                        typeface = Typeface.DEFAULT_BOLD
-                        setTextColor(Color.WHITE)
-                        background = GradientDrawable().apply {
-                            setColor(Color.parseColor("#EF4444"))
-                            cornerRadius = 12f
-                        }
-                        setPadding(10, 6, 10, 6)
-                        setOnClickListener {
-                            val deleted = MapManager.deleteInstalledMapPackage(mapPkg.path)
-                            if (deleted) {
-                                Toast.makeText(this@MainActivity, "Mapa ${mapPkg.name} eliminado", Toast.LENGTH_SHORT).show()
-                                refreshInstalledMapsList()
-                            }
-                        }
-                    }
-
-                    row.addView(mapInfoText)
-                    row.addView(deleteSingleBtn)
-                    installedMapsListLayout.addView(row)
-                }
-            }
-        }
-
-        // Cargar listado inicial
-        refreshInstalledMapsList()
 
         val downloadIgnBtn = Button(this).apply {
             text = "🌐 Descargar e Instalar Mapa IGN 1:25.000"
@@ -998,6 +928,82 @@ class MainActivity : Activity() {
 
         // Seleccionar pestaña por defecto (Tab 0: Estilo)
         selectTab(0)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshInstalledMapsList()
+    }
+
+    private fun refreshInstalledMapsList() {
+        if (!::installedMapsListLayout.isInitialized) return
+        installedMapsListLayout.removeAllViews()
+        val installedMaps = MapManager.getInstalledMaps(this)
+        
+        if (installedMaps.isEmpty()) {
+            val emptyText = TextView(this).apply {
+                text = "🗺️ Mapas Instalados: 0"
+                textSize = 13f
+                typeface = Typeface.DEFAULT_BOLD
+                setTextColor(Color.WHITE)
+                gravity = Gravity.CENTER
+                setPadding(0, 0, 0, 8)
+            }
+            installedMapsListLayout.addView(emptyText)
+        } else {
+            val countText = TextView(this).apply {
+                text = "🗺️ Mapas Instalados: ${installedMaps.size}"
+                textSize = 14f
+                typeface = Typeface.DEFAULT_BOLD
+                setTextColor(Color.WHITE)
+                gravity = Gravity.CENTER
+                setPadding(0, 0, 0, 8)
+            }
+            installedMapsListLayout.addView(countText)
+
+            installedMaps.forEach { mapPkg ->
+                val row = LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                    setPadding(0, 4, 0, 4)
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                }
+
+                val mapInfoText = TextView(this).apply {
+                    text = "• ${mapPkg.name}\n  (${MapManager.formatBytes(mapPkg.sizeBytes)})"
+                    textSize = 12f
+                    typeface = Typeface.DEFAULT_BOLD
+                    setTextColor(Color.parseColor("#38BDF8"))
+                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f)
+                }
+
+                val deleteSingleBtn = Button(this).apply {
+                    text = "🗑️ Borrar"
+                    textSize = 11f
+                    typeface = Typeface.DEFAULT_BOLD
+                    setTextColor(Color.WHITE)
+                    background = GradientDrawable().apply {
+                        setColor(Color.parseColor("#EF4444"))
+                        cornerRadius = 12f
+                    }
+                    setPadding(10, 6, 10, 6)
+                    setOnClickListener {
+                        val deleted = MapManager.deleteInstalledMapPackage(mapPkg.path)
+                        if (deleted) {
+                            Toast.makeText(this@MainActivity, "Mapa ${mapPkg.name} eliminado", Toast.LENGTH_SHORT).show()
+                            refreshInstalledMapsList()
+                        }
+                    }
+                }
+
+                row.addView(mapInfoText)
+                row.addView(deleteSingleBtn)
+                installedMapsListLayout.addView(row)
+            }
+        }
     }
 
     private fun createCardContainer(): LinearLayout {
