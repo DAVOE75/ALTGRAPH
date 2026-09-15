@@ -9,9 +9,6 @@
     <string name="data_type_altimetria_3d_title">3D Höhenprofil</string>
     <string name="data_type_altimetria_3d_desc">Isometrisches 3D-Höhenprofil mit Geländerelief</string>
 
-    <string name="data_type_altgraph_map_title">ALTGRAPH Topo Karte</string>
-    <string name="data_type_altgraph_map_desc">Hochauflösende Vektorkarte mit Reliefschattierung und Fahrerbake</string>
-
     <string name="data_type_fatigue_grade_title">Ermüdungsgrad (GF)</string>
     <string name="data_type_fatigue_grade_desc">Wissenschaftlicher Schwierigkeits- und Ermüdungsindex</string>
 

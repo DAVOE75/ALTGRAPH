@@ -9,14 +9,11 @@
     <string name="data_type_altimetria_3d_title">Altimetria 3D</string>
     <string name="data_type_altimetria_3d_desc">Profilo 3D in prospettiva isometrica con rilievo della pendenza</string>
 
-    <string name="data_type_altgraph_map_title">Mappa Topo ALTGRAPH</string>
-    <string name="data_type_altgraph_map_desc">Mappa topografica vettoriale HD con ombreggiatura del rilievo e balisa del ciclista</string>
-
     <string name="data_type_fatigue_grade_title">Grado di Fatica (GF)</string>
     <string name="data_type_fatigue_grade_desc">Indice scientifico di difficoltà e fatica della salita</string>
 
     <string name="data_type_climb_pacing_title">Ritmo VAM Obiettivo</string>
-    <string name="data_type_climb_pacing_desc">Assistente di ritmo VAM (m/h) secondo la pendenza attuale</string>
+    <string name="data_type_climb_pacing_desc">Assistente di ritmo VAM (m/h) secondo la pendenzaattuale</string>
 
     <string name="data_type_gradient_trend_title">Tendenza 3D e Pendenza Max</string>
     <string name="data_type_gradient_trend_desc">Tendenza della pendenza in tempo reale e picco massimo nel tratto</string>
