@@ -212,25 +212,19 @@ object IgnMbtilesTileEngine {
                 }
             }
 
-            val fallbacks = listOf(
-                "SELECT tile_data FROM tiles WHERE zoom_level = 14 LIMIT 1",
-                "SELECT tile_data FROM tiles WHERE zoom_level = 15 LIMIT 1",
-                "SELECT tile_data FROM tiles LIMIT 1"
-            )
-            for (fq in fallbacks) {
-                try {
-                    val fc = db.rawQuery(fq, null)
-                    if (fc.moveToFirst()) {
-                        val blob = fc.getBlob(0)
-                        if (blob != null && blob.isNotEmpty()) {
-                            val bmp = BitmapFactory.decodeByteArray(blob, 0, blob.size)
-                            fc.close()
-                            if (bmp != null) return bmp
-                        }
+            // REFORZAR: Cargar la primera tesela válida disponible en la base de datos si las coordenadas fallan
+            try {
+                val fc = db.rawQuery("SELECT tile_data FROM tiles LIMIT 1", null)
+                if (fc.moveToFirst()) {
+                    val blob = fc.getBlob(0)
+                    if (blob != null && blob.isNotEmpty()) {
+                        val bmp = BitmapFactory.decodeByteArray(blob, 0, blob.size)
+                        fc.close()
+                        if (bmp != null) return bmp
                     }
-                    fc.close()
-                } catch (e: Exception) {}
-            }
+                }
+                fc.close()
+            } catch (e: Exception) {}
 
             null
         } catch (e: Exception) {
