@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Environment
+import android.util.Log
 import java.io.File
 import kotlin.math.PI
 import kotlin.math.floor
@@ -20,74 +21,28 @@ data class IgnMapInfo(
 
 object IgnMbtilesTileEngine {
 
-    private var activeDb: SQLiteDatabase? = null
-    private var activeDbPath: String? = null
-
-    private val MAP_SEARCH_DIRS = listOf(
-        File("/sdcard/offline/maps"),
-        File("/sdcard/maps"),
-        File("/sdcard/Maps"),
-        File("/sdcard/offline/Maps"),
-        File("/storage/emulated/0/offline/maps"),
-        File("/storage/emulated/0/maps"),
-        File("/storage/emulated/0/Maps"),
-        File(Environment.getExternalStorageDirectory(), "offline/maps"),
-        File(Environment.getExternalStorageDirectory(), "maps"),
-        File(Environment.getExternalStorageDirectory(), "Maps"),
-        File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), ""),
-        File(Environment.getExternalStorageDirectory(), "Download")
-    )
+    private const val TAG = "IGN_MAP"
 
     fun getInstalledIgnMaps(context: Context): List<IgnMapInfo> {
         val result = mutableListOf<IgnMapInfo>()
-        val processedPaths = mutableSetOf<String>()
+        val processedNames = mutableSetOf<String>()
         val activeMapName = AppPreferences.getInstance(context).customMapProvider
 
-        val explicitCandidateFiles = listOf(
-            File("/sdcard/offline/maps/murcia_sureste.mbtiles"),
-            File("/sdcard/offline/maps/granada_este.mbtiles"),
-            File("/sdcard/offline/maps/albacete_sur.mbtiles"),
-            File("/sdcard/offline/maps/murcia_suroeste.mbtiles"),
-            File("/sdcard/offline/maps/alacant_oeste.mbtiles"),
-            File("/sdcard/offline/maps/albacete_este.mbtiles"),
-            File("/sdcard/offline/maps/murcia_noroeste.mbtiles"),
-            File("/sdcard/offline/maps/albacete_oeste.mbtiles"),
-            File("/sdcard/offline/maps/murcia_noreste.mbtiles"),
-            File("/sdcard/offline/maps/almeria_norte.mbtiles"),
-            File("/storage/emulated/0/offline/maps/murcia_sureste.mbtiles"),
-            File("/storage/emulated/0/offline/maps/granada_este.mbtiles"),
-            File("/storage/emulated/0/offline/maps/albacete_sur.mbtiles"),
-            File("/storage/emulated/0/offline/maps/murcia_suroeste.mbtiles"),
-            File("/storage/emulated/0/offline/maps/alacant_oeste.mbtiles"),
-            File("/storage/emulated/0/offline/maps/albacete_este.mbtiles"),
-            File("/storage/emulated/0/offline/maps/murcia_noroeste.mbtiles"),
-            File("/storage/emulated/0/offline/maps/albacete_oeste.mbtiles"),
-            File("/storage/emulated/0/offline/maps/murcia_noreste.mbtiles"),
-            File("/storage/emulated/0/offline/maps/almeria_norte.mbtiles")
-        )
+        val searchDirs = listOf(
+            context.filesDir,
+            context.getExternalFilesDir("maps") ?: File(""),
+            File("/sdcard/offline/maps"),
+            File("/sdcard/maps"),
+            File("/sdcard/Maps"),
+            File("/storage/emulated/0/offline/maps"),
+            File(Environment.getExternalStorageDirectory(), "offline/maps")
+        ).filter { it != File("") }
 
-        explicitCandidateFiles.forEach { file ->
-            if (file.exists() && file.isFile && !processedPaths.contains(file.name.lowercase())) {
-                processedPaths.add(file.name.lowercase())
-                val isActive = file.name.equals(activeMapName, ignoreCase = true) || (activeMapName.isEmpty() && result.isEmpty())
-                result.add(
-                    IgnMapInfo(
-                        fileName = file.name,
-                        filePath = file.absolutePath,
-                        sizeBytes = file.length(),
-                        isActive = isActive
-                    )
-                )
-            }
-        }
-
-        MAP_SEARCH_DIRS.forEach { dir ->
+        searchDirs.forEach { dir ->
             if (dir.exists() && dir.isDirectory) {
-                val fileNames = dir.list()
-                fileNames?.forEach { fileName ->
-                    val file = File(dir, fileName)
-                    if (file.isFile && file.name.lowercase().endsWith(".mbtiles") && !processedPaths.contains(file.name.lowercase())) {
-                        processedPaths.add(file.name.lowercase())
+                dir.listFiles()?.forEach { file ->
+                    if (file.isFile && file.name.lowercase().endsWith(".mbtiles") && !processedNames.contains(file.name.lowercase())) {
+                        processedNames.add(file.name.lowercase())
                         val isActive = file.name.equals(activeMapName, ignoreCase = true) || (activeMapName.isEmpty() && result.isEmpty())
                         result.add(
                             IgnMapInfo(
@@ -116,26 +71,20 @@ object IgnMbtilesTileEngine {
         activeMaps.addAll(maps.filter { !it.fileName.equals(selectedName, ignoreCase = true) })
 
         for (mapInfo in activeMaps) {
-            val bmp = queryExactTileFromMap(context, mapInfo, lat, lng, preferredZoom)
+            val bmp = queryExactTileFromMap(mapInfo, lat, lng, preferredZoom)
             if (bmp != null) return bmp
         }
 
         return null
     }
 
-    private fun queryExactTileFromMap(context: Context, mapInfo: IgnMapInfo, inputLat: Double, inputLng: Double, preferredZoom: Int): Bitmap? {
+    private fun queryExactTileFromMap(mapInfo: IgnMapInfo, inputLat: Double, inputLng: Double, preferredZoom: Int): Bitmap? {
         return try {
-            if (activeDbPath != mapInfo.filePath || activeDb == null || !activeDb!!.isOpen) {
-                try {
-                    activeDb?.close()
-                    activeDb = getReadableDatabase(context, mapInfo)
-                    activeDbPath = mapInfo.filePath
-                } catch (e: Exception) {
-                    return null
-                }
-            }
+            val sourceFile = File(mapInfo.filePath)
+            if (!sourceFile.exists()) return null
 
-            val db = activeDb ?: return null
+            val flags = SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
+            val db = SQLiteDatabase.openDatabase(sourceFile.absolutePath, null, flags)
 
             var targetLat = inputLat
             var targetLng = inputLng
@@ -202,9 +151,8 @@ object IgnMbtilesTileEngine {
                             if (blob != null && blob.isNotEmpty()) {
                                 val bmp = BitmapFactory.decodeByteArray(blob, 0, blob.size)
                                 c.close()
-                                if (bmp != null) {
-                                    return bmp
-                                }
+                                db.close()
+                                if (bmp != null) return bmp
                             }
                         }
                         c.close()
@@ -212,7 +160,6 @@ object IgnMbtilesTileEngine {
                 }
             }
 
-            // REFORZAR: Cargar la primera tesela válida disponible en la base de datos si las coordenadas fallan
             try {
                 val fc = db.rawQuery("SELECT tile_data FROM tiles LIMIT 1", null)
                 if (fc.moveToFirst()) {
@@ -220,35 +167,17 @@ object IgnMbtilesTileEngine {
                     if (blob != null && blob.isNotEmpty()) {
                         val bmp = BitmapFactory.decodeByteArray(blob, 0, blob.size)
                         fc.close()
+                        db.close()
                         if (bmp != null) return bmp
                     }
                 }
                 fc.close()
             } catch (e: Exception) {}
 
+            db.close()
             null
         } catch (e: Exception) {
             null
-        }
-    }
-
-    private fun getReadableDatabase(context: Context, mapInfo: IgnMapInfo): SQLiteDatabase? {
-        try {
-            val sourceFile = File(mapInfo.filePath)
-            if (!sourceFile.exists()) return null
-
-            val cacheFile = File(context.cacheDir, mapInfo.fileName)
-            if (!cacheFile.exists() || cacheFile.length() != sourceFile.length()) {
-                try {
-                    sourceFile.copyTo(cacheFile, overwrite = true)
-                } catch (e: Exception) {}
-            }
-
-            val fileToOpen = if (cacheFile.exists() && cacheFile.canRead()) cacheFile else sourceFile
-            val flags = SQLiteDatabase.OPEN_READONLY or SQLiteDatabase.NO_LOCALIZED_COLLATORS
-            return SQLiteDatabase.openDatabase(fileToOpen.absolutePath, null, flags)
-        } catch (e: Exception) {
-            return null
         }
     }
 

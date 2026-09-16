@@ -22,6 +22,7 @@ import android.widget.Spinner
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import java.io.File
 import java.util.Locale
 import kotlin.math.abs
 
@@ -29,6 +30,7 @@ class MainActivity : Activity() {
 
     private lateinit var prefs: AppPreferences
     private lateinit var installedMapsListLayout: LinearLayout
+    private val PICK_MBTILES_REQUEST = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -686,11 +688,36 @@ class MainActivity : Activity() {
         val ignMapCard = createCardContainer()
         val ignMapTitleLabel = createSectionLabel("🗺️ CARTOGRAFÍA IGN MBTILES INSTALADA")
         val ignMapDescText = TextView(this).apply {
-            text = "Para usar tus mapas de la web del IGN o CNIG en el Karoo 3, copia tus archivos .mbtiles en la carpeta:\nAlmacenamiento interno compartido > offline > maps"
+            text = "Selecciona el archivo .mbtiles de tu dispositivo para cargarlo directamente en ALTGRAPH."
             textSize = 12f
             setTextColor(Color.parseColor("#A1A1AA"))
             gravity = Gravity.CENTER
             setPadding(0, 4, 0, 12)
+        }
+
+        val importBtn = Button(this).apply {
+            text = "📂 Importar Archivo .mbtiles"
+            textSize = 14f
+            typeface = Typeface.DEFAULT_BOLD
+            setTextColor(Color.WHITE)
+            background = GradientDrawable().apply {
+                setColor(Color.parseColor("#38BDF8"))
+                cornerRadius = 18f
+            }
+            setPadding(16, 12, 16, 12)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = 12
+            }
+            setOnClickListener {
+                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "*/*"
+                }
+                startActivityForResult(intent, PICK_MBTILES_REQUEST)
+            }
         }
 
         installedMapsListLayout = LinearLayout(this).apply {
@@ -703,6 +730,7 @@ class MainActivity : Activity() {
 
         ignMapCard.addView(ignMapTitleLabel)
         ignMapCard.addView(ignMapDescText)
+        ignMapCard.addView(importBtn)
         ignMapCard.addView(installedMapsListLayout)
 
         tabMapasContainer.addView(ignMapCard)
@@ -752,6 +780,40 @@ class MainActivity : Activity() {
         refreshInstalledMapsList()
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_MBTILES_REQUEST && resultCode == RESULT_OK) {
+            data?.data?.let { uri ->
+                try {
+                    contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    var fileName = "imported_map.mbtiles"
+                    val cursor = contentResolver.query(uri, null, null, null, null)
+                    cursor?.use {
+                        if (it.moveToFirst()) {
+                            val nameIndex = it.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                            if (nameIndex >= 0) {
+                                fileName = it.getString(nameIndex)
+                            }
+                        }
+                    }
+
+                    val destFile = File(filesDir, fileName)
+                    contentResolver.openInputStream(uri)?.use { input ->
+                        destFile.outputStream().use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+
+                    prefs.customMapProvider = fileName
+                    Toast.makeText(this, "¡Mapa $fileName importado con éxito!", Toast.LENGTH_LONG).show()
+                    refreshInstalledMapsList()
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Error importando: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
     private fun refreshInstalledMapsList() {
         if (!::installedMapsListLayout.isInitialized) return
         installedMapsListLayout.removeAllViews()
@@ -759,7 +821,7 @@ class MainActivity : Activity() {
 
         if (installedMaps.isEmpty()) {
             val emptyText = TextView(this).apply {
-                text = "🗺️ No se han encontrado archivos .mbtiles en /sdcard/offline/maps/\n\nCopia tus archivos .mbtiles desde el PC para activarlos."
+                text = "🗺️ No hay mapas seleccionados.\n\nPulsa el botón de arriba para importar tu archivo .mbtiles."
                 textSize = 12f
                 typeface = Typeface.DEFAULT_BOLD
                 setTextColor(Color.parseColor("#EAB308"))
@@ -769,7 +831,7 @@ class MainActivity : Activity() {
             installedMapsListLayout.addView(emptyText)
         } else {
             val countText = TextView(this).apply {
-                text = "🗺️ Mapas IGN MBTILES Detectados: ${installedMaps.size}"
+                text = "🗺️ Mapas Disponibles: ${installedMaps.size}"
                 textSize = 13f
                 typeface = Typeface.DEFAULT_BOLD
                 setTextColor(Color.WHITE)
