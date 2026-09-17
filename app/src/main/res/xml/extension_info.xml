@@ -41,11 +41,4 @@
         graphical="false"
         icon="@drawable/ic_altigraph_logo" />
 
-    <DataType
-        typeId="altgraph_map"
-        displayName="@string/data_type_altgraph_map_title"
-        description="@string/data_type_altgraph_map_desc"
-        graphical="true"
-        icon="@drawable/ic_altigraph_logo" />
-
 </ExtensionInfo>

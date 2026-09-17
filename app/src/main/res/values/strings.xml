@@ -18,9 +18,6 @@
     <string name="data_type_gradient_trend_title">3D Gradient Trend &amp; Max Ramp</string>
     <string name="data_type_gradient_trend_desc">Real-time gradient trend (Steepening/Easing) &amp; max % peak in segment</string>
 
-    <string name="data_type_altgraph_map_title">Mapa Topográfico IGN (ALTGRAPH)</string>
-    <string name="data_type_altgraph_map_desc">Mapa topográfico IGN 1:25.000 MBTILES a pantalla completa con ruta y posición GPS</string>
-
     <!-- UI Labels for AltimetriaView -->
     <string name="header_climb_strategist">CLIMB STRATEGIST</string>
     <string name="label_dist_remaining">DIST. REMAINING</string>
@@ -58,8 +55,6 @@
     <string name="setting_poi_viewpoints">📸 Viewpoints</string>
     <string name="setting_poi_summits">📡 Summits &amp; Passes</string>
     <string name="setting_show_3d_zoom">Enable Touch Zoom Controls (🔍) on 3D Graph</string>
-    <string name="setting_custom_maps_title">Custom Cartography &amp; Map Packages Manager</string>
-    <string name="setting_custom_maps_desc">Scans and imports high-definition vector offline map packages (.mbtiles / .map) with contour lines and hydrography for Karoo</string>
     <string name="font_normal">Normal</string>
     <string name="font_large">Large</string>
     <string name="font_xl">XL</string>

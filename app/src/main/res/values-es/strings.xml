@@ -18,9 +18,6 @@
     <string name="data_type_gradient_trend_title">Tendencia 3D y Rampa Máxima</string>
     <string name="data_type_gradient_trend_desc">Tendencia de pendiente en tiempo real y pico máximo % del tramo</string>
 
-    <string name="data_type_altgraph_map_title">Mapa Topográfico IGN (ALTGRAPH)</string>
-    <string name="data_type_altgraph_map_desc">Mapa topográfico IGN 1:25.000 MBTILES a pantalla completa con ruta y posición GPS</string>
-
     <!-- UI Labels for AltimetriaView -->
     <string name="header_climb_strategist">ESTRATEGA DE PUERTO</string>
     <string name="label_dist_remaining">DIST. RESTANTE</string>
@@ -58,8 +55,6 @@
     <string name="setting_poi_viewpoints">📸 Miradores y Panorámicas</string>
     <string name="setting_poi_summits">📡 Cimas y Puertos</string>
     <string name="setting_show_3d_zoom">Mostrar Controles de Zoom Táctil (🔍) en Gráfico 3D</string>
-    <string name="setting_custom_maps_title">Gestor e Instalador de Cartografía Personalizada</string>
-    <string name="setting_custom_maps_desc">Permite detectar e importar paquetes de mapas vectoriales offline (.mbtiles / .map) de alta definición con curvas de nivel e hidrografía para Karoo</string>
     <string name="font_normal">Normal</string>
     <string name="font_large">Large</string>
     <string name="font_xl">Extra Gr.</string>
