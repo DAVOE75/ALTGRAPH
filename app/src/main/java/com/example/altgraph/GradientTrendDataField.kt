@@ -5,11 +5,13 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.view.View
 import android.widget.RemoteViews
+import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.hammerhead.karooext.internal.Emitter
 import io.hammerhead.karooext.internal.ViewEmitter
 import io.hammerhead.karooext.models.DataPoint
 import io.hammerhead.karooext.models.DataType
+import io.hammerhead.karooext.models.OnStreamState
 import io.hammerhead.karooext.models.StreamState
 import io.hammerhead.karooext.models.UpdateGraphicConfig
 import io.hammerhead.karooext.models.ViewConfig
@@ -25,6 +27,7 @@ class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradi
     private var streamJob: Job? = null
     private var viewJob: Job? = null
     private val trendTracker = GradientTrendTracker()
+    private var karooSystem: KarooSystemService? = null
 
     var currentGradientPct: Double = 0.0
 
@@ -66,6 +69,24 @@ class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradi
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
         emitter.onNext(UpdateGraphicConfig(showHeader = false))
 
+        if (karooSystem == null) {
+            val system = KarooSystemService(context)
+            system.connect { connected ->
+                if (connected) {
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.ELEVATION_GRADE)) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val grade = streamState.dataPoint.values[DataType.Field.ELEVATION_GRADE]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE]
+                                ?: 0.0
+                            currentGradientPct = grade
+                        }
+                    }
+                }
+            }
+            karooSystem = system
+        }
+
         val w = if (config.viewSize.first > 0) config.viewSize.first else 480
         val h = if (config.viewSize.second > 0) config.viewSize.second else 240
 
@@ -99,6 +120,8 @@ class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradi
 
         emitter.setCancellable {
             viewJob?.cancel()
+            karooSystem?.disconnect()
+            karooSystem = null
         }
     }
 }

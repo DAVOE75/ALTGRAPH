@@ -22,8 +22,8 @@ object ClimbPacingCalculator {
         currentGradientPct: Double,
         userTargetVam: Int = 900
     ): PacingResult {
-        // En parado / interiores (Modo Demo de prueba)
-        if (currentSpeedMps <= 0.1 || currentGradientPct <= 0.5) {
+        // En parado / interiores (Modo Demo de prueba cuando no hay movimiento)
+        if (currentSpeedMps <= 0.1) {
             val demoGrade = 7.2
             val demoSpeedKmh = (userTargetVam.toDouble() / (demoGrade * 10.0)).coerceIn(3.0, 45.0)
             val demoVam = 850
@@ -36,7 +36,22 @@ object ClimbPacingCalculator {
             )
         }
 
-        // VAM instantánea = m/s * 3600 * (pendiente / 100)
+        // Si rodamos en llano o bajada (pendiente <= 0.5%)
+        if (currentGradientPct <= 0.5) {
+            val calculatedVam = if (currentGradientPct > 0.0) {
+                (currentSpeedMps * 3600.0 * (currentGradientPct / 100.0)).roundToInt()
+            } else {
+                0
+            }
+            return PacingResult(
+                currentVam = calculatedVam,
+                targetVam = userTargetVam,
+                targetSpeedKmh = 0.0,
+                status = PacingStatus.ON_PACE
+            )
+        }
+
+        // En subida activa: VAM instantánea = m/s * 3600 * (pendiente / 100)
         val calculatedVam = (currentSpeedMps * 3600.0 * (currentGradientPct / 100.0)).roundToInt()
 
         // Velocidad objetivo en km/h para mantener la VAM deseada

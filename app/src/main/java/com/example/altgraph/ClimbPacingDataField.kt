@@ -5,11 +5,13 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.view.View
 import android.widget.RemoteViews
+import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.hammerhead.karooext.internal.Emitter
 import io.hammerhead.karooext.internal.ViewEmitter
 import io.hammerhead.karooext.models.DataPoint
 import io.hammerhead.karooext.models.DataType
+import io.hammerhead.karooext.models.OnStreamState
 import io.hammerhead.karooext.models.StreamState
 import io.hammerhead.karooext.models.UpdateGraphicConfig
 import io.hammerhead.karooext.models.ViewConfig
@@ -24,6 +26,7 @@ class ClimbPacingDataField(extension: String) : DataTypeImpl(extension, "climb_p
     private val scope = CoroutineScope(Dispatchers.Main)
     private var streamJob: Job? = null
     private var viewJob: Job? = null
+    private var karooSystem: KarooSystemService? = null
 
     var currentSpeedMps: Double = 0.0
     var currentGradientPct: Double = 0.0
@@ -62,6 +65,34 @@ class ClimbPacingDataField(extension: String) : DataTypeImpl(extension, "climb_p
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
         emitter.onNext(UpdateGraphicConfig(showHeader = false))
 
+        if (karooSystem == null) {
+            val system = KarooSystemService(context)
+            system.connect { connected ->
+                if (connected) {
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.SPEED)) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val spd = streamState.dataPoint.values[DataType.Field.SPEED]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE]
+                                ?: 0.0
+                            currentSpeedMps = spd
+                        }
+                    }
+
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.ELEVATION_GRADE)) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val grade = streamState.dataPoint.values[DataType.Field.ELEVATION_GRADE]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE]
+                                ?: 0.0
+                            currentGradientPct = grade
+                        }
+                    }
+                }
+            }
+            karooSystem = system
+        }
+
         val w = if (config.viewSize.first > 0) config.viewSize.first else 480
         val h = if (config.viewSize.second > 0) config.viewSize.second else 240
 
@@ -99,6 +130,8 @@ class ClimbPacingDataField(extension: String) : DataTypeImpl(extension, "climb_p
 
         emitter.setCancellable {
             viewJob?.cancel()
+            karooSystem?.disconnect()
+            karooSystem = null
         }
     }
 }

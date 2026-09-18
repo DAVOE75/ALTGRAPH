@@ -11,6 +11,7 @@ import io.hammerhead.karooext.internal.Emitter
 import io.hammerhead.karooext.internal.ViewEmitter
 import io.hammerhead.karooext.models.DataPoint
 import io.hammerhead.karooext.models.DataType
+import io.hammerhead.karooext.models.OnLocationChanged
 import io.hammerhead.karooext.models.OnNavigationState
 import io.hammerhead.karooext.models.OnStreamState
 import io.hammerhead.karooext.models.StreamState
@@ -66,37 +67,48 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                         val state = navEvent.state
                         if (state is OnNavigationState.NavigationState.NavigatingRoute) {
                             calculator.setRouteFromPolyline(state.routePolyline)
+                            calculator.setRoutePois(state.pois)
                         } else {
                             calculator.clearRoute()
                         }
                     }
 
                     // Consumidor 2: Velocidad Instantánea en tiempo real (m/s)
-                    system.addConsumer(OnStreamState.StartStreaming("SPEED")) { state: OnStreamState ->
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.SPEED)) { state: OnStreamState ->
                         val streamState = state.state
                         if (streamState is StreamState.Streaming) {
-                            val spd = streamState.dataPoint.values[DataType.Field.SINGLE] ?: 0.0
+                            val spd = streamState.dataPoint.values[DataType.Field.SPEED]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE]
+                                ?: 0.0
                             calculator.currentSpeed = spd
                         }
                     }
 
                     // Consumidor 3: Altitud Barométrica Instantánea en tiempo real (metros)
-                    system.addConsumer(OnStreamState.StartStreaming("ELEVATION")) { state: OnStreamState ->
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.PRESSURE_ELEVATION_CORRECTION)) { state: OnStreamState ->
                         val streamState = state.state
                         if (streamState is StreamState.Streaming) {
-                            val elev = streamState.dataPoint.values[DataType.Field.SINGLE] ?: 0.0
+                            val elev = streamState.dataPoint.values[DataType.Field.PRESSURE_ELEVATION]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE]
+                                ?: 0.0
                             calculator.updateLiveElevation(elev)
                         }
                     }
 
-                    // Consumidor 4: Posición GPS en tiempo real (Latitud / Longitud)
-                    system.addConsumer(OnStreamState.StartStreaming("POSITION")) { state: OnStreamState ->
+                    // Consumidor 4: Pendiente Oficial Instantánea (%)
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.ELEVATION_GRADE)) { state: OnStreamState ->
                         val streamState = state.state
                         if (streamState is StreamState.Streaming) {
-                            val lat = streamState.dataPoint.values["latitude"] ?: streamState.dataPoint.values[DataType.Field.SINGLE] ?: 0.0
-                            val lng = streamState.dataPoint.values["longitude"] ?: 0.0
-                            calculator.updateCurrentLocation(lat, lng)
+                            val grade = streamState.dataPoint.values[DataType.Field.ELEVATION_GRADE]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE]
+                                ?: 0.0
+                            calculator.updateLiveGrade(grade)
                         }
+                    }
+
+                    // Consumidor 5: Posición GPS en tiempo real (Latitud / Longitud)
+                    system.addConsumer<OnLocationChanged> { locEvent ->
+                        calculator.updateCurrentLocation(locEvent.lat, locEvent.lng)
                     }
                 }
             }

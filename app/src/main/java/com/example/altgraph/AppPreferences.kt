@@ -103,6 +103,13 @@ class AppPreferences(context: Context) {
         get() = prefs.getString(KEY_CUSTOM_MAP_PROVIDER, "") ?: ""
         set(value) = prefs.edit().putString(KEY_CUSTOM_MAP_PROVIDER, value).apply()
 
+    var altimetriaStyle: AltimetriaStyle
+        get() {
+            val key = prefs.getString(KEY_ALTIMETRIA_STYLE, AltimetriaStyle.CLASSIC.key) ?: AltimetriaStyle.CLASSIC.key
+            return AltimetriaStyle.fromKey(key)
+        }
+        set(value) = prefs.edit().putString(KEY_ALTIMETRIA_STYLE, value.key).apply()
+
     companion object {
         private const val PREFS_NAME = "altgraph_settings"
         private const val KEY_FONT_FAMILY = "font_family_key"
@@ -129,6 +136,7 @@ class AppPreferences(context: Context) {
         private const val KEY_SHOW_POI_SUMMITS = "show_poi_summits"
         private const val KEY_SHOW_3D_ZOOM = "show_3d_zoom_controls"
         private const val KEY_CUSTOM_MAP_PROVIDER = "custom_map_provider_key"
+        private const val KEY_ALTIMETRIA_STYLE = "altimetria_style_key"
 
         @Volatile
         private var INSTANCE: AppPreferences? = null
@@ -140,3 +148,42 @@ class AppPreferences(context: Context) {
         }
     }
 }
+
+enum class AltimetriaStyle(val key: String, val icon: String, val title: String, val description: String) {
+    CLASSIC(
+        key = "classic",
+        icon = "🏔️",
+        title = "Clásica 3D (Por defecto)",
+        description = "Perfil profesional con bisel 3D, degradado suave del 0 al 15% y cotas nítidas"
+    ),
+    HORIZON_ISOMETRIC(
+        key = "horizon_iso",
+        icon = "✈️",
+        title = "Horizonte Isométrico",
+        description = "Perspectiva de cabina proyectada hacia el horizonte con haz luminoso del ciclista"
+    ),
+    TACTICAL_OASES(
+        key = "tactical_oases",
+        icon = "❄️",
+        title = "Oasis y Crisoles Tácticos",
+        description = "Destaca descansillos de recuperación en azul hielo y muros duros en fuego térmico"
+    ),
+    DYNAMIC_FORCE_FIELD(
+        key = "force_field",
+        icon = "⚡",
+        title = "Campo de Fuerza y Fatiga",
+        description = "Relieve biométrico de inercia y modulación dinámica de dureza acumulada"
+    ),
+    MONOLITHIC_OBSIDIAN(
+        key = "monolithic",
+        icon = "💎",
+        title = "Monolito Obsidiana y Plasma",
+        description = "Cristal oscuro facetado con núcleo de plasma luminoso y cresta láser"
+    );
+
+    companion object {
+        fun fromKey(key: String): AltimetriaStyle {
+            return entries.find { it.key == key } ?: CLASSIC
+        }
+    }
+}

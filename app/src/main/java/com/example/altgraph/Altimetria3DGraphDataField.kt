@@ -16,6 +16,7 @@ import io.hammerhead.karooext.internal.Emitter
 import io.hammerhead.karooext.internal.ViewEmitter
 import io.hammerhead.karooext.models.DataPoint
 import io.hammerhead.karooext.models.DataType
+import io.hammerhead.karooext.models.OnLocationChanged
 import io.hammerhead.karooext.models.OnNavigationState
 import io.hammerhead.karooext.models.OnStreamState
 import io.hammerhead.karooext.models.StreamState
@@ -80,6 +81,9 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                             curr < 2000 -> 2000
                             curr < 5000 -> 5000
                             curr < 10000 -> 10000
+                            curr < 20000 -> 20000
+                            curr < 50000 -> 50000
+                            curr < 100000 -> 100000
                             else -> 200
                         }
                         prefs.lookaheadMeters3d = nextVal
@@ -104,37 +108,48 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                         val state = navEvent.state
                         if (state is OnNavigationState.NavigationState.NavigatingRoute) {
                             calculator.setRouteFromPolyline(state.routePolyline)
+                            calculator.setRoutePois(state.pois)
                         } else {
                             calculator.clearRoute()
                         }
                     }
 
                     // Consumidor 2: Velocidad Instantánea en tiempo real (m/s)
-                    system.addConsumer(OnStreamState.StartStreaming("SPEED")) { state: OnStreamState ->
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.SPEED)) { state: OnStreamState ->
                         val streamState = state.state
                         if (streamState is StreamState.Streaming) {
-                            val spd = streamState.dataPoint.values[DataType.Field.SINGLE] ?: 0.0
+                            val spd = streamState.dataPoint.values[DataType.Field.SPEED]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE]
+                                ?: 0.0
                             calculator.currentSpeed = spd
                         }
                     }
 
                     // Consumidor 3: Altitud Barométrica Instantánea en tiempo real (metros)
-                    system.addConsumer(OnStreamState.StartStreaming("ELEVATION")) { state: OnStreamState ->
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.PRESSURE_ELEVATION_CORRECTION)) { state: OnStreamState ->
                         val streamState = state.state
                         if (streamState is StreamState.Streaming) {
-                            val elev = streamState.dataPoint.values[DataType.Field.SINGLE] ?: 0.0
+                            val elev = streamState.dataPoint.values[DataType.Field.PRESSURE_ELEVATION]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE]
+                                ?: 0.0
                             calculator.updateLiveElevation(elev)
                         }
                     }
 
-                    // Consumidor 4: Posición GPS en tiempo real (Latitud / Longitud)
-                    system.addConsumer(OnStreamState.StartStreaming("POSITION")) { state: OnStreamState ->
+                    // Consumidor 4: Pendiente Oficial Instantánea (%)
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.ELEVATION_GRADE)) { state: OnStreamState ->
                         val streamState = state.state
                         if (streamState is StreamState.Streaming) {
-                            val lat = streamState.dataPoint.values["latitude"] ?: streamState.dataPoint.values[DataType.Field.SINGLE] ?: 0.0
-                            val lng = streamState.dataPoint.values["longitude"] ?: 0.0
-                            calculator.updateCurrentLocation(lat, lng)
+                            val grade = streamState.dataPoint.values[DataType.Field.ELEVATION_GRADE]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE]
+                                ?: 0.0
+                            calculator.updateLiveGrade(grade)
                         }
+                    }
+
+                    // Consumidor 5: Posición GPS en tiempo real (Latitud / Longitud)
+                    system.addConsumer<OnLocationChanged> { locEvent ->
+                        calculator.updateCurrentLocation(locEvent.lat, locEvent.lng)
                     }
                 }
             }
@@ -151,13 +166,17 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
         )
         altimetria3DView.layout(0, 0, w, h)
 
+        var cachedBitmap: Bitmap? = null
+        var cachedCanvas: Canvas? = null
+
         val viewJob = scope.launch {
             while (true) {
                 val prefs = AppPreferences.getInstance(context)
                 val strategy = calculator.calculateStrategy(context)
+                val startElev = if (strategy.windowStartElevation > 0.0) strategy.windowStartElevation else calculator.currentElevation
                 altimetria3DView.update3DData(
                     blocks = strategy.nextBlocks,
-                    elevation = calculator.currentElevation,
+                    elevation = startElev,
                     maxElev = 727.0,
                     grade = strategy.avgGrade,
                     remainingDist = strategy.remainingDistance,
@@ -176,15 +195,30 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     hairpins = strategy.hairpins,
                     pois = strategy.pois,
                     showZoomControls = prefs.show3dZoomControls,
-                    curvatureOffsets = strategy.curvatureOffsets
+                    curvatureOffsets = strategy.curvatureOffsets,
+                    riderProgress = strategy.riderProgress,
+                    windowStartMeters = strategy.windowStartMeters,
+                    subBlocks = strategy.subBlocks,
+                    subBlockSizeMeters = strategy.subBlockSizeMeters,
+                    majorBlockSizeMeters = strategy.majorBlockSizeMeters,
+                    profileElevations = strategy.profileElevations,
+                    showBlockPercentages = prefs.showBlockPercentages,
+                    altimetriaStyle = prefs.altimetriaStyle
                 )
 
-                val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-                val canvas = Canvas(bitmap)
-                altimetria3DView.draw(canvas)
+                if (cachedBitmap == null || cachedBitmap?.width != w || cachedBitmap?.height != h) {
+                    cachedBitmap?.recycle()
+                    val newBmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+                    cachedBitmap = newBmp
+                    cachedCanvas = Canvas(newBmp)
+                }
+
+                val currentBmp = cachedBitmap!!
+                val currentCanvas = cachedCanvas!!
+                altimetria3DView.draw(currentCanvas)
 
                 val remoteViews = RemoteViews(context.packageName, R.layout.view_remote_graphic)
-                remoteViews.setImageViewBitmap(R.id.img_graphic, bitmap)
+                remoteViews.setImageViewBitmap(R.id.img_graphic, currentBmp)
 
                 if (prefs.show3dZoomControls) {
                     val intent = Intent(ACTION_CYCLE_3D_ZOOM).apply {
@@ -207,6 +241,9 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
 
         emitter.setCancellable {
             viewJob.cancel()
+            cachedBitmap?.recycle()
+            cachedBitmap = null
+            cachedCanvas = null
             zoomReceiver?.let {
                 try {
                     context.applicationContext.unregisterReceiver(it)

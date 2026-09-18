@@ -1,6 +1,7 @@
 package com.example.altgraph
 
 import android.content.Context
+import io.hammerhead.karooext.models.Symbol
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.roundToInt
@@ -29,7 +30,13 @@ data class StrategyData(
     val hairpins: List<Double>,
     val pois: List<Poi>,
     val curvatureOffsets: List<Float> = emptyList(),
-    val riderProgress: Float = 0.0f
+    val riderProgress: Float = 0.0f,
+    val windowStartMeters: Double = 0.0,
+    val windowStartElevation: Double = 0.0,
+    val subBlocks: List<Float> = emptyList(),
+    val subBlockSizeMeters: Double = 50.0,
+    val majorBlockSizeMeters: Double = 100.0,
+    val profileElevations: List<Float> = emptyList()
 )
 
 class AltimetriaStrategyCalculator {
@@ -50,6 +57,11 @@ class AltimetriaStrategyCalculator {
     
     // Curvas de herradura (distancias absolutas detectadas)
     private val absoluteHairpins = mutableListOf<Double>()
+    private val routePois = mutableListOf<Poi>()
+
+    fun updateLiveGrade(grade: Double) {
+        this.instantBarometricGrade = grade
+    }
 
     fun updateLiveElevation(elev: Double) {
         if (elev <= 0.0) return
@@ -76,10 +88,88 @@ class AltimetriaStrategyCalculator {
         }
     }
 
+    fun getSubBlockSize(lookaheadDist: Double): Double {
+        return when {
+            lookaheadDist <= 500.0 -> 50.0
+            lookaheadDist <= 5000.0 -> 100.0
+            lookaheadDist <= 20000.0 -> 500.0
+            lookaheadDist <= 50000.0 -> 1000.0
+            else -> 10000.0
+        }
+    }
+
+    fun getMajorBlockSize(lookaheadDist: Double): Double {
+        return when {
+            lookaheadDist <= 500.0 -> 100.0
+            lookaheadDist <= 5000.0 -> 500.0
+            lookaheadDist <= 20000.0 -> 2000.0
+            lookaheadDist <= 50000.0 -> 5000.0
+            else -> 20000.0
+        }
+    }
+
+    fun getElevationAtDistance(dist: Double): Double {
+        if (routePoints.isEmpty()) return currentElevation
+        if (dist <= routePoints.first().distance) return routePoints.first().elevation
+        if (dist >= routePoints.last().distance) return routePoints.last().elevation
+
+        var low = 0
+        var high = routePoints.size - 1
+        while (low <= high) {
+            val mid = (low + high).ushr(1)
+            val p = routePoints[mid]
+            if (p.distance < dist) {
+                low = mid + 1
+            } else if (p.distance > dist) {
+                high = mid - 1
+            } else {
+                return p.elevation
+            }
+        }
+        val p0 = routePoints[high.coerceIn(0, routePoints.size - 1)]
+        val p1 = routePoints[low.coerceIn(0, routePoints.size - 1)]
+        val span = (p1.distance - p0.distance).coerceAtLeast(0.01)
+        val frac = ((dist - p0.distance) / span).coerceIn(0.0, 1.0)
+        return p0.elevation + frac * (p1.elevation - p0.elevation)
+    }
+
     fun updateCurrentLocation(lat: Double, lng: Double) {
         if (lat == 0.0 && lng == 0.0) return
         this.currentLatitude = lat
         this.currentLongitude = lng
+    }
+
+    fun setRoutePois(symbols: List<Symbol.POI>) {
+        if (routePoints.isEmpty() || symbols.isEmpty()) {
+            this.routePois.clear()
+            return
+        }
+        routePois.clear()
+        for (sym in symbols) {
+            var nearestDist = 0.0
+            var minDist = Double.MAX_VALUE
+            for (pt in routePoints) {
+                val d = hypot(pt.latitude - sym.lat, pt.longitude - sym.lng)
+                if (d < minDist) {
+                    minDist = d
+                    nearestDist = pt.distance
+                }
+            }
+            val name = sym.name ?: "Hito"
+            val icon = when {
+                name.contains("agua", ignoreCase = true) || name.contains("font", ignoreCase = true) || name.contains("fuente", ignoreCase = true) -> "💧"
+                name.contains("mirador", ignoreCase = true) || name.contains("vista", ignoreCase = true) -> "📸"
+                name.contains("puerto", ignoreCase = true) || name.contains("cima", ignoreCase = true) || name.contains("alto", ignoreCase = true) || name.contains("col", ignoreCase = true) -> "📡"
+                else -> "🏘️"
+            }
+            val type = when (icon) {
+                "💧" -> PoiType.WATER
+                "📸" -> PoiType.VIEWPOINT
+                "📡" -> PoiType.SUMMIT
+                else -> PoiType.TOWN
+            }
+            routePois.add(Poi(nearestDist, icon, name, type))
+        }
     }
 
     fun setRouteFromPolyline(polyline: String) {
@@ -157,6 +247,7 @@ class AltimetriaStrategyCalculator {
     fun clearRoute() {
         this.routePoints = emptyList()
         this.absoluteHairpins.clear()
+        this.routePois.clear()
         this.isNavigatingRoute = false
     }
 
@@ -175,48 +266,69 @@ class AltimetriaStrategyCalculator {
         // MODO LIBRE / ENTRENAMIENTO REAL SIN RUTA PRECARGADA:
         // Genera el perfil 3D barométrico ajustándose exactamente a la pendiente en vivo de la carretera
         if (!isNavigating) {
+            val baseGrade = if (instantBarometricGrade != 0.0) instantBarometricGrade else 5.0
             if (currentSpeed > 0.1) {
                 liveDistanceAccumulated += currentSpeed * 1.0 // Medido cada segundo
             }
-            
-            val liveBlocks = mutableListOf<Float>()
-            val baseGrade = instantBarometricGrade.coerceIn(-15.0, 30.0)
-            
-            // Generar los 10 bloques de la gráfica basados en la inclinación barométrica real de la vía
-            for (idx in 0 until 10) {
-                val blockGrade = (baseGrade + (sin(idx * 0.8) * 0.8)).coerceIn(-15.0, 30.0).toFloat()
-                liveBlocks.add(blockGrade)
+
+            val quantumMeters = 50.0
+            val windowStartDist = (liveDistanceAccumulated / quantumMeters).toLong() * quantumMeters
+            val riderDistInWindow = (liveDistanceAccumulated - windowStartDist).coerceAtLeast(0.0)
+            val riderProgress = (riderDistInWindow / lookaheadDist).toFloat().coerceIn(0f, 1f)
+
+            val subBlockSize = getSubBlockSize(lookaheadDist)
+            val majorBlockSize = getMajorBlockSize(lookaheadDist)
+            val numSubBlocks = (lookaheadDist / subBlockSize).toInt().coerceIn(2, 60)
+
+            val freeSubBlocks = mutableListOf<Float>()
+            val freeElevations = mutableListOf<Float>()
+            var accElev = currentElevation
+            freeElevations.add(accElev.toFloat())
+
+            val blockShift = (windowStartDist / subBlockSize).toInt()
+            for (idx in 0 until numSubBlocks) {
+                val blockGrade = (baseGrade + (sin((blockShift + idx) * 0.8) * 1.5)).coerceIn(-15.0, 30.0).toFloat()
+                freeSubBlocks.add(blockGrade)
+                accElev += subBlockSize * (blockGrade / 100.0)
+                freeElevations.add(accElev.toFloat())
             }
 
-            val hasAttack = attackAlertsEnabled && liveBlocks.any { it > thresholdAttack }
-            val liveFatigue = (liveBlocks.average() * 8.5 + asphaltFactor * 10).roundToInt().coerceIn(10, 250)
+            val hasAttack = attackAlertsEnabled && freeSubBlocks.any { it > thresholdAttack }
+            val liveFatigue = (freeSubBlocks.average() * 8.5 + asphaltFactor * 10).roundToInt().coerceIn(10, 250)
 
             ClimbStateManager.updateApm(liveFatigue)
-            
+
             val liveHairpins = emptyList<Double>()
             val livePois = emptyList<Poi>()
 
-            val liveCurvatures = List(50) { idx -> (sin((liveDistanceAccumulated / 100.0) + idx * 0.3) * 0.8).toFloat() }
-
-            val progressInWindow = ((liveDistanceAccumulated % lookaheadDist) / lookaheadDist).coerceIn(0.0, 1.0).toFloat()
+            val liveCurvatures = List(50) { idx ->
+                val distAlongWindow = idx * (lookaheadDist / 49.0)
+                (sin((windowStartDist + distAlongWindow) / 75.0) * 0.75 + sin((windowStartDist + distAlongWindow) / 200.0) * 0.25).toFloat()
+            }
 
             return StrategyData(
                 remainingDistance = 0.0,
                 timeToSummit = 0L,
                 avgGrade = baseGrade,
-                nextBlocks = liveBlocks,
+                nextBlocks = freeSubBlocks.take(10),
                 attackAlert = hasAttack,
-                blockSizeMeters = blockSize,
+                blockSizeMeters = subBlockSize,
                 totalFatigueGrade = liveFatigue,
                 hairpins = liveHairpins,
                 pois = livePois,
                 curvatureOffsets = liveCurvatures,
-                riderProgress = progressInWindow
+                riderProgress = riderProgress,
+                windowStartMeters = windowStartDist,
+                windowStartElevation = currentElevation,
+                subBlocks = freeSubBlocks,
+                subBlockSizeMeters = subBlockSize,
+                majorBlockSizeMeters = majorBlockSize,
+                profileElevations = freeElevations
             )
         }
 
         // MODO NAVEGANDO RUTA PRECARGADA (GPX / FIT):
-        // Encuentra la posición GPS exacta del ciclista en el trazado de la ruta y calcula el avance en vivo
+        // 1. Encuentra la posición GPS exacta del ciclista en el trazado de la ruta
         var nearestIndex = 0
         var minDistance = Double.MAX_VALUE
         routePoints.forEachIndexed { index, point ->
@@ -227,10 +339,35 @@ class AltimetriaStrategyCalculator {
             }
         }
 
-        val totalDistanceRemaining = routePoints.drop(nearestIndex).sumOf { it.distance }
+        val currentRiderDistance = routePoints[nearestIndex].distance
+
+        // 2. Ventana deslizante en bloques cuánticos de 50 metros
+        val quantumMeters = 50.0
+        val windowStartDist = (currentRiderDistance / quantumMeters).toLong() * quantumMeters
+        val windowEndDist = windowStartDist + lookaheadDist
+
+        val riderOffsetInWindow = (currentRiderDistance - windowStartDist).coerceAtLeast(0.0)
+        val riderProgress = (riderOffsetInWindow / lookaheadDist).toFloat().coerceIn(0f, 1f)
+
+        // 3. Localizar el punto de ruta correspondiente al inicio de la ventana (windowStartDist)
+        var windowStartIndex = nearestIndex
+        while (windowStartIndex > 0 && routePoints[windowStartIndex].distance > windowStartDist) {
+            windowStartIndex--
+        }
+        while (windowStartIndex < routePoints.size - 1 && routePoints[windowStartIndex + 1].distance <= windowStartDist) {
+            windowStartIndex++
+        }
+        val windowStartElevation = getElevationAtDistance(windowStartDist)
+
+        // 4. Distancia y desnivel restantes hasta la meta de la ruta
+        val totalDistanceRemaining = if (routePoints.isNotEmpty()) {
+            (routePoints.last().distance - currentRiderDistance).coerceAtLeast(0.0)
+        } else {
+            0.0
+        }
         val endElevation = routePoints.last().elevation
         val elevationGainRemaining = (endElevation - currentElevation).coerceAtLeast(0.0)
-        
+
         val avgGradeRemaining = if (totalDistanceRemaining > 0) {
             if (useTopographicCalculation) {
                 val distRealSq = totalDistanceRemaining * totalDistanceRemaining
@@ -243,72 +380,71 @@ class AltimetriaStrategyCalculator {
         } else {
             0.0
         }
-        
+
         val secondsRemaining = if (currentSpeed > 0.1) (totalDistanceRemaining / currentSpeed).toLong() else 0L
 
-        val nextBlocks = mutableListOf<Float>()
+        // 5. Cálculo de resolución adaptativa según escala (Lookahead)
+        val subBlockSize = getSubBlockSize(lookaheadDist)
+        val majorBlockSize = getMajorBlockSize(lookaheadDist)
+
+        val numSubBlocks = (lookaheadDist / subBlockSize).roundToInt().coerceIn(2, 200)
+        val routeSubBlocks = mutableListOf<Float>()
+        val routeElevations = mutableListOf<Float>()
+        routeElevations.add(windowStartElevation.toFloat())
+
         var attack = false
         var accumulatedHardness = 0.0
         var maxRampPct = 0.0
 
-        var currentBlockStartDistance = routePoints[nearestIndex].distance
-        var currentBlockStartElevation = routePoints[nearestIndex].elevation
+        for (j in 0 until numSubBlocks) {
+            val sDistStart = windowStartDist + (j * subBlockSize)
+            val sDistEnd = windowStartDist + ((j + 1) * subBlockSize)
+            val sElevStart = getElevationAtDistance(sDistStart)
+            val sElevEnd = getElevationAtDistance(sDistEnd)
 
-        for (i in nearestIndex + 1 until routePoints.size) {
-            val point = routePoints[i]
-            val distanceDiff = point.distance - currentBlockStartDistance
+            val sElevDiff = sElevEnd - sElevStart
+            val sDist = (sDistEnd - sDistStart).coerceAtLeast(1.0)
+            val grade = if (useTopographicCalculation) {
+                val distRealSq = sDist * sDist
+                val elevSq = sElevDiff * sElevDiff
+                val horizontalDist = if (distRealSq > elevSq) sqrt(distRealSq - elevSq) else sDist
+                (sElevDiff / horizontalDist) * 100.0
+            } else {
+                (sElevDiff / sDist) * 100.0
+            }
 
-            if (distanceDiff >= blockSize) {
-                val distReal = distanceDiff.coerceAtLeast(1.0)
-                val elevDiff = point.elevation - currentBlockStartElevation
-                
-                val grade = if (useTopographicCalculation) {
-                    val distRealSq = distReal * distReal
-                    val elevSq = elevDiff * elevDiff
-                    val horizontalDist = if (distRealSq > elevSq) sqrt(distRealSq - elevSq) else distReal
-                    (elevDiff / horizontalDist) * 100.0
-                } else {
-                    (elevDiff / distReal) * 100.0
-                }
-                
-                val distanceKm = distReal / 1000.0
+            routeSubBlocks.add(grade.toFloat())
+            routeElevations.add(sElevEnd.toFloat())
 
-                if (grade > maxRampPct) {
-                    maxRampPct = grade
-                }
-
-                accumulatedHardness += FatigueGradeCalculator.calculateSegmentHardness(grade, distanceKm)
-
-                if (nextBlocks.size < 10) {
-                    nextBlocks.add(grade.toFloat())
-                    if (attackAlertsEnabled && grade > thresholdAttack) {
-                        attack = true
-                    }
-                }
-
-                currentBlockStartDistance = point.distance
-                currentBlockStartElevation = point.elevation
+            val distanceKm = sDist / 1000.0
+            if (grade > maxRampPct) {
+                maxRampPct = grade
+            }
+            accumulatedHardness += FatigueGradeCalculator.calculateSegmentHardness(grade, distanceKm)
+            if (attackAlertsEnabled && grade > thresholdAttack) {
+                attack = true
             }
         }
 
-        if (nextBlocks.size < 10 && routePoints.isNotEmpty() && currentBlockStartDistance < routePoints.last().distance) {
-            val remainingDist = (routePoints.last().distance - currentBlockStartDistance).coerceAtLeast(1.0)
-            if (remainingDist > 10.0) {
-                val elevDiff = routePoints.last().elevation - currentBlockStartElevation
-                val lastGrade = if (useTopographicCalculation) {
-                    val distRealSq = remainingDist * remainingDist
-                    val elevSq = elevDiff * elevDiff
-                    val horizontalDist = if (distRealSq > elevSq) sqrt(distRealSq - elevSq) else remainingDist
-                    (elevDiff / horizontalDist) * 100.0
-                } else {
-                    (elevDiff / remainingDist) * 100.0
-                }
-                
-                nextBlocks.add(lastGrade.toFloat())
-                if (attackAlertsEnabled && lastGrade > thresholdAttack) {
-                    attack = true
-                }
+        // Construcción de bloques mayores para telemetría y rótulos
+        val numMajorBlocks = (lookaheadDist / majorBlockSize).roundToInt().coerceIn(1, 20)
+        val routeMajorBlocks = mutableListOf<Float>()
+        for (m in 0 until numMajorBlocks) {
+            val mDistStart = windowStartDist + (m * majorBlockSize)
+            val mDistEnd = windowStartDist + ((m + 1) * majorBlockSize)
+            val mElevStart = getElevationAtDistance(mDistStart)
+            val mElevEnd = getElevationAtDistance(mDistEnd)
+            val mElevDiff = mElevEnd - mElevStart
+            val mDist = (mDistEnd - mDistStart).coerceAtLeast(1.0)
+            val mGrade = if (useTopographicCalculation) {
+                val distRealSq = mDist * mDist
+                val elevSq = mElevDiff * mElevDiff
+                val horizontalDist = if (distRealSq > elevSq) sqrt(distRealSq - elevSq) else mDist
+                (mElevDiff / horizontalDist) * 100.0
+            } else {
+                (mElevDiff / mDist) * 100.0
             }
+            routeMajorBlocks.add(mGrade.toFloat())
         }
 
         val totalGf = FatigueGradeCalculator.calculateTotalFatigueGrade(
@@ -318,9 +454,9 @@ class AltimetriaStrategyCalculator {
         ).roundToInt()
 
         ClimbStateManager.updateApm(totalGf)
-        
+
         val visibleHairpins = absoluteHairpins
-            .map { it - routePoints[nearestIndex].distance }
+            .map { it - windowStartDist }
             .filter { it in 0.0..lookaheadDist }
 
         val showPoiTowns = prefs?.showPoiTowns ?: true
@@ -328,30 +464,41 @@ class AltimetriaStrategyCalculator {
         val showPoiViewpoints = prefs?.showPoiViewpoints ?: true
         val showPoiSummits = prefs?.showPoiSummits ?: true
 
-        val simulatedPois = mutableListOf<Poi>()
-        val startDist = routePoints[nearestIndex].distance
-        
-        if (showPoiTowns) simulatedPois.add(Poi(1200.0 - startDist, "🏘️", "Vall d'Ebo", PoiType.TOWN))
-        if (showPoiWater) simulatedPois.add(Poi(3500.0 - startDist, "💧", "Font de la Bici", PoiType.WATER))
-        if (showPoiViewpoints) simulatedPois.add(Poi(4200.0 - startDist, "📸", "Mirador del Valle", PoiType.VIEWPOINT))
-        if (showPoiSummits) simulatedPois.add(Poi(8500.0 - startDist, "📡", "Miserat-Xillibre", PoiType.SUMMIT))
+        val rawPois = if (routePois.isNotEmpty()) {
+            routePois.map { Poi(it.relativeDistance - windowStartDist, it.icon, it.name, it.type) }
+        } else {
+            listOf(
+                Poi(1200.0 - windowStartDist, "🏘️", "Vall d'Ebo", PoiType.TOWN),
+                Poi(3500.0 - windowStartDist, "💧", "Font de la Bici", PoiType.WATER),
+                Poi(4200.0 - windowStartDist, "📸", "Mirador del Valle", PoiType.VIEWPOINT),
+                Poi(8500.0 - windowStartDist, "📡", "Miserat-Xillibre", PoiType.SUMMIT)
+            )
+        }
 
-        val visiblePois = simulatedPois.filter { it.relativeDistance in 0.0..lookaheadDist }
+        val visiblePois = rawPois.filter { poi ->
+            val matchesCategory = when (poi.type) {
+                PoiType.TOWN -> showPoiTowns
+                PoiType.WATER -> showPoiWater
+                PoiType.VIEWPOINT -> showPoiViewpoints
+                PoiType.SUMMIT -> showPoiSummits
+            }
+            matchesCategory && poi.relativeDistance in 0.0..lookaheadDist
+        }
 
-        // Cálculo de curvatura real de la carretera GPS por orientación vectorial
-        val curvatureOffsets = mutableListOf<Float>()
-        if (routePoints.size > nearestIndex + 1) {
-            val startP = routePoints[nearestIndex]
+        // Cálculo de curvatura real de la carretera GPS por orientación vectorial muestreado a 50 puntos
+        val rawOffsets = mutableListOf<Pair<Double, Double>>()
+        rawOffsets.add(Pair(windowStartDist, 0.0))
+
+        if (routePoints.size > windowStartIndex + 1) {
+            val startP = routePoints[windowStartIndex]
             var initialBearing = 0.0
-            if (nearestIndex < routePoints.size - 1) {
-                val p1 = routePoints[nearestIndex + 1]
+            if (windowStartIndex < routePoints.size - 1) {
+                val p1 = routePoints[windowStartIndex + 1]
                 initialBearing = bearing(startP.latitude, startP.longitude, p1.latitude, p1.longitude)
             }
 
             var cumOffset = 0.0
-            curvatureOffsets.add(0.0f)
-
-            for (i in nearestIndex + 1 until routePoints.size) {
+            for (i in windowStartIndex + 1 until routePoints.size) {
                 val prevP = routePoints[i - 1]
                 val currP = routePoints[i]
                 val segDist = (currP.distance - prevP.distance).coerceAtLeast(1.0)
@@ -361,28 +508,55 @@ class AltimetriaStrategyCalculator {
                 while (angleDiff > 180.0) angleDiff -= 360.0
                 while (angleDiff < -180.0) angleDiff += 360.0
 
-                val lateralMeters = sin(Math.toRadians(angleDiff)) * (segDist / 20.0)
+                val lateralMeters = sin(Math.toRadians(angleDiff)) * (segDist / 25.0)
                 cumOffset += lateralMeters
-                curvatureOffsets.add(cumOffset.coerceIn(-1.5, 1.5).toFloat())
+                rawOffsets.add(Pair(currP.distance, cumOffset))
+
+                if (currP.distance >= windowEndDist) {
+                    break
+                }
             }
         }
 
-        // Progreso del ciclista a lo largo de la ventana de anticipación en ruta
-        val currentDistOnRoute = routePoints[nearestIndex].distance
-        val routeProgressInWindow = ((currentDistOnRoute % lookaheadDist) / lookaheadDist).coerceIn(0.0, 1.0).toFloat()
+        // Muestreo uniforme en 50 puntos a lo largo de la ventana [windowStartDist, windowEndDist]
+        val curvatureOffsets = List(50) { idx ->
+            val targetDist = windowStartDist + idx * (lookaheadDist / 49.0)
+            if (rawOffsets.size >= 2) {
+                val nextIdx = rawOffsets.indexOfFirst { it.first >= targetDist }
+                if (nextIdx == -1) {
+                    rawOffsets.last().second.coerceIn(-1.0, 1.0).toFloat()
+                } else if (nextIdx == 0) {
+                    rawOffsets.first().second.coerceIn(-1.0, 1.0).toFloat()
+                } else {
+                    val p0 = rawOffsets[nextIdx - 1]
+                    val p1 = rawOffsets[nextIdx]
+                    val span = (p1.first - p0.first).coerceAtLeast(0.1)
+                    val frac = ((targetDist - p0.first) / span).coerceIn(0.0, 1.0)
+                    (p0.second + frac * (p1.second - p0.second)).coerceIn(-1.0, 1.0).toFloat()
+                }
+            } else {
+                0.0f
+            }
+        }
 
         return StrategyData(
             remainingDistance = totalDistanceRemaining,
             timeToSummit = secondsRemaining,
             avgGrade = avgGradeRemaining,
-            nextBlocks = nextBlocks,
+            nextBlocks = routeMajorBlocks,
             attackAlert = attack,
-            blockSizeMeters = blockSize,
+            blockSizeMeters = majorBlockSize,
             totalFatigueGrade = totalGf,
             hairpins = visibleHairpins,
             pois = visiblePois,
             curvatureOffsets = curvatureOffsets,
-            riderProgress = routeProgressInWindow
+            riderProgress = riderProgress,
+            windowStartMeters = windowStartDist,
+            windowStartElevation = windowStartElevation,
+            subBlocks = routeSubBlocks,
+            subBlockSizeMeters = subBlockSize,
+            majorBlockSizeMeters = majorBlockSize,
+            profileElevations = routeElevations
         )
     }
 
@@ -397,38 +571,42 @@ class AltimetriaStrategyCalculator {
     }
 
     private fun decodePolyline(encoded: String): List<Pair<Double, Double>> {
-        val poly = ArrayList<Pair<Double, Double>>()
-        var index = 0
-        val len = encoded.length
-        var lat = 0
-        var lng = 0
+        return try {
+            val poly = ArrayList<Pair<Double, Double>>()
+            var index = 0
+            val len = encoded.length
+            var lat = 0
+            var lng = 0
 
-        while (index < len) {
-            var b: Int
-            var shift = 0
-            var result = 0
-            do {
-                b = encoded[index++].code - 63
-                result = result or (b and 0x1f shl shift)
-                shift += 5
-            } while (b >= 0x20)
-            val dlat = if (result and 1 != 0) (result shr 1).inv() else result shr 1
-            lat += dlat
+            while (index < len) {
+                var b: Int
+                var shift = 0
+                var result = 0
+                do {
+                    b = encoded[index++].code - 63
+                    result = result or (b and 0x1f shl shift)
+                    shift += 5
+                } while (b >= 0x20)
+                val dlat = if (result and 1 != 0) (result shr 1).inv() else result shr 1
+                lat += dlat
 
-            shift = 0
-            result = 0
-            do {
-                b = encoded[index++].code - 63
-                result = result or (b and 0x1f shl shift)
-                shift += 5
-            } while (b >= 0x20)
-            val dlng = if (result and 1 != 0) (result shr 1).inv() else result shr 1
-            lng += dlng
+                shift = 0
+                result = 0
+                do {
+                    b = encoded[index++].code - 63
+                    result = result or (b and 0x1f shl shift)
+                    shift += 5
+                } while (b >= 0x20)
+                val dlng = if (result and 1 != 0) (result shr 1).inv() else result shr 1
+                lng += dlng
 
-            val pLat = lat.toDouble() / 1E5
-            val pLng = lng.toDouble() / 1E5
-            poly.add(Pair(pLat, pLng))
+                val pLat = lat.toDouble() / 1E5
+                val pLng = lng.toDouble() / 1E5
+                poly.add(Pair(pLat, pLng))
+            }
+            poly
+        } catch (e: Exception) {
+            emptyList()
         }
-        return poly
     }
 }

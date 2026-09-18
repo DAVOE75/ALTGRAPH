@@ -94,7 +94,7 @@ class ClimbPacingView @JvmOverloads constructor(
         canvas.drawText("VELOCIDAD OBJETIVO", padX, h * 0.62f, speedLabelPaint)
 
         speedValuePaint.textSize = (h * 0.22f).coerceIn(22f, 42f)
-        val speedStr = "%.1f km/h".format(targetSpeedKmh)
+        val speedStr = if (targetSpeedKmh > 0.0) "%.1f km/h".format(targetSpeedKmh) else "--.- km/h"
         canvas.drawText(speedStr, padX, h * 0.88f, speedValuePaint)
 
         // 4. Insinia de Estado

@@ -31,14 +31,14 @@
         typeId="climb_pacing"
         displayName="@string/data_type_climb_pacing_title"
         description="@string/data_type_climb_pacing_desc"
-        graphical="false"
+        graphical="true"
         icon="@drawable/ic_altigraph_logo" />
 
     <DataType
         typeId="gradient_trend"
         displayName="@string/data_type_gradient_trend_title"
         description="@string/data_type_gradient_trend_desc"
-        graphical="false"
+        graphical="true"
         icon="@drawable/ic_altigraph_logo" />
 
 </ExtensionInfo>

@@ -59,7 +59,7 @@ class MainActivity : Activity() {
         }
 
         val subtitle = TextView(this).apply {
-            text = "${getString(R.string.title_settings)} • v0.3.0"
+            text = "${getString(R.string.title_settings)} • v0.4.0"
             textSize = 12f
             setTextColor(Color.parseColor("#A1A1AA"))
             gravity = Gravity.CENTER
@@ -137,6 +137,56 @@ class MainActivity : Activity() {
         // ==========================================
         // PESTAÑA 1: 🎨 ESTILO Y APARIENCIA
         // ==========================================
+
+        // Opción: Modelo de Altimetría (Selector de las 5 Vistas Revolucionarias)
+        val styleCard = createCardContainer()
+        val styleLabel = createSectionLabel("VISTA Y MODELO DE ALTIMETRÍA")
+        val initialStyle = prefs.altimetriaStyle
+        val styleValueText = createValueText("${initialStyle.icon} ${initialStyle.title}")
+        val styleDescText = TextView(this).apply {
+            text = initialStyle.description
+            textSize = 12f
+            setTextColor(Color.parseColor("#94A3B8"))
+            gravity = Gravity.CENTER
+            setPadding(8, 0, 8, 12)
+        }
+
+        val styleButtons = mutableListOf<Button>()
+        val styleOptions = AltimetriaStyle.entries
+
+        val styleCol = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
+
+        styleOptions.forEachIndexed { idx, styleOpt ->
+            val isSelected = styleOpt == initialStyle
+            val btn = Button(this).apply {
+                text = "${styleOpt.icon} ${styleOpt.title}"
+                textSize = 12f
+                typeface = Typeface.DEFAULT_BOLD
+                setPadding(10, 10, 10, 10)
+                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                    topMargin = 3
+                    bottomMargin = 3
+                }
+                applyButtonStyle(this, isSelected)
+                setOnClickListener {
+                    prefs.altimetriaStyle = styleOpt
+                    styleValueText.text = "${styleOpt.icon} ${styleOpt.title}"
+                    styleDescText.text = styleOpt.description
+                    updateSegmentActiveStates(styleButtons, idx)
+                    Toast.makeText(this@MainActivity, "Vista: ${styleOpt.title}", Toast.LENGTH_SHORT).show()
+                }
+            }
+            styleButtons.add(btn)
+            styleCol.addView(btn)
+        }
+
+        styleCard.addView(styleLabel)
+        styleCard.addView(styleValueText)
+        styleCard.addView(styleDescText)
+        styleCard.addView(styleCol)
 
         // Opción: Tipografía (Dropdown Spinner)
         val fontCard = createCardContainer()
@@ -230,6 +280,7 @@ class MainActivity : Activity() {
         }
         showZoomCard.addView(switchShowZoom)
 
+        tabEstiloContainer.addView(styleCard)
         tabEstiloContainer.addView(fontCard)
         tabEstiloContainer.addView(rotate90Card)
         tabEstiloContainer.addView(font3dCard)
@@ -260,7 +311,12 @@ class MainActivity : Activity() {
         val lookaheadMinusBtn = createActionButton("- Reducir") {
             val curr = prefs.lookaheadMeters3d
             val nextVal = when {
-                curr > 1000 -> curr - 1000
+                curr > 50000 -> 50000
+                curr > 20000 -> 20000
+                curr > 10000 -> 10000
+                curr > 5000 -> 5000
+                curr > 2000 -> 2000
+                curr > 1000 -> 1000
                 curr == 1000 -> 500
                 curr > 200 -> curr - 50
                 else -> 200
@@ -274,8 +330,13 @@ class MainActivity : Activity() {
             val nextVal = when {
                 curr < 500 -> curr + 50
                 curr == 500 -> 1000
-                curr < 10000 -> curr + 1000
-                else -> 10000
+                curr < 2000 -> 2000
+                curr < 5000 -> 5000
+                curr < 10000 -> 10000
+                curr < 20000 -> 20000
+                curr < 50000 -> 50000
+                curr < 100000 -> 100000
+                else -> 100000
             }
             prefs.lookaheadMeters3d = nextVal
             lookaheadValueText.text = formatLookaheadText(nextVal)
@@ -299,7 +360,7 @@ class MainActivity : Activity() {
                 prefs.show3dCotas = isChecked
             }
         }
-        showCotasCard.addView(showCotasCard)
+        showCotasCard.addView(switchShowCotas)
 
         // Opción: Mostrar Rampas Duras
         val showRampsCard = createCardContainer()
