@@ -110,6 +110,48 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                     system.addConsumer<OnLocationChanged> { locEvent ->
                         calculator.updateCurrentLocation(locEvent.lat, locEvent.lng)
                     }
+
+                    // ── Consumidores 6-10: Datos del Climber nativo de Karoo ────────────────
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.DISTANCE_TO_TOP)) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val d = streamState.dataPoint.values[DataType.Field.DISTANCE_TO_TOP]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE] ?: 0.0
+                            calculator.updateClimbData(distToTop = d)
+                        }
+                    }
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.ELEVATION_TO_TOP)) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val e = streamState.dataPoint.values[DataType.Field.ELEVATION_TO_TOP]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE] ?: 0.0
+                            calculator.updateClimbData(elevToTop = e)
+                        }
+                    }
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.DISTANCE_FROM_BOTTOM)) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val d = streamState.dataPoint.values[DataType.Field.DISTANCE_TO_TOP]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE] ?: 0.0
+                            calculator.updateClimbData(distFromBottom = d)
+                        }
+                    }
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.ELEVATION_FROM_BOTTOM)) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val e = streamState.dataPoint.values[DataType.Field.ELEVATION_TO_TOP]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE] ?: 0.0
+                            calculator.updateClimbData(elevFromBottom = e)
+                        }
+                    }
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.ELEVATION_REMAINING)) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val e = streamState.dataPoint.values[DataType.Field.ELEVATION_REMAINING]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE] ?: 0.0
+                            calculator.updateClimbData(elevRemaining = e)
+                        }
+                    }
                 }
             }
             karooSystem = system

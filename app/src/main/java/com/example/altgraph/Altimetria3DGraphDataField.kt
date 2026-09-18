@@ -151,6 +151,66 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     system.addConsumer<OnLocationChanged> { locEvent ->
                         calculator.updateCurrentLocation(locEvent.lat, locEvent.lng)
                     }
+
+                    // ── Consumidores 6-10: Datos del Climber nativo de Karoo ──────────────────
+                    // El SDK calcula estos valores directamente desde el archivo GPX/FIT de la ruta.
+                    // Son los mismos datos que usa el módulo Climber de Hammerhead internamente.
+                    // Permiten que ALTGRAPH construya un perfil 3D con la altimetría REAL del climb.
+
+                    // Consumidor 6: Distancia al Cima del climb actual
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.DISTANCE_TO_TOP)) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val d = streamState.dataPoint.values[DataType.Field.DISTANCE_TO_TOP]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE]
+                                ?: 0.0
+                            calculator.updateClimbData(distToTop = d)
+                        }
+                    }
+
+                    // Consumidor 7: Desnivel hasta el Cima del climb actual
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.ELEVATION_TO_TOP)) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val e = streamState.dataPoint.values[DataType.Field.ELEVATION_TO_TOP]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE]
+                                ?: 0.0
+                            calculator.updateClimbData(elevToTop = e)
+                        }
+                    }
+
+                    // Consumidor 8: Distancia desde la Base del climb actual
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.DISTANCE_FROM_BOTTOM)) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val d = streamState.dataPoint.values[DataType.Field.DISTANCE_TO_TOP]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE]
+                                ?: 0.0
+                            calculator.updateClimbData(distFromBottom = d)
+                        }
+                    }
+
+                    // Consumidor 9: Desnivel desde la Base del climb actual
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.ELEVATION_FROM_BOTTOM)) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val e = streamState.dataPoint.values[DataType.Field.ELEVATION_TO_TOP]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE]
+                                ?: 0.0
+                            calculator.updateClimbData(elevFromBottom = e)
+                        }
+                    }
+
+                    // Consumidor 10: Desnivel restante total de la ruta
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.ELEVATION_REMAINING)) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val e = streamState.dataPoint.values[DataType.Field.ELEVATION_REMAINING]
+                                ?: streamState.dataPoint.values[DataType.Field.SINGLE]
+                                ?: 0.0
+                            calculator.updateClimbData(elevRemaining = e)
+                        }
+                    }
                 }
             }
             karooSystem = system

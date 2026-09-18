@@ -54,13 +54,42 @@ class AltimetriaStrategyCalculator {
     private var lastElevationSample = 350.0
     private var liveDistanceAccumulated = 0.0
     private var instantBarometricGrade = 0.0
-    
+
+    // ── Datos del Climber nativo de Karoo (DISTANCE_TO_TOP, ELEVATION_TO_TOP, …) ──
+    // El SDK expone estos valores calculados directamente desde el archivo de ruta (GPX/FIT).
+    // Son la fuente de verdad para la altimetría real del climb activo.
+    var distanceToTop: Double = 0.0      // metros hasta la cima del climb actual
+    var elevationToTop: Double = 0.0     // metros de desnivel hasta la cima
+    var distanceFromBottom: Double = 0.0 // metros desde la base del climb
+    var elevationFromBottom: Double = 0.0 // metros de desnivel desde la base
+    var elevationRemaining: Double = 0.0 // desnivel restante total de la ruta
+
     // Curvas de herradura (distancias absolutas detectadas)
     private val absoluteHairpins = mutableListOf<Double>()
     private val routePois = mutableListOf<Poi>()
 
     fun updateLiveGrade(grade: Double) {
         this.instantBarometricGrade = grade
+    }
+
+    /**
+     * Actualiza los datos del climb activo recibidos de los streams nativos del SDK:
+     * DISTANCE_TO_TOP, ELEVATION_TO_TOP, DISTANCE_FROM_BOTTOM, ELEVATION_FROM_BOTTOM.
+     * Estos reflejan la altimetría real del archivo de ruta cargado (GPX/FIT),
+     * exactamente como lo hace el módulo Climber de Hammerhead internamente.
+     */
+    fun updateClimbData(
+        distToTop: Double = distanceToTop,
+        elevToTop: Double = elevationToTop,
+        distFromBottom: Double = distanceFromBottom,
+        elevFromBottom: Double = elevationFromBottom,
+        elevRemaining: Double = elevationRemaining
+    ) {
+        if (distToTop >= 0.0) this.distanceToTop = distToTop
+        if (elevToTop >= 0.0) this.elevationToTop = elevToTop
+        if (distFromBottom >= 0.0) this.distanceFromBottom = distFromBottom
+        if (elevFromBottom >= 0.0) this.elevationFromBottom = elevFromBottom
+        if (elevRemaining >= 0.0) this.elevationRemaining = elevRemaining
     }
 
     fun updateLiveElevation(elev: Double) {
@@ -298,6 +327,12 @@ class AltimetriaStrategyCalculator {
         this.absoluteHairpins.clear()
         this.routePois.clear()
         this.isNavigatingRoute = false
+        // Resetear datos del climb al salir de la navegación
+        this.distanceToTop = 0.0
+        this.elevationToTop = 0.0
+        this.distanceFromBottom = 0.0
+        this.elevationFromBottom = 0.0
+        this.elevationRemaining = 0.0
     }
 
     fun calculateStrategy(context: Context? = null): StrategyData {
@@ -410,14 +445,22 @@ class AltimetriaStrategyCalculator {
         }
         val windowStartElevation = getElevationAtDistance(windowStartDist)
 
-        // 4. Distancia y desnivel restantes hasta la meta de la ruta
-        val totalDistanceRemaining = if (routePoints.isNotEmpty()) {
-            (routePoints.last().distance - currentRiderDistance).coerceAtLeast(0.0)
+        // 4. Distancia y desnivel restantes
+        // Preferimos los datos nativos del SDK (distanceToTop / elevationRemaining) sobre la
+        // interpolación polilineal, porque los nativos vienen del archivo GPX/FIT real.
+        val totalDistanceRemaining: Double
+        val elevationGainRemaining: Double
+        if (distanceToTop > 0.0 && elevationToTop > 0.0) {
+            // ✅ Modo Climber real: usamos los datos exactos del SDK
+            totalDistanceRemaining = distanceToTop
+            elevationGainRemaining = elevationToTop
         } else {
-            0.0
+            totalDistanceRemaining = if (routePoints.isNotEmpty()) {
+                (routePoints.last().distance - currentRiderDistance).coerceAtLeast(0.0)
+            } else 0.0
+            val endElevation = routePoints.last().elevation
+            elevationGainRemaining = (endElevation - currentElevation).coerceAtLeast(0.0)
         }
-        val endElevation = routePoints.last().elevation
-        val elevationGainRemaining = (endElevation - currentElevation).coerceAtLeast(0.0)
 
         val avgGradeRemaining = if (totalDistanceRemaining > 0) {
             if (useTopographicCalculation) {
@@ -447,11 +490,36 @@ class AltimetriaStrategyCalculator {
         var accumulatedHardness = 0.0
         var maxRampPct = 0.0
 
+        // ── Estrategia de construcción del perfil ──────────────────────────────────
+        // Si tenemos datos nativos del climb (del SDK, fuente directa del archivo GPX/FIT):
+        //   → Los bloques se calculan interpolando linealmente entre la posición actual
+        //     y la cima real del climb. Esto replica exactamente lo que hace el Climber
+        //     de Hammerhead, pero en representación 3D.
+        // Si no tenemos datos del climb (descenso, pausa, ruta sin climb activo):
+        //   → Usamos la polilínea de ruta con la calibración barométrica progresiva.
+        // ──────────────────────────────────────────────────────────────────────────
+        val useClimberData = distanceToTop > 50.0 && elevationToTop > 0.5
+        val summitElevation = if (useClimberData) currentElevation + elevationToTop else 0.0
+
         for (j in 0 until numSubBlocks) {
             val sDistStart = windowStartDist + (j * subBlockSize)
             val sDistEnd = windowStartDist + ((j + 1) * subBlockSize)
-            val sElevStart = getElevationAtDistance(sDistStart)
-            val sElevEnd = getElevationAtDistance(sDistEnd)
+
+            val sElevStart: Double
+            val sElevEnd: Double
+
+            if (useClimberData) {
+                // Interpolación lineal a lo largo del climb real hacia la cima
+                // Fracción de la ventana lookahead que ya ha cubierto el rider
+                val fracStart = (sDistStart - windowStartDist).coerceAtLeast(0.0) / distanceToTop.coerceAtLeast(1.0)
+                val fracEnd   = (sDistEnd   - windowStartDist).coerceAtLeast(0.0) / distanceToTop.coerceAtLeast(1.0)
+                sElevStart = currentElevation + fracStart.coerceIn(0.0, 1.0) * elevationToTop
+                sElevEnd   = currentElevation + fracEnd.coerceIn(0.0, 1.0)   * elevationToTop
+            } else {
+                // Fallback: polilínea 2D calibrada barométricamente
+                sElevStart = getElevationAtDistance(sDistStart)
+                sElevEnd   = getElevationAtDistance(sDistEnd)
+            }
 
             val sElevDiff = sElevEnd - sElevStart
             val sDist = (sDistEnd - sDistStart).coerceAtLeast(1.0)
@@ -468,13 +536,9 @@ class AltimetriaStrategyCalculator {
             routeElevations.add(sElevEnd.toFloat())
 
             val distanceKm = sDist / 1000.0
-            if (grade > maxRampPct) {
-                maxRampPct = grade
-            }
+            if (grade > maxRampPct) maxRampPct = grade
             accumulatedHardness += FatigueGradeCalculator.calculateSegmentHardness(grade, distanceKm)
-            if (attackAlertsEnabled && grade > thresholdAttack) {
-                attack = true
-            }
+            if (attackAlertsEnabled && grade > thresholdAttack) attack = true
         }
 
         // Construcción de bloques mayores para telemetría y rótulos
