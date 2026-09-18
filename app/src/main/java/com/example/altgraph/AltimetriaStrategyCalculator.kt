@@ -65,19 +65,19 @@ class AltimetriaStrategyCalculator {
 
     fun updateLiveElevation(elev: Double) {
         if (elev <= 0.0) return
-        
+
         // Calcular la pendiente barométrica instantánea real (deltaE / deltaD)
         if (lastElevationSample > 0.0 && currentSpeed > 0.1) {
             val deltaE = elev - lastElevationSample
             val deltaD = (currentSpeed * 1.0).coerceAtLeast(0.5) // Medido cada segundo
             val calcGrade = (deltaE / deltaD) * 100.0
-            
+
             // Suavizado por media móvil exponencial (EMA) para eliminar ruido del altímetro
             instantBarometricGrade = (0.3 * calcGrade) + (0.7 * instantBarometricGrade)
         }
         lastElevationSample = elev
         this.currentElevation = elev
-        
+
         if (!isNavigatingRoute && routePoints.isEmpty()) {
             if (liveElevationHistory.size < 20) {
                 liveElevationHistory.add(elev)
@@ -85,6 +85,11 @@ class AltimetriaStrategyCalculator {
                 liveElevationHistory.removeAt(0)
                 liveElevationHistory.add(elev)
             }
+        }
+
+        // En modo ruta: recalibrar el perfil con la altitud barométrica real
+        if (isNavigatingRoute && routePoints.isNotEmpty()) {
+            recalibrateElevationProfile(elev)
         }
     }
 
@@ -179,25 +184,69 @@ class AltimetriaStrategyCalculator {
             return
         }
 
+        // Build a list of raw (lat, lng, distAcumulada) first so we can apply real elevation.
+        // The Karoo polyline encodes ONLY lat/lng — no altitude. We anchor the profile on the
+        // current barometric elevation and accumulate vertical gain from the live grade stream.
+        // Any subsequent live elevation update will correct currentElevation in real time.
         var accumulatedDist = 0.0
         val result = mutableListOf<RoutePoint>()
 
+        // First pass: compute accumulated distances
+        val rawDistances = DoubleArray(points.size)
         for (i in points.indices) {
-            val pt = points[i]
             if (i > 0) {
                 val prev = points[i - 1]
+                val pt  = points[i]
                 val d = hypot(pt.first - prev.first, pt.second - prev.second) * 111000.0
                 accumulatedDist += d
             }
-            val microRelief = (sin(accumulatedDist / 80.0) * 12.0) + (sin(accumulatedDist / 250.0) * 35.0)
-            val approxElev = 100.0 + microRelief + (accumulatedDist / 110.0)
-            result.add(RoutePoint(pt.first, pt.second, approxElev, accumulatedDist))
+            rawDistances[i] = accumulatedDist
+        }
+
+        // Second pass: assign elevation anchored at the current barometric altitude.
+        // We project forward using the live grade (m of climb per metre of distance).
+        // If we have no live grade yet we assume a flat road — far better than fake sines.
+        val anchorElev = if (currentElevation > 0.0) currentElevation else 100.0
+        // gradePerMetre: e.g. 8% → 0.08; negative for descents
+        val gradePerMetre = instantBarometricGrade / 100.0
+
+        for (i in points.indices) {
+            val pt = points[i]
+            val dist = rawDistances[i]
+            // Simple linear projection from anchor at the rider's current position.
+            // The delta distance from dist=0 (start of polyline) could be huge if the
+            // rider is already mid-route, so we keep it relative to current position.
+            // updateCurrentLocation() + nearestIndex logic corrects this at render time.
+            val projectedElev = anchorElev + dist * gradePerMetre
+            result.add(RoutePoint(pt.first, pt.second, projectedElev, dist))
         }
 
         this.routePoints = result
         this.isNavigatingRoute = true
-        
+
         detectHairpins()
+    }
+
+    /**
+     * Called whenever we get a fresh barometric altitude reading.
+     * In route mode we recalibrate the elevation profile so that the point nearest to
+     * the rider's current GPS position matches the real barometric altitude, and all
+     * surrounding points are shifted by the same delta. This keeps the profile truthful.
+     */
+    fun recalibrateElevationProfile(realElev: Double) {
+        if (routePoints.isEmpty() || realElev <= 0.0) return
+        // Find the nearest point to the current GPS position
+        var nearestIndex = 0
+        var minDist = Double.MAX_VALUE
+        routePoints.forEachIndexed { index, point ->
+            val d = hypot(point.latitude - currentLatitude, point.longitude - currentLongitude)
+            if (d < minDist) { minDist = d; nearestIndex = index }
+        }
+        val currentProfileElev = routePoints[nearestIndex].elevation
+        val delta = realElev - currentProfileElev
+        if (abs(delta) < 0.5) return  // negligible correction
+        // Shift all points by the same delta (rigid translation keeps relative shape)
+        this.routePoints = routePoints.map { it.copy(elevation = it.elevation + delta) }
     }
 
     private fun detectHairpins() {
@@ -285,11 +334,13 @@ class AltimetriaStrategyCalculator {
             var accElev = currentElevation
             freeElevations.add(accElev.toFloat())
 
-            val blockShift = (windowStartDist / subBlockSize).toInt()
+            // Proyectar la pendiente actual de forma constante hacia adelante.
+            // NO añadimos oscilaciones sinusoidales — el perfil debe reflejar la
+            // carretera real que el altímetro barométrico está leyendo, no un adorno.
+            val constantGrade = baseGrade.coerceIn(-30.0, 30.0).toFloat()
             for (idx in 0 until numSubBlocks) {
-                val blockGrade = (baseGrade + (sin((blockShift + idx) * 0.8) * 1.5)).coerceIn(-15.0, 30.0).toFloat()
-                freeSubBlocks.add(blockGrade)
-                accElev += subBlockSize * (blockGrade / 100.0)
+                freeSubBlocks.add(constantGrade)
+                accElev += subBlockSize * (constantGrade / 100.0)
                 freeElevations.add(accElev.toFloat())
             }
 
@@ -464,15 +515,11 @@ class AltimetriaStrategyCalculator {
         val showPoiViewpoints = prefs?.showPoiViewpoints ?: true
         val showPoiSummits = prefs?.showPoiSummits ?: true
 
+        // Solo mostrar POIs reales de la ruta SDK. Si la ruta no tiene POIs no fabricamos ninguno.
         val rawPois = if (routePois.isNotEmpty()) {
             routePois.map { Poi(it.relativeDistance - windowStartDist, it.icon, it.name, it.type) }
         } else {
-            listOf(
-                Poi(1200.0 - windowStartDist, "🏘️", "Vall d'Ebo", PoiType.TOWN),
-                Poi(3500.0 - windowStartDist, "💧", "Font de la Bici", PoiType.WATER),
-                Poi(4200.0 - windowStartDist, "📸", "Mirador del Valle", PoiType.VIEWPOINT),
-                Poi(8500.0 - windowStartDist, "📡", "Miserat-Xillibre", PoiType.SUMMIT)
-            )
+            emptyList()
         }
 
         val visiblePois = rawPois.filter { poi ->
