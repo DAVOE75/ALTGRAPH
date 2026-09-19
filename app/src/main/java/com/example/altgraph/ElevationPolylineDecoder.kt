@@ -44,6 +44,22 @@ object ElevationPolylineDecoder {
                         p.elevation < -500 || p.elevation > 9000
             }
 
+            if (hasInvalid) {
+                Log.w(TAG, "Default precision gave invalid values, trying ALT_PRECISION")
+                val altPoints = decodeWithPrecision(encoded, ALT_PRECISION)
+                val altInvalid = altPoints.any { p ->
+                    p.distance < 0 || p.distance > 1_000_000 ||
+                            p.elevation < -500 || p.elevation > 9000
+                }
+                
+                if (!altInvalid && altPoints.isNotEmpty()) {
+                    Log.d(TAG, "Decode success with ALT_PRECISION! Points: ${altPoints.size}")
+                    return DecodeResult.Success(altPoints)
+                }
+                
+                return DecodeResult.Error("Invalid decoded values with both precisions")
+            }
+
             Log.d(TAG, "Decode success with default precision! Points: ${points.size}")
             DecodeResult.Success(points)
         } catch (e: Exception) {
