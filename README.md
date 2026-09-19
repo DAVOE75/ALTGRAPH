@@ -77,40 +77,89 @@ Permite al ciclista elegir entre 5 formas visuales de interpretar la montaña de
 
 ---
 
-## 📖 Manual de Usuario
-Consulta el [**Manual de Usuario (`USER_MANUAL.md`)**](USER_MANUAL.md) para ver la guía completa de configuración e instalación.
+## 🆚 ALTGRAPH vs Climber Nativo de Karoo
+
+ALTGRAPH no sustituye el Climber nativo, sino que lo complementa ofreciendo una **vista gráfica integral** y personalizable como un campo de datos (`Data Field`) o a pantalla completa. Sus principales diferencias son:
+- **Resolución Adaptativa y Renderizado Continuo**: El perfil avanza físicamente en ventanas rodantes de 50m. Las barras no pegan "saltos" estáticos, fluyen hacia ti con la cadencia de tu pedaleo.
+- **Modelos de Visualización**: El nativo tiene una vista fija; ALTGRAPH te ofrece 5 modelos revolucionarios (Clásica 3D, Horizonte Isométrico, Oasis Tácticos, Campo de Fuerza y Monolito).
+- **Escalas Dinámicas al Toque**: Puedes cambiar instantáneamente el zoom de la ruta (200m, 1km, 10km, 20km, 50km, etc.) simplemente tocando el botón de lupa sin salir de tu entrenamiento.
+- **Grado de Fatiga (GF)**: Única herramienta en Karoo que calcula la dureza científica de un puerto basándose en el coeficiente APM (Altimetrías de Puertos de Montaña).
 
 ---
 
-## 🛠️ Requisitos e Instalación
+## ⚙️ Características y Funciones en Detalle
 
-### Requisitos de desarrollo
-* **Android Studio**: Ladybug / 2024.2.1 o superior.
-* **JDK**: Java 17 o superior.
-* **Android SDK**: `compileSdk = 34`, `minSdk = 26`.
-* **Dispositivo**: Hammerhead Karoo 2 o Karoo 3 con ADB activado.
+- **Panel Táctico (Dashboard)**: Incorpora campos de datos exclusivos de la extensión para añadirlos libremente a tus pantallas: *Estratega de Altimetría*, *Grado de Fatiga (GF)*, *Ritmo VAM Objetivo* y *Tendencia 3D*.
+- **Iconos Topográficos Oficiales**: Identificación de Cimas, Puertos de Montaña (Map-Pin), Pueblos y Fuentes extraídos directamente de la ruta o del relieve.
+- **Detección Matemática de Curvas**: El algoritmo detecta giros cerrados (tornanti/herraduras) y te avisa gráficamente.
+- **Cálculo Topográfico Puro**: Opcionalmente, puedes calcular las distancias en base a proyección horizontal para un rigor absoluto en puertos extremos de alta montaña.
+- **Temas Oscuros y de Alto Contraste**: Interfaz diseñada para una legibilidad instantánea bajo el sol directo o con gafas fotocromáticas.
 
 ---
 
-## 📦 Compilación
+## 📲 Instalación en Karoo 2 y Karoo 3
 
+Al estar basada en el SDK oficial `karoo-ext`, la instalación **no requiere root** ni modificaciones peligrosas del sistema operativo. Es 100% segura.
+
+**Vía Sideloading (Recomendado para Karoo 3)**
+1. Descarga el archivo `.apk` de la última versión desde la sección [Releases](https://github.com/DAVOE75/ALTGRAPH/releases).
+2. Envíalo a tu Karoo usando la app oficial **Hammerhead Companion** en tu smartphone.
+3. Una vez instalada, la extensión ALTGRAPH buscará actualizaciones futuras de manera automática leyendo el `manifest.json`.
+
+**Vía ADB (Avanzado)**
+1. Habilita las Opciones de Desarrollador y la depuración USB en tu dispositivo Karoo.
+2. Conecta el dispositivo al PC y ejecuta: `adb install -r altgraph.apk`
+
+---
+
+## 🔧 Configuración Inicial
+
+Para dar vida a ALTGRAPH en tu pantalla de entrenamiento:
+1. En tu Karoo, ve a **Profiles** (Perfiles de usuario) y edita tu perfil habitual (ej: Carretera o MTB).
+2. Edita una de las páginas de datos y selecciona la disposición (layout) que prefieras (soporta desde el bloque gráfico central hasta pantalla completa 100%).
+3. Toca la celda para elegir el campo, baja a la sección de extensiones y elige **ALTGRAPH**.
+4. ¡Opcional!: Abre la app compañera de ALTGRAPH desde el cajón principal de apps (App Launcher) para ajustar tus preferencias, como el modelo 3D por defecto o tu VAM objetivo.
+
+---
+
+## 🧠 Arquitectura y Cómo Funciona
+
+- **Integración Nativa Total**: Extrae la ruta, el track y el progreso en vivo desde el `OnNavigationState` de la API oficial `karoo-ext`. Utiliza los mismos datos en crudo que el sistema de escalada de Hammerhead.
+- **Procesamiento de Telemetría**: El progreso del ciclista se triangula cruzando el flujo `DISTANCE_TO_DESTINATION` con la polilínea de elevación original, filtrando errores del GPS.
+- **Renderizado Zero-Allocation**: Todo el motor gráfico 3D ha sido programado sobre un Canvas puro en Android. No se generan objetos "basura" en bucle (Zero GC pauses), lo que garantiza 0 tirones (lags) visuales y un impacto mínimo en la batería.
+
+---
+
+## ⚠️ Limitaciones Conocidas
+
+- Si te sales de la ruta cargada (Off-Route), el gráfico dejará de avanzar hasta que el sistema de navegación recalcule o vuelvas a la trazada oficial.
+- Si Karoo no proporciona la polilínea de elevación para una ruta importada de terceros, ALTGRAPH se basará en medias para trazar el perfil, disminuyendo la fidelidad hiperrealista.
+
+---
+
+## 📦 Compilación para Desarrolladores
+
+El proyecto utiliza Gradle y Kotlin. Requiere JDK 17 y Android SDK (Plataforma 34).
 ```bash
-# Compilar proyecto
-./gradlew assembleDebug
-
-# Instalar en Karoo conectado por USB
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+./gradlew assembleDebug # Compila el APK de prueba
+./gradlew testDebugUnitTest # Ejecuta los test matemáticos
 ```
 
 ---
 
-## 👨‍💻 Desarrollador
-Desarrollado con pasión por **David García Pascual**.
+## 🤝 Créditos y Agradecimientos
+
+- Construido sobre el SDK oficial **[karoo-ext](https://github.com/hammerheadnav/karoo-ext)** de Hammerhead (Licencia Apache 2.0).
+- Inspirado por la comunidad open-source de modding para Karoo (como la mítica extensión *Ki2* o *Climber+*).
+- Desarrollado por **David García Pascual**.
 
 ---
 
-## 📄 Licencia
-Este proyecto se distribuye bajo la licencia **MIT**.
+## 📄 Licencia y Descargo de Responsabilidad
+
+Este proyecto de código abierto se distribuye bajo la licencia **MIT** - Copyright 2026 David García Pascual.
+
+*Descargo de responsabilidad: Esta extensión no está afiliada, respaldada, patrocinada ni soportada por Hammerhead o SRAM. Úsala bajo tu propio riesgo y, por favor, mantén siempre los ojos en la carretera y las manos en el manillar.*
 
 
 ---
