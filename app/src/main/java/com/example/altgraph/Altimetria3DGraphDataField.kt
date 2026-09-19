@@ -132,7 +132,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                                 val pois = (state.javaClass.methods.find { it.name == "getPois" }?.invoke(state) as? List<*>)
                                 if (pois != null) {
                                     @Suppress("UNCHECKED_CAST")
-                                    calculator.setRoutePois(pois as List<io.hammerhead.karooext.models.Poi>)
+                                    calculator.setRoutePois(pois as List<io.hammerhead.karooext.models.Symbol.POI>)
                                 }
                                 
                                 // Sincronizar lista de puertos (Mountain Gates)
