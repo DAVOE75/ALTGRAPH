@@ -663,7 +663,7 @@ class Altimetria3DView @JvmOverloads constructor(
         val pillH = (h * 0.15f).coerceIn(26f, 40f)
 
         val marginR = 16f
-        val marginT = 16f
+        val marginT = 4f // Subido un poco más hacia arriba (antes 16f)
 
         val right = w - marginR
         val left = right - pillW
