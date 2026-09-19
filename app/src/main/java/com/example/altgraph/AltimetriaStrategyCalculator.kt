@@ -536,18 +536,25 @@ class AltimetriaStrategyCalculator {
         var nearestIndex = 0
         if (currentLatitude != 0.0 && currentLongitude != 0.0 && routePoints.isNotEmpty()) {
             var minDistance = Double.MAX_VALUE
+            var realMinDistance = Double.MAX_VALUE
             routePoints.forEachIndexed { index, point ->
                 val results = FloatArray(1)
                 android.location.Location.distanceBetween(point.latitude, point.longitude, currentLatitude, currentLongitude, results)
-                if (results[0] < minDistance) {
-                    minDistance = results[0].toDouble()
+                val dist = results[0].toDouble()
+                
+                // FIX PARA RUTAS CIRCULARES: Penalizamos ligeramente los puntos finales para que
+                // si el inicio y el fin coinciden (ej. en la misma ciudad), elija el inicio.
+                val adjustedDist = dist + (index * 0.001)
+                
+                if (adjustedDist < minDistance) {
+                    minDistance = adjustedDist
                     nearestIndex = index
+                    realMinDistance = dist
                 }
             }
             
-            // PREVIEW FIX: If the closest point on the route is more than 5km away,
-            // we assume the user is at home testing/previewing the route, so we start at km 0.
-            if (minDistance > 5000.0) {
+            // PREVIEW FIX: Si el punto más cercano está a más de 5km, asumimos que está en casa probando.
+            if (realMinDistance > 5000.0) {
                 nearestIndex = 0
             }
         }
@@ -561,7 +568,15 @@ class AltimetriaStrategyCalculator {
 
         // 2. Ventana deslizante en bloques cuánticos de 50 metros
         val quantumMeters = 50.0
-        val windowStartDist = (currentRiderDistance / quantumMeters).toLong() * quantumMeters
+        var windowStartDist = (currentRiderDistance / quantumMeters).toLong() * quantumMeters
+        
+        // PANORAMIC FIX: Si el zoom es de 100km o más (ultra panorámico), forzamos
+        // el inicio de la ventana al kilómetro 0 para mostrar la ruta completa, 
+        // tal y como se ve en el Hammerhead Dashboard.
+        if (lookaheadDist >= 100000.0) {
+            windowStartDist = 0.0
+        }
+        
         val windowEndDist = windowStartDist + lookaheadDist
 
         val riderOffsetInWindow = (currentRiderDistance - windowStartDist).coerceAtLeast(0.0)
