@@ -17,7 +17,10 @@ object GradeColorScale {
      */
     fun getColorHex(grade: Double): String {
         return when {
-            grade < 0.0 -> "#FFFFFF" // Blanco puro para bajadas
+            grade <= -10.0 -> "#041E42" // Descenso pronunciado (Azul marino muy oscuro)
+            grade <= -5.0 -> "#004B87" // Descenso medio (Azul oscuro)
+            grade <= -2.0 -> "#0072CE" // Descenso suave (Azul medio)
+            grade < 0.0 -> "#41B6E6" // Falso llano bajada (Azul claro celeste)
             grade < 3.0 -> "#388E3C" // Verde bosque intenso (sin ser flúor)
             grade < 5.0 -> "#FBC02D" // Amarillo fuerte
             grade < 8.0 -> "#F57C00" // Naranja intenso

@@ -38,7 +38,10 @@ Permite al ciclista elegir entre 5 formas visuales de interpretar la montaña de
 5. **💎 Monolito de Obsidiana y Plasma (`Monolito`)**: Montaña esculpida en cristal de obsidiana facetado oscuro (`#151D2C` a `#04070D`), faceta superior 3D en cristal pulido, núcleo interior de plasma radiante y cresta superior en haz láser blanco con resplandor neón celeste.
 
 ### 🎨 Escala de Gradientes Intensa de Alta Visibilidad
-* **$< 0.0\%$**: Blanco puro `#FFFFFF` (Descensos y llaneos).
+* **$\le -10.0\%$**: Azul marino oscuro `#041E42` (Descenso pronunciado).
+* **$-10.0\%$ a $-5.0\%$**: Azul oscuro `#004B87` (Descenso medio).
+* **$-5.0\%$ a $-2.0\%$**: Azul medio `#0072CE` (Descenso suave).
+* **$-2.0\%$ a $<0.0\%$**: Azul claro celeste `#41B6E6` (Falso llano bajada).
 * **$0.0\%$ a $3.0\%$**: Verde bosque intenso `#388E3C`.
 * **$3.0\%$ a $5.0\%$**: Amarillo fuerte `#FBC02D`.
 * **$5.0\%$ a $8.0\%$**: Naranja intenso `#F57C00`.
