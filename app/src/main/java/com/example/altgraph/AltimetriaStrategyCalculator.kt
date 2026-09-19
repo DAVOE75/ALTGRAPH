@@ -535,26 +535,27 @@ class AltimetriaStrategyCalculator {
             )
         }
 
-        // 1. Encuentra el índice más cercano para inicializar la ventana
-        var nearestIndex = 0
+        // 1. Encuentra el índice más cercano en una ventana local para inicializar la ventana
         if (currentLatitude != 0.0 && currentLongitude != 0.0 && routePoints.isNotEmpty()) {
             var minDistance = Double.MAX_VALUE
             var realMinDistance = Double.MAX_VALUE
-            routePoints.forEachIndexed { index, point ->
-                val results = FloatArray(1)
-                android.location.Location.distanceBetween(point.latitude, point.longitude, currentLatitude, currentLongitude, results)
-                val dist = results[0].toDouble()
-                
-                // FIX PARA RUTAS CIRCULARES: Penalizamos ligeramente los puntos finales para que
-                // si el inicio y el fin coinciden (ej. en la misma ciudad), elija el inicio.
-                val adjustedDist = dist + (index * 0.001)
-                
-                if (adjustedDist < minDistance) {
-                    minDistance = adjustedDist
-                    nearestIndex = index
+            val dists = FloatArray(1)
+            
+            val searchStart = if (nearestIndex == 0) 0 else (nearestIndex - 20).coerceAtLeast(0)
+            val searchEnd = if (nearestIndex == 0) routePoints.size else (nearestIndex + 500).coerceAtMost(routePoints.size)
+            
+            var newNearestIdx = nearestIndex
+            for (i in searchStart until searchEnd) {
+                val pt = routePoints[i]
+                Location.distanceBetween(currentLatitude, currentLongitude, pt.latitude, pt.longitude, dists)
+                val dist = dists[0].toDouble()
+                if (dist < minDistance) {
+                    minDistance = dist
                     realMinDistance = dist
+                    newNearestIdx = i
                 }
             }
+            nearestIndex = newNearestIdx
             
             // PREVIEW FIX: Si el punto más cercano está a más de 5km, asumimos que está en casa probando.
             if (realMinDistance > 5000.0) {
@@ -562,11 +563,17 @@ class AltimetriaStrategyCalculator {
             }
         }
 
-        // 1. Usar la distancia restante reportada por el Karoo para un seguimiento perfecto
-        // Esto evita los problemas de 'snapping' en rutas circulares o con cruces, ya que Karoo
-        // sabe exactamente en qué punto de la ruta estamos navegando.
-        val totalLength = routeElevationProfile.lastOrNull()?.distance ?: (routePoints.lastOrNull()?.distance ?: 0.0)
-        val currentRiderDistance = (totalLength - fallbackRemainingDistance).coerceAtLeast(0.0)
+        // 1. Usar la distancia restante reportada por el Karoo para un seguimiento perfecto,
+        // pero si aún no está disponible (ej. arranque inicial o rutas sin valhalla), usamos
+        // el índice más cercano del escáner geográfico (que ahora tiene protección contra cruces).
+        val currentRiderDistance = if (fallbackRemainingDistance > 0.0) {
+            val totalLength = routeElevationProfile.lastOrNull()?.distance ?: (routePoints.lastOrNull()?.distance ?: 0.0)
+            (totalLength - fallbackRemainingDistance).coerceAtLeast(0.0)
+        } else if (routePoints.isNotEmpty()) {
+            routePoints[nearestIndex].distance
+        } else {
+            0.0
+        }
 
         // 2. Ventana deslizante en bloques cuánticos de 50 metros
         val quantumMeters = 50.0

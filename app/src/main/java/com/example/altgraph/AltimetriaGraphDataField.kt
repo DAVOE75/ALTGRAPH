@@ -65,11 +65,21 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                     // Consumidor 1: Polilínea e Itinerario de Ruta Precargada (GPX / FIT)
                     system.addConsumer<OnNavigationState> { navEvent ->
                         val state = navEvent.state
+                        
                         if (state is OnNavigationState.NavigationState.NavigatingRoute) {
+                            Log.d(TAG, "NAV: ruta='${state.name}' dist=${state.routeDistance}m pois=${state.pois.size}")
                             calculator.isNavigatingRoute = true
+                            calculator.fallbackRemainingDistance = state.routeDistance
                             calculator.setRouteFromPolyline(state.routePolyline)
+                            
+                            var elevPoly = state.routeElevationPolyline
+                            if (elevPoly.isNullOrEmpty()) {
+                                elevPoly = (state.javaClass.methods.find { it.name == "getElevationPolyline" }?.invoke(state) as? String)
+                            }
+                            calculator.setRouteElevationProfile(elevPoly)
+                            
                             calculator.setRoutePois(state.pois)
-
+                            
                             val routeKey = "route:${state.name}"
                             val routeClimbs = state.climbs.map { climb ->
                                 RouteClimb(
@@ -81,11 +91,19 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                                 )
                             }
                             calculator.syncRouteClimbs(routeKey, routeClimbs)
-
                             
-                            calculator.setRouteElevationProfile(state.routeElevationPolyline)
+                        } else if (state is OnNavigationState.NavigationState.NavigatingToDestination) {
+                            val dist = (state.javaClass.methods.find { it.name == "getDestinationDistance" || it.name == "getDistance" }?.invoke(state) as? Double) ?: 0.0
+                            Log.d(TAG, "NAV: Destino dinámico detectado, dist=${dist}m")
+                            calculator.isNavigatingRoute = true
+                            calculator.setRouteElevationProfile(state.elevationPolyline)
+                            calculator.fallbackRemainingDistance = dist
+                            
                         } else {
-                            calculator.clearRoute()
+                            if (state.javaClass.simpleName == "Idle") {
+                                Log.d(TAG, "NAV: Navegación finalizada (Idle).")
+                                calculator.clearRoute()
+                            }
                         }
                     }
 

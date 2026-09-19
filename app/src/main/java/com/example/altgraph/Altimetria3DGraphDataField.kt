@@ -115,6 +115,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                         if (state is OnNavigationState.NavigationState.NavigatingRoute) {
                             Log.d(TAG, "NAV: ruta='${state.name}' dist=${state.routeDistance}m pois=${state.pois.size}")
                             calculator.isNavigatingRoute = true
+                            calculator.fallbackRemainingDistance = state.routeDistance
                             calculator.setRouteFromPolyline(state.routePolyline)
                             
                             var elevPoly = state.routeElevationPolyline
