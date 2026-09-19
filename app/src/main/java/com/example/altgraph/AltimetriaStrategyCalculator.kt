@@ -905,7 +905,8 @@ class AltimetriaStrategyCalculator {
             profileElevations = routeElevations,
             activeClimbs = visibleClimbs,
             visibleAvgGrade = visibleAvgGrade,
-            visibleMaxGrade = trueMaxGrade
+            visibleMaxGrade = trueMaxGrade,
+            routeName = activeRouteName
         )
     }
 

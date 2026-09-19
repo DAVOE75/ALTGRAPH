@@ -39,12 +39,12 @@ Permite al ciclista elegir entre 5 formas visuales de interpretar la montaña de
 
 ### 🎨 Escala de Gradientes Intensa de Alta Visibilidad
 * **$< 0.0\%$**: Blanco puro `#FFFFFF` (Descensos y llaneos).
-* **$0.0\%$ a $3.0\%$**: Verde puro flúor `#00FF00`.
-* **$3.0\%$ a $5.0\%$**: Amarillo puro flúor `#FFFF00`.
-* **$5.0\%$ a $8.0\%$**: Naranja puro eléctrico `#FF6600`.
-* **$8.0\%$ a $10.0\%$**: Marrón puro intenso `#964B00`.
-* **$10.0\%$ a $13.0\%$**: Rojo puro sangre `#FF0000`.
-* **$13.0\%$ a $17.0\%$**: Granate rojo oscuro `#8B0000`.
+* **$0.0\%$ a $3.0\%$**: Verde bosque intenso `#388E3C`.
+* **$3.0\%$ a $5.0\%$**: Amarillo fuerte `#FBC02D`.
+* **$5.0\%$ a $8.0\%$**: Naranja intenso `#F57C00`.
+* **$8.0\%$ a $10.0\%$**: Naranja oscuro / teja `#E65100`.
+* **$10.0\%$ a $13.0\%$**: Rojo intenso `#D32F2F`.
+* **$13.0\%$ a $17.0\%$**: Granate rojo oscuro `#B71C1C`.
 * **$> 17.0\%$**: Negro azabache `#000000`.
 
 ### 🔄 Ventana Rodante Cuántica de 50m y Avance Físico
