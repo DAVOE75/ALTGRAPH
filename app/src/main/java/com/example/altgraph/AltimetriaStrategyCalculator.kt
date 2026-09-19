@@ -19,6 +19,14 @@ enum class PoiType { TOWN, WATER, VIEWPOINT, SUMMIT }
 
 data class Poi(val relativeDistance: Double, val icon: String, val name: String, val type: PoiType)
 
+data class RouteClimb(
+    val startDistance: Double,
+    val endDistance: Double,
+    val length: Double,
+    val totalElevation: Double,
+    val avgGrade: Double
+)
+
 data class StrategyData(
     val remainingDistance: Double,
     val timeToSummit: Long,
@@ -36,7 +44,8 @@ data class StrategyData(
     val subBlocks: List<Float> = emptyList(),
     val subBlockSizeMeters: Double = 50.0,
     val majorBlockSizeMeters: Double = 100.0,
-    val profileElevations: List<Float> = emptyList()
+    val profileElevations: List<Float> = emptyList(),
+    val activeClimbs: List<RouteClimb> = emptyList()
 )
 
 class AltimetriaStrategyCalculator {
@@ -69,6 +78,10 @@ class AltimetriaStrategyCalculator {
 
     // GPX Elevation Profile Completo (SDK 1.1.7+)
     var routeElevationProfile: List<ElevationPolylineDecoder.ElevationPoint> = emptyList()
+
+    // Lista de puertos (climbs) de la ruta para marcar Mountain Gates en el 3D
+    var routeClimbs: List<RouteClimb> = emptyList()
+    private var routeKeyForClimbs: String? = null
 
     // Curvas de herradura (distancias absolutas detectadas)
     private val absoluteHairpins = mutableListOf<Double>()
@@ -179,7 +192,7 @@ class AltimetriaStrategyCalculator {
         this.currentLongitude = lng
     }
 
-    fun setRoutePois(symbols: List<Symbol.POI>) {
+    fun setRoutePois(symbols: List<io.hammerhead.karooext.models.Symbol.POI>) {
         if (routePoints.isEmpty() || symbols.isEmpty()) {
             this.routePois.clear()
             return
@@ -200,7 +213,7 @@ class AltimetriaStrategyCalculator {
                 name.contains("agua", ignoreCase = true) || name.contains("font", ignoreCase = true) || name.contains("fuente", ignoreCase = true) -> "💧"
                 name.contains("mirador", ignoreCase = true) || name.contains("vista", ignoreCase = true) -> "📸"
                 name.contains("puerto", ignoreCase = true) || name.contains("cima", ignoreCase = true) || name.contains("alto", ignoreCase = true) || name.contains("col", ignoreCase = true) -> "📡"
-                else -> "🏘️"
+                else -> "☕"
             }
             val type = when (icon) {
                 "💧" -> PoiType.WATER
@@ -209,6 +222,23 @@ class AltimetriaStrategyCalculator {
                 else -> PoiType.TOWN
             }
             routePois.add(Poi(nearestDist, icon, name, type))
+        }
+    }
+
+    /**
+     * Sincroniza la lista de climbs. Como Karoo puede borrar los climbs superados de la lista,
+     * hacemos un merge para mantenerlos (y poder verlos al hacer re-ride).
+     */
+    fun syncRouteClimbs(routeKey: String, incoming: List<RouteClimb>) {
+        if (routeKeyForClimbs != routeKey) {
+            routeKeyForClimbs = routeKey
+            routeClimbs = incoming
+        } else if (incoming.isNotEmpty()) {
+            val currentStartDists = routeClimbs.map { it.startDistance }.toSet()
+            val newClimbs = incoming.filter { it.startDistance !in currentStartDists }
+            if (newClimbs.isNotEmpty()) {
+                routeClimbs = (routeClimbs + newClimbs).sortedBy { it.startDistance }
+            }
         }
     }
 
@@ -384,6 +414,8 @@ class AltimetriaStrategyCalculator {
     fun clearRoute() {
         this.routePoints = emptyList()
         this.routeElevationProfile = emptyList()
+        this.routeClimbs = emptyList()
+        this.routeKeyForClimbs = null
         this.absoluteHairpins.clear()
         this.routePois.clear()
         this.isNavigatingRoute = false
@@ -469,7 +501,8 @@ class AltimetriaStrategyCalculator {
                 subBlocks = freeSubBlocks,
                 subBlockSizeMeters = subBlockSize,
                 majorBlockSizeMeters = majorBlockSize,
-                profileElevations = freeElevations
+                profileElevations = freeElevations,
+                activeClimbs = emptyList()
             )
         }
 
@@ -721,6 +754,11 @@ class AltimetriaStrategyCalculator {
             }
         }
 
+        // 12. Filtrar puertos visibles en la ventana 3D actual
+        val visibleClimbs = routeClimbs.filter { climb ->
+            climb.startDistance < windowEndDist && climb.endDistance > windowStartDist
+        }
+
         return StrategyData(
             remainingDistance = totalDistanceRemaining,
             timeToSummit = secondsRemaining,
@@ -738,7 +776,8 @@ class AltimetriaStrategyCalculator {
             subBlocks = routeSubBlocks,
             subBlockSizeMeters = subBlockSize,
             majorBlockSizeMeters = majorBlockSize,
-            profileElevations = routeElevations
+            profileElevations = routeElevations,
+            activeClimbs = visibleClimbs
         )
     }
 

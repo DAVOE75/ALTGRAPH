@@ -114,6 +114,20 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                             calculator.currentRouteDistance = state.routeDistance
                             calculator.setRouteFromPolyline(state.routePolyline)
                             calculator.setRoutePois(state.pois)
+
+                            // Sincronizar lista de puertos (Mountain Gates)
+                            val routeKey = "route:${state.name}"
+                            val routeClimbs = state.climbs.map { climb ->
+                                RouteClimb(
+                                    startDistance = climb.startDistance,
+                                    endDistance = climb.startDistance + climb.length,
+                                    length = climb.length,
+                                    totalElevation = climb.totalElevation,
+                                    avgGrade = climb.grade
+                                )
+                            }
+                            calculator.syncRouteClimbs(routeKey, routeClimbs)
+
                             
                             // SDK 1.1.7: Extraer el perfil de elevación real si está disponible
                             try {
@@ -284,7 +298,9 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     majorBlockSizeMeters = strategy.majorBlockSizeMeters,
                     profileElevations = strategy.profileElevations,
                     showBlockPercentages = prefs.showBlockPercentages,
-                    altimetriaStyle = prefs.altimetriaStyle
+                    altimetriaStyle = prefs.altimetriaStyle,
+                    targetVam = prefs.targetVam,
+                    activeClimbs = strategy.activeClimbs
                 )
 
                 if (cachedBitmap == null || cachedBitmap?.width != w || cachedBitmap?.height != h) {

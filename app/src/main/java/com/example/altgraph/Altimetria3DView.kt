@@ -368,6 +368,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private var subBlockSizeMeters: Double = 50.0
     private var majorBlockSizeMeters: Double = 100.0
     private var profileElevations: List<Float> = emptyList()
+    private var activeClimbs: List<RouteClimb> = emptyList()
     private var altimetriaStyle: AltimetriaStyle = AltimetriaStyle.CLASSIC
     private var targetVam: Int = 900
 
@@ -418,7 +419,8 @@ class Altimetria3DView @JvmOverloads constructor(
         profileElevations: List<Float> = emptyList(),
         showBlockPercentages: Boolean = true,
         altimetriaStyle: AltimetriaStyle = AltimetriaStyle.CLASSIC,
-        targetVam: Int = 900
+        targetVam: Int = 900,
+        activeClimbs: List<RouteClimb> = emptyList()
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -449,6 +451,7 @@ class Altimetria3DView @JvmOverloads constructor(
         this.windowStartMeters = windowStartMeters
         this.altimetriaStyle = altimetriaStyle
         this.targetVam = targetVam
+        this.activeClimbs = activeClimbs
         if (subBlocks.isNotEmpty()) {
             this.subBlocks = subBlocks
         }
@@ -610,9 +613,9 @@ class Altimetria3DView @JvmOverloads constructor(
         canvas.drawText(labelCurrentGrade, col1X, h * 0.13f, subTitleLabelPaint)
 
         val liveGradeText = "%.1f%%".format(currentGrade)
-        liveGradePaint.textSize = ((h * 0.11f) * fontScale).coerceIn(18f, 36f)
+        liveGradePaint.textSize = ((h * 0.13f) * fontScale).coerceIn(22f, 44f) // Mayor tamaño
         liveGradePaint.color = GradeColorScale.getTelemetryColor(currentGrade)
-        canvas.drawText(liveGradeText, col1X, h * 0.23f, liveGradePaint)
+        canvas.drawText(liveGradeText, col1X, h * 0.24f, liveGradePaint)
 
         // COLUMNA 2: PENDIENTE MEDIA DEL TRAMO VISIBLE
         val tramoAvgGrade = if (subBlocks.isNotEmpty()) subBlocks.average() else (if (nextBlocks.isNotEmpty()) nextBlocks.average() else currentGrade)
@@ -673,6 +676,68 @@ class Altimetria3DView @JvmOverloads constructor(
             else -> "🔍 ${lookaheadMeters / 1000}.${(lookaheadMeters % 1000) / 100}km"
         }
         canvas.drawText(zoomLabel, centerX, centerY, zoomBtnPaint)
+    }
+
+    private fun drawMountainGates(canvas: Canvas, xFront: FloatArray, yFront: FloatArray, yBase: FloatArray, totalMicroSamples: Int) {
+        if (activeClimbs.isEmpty()) return
+
+        val windowEndMeters = windowStartMeters + lookaheadMeters
+
+        for (climb in activeClimbs) {
+            // Draw Mountain Gate at Start
+            if (climb.startDistance in windowStartMeters..windowEndMeters) {
+                val startFrac = ((climb.startDistance - windowStartMeters) / lookaheadMeters).toFloat().coerceIn(0f, 1f)
+                val idx = (startFrac * (totalMicroSamples - 1)).roundToInt().coerceIn(0, totalMicroSamples - 1)
+                val px = xFront[idx]
+                val pyTop = yFront[idx]
+                
+                // Draw Glowing Gate / Arch
+                val gatePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = Color.parseColor("#EF4444")
+                    strokeWidth = 4f
+                    style = Paint.Style.STROKE
+                    setShadowLayer(10f, 0f, 0f, Color.parseColor("#EF4444"))
+                }
+                
+                // Draw a vertical line shooting up from the road as a gate
+                val archHeight = 120f
+                canvas.drawLine(px, pyTop, px, pyTop - archHeight, gatePaint)
+                canvas.drawLine(px - 30f, pyTop - archHeight, px + 30f, pyTop - archHeight, gatePaint) // Top crossbar
+                
+                // Label for Start
+                val gateTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = Color.WHITE
+                    textSize = 20f
+                    typeface = Typeface.DEFAULT_BOLD
+                    textAlign = Paint.Align.CENTER
+                }
+                canvas.drawText("START CLIMB", px, pyTop - archHeight - 10f, gateTextPaint)
+            }
+
+            // Draw Summit Beacon at End
+            if (climb.endDistance in windowStartMeters..windowEndMeters) {
+                val endFrac = ((climb.endDistance - windowStartMeters) / lookaheadMeters).toFloat().coerceIn(0f, 1f)
+                val idx = (endFrac * (totalMicroSamples - 1)).roundToInt().coerceIn(0, totalMicroSamples - 1)
+                val px = xFront[idx]
+                val pyTop = yFront[idx]
+                
+                val beaconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = Color.parseColor("#EAB308")
+                    style = Paint.Style.FILL
+                    setShadowLayer(15f, 0f, 0f, Color.parseColor("#FDE047"))
+                }
+                
+                canvas.drawCircle(px, pyTop - 40f, 15f, beaconPaint)
+                
+                val summitTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = Color.WHITE
+                    textSize = 22f
+                    typeface = Typeface.DEFAULT_BOLD
+                    textAlign = Paint.Align.CENTER
+                }
+                canvas.drawText("SUMMIT", px, pyTop - 65f, summitTextPaint)
+            }
+        }
     }
 
     private fun draw3DStraightRibbon(canvas: Canvas, w: Float, h: Float) {
@@ -918,6 +983,9 @@ class Altimetria3DView @JvmOverloads constructor(
                 }
             }
         }
+
+        // 6.b. MOUNTAIN GATES & SUMMIT BEACONS (Puertos Oficiales SDK)
+        drawMountainGates(canvas, xFront, yFront, yBase, totalMicroSamples)
 
         // 7. Flechas con porcentaje para rampas duras (>= 10%)
         if (showRamps) {

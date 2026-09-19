@@ -69,6 +69,19 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                             calculator.currentRouteDistance = state.routeDistance
                             calculator.setRouteFromPolyline(state.routePolyline)
                             calculator.setRoutePois(state.pois)
+
+                            val routeKey = "route:${state.name}"
+                            val routeClimbs = state.climbs.map { climb ->
+                                RouteClimb(
+                                    startDistance = climb.startDistance,
+                                    endDistance = climb.startDistance + climb.length,
+                                    length = climb.length,
+                                    totalElevation = climb.totalElevation,
+                                    avgGrade = climb.grade
+                                )
+                            }
+                            calculator.syncRouteClimbs(routeKey, routeClimbs)
+
                             
                             try {
                                 val method = state.javaClass.getMethod("getRouteElevationPolyline")
