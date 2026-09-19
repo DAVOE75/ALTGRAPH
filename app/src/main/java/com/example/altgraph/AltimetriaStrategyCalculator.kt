@@ -60,6 +60,9 @@ class AltimetriaStrategyCalculator {
     var isNavigatingRoute = false
     var routePoints: List<RoutePoint> = emptyList()
     
+    // El progreso exacto en la ruta (metros desde el inicio de la ruta)
+    var routeProgressDistance: Double = 0.0
+
     // Historial y buffer de altitud barométrica instantánea en tiempo real
     private val liveElevationHistory = mutableListOf<Double>()
     private var lastElevationSample = 350.0
@@ -528,26 +531,10 @@ class AltimetriaStrategyCalculator {
             )
         }
 
-        // 1. Encuentra el índice más cercano para inicializar la ventana
-        var nearestIndex = 0
-        if (currentLatitude != 0.0 && currentLongitude != 0.0 && routePoints.isNotEmpty()) {
-            var minDistance = Double.MAX_VALUE
-            routePoints.forEachIndexed { index, point ->
-                val results = FloatArray(1)
-                android.location.Location.distanceBetween(point.latitude, point.longitude, currentLatitude, currentLongitude, results)
-                if (results[0] < minDistance) {
-                    minDistance = results[0].toDouble()
-                    nearestIndex = index
-                }
-            }
-        }
-
-        // 1b. Usar el índice más cercano
-        val currentRiderDistance = if (routePoints.isNotEmpty()) {
-            routePoints[nearestIndex].distance
-        } else {
-            0.0
-        }
+        // 1. Usar el progreso exacto reportado por el Karoo (routeDistance - destinationDistance)
+        // Esto evita el problema de que el GPS te "enganche" al punto más cercano si estás en tu casa
+        // probando una ruta lejana, haciendo que el gráfico empiece en el medio de la nada.
+        val currentRiderDistance = if (isNavigatingRoute) routeProgressDistance.coerceAtLeast(0.0) else 0.0
 
         // 2. Ventana deslizante en bloques cuánticos de 50 metros
         val quantumMeters = 50.0
@@ -557,14 +544,6 @@ class AltimetriaStrategyCalculator {
         val riderOffsetInWindow = (currentRiderDistance - windowStartDist).coerceAtLeast(0.0)
         val riderProgress = (riderOffsetInWindow / lookaheadDist).toFloat().coerceIn(0f, 1f)
 
-        // 3. Localizar el punto de ruta correspondiente al inicio de la ventana (windowStartDist)
-        var windowStartIndex = nearestIndex
-        while (windowStartIndex > 0 && routePoints[windowStartIndex].distance > windowStartDist) {
-            windowStartIndex--
-        }
-        while (windowStartIndex < routePoints.size - 1 && routePoints[windowStartIndex + 1].distance <= windowStartDist) {
-            windowStartIndex++
-        }
         val windowStartElevation = getElevationAtDistance(windowStartDist)
 
         // 4. Distancia y desnivel restantes
