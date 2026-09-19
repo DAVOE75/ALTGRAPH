@@ -27,32 +27,38 @@ object ElevationPolylineDecoder {
     /**
      * Decode with automatic precision detection and validation.
      */
-    fun decodeSafe(encoded: String?): DecodeResult {
+    fun decodeSafe(encoded: String?, expectedLengthMeters: Double = 0.0): DecodeResult {
         if (encoded.isNullOrEmpty()) {
             return DecodeResult.Error("Empty polyline")
         }
 
         return try {
-            val points = decodeWithPrecision(encoded, DEFAULT_PRECISION)
+            var points = decodeWithPrecision(encoded, DEFAULT_PRECISION)
 
             if (points.isEmpty()) {
                 return DecodeResult.Error("Decoded to empty list")
             }
 
-            // Un GPX puede tener algún punto erróneo (ej. -505m o 9005m por ruido de GPS).
-            // No queremos arruinar todo el perfil y aplanarlo solo por un punto.
-            // PERO si la ruta usa precisión 1e5, los valores serán del orden de millones.
-            // Por tanto, solo cambiamos a ALT_PRECISION si los valores son EXTREMADAMENTE absurdos.
             val maxElev = points.maxOfOrNull { it.elevation } ?: 0.0
             val totalDist = points.lastOrNull()?.distance ?: 0.0
 
-            if (totalDist > 20_000_000 || maxElev > 30_000) {
-                Log.w(TAG, "Valores extremos detectados (dist=$totalDist, elev=$maxElev). Usando ALT_PRECISION.")
-                val altPoints = decodeWithPrecision(encoded, ALT_PRECISION)
-                return DecodeResult.Success(altPoints)
+            if (expectedLengthMeters > 0.0) {
+                val ratio = totalDist / expectedLengthMeters
+                if (ratio in 9.0..11.0) {
+                    Log.d(TAG, "Detectada precisión 10.0 (dist=$totalDist vs expected=$expectedLengthMeters)")
+                    points = decodeWithPrecision(encoded, 10.0)
+                } else if (ratio > 50000.0) {
+                    Log.d(TAG, "Detectada precisión 1e5 (dist=$totalDist vs expected=$expectedLengthMeters)")
+                    points = decodeWithPrecision(encoded, 1e5)
+                }
+            } else {
+                if (totalDist > 20_000_000 || maxElev > 30_000) {
+                    Log.w(TAG, "Valores extremos detectados (dist=$totalDist, elev=$maxElev). Usando ALT_PRECISION.")
+                    points = decodeWithPrecision(encoded, ALT_PRECISION)
+                }
             }
 
-            Log.d(TAG, "Decode success with default precision! Points: ${points.size}")
+            Log.d(TAG, "Decode success! Points: ${points.size}")
             DecodeResult.Success(points)
         } catch (e: Exception) {
             Log.e(TAG, "Decode failed: ${e.message}", e)

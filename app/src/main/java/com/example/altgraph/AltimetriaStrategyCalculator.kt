@@ -266,7 +266,8 @@ class AltimetriaStrategyCalculator {
         lastElevationPolyline = safeEncoded
         
         Log.e("AltiCalc", "setRouteElevationProfile called, encoded length=${encoded?.length}")
-        val result = ElevationPolylineDecoder.decodeSafe(encoded)
+        val expectedLength = routePoints.lastOrNull()?.distance ?: 0.0
+        val result = ElevationPolylineDecoder.decodeSafe(encoded, expectedLength)
         if (result is ElevationPolylineDecoder.DecodeResult.Success) {
             this.routeElevationProfile = ElevationPolylineDecoder.smooth(result.points)
             Log.e("AltiCalc", "Route elevation decoded successfully, points=${routeElevationProfile.size}")
