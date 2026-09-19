@@ -893,20 +893,23 @@ class Altimetria3DView @JvmOverloads constructor(
         }
 
         // 5. DIVISORES DE BLOQUE MAYOR VERTICALES CON COTAS DE ALTITUD
-        cotaTextPaint.textSize = ((h * 0.048f) * fontScale).coerceIn(10f, 16f)
+        cotaTextPaint.textSize = ((h * 0.055f) * fontScale).coerceIn(12f, 18f)
+        cotaTextPaint.color = Color.parseColor("#E2E8F0") // Más claro y visible
         for (k in 0 until majorSamples) {
             val microIdx = (k * microSubDivisions).coerceAtMost(totalMicroSamples - 1)
             val px = xFront[microIdx]
             val pyTop = yFront[microIdx]
             val pyBase = yBase[microIdx]
 
-            // Ocultar cotas a partir de 50km para limpiar el gráfico
-            if (showCotas && lookaheadMeters < 50000) {
-                canvas.drawLine(px, pyTop, px, pyBase, cotaLinePaint)
-                val cotaText = "${majorElevations[k].toInt()} m"
+            // Se visualiza en TODAS las escalas, como se solicitó
+            if (showCotas) {
+                // Línea vertical que sube un poco por encima del perfil
+                canvas.drawLine(px, pyTop - 12f, px, pyBase, cotaLinePaint)
+                
+                val cotaText = "${majorElevations[k].toInt()}"
                 canvas.save()
-                val textOffsetX = if (k == 0) px + 8f else px - 5f
-                val textOffsetY = pyBase - 36f
+                val textOffsetX = px + 6f
+                val textOffsetY = pyTop - 18f // Encima de la superficie del perfil
                 canvas.translate(textOffsetX, textOffsetY)
                 canvas.rotate(-90f)
                 canvas.drawText(cotaText, 0f, 0f, cotaTextPaint)
