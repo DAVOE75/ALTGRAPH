@@ -820,7 +820,6 @@ class AltimetriaStrategyCalculator {
         }
 
         // ── Cálculo de Pendiente Máxima y Media REAL del Tramo Visible ────────────────
-        val windowEndDist = windowStartDist + actualLookahead
         val rawSource = if (routeElevationProfile.isNotEmpty()) routeElevationProfile else routePoints.map { ElevationPolylineDecoder.ElevationPoint(it.distance, it.elevation) }
 
         var trueMaxGrade = 0.0
