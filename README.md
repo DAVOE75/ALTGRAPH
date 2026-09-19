@@ -37,26 +37,15 @@ Permite al ciclista elegir entre 5 formas visuales de interpretar la montaña de
 4. **⚡ Campo de Fuerza y Fatiga (`Campo Fuerza`)**: Relieve con líneas gravitatorias de tensión ancladas con precisión de píxel a la pendiente, onda cinética senoidal en la base (cian en avance con inercia, carmesí rápido cuando la pendiente frena la cadencia) y línea guía de ritmo ascensional (VAM) flotando suavemente sobre el perfil.
 5. **💎 Monolito de Obsidiana y Plasma (`Monolito`)**: Montaña esculpida en cristal de obsidiana facetado oscuro (`#151D2C` a `#04070D`), faceta superior 3D en cristal pulido, núcleo interior de plasma radiante y cresta superior en haz láser blanco con resplandor neón celeste.
 
-### 🎨 Escala Monocromática Continua de 15 Tramos
-* **$< 0.0\%$**: Azul `#1D4ED8` (Descensos y pendientes negativas).
-* **$0.0\%$ a $15.0\%$**: Transición suave de 1 en 1 en 15 tramos:
-  * `0-1%`: Blanco puro `#FFFFFF`
-  * `1-2%`: Crema suave `#FEF9C3`
-  * `2-3%`: Amarillo muy claro `#FEF08A`
-  * `3-4%`: Amarillo claro `#FDE047`
-  * `4-5%`: Amarillo medio `#FACC15`
-  * `5-6%`: Dorado `#EAB308`
-  * `6-7%`: Amarillo anaranjado `#F59E0B`
-  * `7-8%`: Naranja claro / ámbar `#FB923C`
-  * `8-9%`: Naranja puro `#F97316`
-  * `9-10%`: Naranja intenso `#EA580C`
-  * `10-11%`: Bermellón `#E03E1A`
-  * `11-12%`: Rojo anaranjado `#EA2E1A`
-  * `12-13%`: Rojo vivo `#E02424`
-  * `13-14%`: Rojo puro `#DC2626`
-  * `14-15%`: Rojo intenso `#B91C1C`
-* **$> 15.0\%$ hasta $20.0\%$**: Rojo muy intenso `#991B1B`.
-* **$> 20.0\%$**: Negro azabache `#000000`.
+### 🎨 Escala de Gradientes Intensa de Alta Visibilidad
+* **$< 0.0\%$**: Gris claro casi blanco `#F3F4F6` (Descensos y llaneos).
+* **$0.0\%$ a $3.0\%$**: Verde intenso `#16A34A`.
+* **$3.0\%$ a $5.0\%$**: Amarillo vivo `#FFD600`.
+* **$5.0\%$ a $8.0\%$**: Naranja intenso `#FF6D00`.
+* **$8.0\%$ a $10.0\%$**: Marrón fuerte `#8B4513`.
+* **$10.0\%$ a $13.0\%$**: Rojo puro intenso `#D50000`.
+* **$13.0\%$ a $17.0\%$**: Granate oscuro `#800000`.
+* **$> 17.0\%$**: Negro azabache `#000000`.
 
 ### 🔄 Ventana Rodante Cuántica de 50m y Avance Físico
 * El faro del ciclista asciende físicamente por el contorno superior de la pendiente de 0 a 50m.
