@@ -14,9 +14,13 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
 
 ## 📸 Capturas en Pantalla Real de Karoo 3
 
-| 🏔️ Altimetría 3D e Itinerario | 🎨 Pestaña Estilo y Selector | 🏔️ Pestaña 3D |
+| 🏔️ Altimetría 3D (Escala 200m) | 🏔️ Altimetría 3D (Escala 1km) | 🏔️ Altimetría 3D (Escala 10km) |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile.png" width="220" alt="Altimetría 3D" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_estilo.png" width="220" alt="Panel Estilo" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_3d.png" width="220" alt="Panel 3D" /> |
+| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile.png" width="220" alt="Altimetría 3D 200m" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_1km.png" width="220" alt="Altimetría 3D 1km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_10km.png" width="220" alt="Altimetría 3D 10km" /> |
+
+| 🏔️ Altimetría 3D (Escala 20km) | 🎨 Pestaña Estilo y Selector | 🏔️ Pestaña 3D |
+| :---: | :---: | :---: |
+| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_20km.png" width="220" alt="Altimetría 3D 20km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_estilo.png" width="220" alt="Panel Estilo" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_3d.png" width="220" alt="Panel 3D" /> |
 
 | 📊 Pestaña 2D | 🚴 Pestaña VAM |
 | :---: | :---: |
