@@ -129,16 +129,8 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                             calculator.syncRouteClimbs(routeKey, routeClimbs)
 
                             
-                            // SDK 1.1.7: Extraer el perfil de elevación real si está disponible
-                            try {
-                                // Reflexión en caso de que la propiedad no esté expuesta públicamente en todas las builds
-                                val method = state.javaClass.getMethod("getRouteElevationPolyline")
-                                val elevPoly = method.invoke(state) as? String
-                                calculator.setRouteElevationProfile(elevPoly)
-                            } catch (e: Exception) {
-                                // Si no se encuentra el método o hay error (ej: usando una versión de SDK antigua)
-                                calculator.setRouteElevationProfile(null)
-                            }
+                            // SDK 1.1.7: Extraer el perfil de elevación real
+                            calculator.setRouteElevationProfile(state.routeElevationPolyline)
                         } else {
                             Log.d(TAG, "NAV: Idle (sin ruta cargada)")
                             calculator.clearRoute()

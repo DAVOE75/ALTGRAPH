@@ -83,13 +83,7 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                             calculator.syncRouteClimbs(routeKey, routeClimbs)
 
                             
-                            try {
-                                val method = state.javaClass.getMethod("getRouteElevationPolyline")
-                                val elevPoly = method.invoke(state) as? String
-                                calculator.setRouteElevationProfile(elevPoly)
-                            } catch (e: Exception) {
-                                calculator.setRouteElevationProfile(null)
-                            }
+                            calculator.setRouteElevationProfile(state.routeElevationPolyline)
                         } else {
                             calculator.clearRoute()
                         }
