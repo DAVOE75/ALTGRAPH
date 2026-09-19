@@ -831,6 +831,9 @@ class AltimetriaStrategyCalculator {
             var firstPt: ElevationPolylineDecoder.ElevationPoint? = null
             var endPt: ElevationPolylineDecoder.ElevationPoint? = null
 
+            var totalAscent = 0.0
+            var ascentDistance = 0.0
+
             for (pt in rawSource) {
                 if (pt.distance < windowStartDist) {
                     lastPt = pt
@@ -841,8 +844,14 @@ class AltimetriaStrategyCalculator {
                 if (lastPt != null) {
                     val dDist = pt.distance - lastPt.distance
                     if (dDist > 5.0) { // Ignorar distancias microscópicas para evitar ruido
-                        val grade = ((pt.elevation - lastPt.elevation) / dDist) * 100.0
+                        val dElev = pt.elevation - lastPt.elevation
+                        val grade = (dElev / dDist) * 100.0
                         if (grade > trueMaxGrade) trueMaxGrade = grade
+                        
+                        if (dElev > 0.0) {
+                            totalAscent += dElev
+                            ascentDistance += dDist
+                        }
                     }
                 }
 
@@ -853,12 +862,11 @@ class AltimetriaStrategyCalculator {
                     break
                 }
             }
-            if (firstPt != null && endPt != null && endPt.distance > firstPt.distance) {
-                visibleElevationGain = (endPt.elevation - firstPt.elevation).coerceAtLeast(0.0)
-                val visibleDist = endPt.distance - firstPt.distance
-                if (visibleDist > 0) {
-                    visibleAvgGrade = (visibleElevationGain / visibleDist) * 100.0
-                }
+            
+            if (ascentDistance > 0.0) {
+                visibleAvgGrade = (totalAscent / ascentDistance) * 100.0
+            } else {
+                visibleAvgGrade = 0.0
             }
         }
 
