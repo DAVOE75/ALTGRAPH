@@ -888,7 +888,8 @@ class Altimetria3DView @JvmOverloads constructor(
         }
 
         // 6. PORCENTAJES DE PENDIENTE DENTRO DE LOS BLOQUES (GRANDES, HORIZONTALES Y DE ALTO CONTRASTE)
-        if (showBlockPercentages && totalMicroSamples > 1) {
+        // Ocultar los porcentajes en escalas muy amplias (>= 100km) para que el perfil de ruta sea claro
+        if (showBlockPercentages && totalMicroSamples > 1 && lookaheadMeters < 100000) {
             val isObsidian = altimetriaStyle == AltimetriaStyle.MONOLITHIC_OBSIDIAN
             val badgeBg = if (isObsidian) holoBadgeBgPaint else pctBadgeBgPaint
             val badgeBorder = if (isObsidian) holoBadgeBorderPaint else pctBadgeBorderPaint

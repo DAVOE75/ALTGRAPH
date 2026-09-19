@@ -87,6 +87,8 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                             curr < 20000 -> 20000
                             curr < 50000 -> 50000
                             curr < 100000 -> 100000
+                            curr < 150000 -> 150000
+                            curr < 200000 -> 200000
                             else -> 200
                         }
                         prefs.lookaheadMeters3d = nextVal

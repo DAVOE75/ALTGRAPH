@@ -311,6 +311,8 @@ class MainActivity : Activity() {
         val lookaheadMinusBtn = createActionButton("- Reducir") {
             val curr = prefs.lookaheadMeters3d
             val nextVal = when {
+                curr > 150000 -> 150000
+                curr > 100000 -> 100000
                 curr > 50000 -> 50000
                 curr > 20000 -> 20000
                 curr > 10000 -> 10000
@@ -336,7 +338,9 @@ class MainActivity : Activity() {
                 curr < 20000 -> 20000
                 curr < 50000 -> 50000
                 curr < 100000 -> 100000
-                else -> 100000
+                curr < 150000 -> 150000
+                curr < 200000 -> 200000
+                else -> 200000
             }
             prefs.lookaheadMeters3d = nextVal
             lookaheadValueText.text = formatLookaheadText(nextVal)
