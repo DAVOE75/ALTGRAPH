@@ -108,6 +108,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                 if (connected) {
                     // Consumidor 1: Polilínea e Itinerario de Ruta Precargada (GPX / FIT)
                     system.addConsumer<OnNavigationState> { navEvent ->
+                        val state = navEvent.state
                         if (state is OnNavigationState.NavigationState.NavigatingRoute) {
                             Log.d(TAG, "NAV: ruta='${state.name}' dist=${state.routeDistance}m pois=${state.pois.size}")
                             calculator.isNavigatingRoute = true
