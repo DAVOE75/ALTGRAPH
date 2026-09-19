@@ -64,6 +64,9 @@ class AltimetriaStrategyCalculator {
     var elevationFromBottom: Double = 0.0 // metros de desnivel desde la base
     var elevationRemaining: Double = 0.0 // desnivel restante total de la ruta
 
+    // GPX Elevation Profile Completo (SDK 1.1.7+)
+    var routeElevationProfile: List<ElevationPolylineDecoder.ElevationPoint> = emptyList()
+
     // Curvas de herradura (distancias absolutas detectadas)
     private val absoluteHairpins = mutableListOf<Double>()
     private val routePois = mutableListOf<Poi>()
@@ -206,6 +209,53 @@ class AltimetriaStrategyCalculator {
         }
     }
 
+    fun setRouteElevationProfile(encoded: String?) {
+        val result = ElevationPolylineDecoder.decodeSafe(encoded)
+        if (result is ElevationPolylineDecoder.DecodeResult.Success) {
+            this.routeElevationProfile = ElevationPolylineDecoder.smooth(result.points)
+            applyTrueElevationsToRoutePoints()
+        } else {
+            this.routeElevationProfile = emptyList()
+        }
+    }
+
+    private fun applyTrueElevationsToRoutePoints() {
+        if (routePoints.isEmpty() || routeElevationProfile.isEmpty()) return
+
+        val newPoints = routePoints.map { pt ->
+            // Interpolate true elevation from routeElevationProfile based on distance
+            val trueElev = getTrueElevationAtDistance(pt.distance)
+            pt.copy(elevation = trueElev)
+        }
+        this.routePoints = newPoints
+    }
+
+    private fun getTrueElevationAtDistance(dist: Double): Double {
+        if (routeElevationProfile.isEmpty()) return 0.0
+        if (dist <= routeElevationProfile.first().distance) return routeElevationProfile.first().elevation
+        if (dist >= routeElevationProfile.last().distance) return routeElevationProfile.last().elevation
+
+        var low = 0
+        var high = routeElevationProfile.size - 1
+
+        while (low <= high) {
+            val mid = (low + high) ushr 1
+            val midVal = routeElevationProfile[mid].distance
+            if (midVal < dist) low = mid + 1
+            else if (midVal > dist) high = mid - 1
+            else return routeElevationProfile[mid].elevation
+        }
+
+        if (low == 0) return routeElevationProfile.first().elevation
+        if (low >= routeElevationProfile.size) return routeElevationProfile.last().elevation
+
+        val p1 = routeElevationProfile[low - 1]
+        val p2 = routeElevationProfile[low]
+
+        val t = (dist - p1.distance) / (p2.distance - p1.distance)
+        return p1.elevation + t * (p2.elevation - p1.elevation)
+    }
+
     fun setRouteFromPolyline(polyline: String) {
         val points = decodePolyline(polyline)
         if (points.isEmpty()) {
@@ -252,6 +302,11 @@ class AltimetriaStrategyCalculator {
 
         this.routePoints = result
         this.isNavigatingRoute = true
+        
+        // If we already received the elevation profile, apply it now
+        if (routeElevationProfile.isNotEmpty()) {
+            applyTrueElevationsToRoutePoints()
+        }
 
         detectHairpins()
     }
@@ -324,6 +379,7 @@ class AltimetriaStrategyCalculator {
 
     fun clearRoute() {
         this.routePoints = emptyList()
+        this.routeElevationProfile = emptyList()
         this.absoluteHairpins.clear()
         this.routePois.clear()
         this.isNavigatingRoute = false
@@ -492,14 +548,13 @@ class AltimetriaStrategyCalculator {
 
         // ── Estrategia de construcción del perfil ──────────────────────────────────
         // Si tenemos datos nativos del climb (del SDK, fuente directa del archivo GPX/FIT):
-        //   → Los bloques se calculan interpolando linealmente entre la posición actual
-        //     y la cima real del climb. Esto replica exactamente lo que hace el Climber
-        //     de Hammerhead, pero en representación 3D.
-        // Si no tenemos datos del climb (descenso, pausa, ruta sin climb activo):
-        //   → Usamos la polilínea de ruta con la calibración barométrica progresiva.
+        //   → Usamos la interpolación a lo largo del climb PERO si además tenemos el
+        //     PERFIL DE ELEVACIÓN COMPLETO (routeElevationProfile), entonces usamos
+        //     esos datos con precisión punto a punto.
         // ──────────────────────────────────────────────────────────────────────────
         val useClimberData = distanceToTop > 50.0 && elevationToTop > 0.5
         val summitElevation = if (useClimberData) currentElevation + elevationToTop else 0.0
+        val hasTrueProfile = routeElevationProfile.isNotEmpty()
 
         for (j in 0 until numSubBlocks) {
             val sDistStart = windowStartDist + (j * subBlockSize)
@@ -508,15 +563,18 @@ class AltimetriaStrategyCalculator {
             val sElevStart: Double
             val sElevEnd: Double
 
-            if (useClimberData) {
-                // Interpolación lineal a lo largo del climb real hacia la cima
-                // Fracción de la ventana lookahead que ya ha cubierto el rider
+            if (hasTrueProfile) {
+                // Si tenemos el perfil real, leemos la altitud exacta!
+                sElevStart = getElevationAtDistance(sDistStart)
+                sElevEnd   = getElevationAtDistance(sDistEnd)
+            } else if (useClimberData) {
+                // Fallback a interpolación lineal si no hay perfil detallado
                 val fracStart = (sDistStart - windowStartDist).coerceAtLeast(0.0) / distanceToTop.coerceAtLeast(1.0)
                 val fracEnd   = (sDistEnd   - windowStartDist).coerceAtLeast(0.0) / distanceToTop.coerceAtLeast(1.0)
                 sElevStart = currentElevation + fracStart.coerceIn(0.0, 1.0) * elevationToTop
                 sElevEnd   = currentElevation + fracEnd.coerceIn(0.0, 1.0)   * elevationToTop
             } else {
-                // Fallback: polilínea 2D calibrada barométricamente
+                // Fallback a polilínea 2D calibrada barométricamente
                 sElevStart = getElevationAtDistance(sDistStart)
                 sElevEnd   = getElevationAtDistance(sDistEnd)
             }

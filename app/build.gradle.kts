@@ -58,5 +58,5 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
 
     // SDK oficial de Karoo Extension
-    implementation("io.hammerhead:karoo-ext:1.1.4")
+    implementation("io.hammerhead:karoo-ext:1.1.7")
 }

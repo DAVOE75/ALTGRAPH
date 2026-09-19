@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Build
+import android.util.Log
 import android.view.View
 import android.widget.RemoteViews
 import io.hammerhead.karooext.KarooSystemService
@@ -27,6 +28,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+private const val TAG = "ALTGRAPH"
 
 class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "altimetria_3d") {
 
@@ -107,9 +110,22 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     system.addConsumer<OnNavigationState> { navEvent ->
                         val state = navEvent.state
                         if (state is OnNavigationState.NavigationState.NavigatingRoute) {
+                            Log.d(TAG, "NAV: ruta='${state.name}' dist=${state.routeDistance}m pois=${state.pois.size}")
                             calculator.setRouteFromPolyline(state.routePolyline)
                             calculator.setRoutePois(state.pois)
+                            
+                            // SDK 1.1.7: Extraer el perfil de elevación real si está disponible
+                            try {
+                                // Reflexión en caso de que la propiedad no esté expuesta públicamente en todas las builds
+                                val method = state.javaClass.getMethod("getRouteElevationPolyline")
+                                val elevPoly = method.invoke(state) as? String
+                                calculator.setRouteElevationProfile(elevPoly)
+                            } catch (e: Exception) {
+                                // Si no se encuentra el método o hay error (ej: usando una versión de SDK antigua)
+                                calculator.setRouteElevationProfile(null)
+                            }
                         } else {
+                            Log.d(TAG, "NAV: Idle (sin ruta cargada)")
                             calculator.clearRoute()
                         }
                     }
@@ -132,6 +148,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                             val elev = streamState.dataPoint.values[DataType.Field.PRESSURE_ELEVATION]
                                 ?: streamState.dataPoint.values[DataType.Field.SINGLE]
                                 ?: 0.0
+                            Log.d(TAG, "BARO_ELEV: ${elev}m")
                             calculator.updateLiveElevation(elev)
                         }
                     }
@@ -143,6 +160,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                             val grade = streamState.dataPoint.values[DataType.Field.ELEVATION_GRADE]
                                 ?: streamState.dataPoint.values[DataType.Field.SINGLE]
                                 ?: 0.0
+                            Log.d(TAG, "GRADE: ${grade}%")
                             calculator.updateLiveGrade(grade)
                         }
                     }
@@ -164,6 +182,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                             val d = streamState.dataPoint.values[DataType.Field.DISTANCE_TO_TOP]
                                 ?: streamState.dataPoint.values[DataType.Field.SINGLE]
                                 ?: 0.0
+                            Log.d(TAG, "CLIMBER distToTop=${d}m elev=${calculator.currentElevation}m")
                             calculator.updateClimbData(distToTop = d)
                         }
                     }
@@ -175,6 +194,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                             val e = streamState.dataPoint.values[DataType.Field.ELEVATION_TO_TOP]
                                 ?: streamState.dataPoint.values[DataType.Field.SINGLE]
                                 ?: 0.0
+                            Log.d(TAG, "CLIMBER elevToTop=${e}m")
                             calculator.updateClimbData(elevToTop = e)
                         }
                     }
