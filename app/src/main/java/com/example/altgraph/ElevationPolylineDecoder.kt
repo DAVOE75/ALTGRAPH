@@ -39,25 +39,17 @@ object ElevationPolylineDecoder {
                 return DecodeResult.Error("Decoded to empty list")
             }
 
-            val hasInvalid = points.any { p ->
-                p.distance < 0 || p.distance > 1_000_000 ||
-                        p.elevation < -500 || p.elevation > 9000
-            }
+            // Un GPX puede tener algún punto erróneo (ej. -505m o 9005m por ruido de GPS).
+            // No queremos arruinar todo el perfil y aplanarlo solo por un punto.
+            // PERO si la ruta usa precisión 1e5, los valores serán del orden de millones.
+            // Por tanto, solo cambiamos a ALT_PRECISION si los valores son EXTREMADAMENTE absurdos.
+            val maxElev = points.maxOfOrNull { it.elevation } ?: 0.0
+            val totalDist = points.lastOrNull()?.distance ?: 0.0
 
-            if (hasInvalid) {
-                Log.w(TAG, "Default precision gave invalid values, trying ALT_PRECISION")
+            if (totalDist > 20_000_000 || maxElev > 30_000) {
+                Log.w(TAG, "Valores extremos detectados (dist=$totalDist, elev=$maxElev). Usando ALT_PRECISION.")
                 val altPoints = decodeWithPrecision(encoded, ALT_PRECISION)
-                val altInvalid = altPoints.any { p ->
-                    p.distance < 0 || p.distance > 1_000_000 ||
-                            p.elevation < -500 || p.elevation > 9000
-                }
-                
-                if (!altInvalid && altPoints.isNotEmpty()) {
-                    Log.d(TAG, "Decode success with ALT_PRECISION! Points: ${altPoints.size}")
-                    return DecodeResult.Success(altPoints)
-                }
-                
-                return DecodeResult.Error("Invalid decoded values with both precisions")
+                return DecodeResult.Success(altPoints)
             }
 
             Log.d(TAG, "Decode success with default precision! Points: ${points.size}")

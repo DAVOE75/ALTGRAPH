@@ -116,7 +116,13 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                             Log.d(TAG, "NAV: ruta='${state.name}' dist=${state.routeDistance}m pois=${state.pois.size}")
                             calculator.isNavigatingRoute = true
                             calculator.setRouteFromPolyline(state.routePolyline)
-                            calculator.setRouteElevationProfile(state.routeElevationPolyline)
+                            
+                            var elevPoly = state.routeElevationPolyline
+                            if (elevPoly.isNullOrEmpty()) {
+                                elevPoly = (state.javaClass.methods.find { it.name == "getElevationPolyline" }?.invoke(state) as? String)
+                            }
+                            calculator.setRouteElevationProfile(elevPoly)
+                            
                             calculator.setRoutePois(state.pois)
                             
                             // Sincronizar lista de puertos (Mountain Gates)
