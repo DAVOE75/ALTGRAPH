@@ -623,9 +623,9 @@ class Altimetria3DView @JvmOverloads constructor(
         canvas.drawText(labelCurrentGrade, col1X, h * 0.13f, subTitleLabelPaint)
 
         val liveGradeText = "%.1f%%".format(currentGrade)
-        liveGradePaint.textSize = ((h * 0.15f) * fontScale).coerceIn(26f, 48f) // Aumentado 2 puntos extra
+        liveGradePaint.textSize = ((h * 0.30f) * fontScale).coerceIn(52f, 96f) // Doble de tamaño
         liveGradePaint.color = GradeColorScale.getTelemetryColor(currentGrade)
-        canvas.drawText(liveGradeText, col1X, h * 0.24f, liveGradePaint)
+        canvas.drawText(liveGradeText, col1X, h * 0.36f, liveGradePaint) // Baseline ajustado
 
         // COLUMNA 2: PENDIENTE MEDIA DEL TRAMO VISIBLE
         val tramoAvgGrade = if (visibleAvgGrade > 0.0) visibleAvgGrade else (if (subBlocks.isNotEmpty()) subBlocks.average() else (if (nextBlocks.isNotEmpty()) nextBlocks.average() else currentGrade))
@@ -633,9 +633,9 @@ class Altimetria3DView @JvmOverloads constructor(
         canvas.drawText(labelAvgGrade, col2X, h * 0.13f, subTitleLabelPaint)
 
         val avgGradeText = "%.1f%%".format(tramoAvgGrade)
-        liveGradePaint.textSize = ((h * 0.11f) * fontScale).coerceIn(18f, 36f)
+        liveGradePaint.textSize = ((h * 0.22f) * fontScale).coerceIn(36f, 72f) // Doble de tamaño
         liveGradePaint.color = GradeColorScale.getTelemetryColor(tramoAvgGrade)
-        canvas.drawText(avgGradeText, col2X, h * 0.23f, liveGradePaint)
+        canvas.drawText(avgGradeText, col2X, h * 0.33f, liveGradePaint) // Baseline ajustado
 
         // COLUMNA 3: PENDIENTE MÁXIMA DEL TRAMO VISIBLE
         if (showMaxGrade) {
@@ -644,9 +644,9 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawText(labelMaxGrade, col3X, h * 0.13f, subTitleLabelPaint)
 
             val maxGradeText = "%.1f%%".format(tramoMaxGrade)
-            maxGradePaint.textSize = ((h * 0.11f) * fontScale).coerceIn(18f, 36f)
+            maxGradePaint.textSize = ((h * 0.22f) * fontScale).coerceIn(36f, 72f) // Doble de tamaño
             maxGradePaint.color = GradeColorScale.getTelemetryColor(tramoMaxGrade)
-            canvas.drawText(maxGradeText, col3X, h * 0.23f, maxGradePaint)
+            canvas.drawText(maxGradeText, col3X, h * 0.33f, maxGradePaint)
         }
 
         // 3. Botones Minimalistas de Zoom [ - | + ]
