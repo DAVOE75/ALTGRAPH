@@ -78,6 +78,9 @@ class AltimetriaStrategyCalculator {
     // Distancia exacta reportada por Karoo en la ruta
     var currentRouteDistance: Double = 0.0
 
+    // Distancia exacta restante reportada por Karoo en la ruta (útil si no hay puntos GPS)
+    var fallbackRemainingDistance: Double = 0.0
+
     // GPX Elevation Profile Completo (SDK 1.1.7+)
     var routeElevationProfile: List<ElevationPolylineDecoder.ElevationPoint> = emptyList()
 
@@ -463,7 +466,7 @@ class AltimetriaStrategyCalculator {
         val asphaltFactor = prefs?.asphaltFactor ?: 0.5
         val useTopographicCalculation = prefs?.useTopographicCalculation ?: false
 
-        val isNavigating = isNavigatingRoute && routePoints.isNotEmpty()
+        val isNavigating = isNavigatingRoute && (routePoints.isNotEmpty() || routeElevationProfile.isNotEmpty())
 
         // MODO LIBRE / ENTRENAMIENTO REAL SIN RUTA PRECARGADA:
         // Genera el perfil 3D barométrico ajustándose exactamente a la pendiente en vivo de la carretera
@@ -559,11 +562,12 @@ class AltimetriaStrategyCalculator {
             }
         }
 
-        // 1b. Usar el índice más cercano
+        // 1b. Usar el índice más cercano para determinar la distancia del ciclista
         val currentRiderDistance = if (routePoints.isNotEmpty()) {
             routePoints[nearestIndex].distance
         } else {
-            0.0
+            val totalLength = routeElevationProfile.lastOrNull()?.distance ?: 0.0
+            (totalLength - fallbackRemainingDistance).coerceAtLeast(0.0)
         }
 
         // 2. Ventana deslizante en bloques cuánticos de 50 metros

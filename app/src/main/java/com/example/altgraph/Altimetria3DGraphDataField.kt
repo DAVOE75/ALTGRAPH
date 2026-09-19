@@ -108,58 +108,41 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
             val system = KarooSystemService(context)
             system.connect { connected ->
                 if (connected) {
-                    // Consumidor 1: Polilínea e Itinerario de Ruta (Soporta GPX y Rutas Dinámicas)
+                    // Consumidor 1: Polilínea e Itinerario de Ruta (GPX y Rutas Dinámicas)
                     system.addConsumer<OnNavigationState> { navEvent ->
                         val state = navEvent.state
                         
-                        // Usamos reflection para extraer las polilíneas sea cual sea el tipo de navegación
-                        // (NavigatingRoute, NavigatingToDestination, NavigatingToPoi, etc.)
-                        var foundRoute = false
-                        try {
-                            val name = (state.javaClass.methods.find { it.name == "getName" }?.invoke(state) as? String) ?: "Ruta Dinámica"
-                            val routePolyline = (state.javaClass.methods.find { it.name == "getRoutePolyline" || it.name == "getPolyline" }?.invoke(state) as? String)
-                            val elevPolyline = (state.javaClass.methods.find { it.name == "getRouteElevationPolyline" || it.name == "getElevationPolyline" }?.invoke(state) as? String)
+                        if (state is OnNavigationState.NavigationState.NavigatingRoute) {
+                            Log.d(TAG, "NAV: ruta='${state.name}' dist=${state.routeDistance}m pois=${state.pois.size}")
+                            calculator.isNavigatingRoute = true
+                            calculator.setRouteFromPolyline(state.routePolyline)
+                            calculator.setRouteElevationProfile(state.routeElevationPolyline)
+                            calculator.setRoutePois(state.pois)
                             
-                            if (!routePolyline.isNullOrEmpty()) {
-                                Log.d(TAG, "NAV: Ruta detectada mediante Reflection ('$name')")
-                                calculator.isNavigatingRoute = true
-                                calculator.setRouteFromPolyline(routePolyline)
-                                if (!elevPolyline.isNullOrEmpty()) {
-                                    calculator.setRouteElevationProfile(elevPolyline)
-                                }
-                                
-                                // Extraer POIs si están disponibles
-                                val pois = (state.javaClass.methods.find { it.name == "getPois" }?.invoke(state) as? List<*>)
-                                if (pois != null) {
-                                    @Suppress("UNCHECKED_CAST")
-                                    calculator.setRoutePois(pois as List<io.hammerhead.karooext.models.Symbol.POI>)
-                                }
-                                
-                                // Sincronizar lista de puertos (Mountain Gates)
-                                val climbs = (state.javaClass.methods.find { it.name == "getClimbs" }?.invoke(state) as? List<*>)
-                                if (climbs != null) {
-                                    @Suppress("UNCHECKED_CAST")
-                                    val karooClimbs = climbs as List<io.hammerhead.karooext.models.OnNavigationState.NavigationState.Climb>
-                                    val routeKey = "route:$name"
-                                    val routeClimbs = karooClimbs.map { climb ->
-                                        com.example.altgraph.RouteClimb(
-                                            startDistance = climb.startDistance,
-                                            endDistance = climb.startDistance + climb.length,
-                                            length = climb.length,
-                                            totalElevation = climb.totalElevation,
-                                            avgGrade = climb.grade
-                                        )
-                                    }
-                                    calculator.syncRouteClimbs(routeKey, routeClimbs)
-                                }
-                                
-                                foundRoute = true
+                            // Sincronizar lista de puertos (Mountain Gates)
+                            val routeKey = "route:${state.name}"
+                            val routeClimbs = state.climbs.map { climb ->
+                                RouteClimb(
+                                    startDistance = climb.startDistance,
+                                    endDistance = climb.startDistance + climb.length,
+                                    length = climb.length,
+                                    totalElevation = climb.totalElevation,
+                                    avgGrade = climb.grade
+                                )
                             }
-                        } catch (e: Exception) {
-                            Log.e(TAG, "Error extrayendo datos de navegación por reflection", e)
-                        }
-
-                        if (!foundRoute) {
+                            calculator.syncRouteClimbs(routeKey, routeClimbs)
+                            
+                            // Usar routeDistance como fallback si no tenemos puntos GPS
+                            calculator.fallbackRemainingDistance = state.routeDistance
+                            
+                        } else if (state is OnNavigationState.NavigationState.NavigatingToDestination) {
+                            Log.d(TAG, "NAV: Destino dinámico detectado, dist=${state.destinationDistance}m")
+                            calculator.isNavigatingRoute = true
+                            // Rutas a destino no suelen tener routePolyline, pero sí elevationPolyline
+                            calculator.setRouteElevationProfile(state.elevationPolyline)
+                            calculator.fallbackRemainingDistance = state.destinationDistance
+                            
+                        } else {
                             if (state.javaClass.simpleName == "Idle") {
                                 Log.d(TAG, "NAV: Idle (sin ruta cargada)")
                                 calculator.clearRoute()
