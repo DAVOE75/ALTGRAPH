@@ -613,7 +613,7 @@ class Altimetria3DView @JvmOverloads constructor(
         canvas.drawText(labelCurrentGrade, col1X, h * 0.13f, subTitleLabelPaint)
 
         val liveGradeText = "%.1f%%".format(currentGrade)
-        liveGradePaint.textSize = ((h * 0.13f) * fontScale).coerceIn(22f, 44f) // Mayor tamaño
+        liveGradePaint.textSize = ((h * 0.15f) * fontScale).coerceIn(26f, 48f) // Aumentado 2 puntos extra
         liveGradePaint.color = GradeColorScale.getTelemetryColor(currentGrade)
         canvas.drawText(liveGradeText, col1X, h * 0.24f, liveGradePaint)
 
