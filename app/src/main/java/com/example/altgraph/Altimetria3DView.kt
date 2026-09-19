@@ -616,37 +616,37 @@ class Altimetria3DView @JvmOverloads constructor(
         val col2X = w * 0.35f
         val col3X = w * 0.68f
 
-        subTitleLabelPaint.textSize = ((h * 0.040f) * fontScale).coerceIn(9f, 14f)
+        subTitleLabelPaint.textSize = ((h * 0.055f) * fontScale).coerceIn(12f, 18f) // Subtítulos ligeramente más grandes
 
         // COLUMNA 1: PENDIENTE ACTUAL
         val labelCurrentGrade = context.getString(R.string.label_current_gradient)
-        canvas.drawText(labelCurrentGrade, col1X, h * 0.13f, subTitleLabelPaint)
+        canvas.drawText(labelCurrentGrade, col1X, h * 0.14f, subTitleLabelPaint)
 
         val liveGradeText = "%.1f%%".format(currentGrade)
-        liveGradePaint.textSize = ((h * 0.30f) * fontScale).coerceIn(52f, 96f) // Doble de tamaño
+        liveGradePaint.textSize = ((h * 0.26f) * fontScale).coerceIn(44f, 82f) // Tamaño intermedio grande
         liveGradePaint.color = GradeColorScale.getTelemetryColor(currentGrade)
-        canvas.drawText(liveGradeText, col1X, h * 0.36f, liveGradePaint) // Baseline ajustado
+        canvas.drawText(liveGradeText, col1X, h * 0.33f, liveGradePaint) // Pegado más arriba
 
         // COLUMNA 2: PENDIENTE MEDIA DEL TRAMO VISIBLE
         val tramoAvgGrade = if (visibleAvgGrade > 0.0) visibleAvgGrade else (if (subBlocks.isNotEmpty()) subBlocks.average() else (if (nextBlocks.isNotEmpty()) nextBlocks.average() else currentGrade))
         val labelAvgGrade = context.getString(R.string.label_avg_gradient_tramo)
-        canvas.drawText(labelAvgGrade, col2X, h * 0.13f, subTitleLabelPaint)
+        canvas.drawText(labelAvgGrade, col2X, h * 0.14f, subTitleLabelPaint)
 
         val avgGradeText = "%.1f%%".format(tramoAvgGrade)
-        liveGradePaint.textSize = ((h * 0.22f) * fontScale).coerceIn(36f, 72f) // Doble de tamaño
+        liveGradePaint.textSize = ((h * 0.18f) * fontScale).coerceIn(30f, 56f) // Tamaño intermedio grande
         liveGradePaint.color = GradeColorScale.getTelemetryColor(tramoAvgGrade)
-        canvas.drawText(avgGradeText, col2X, h * 0.33f, liveGradePaint) // Baseline ajustado
+        canvas.drawText(avgGradeText, col2X, h * 0.30f, liveGradePaint) // Pegado más arriba
 
         // COLUMNA 3: PENDIENTE MÁXIMA DEL TRAMO VISIBLE
         if (showMaxGrade) {
             val tramoMaxGrade = if (visibleMaxGrade > 0.0) visibleMaxGrade else (if (subBlocks.isNotEmpty()) subBlocks.maxOrNull()?.toDouble() ?: 12.8 else (if (nextBlocks.isNotEmpty()) nextBlocks.maxOrNull()?.toDouble() ?: 12.8 else 12.8))
             val labelMaxGrade = context.getString(R.string.label_max_gradient_tramo)
-            canvas.drawText(labelMaxGrade, col3X, h * 0.13f, subTitleLabelPaint)
+            canvas.drawText(labelMaxGrade, col3X, h * 0.14f, subTitleLabelPaint)
 
             val maxGradeText = "%.1f%%".format(tramoMaxGrade)
-            maxGradePaint.textSize = ((h * 0.22f) * fontScale).coerceIn(36f, 72f) // Doble de tamaño
+            maxGradePaint.textSize = ((h * 0.18f) * fontScale).coerceIn(30f, 56f) // Tamaño intermedio grande
             maxGradePaint.color = GradeColorScale.getTelemetryColor(tramoMaxGrade)
-            canvas.drawText(maxGradeText, col3X, h * 0.33f, maxGradePaint)
+            canvas.drawText(maxGradeText, col3X, h * 0.30f, maxGradePaint)
         }
 
         // 3. Botones Minimalistas de Zoom [ - | + ]
