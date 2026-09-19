@@ -144,6 +144,14 @@ Para dar vida a ALTGRAPH en tu pantalla de entrenamiento:
 
 ---
 
+## 🔮 Roadmap y Próximos Avances (Free-Ride Mode)
+
+El próximo gran hito en el desarrollo de ALTGRAPH es la **Generación Altimétrica en Tiempo Real (Modo Free-Ride)**. 
+
+Actualmente la extensión requiere cargar una ruta (GPX) para obtener los perfiles. Tan pronto como Hammerhead libere y habilite el acceso a los datos de elevación inminente en su SDK para desarrolladores externos, **ALTGRAPH generará la gráfica 3D y todas sus métricas tácticas sobre la marcha**, sin necesidad de llevar un track cargado. Podrás salir a explorar libremente y la montaña se dibujará frente a ti en tiempo real.
+
+---
+
 ## 📦 Compilación para Desarrolladores
 
 El proyecto utiliza Gradle y Kotlin. Requiere JDK 17 y Android SDK (Plataforma 34).
