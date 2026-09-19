@@ -26,9 +26,9 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_estilo.png" width="220" alt="Panel Estilo" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_3d.png" width="220" alt="Panel 3D" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_2d.png" width="220" alt="Panel 2D" /> |
 
-| 🚴 Pestaña VAM | | |
+| 🚴 Pestaña VAM | 📊 Dashboard Completo | |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_vam.png" width="220" alt="Panel VAM" /> | | |
+| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_vam.png" width="220" alt="Panel VAM" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_dashboard_completo.png" width="220" alt="Dashboard Completo" /> | |
 
 ---
 
