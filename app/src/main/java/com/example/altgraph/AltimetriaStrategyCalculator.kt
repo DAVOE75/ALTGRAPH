@@ -520,10 +520,8 @@ class AltimetriaStrategyCalculator {
             }
         }
 
-        // 1b. Usar la distancia en la ruta proporcionada por el Karoo, o calcularla si falla.
-        val currentRiderDistance = if (currentRouteDistance > 0.0) {
-            currentRouteDistance
-        } else if (routePoints.isNotEmpty()) {
+        // 1b. Usar el índice más cercano
+        val currentRiderDistance = if (routePoints.isNotEmpty()) {
             routePoints[nearestIndex].distance
         } else {
             0.0
