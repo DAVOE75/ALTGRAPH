@@ -26,7 +26,9 @@ data class RouteClimb(
     val endDistance: Double,
     val length: Double,
     val totalElevation: Double,
-    val avgGrade: Double
+    val avgGrade: Double,
+    var apm: Double = 0.0,
+    var category: String = ""
 )
 
 data class StrategyData(
@@ -69,7 +71,7 @@ class AltimetriaStrategyCalculator {
     private val liveElevationHistory = mutableListOf<Double>()
     private var lastElevationSample = 350.0
     private var liveDistanceAccumulated = 0.0
-    private var instantBarometricGrade = 0.0
+    var instantBarometricGrade = 0.0
 
     // ── Datos del Climber nativo de Karoo (DISTANCE_TO_TOP, ELEVATION_TO_TOP, …) ──
     // El SDK expone estos valores calculados directamente desde el archivo de ruta (GPX/FIT).
@@ -230,7 +232,11 @@ class AltimetriaStrategyCalculator {
                     nearestDist = pt.distance
                 }
             }
-            val name = sym.name ?: "Hito"
+            var name = sym.name ?: "Hito"
+            // Limpiamos cualquier "XXX m" previo y le añadimos la altitud real
+            name = name.replace(Regex("\\b\\d+\\s*m\\b", RegexOption.IGNORE_CASE), "").trim()
+            val realElevation = getTrueElevationAtDistance(nearestDist).toInt()
+            name = "$name ${realElevation}m"
             val icon = when {
                 name.contains("agua", ignoreCase = true) || name.contains("font", ignoreCase = true) || name.contains("fuente", ignoreCase = true) -> "💧"
                 name.contains("mirador", ignoreCase = true) || name.contains("vista", ignoreCase = true) -> "📸"
@@ -250,18 +256,53 @@ class AltimetriaStrategyCalculator {
     /**
      * Sincroniza la lista de climbs. Como Karoo puede borrar los climbs superados de la lista,
      * hacemos un merge para mantenerlos (y poder verlos al hacer re-ride).
+     * Además, cataloga los puertos calculando su APM.
      */
     fun syncRouteClimbs(routeKey: String, incoming: List<RouteClimb>) {
         if (routeKeyForClimbs != routeKey) {
             routeKeyForClimbs = routeKey
-            routeClimbs = incoming
+            if (incoming.isNotEmpty()) {
+                routeClimbs = incoming.map { calculateClimbCategory(it) }
+            }
         } else if (incoming.isNotEmpty()) {
             val currentStartDists = routeClimbs.map { it.startDistance }.toSet()
-            val newClimbs = incoming.filter { it.startDistance !in currentStartDists }
+            val newClimbs = incoming.filter { it.startDistance !in currentStartDists }.map { calculateClimbCategory(it) }
             if (newClimbs.isNotEmpty()) {
                 routeClimbs = (routeClimbs + newClimbs).sortedBy { it.startDistance }
             }
         }
+    }
+
+    private fun calculateClimbCategory(climb: RouteClimb): RouteClimb {
+        var accumulatedHardness = 0.0
+        var maxGrade = 0.0
+        val defaultAsphaltFactor = 0.5 // Standard TA
+
+        if (routeElevationProfile.isNotEmpty()) {
+            val points = routeElevationProfile.filter { it.distance in climb.startDistance..climb.endDistance }
+            if (points.size >= 2) {
+                var lastPt = points.first()
+                for (i in 1 until points.size) {
+                    val pt = points[i]
+                    val dDist = pt.distance - lastPt.distance
+                    if (dDist > 5.0) {
+                        val dElev = pt.elevation - lastPt.elevation
+                        val rawGrade = (dElev / dDist) * 100.0
+                        val grade = rawGrade.coerceAtMost(35.0) // Cap anomalies at 35%
+                        if (grade > maxGrade) maxGrade = grade
+                        if (grade > 0.0) {
+                            accumulatedHardness += FatigueGradeCalculator.calculateSegmentHardness(grade, dDist / 1000.0)
+                        }
+                    }
+                    lastPt = pt
+                }
+            }
+        }
+        
+        val apm = FatigueGradeCalculator.calculateTotalFatigueGrade(accumulatedHardness, defaultAsphaltFactor, maxGrade)
+        val category = FatigueGradeCalculator.getClimbCategoryName(apm)
+        
+        return climb.copy(apm = apm, category = category)
     }
 
     fun setRouteElevationProfile(encoded: String?) {
@@ -276,9 +317,99 @@ class AltimetriaStrategyCalculator {
             this.routeElevationProfile = ElevationPolylineDecoder.smooth(result.points)
             Log.e("AltiCalc", "Route elevation decoded successfully, points=${routeElevationProfile.size}")
             applyTrueElevationsToRoutePoints()
+            detectCustomClimbsFromProfile()
         } else {
             Log.e("AltiCalc", "Route elevation decode failed!")
             this.routeElevationProfile = emptyList()
+        }
+    }
+
+    private fun detectCustomClimbsFromProfile() {
+        if (routeElevationProfile.isEmpty()) return
+        
+        val customClimbs = mutableListOf<RouteClimb>()
+        
+        val minClimbDistance = 500.0
+        val minClimbElevation = 25.0
+        
+        var climbStartIndex = -1
+        var localMaxIndex = -1
+        
+        var i = 0
+        while (i < routeElevationProfile.size - 1) {
+            val pt = routeElevationProfile[i]
+            
+            if (climbStartIndex == -1) {
+                // Look for a solid start (next 200m averages >= 2.5%)
+                val lookaheadDist = 200.0
+                var j = i + 1
+                while (j < routeElevationProfile.size && routeElevationProfile[j].distance - pt.distance < lookaheadDist) {
+                    j++
+                }
+                if (j < routeElevationProfile.size) {
+                    val endPt = routeElevationProfile[j]
+                    val dE = endPt.elevation - pt.elevation
+                    val dD = endPt.distance - pt.distance
+                    val grade = if (dD > 0) (dE / dD) * 100.0 else 0.0
+                    
+                    if (grade >= 2.5) {
+                        climbStartIndex = i
+                        localMaxIndex = i
+                    } else {
+                        // Skip forward to avoid micro-checking flats
+                        i = (i + 5).coerceAtMost(routeElevationProfile.size - 2)
+                        continue
+                    }
+                } else {
+                    break
+                }
+            } else {
+                if (pt.elevation > routeElevationProfile[localMaxIndex].elevation) {
+                    localMaxIndex = i
+                }
+                
+                val drop = routeElevationProfile[localMaxIndex].elevation - pt.elevation
+                val distanceSinceMax = pt.distance - routeElevationProfile[localMaxIndex].distance
+                val isFlat = distanceSinceMax > 500.0 // 500m without establishing a new peak
+                val isEndOfRoute = i == routeElevationProfile.size - 2
+                
+                if (drop > 20.0 || isFlat || isEndOfRoute) {
+                    val startPt = routeElevationProfile[climbStartIndex]
+                    val maxPt = routeElevationProfile[localMaxIndex]
+                    
+                    val climbDist = maxPt.distance - startPt.distance
+                    val climbElev = maxPt.elevation - startPt.elevation
+                    
+                    if (climbDist >= 1000.0) {
+                        val avgGrade = (climbElev / climbDist) * 100.0
+                        
+                        val isStandardClimb = climbDist >= 3000.0 && avgGrade >= 3.0
+                        val isMuroClimb = climbDist >= 1000.0 && avgGrade >= 12.0
+                        
+                        if (isStandardClimb || isMuroClimb) {
+                            val potentialClimb = RouteClimb(
+                                startDistance = startPt.distance,
+                                endDistance = maxPt.distance,
+                                length = climbDist,
+                                totalElevation = climbElev,
+                                avgGrade = avgGrade
+                            )
+                            val categorizedClimb = calculateClimbCategory(potentialClimb)
+                            customClimbs.add(categorizedClimb)
+                        }
+                    }
+                    
+                    i = localMaxIndex
+                    climbStartIndex = -1
+                    localMaxIndex = -1
+                }
+            }
+            i++
+        }
+        
+        if (customClimbs.isNotEmpty() && this.routeClimbs.isEmpty()) {
+            this.routeClimbs = customClimbs.sortedBy { it.startDistance }
+            Log.e("AltiCalc", "Detected ${customClimbs.size} custom climbs!")
         }
     }
 
@@ -958,5 +1089,82 @@ class AltimetriaStrategyCalculator {
         } catch (e: Exception) {
             emptyList()
         }
+    }
+
+    fun getStrategyDataForClimb(climb: RouteClimb, customStartDist: Double? = null, customLength: Double? = null): StrategyData {
+        val windowLength = customLength ?: climb.length
+        val majorBlock = getMajorBlockSize(windowLength)
+        val subBlock = getSubBlockSize(windowLength)
+        
+        val subBlocks = mutableListOf<Float>()
+        val profileElevs = mutableListOf<Float>()
+        
+        val startDist = customStartDist ?: climb.startDistance
+        val endDist = (startDist + windowLength).coerceAtMost(climb.endDistance)
+        var currentDist = startDist
+        
+        var minElev = Double.MAX_VALUE
+        var maxElev = Double.MIN_VALUE
+        var trueMaxGrade = 0.0
+        var totalAscent = 0.0
+        var ascentDistance = 0.0
+        
+        // Sampling loop for the static climb
+        while (currentDist < endDist) {
+            val chunkEnd = (currentDist + subBlock).coerceAtMost(endDist)
+            val e1 = getElevationAtDistance(currentDist)
+            val e2 = getElevationAtDistance(chunkEnd)
+            val dDist = chunkEnd - currentDist
+            
+            var grade = 0.0
+            if (dDist > 0.0) {
+                grade = ((e2 - e1) / dDist) * 100.0
+                if (grade > trueMaxGrade) trueMaxGrade = grade
+                if (grade > 0.0) {
+                    totalAscent += (e2 - e1)
+                    ascentDistance += dDist
+                }
+            }
+            
+            subBlocks.add(grade.toFloat())
+            profileElevs.add(e1.toFloat())
+            
+            if (e1 < minElev) minElev = e1
+            if (e2 > maxElev) maxElev = e2
+            
+            currentDist += subBlock
+        }
+        
+        // Add final elevation point to close the profile
+        val finalElev = getElevationAtDistance(endDist)
+        profileElevs.add(finalElev.toFloat())
+        if (finalElev < minElev) minElev = finalElev
+        if (finalElev > maxElev) maxElev = finalElev
+        
+        val avgGrade = if (ascentDistance > 0) (totalAscent / ascentDistance) * 100.0 else climb.avgGrade
+        
+        return StrategyData(
+            remainingDistance = climb.length,
+            timeToSummit = 0L,
+            avgGrade = avgGrade,
+            nextBlocks = emptyList(), // Not used in this static view
+            attackAlert = trueMaxGrade >= 12.0,
+            blockSizeMeters = majorBlock,
+            totalFatigueGrade = climb.apm.roundToInt(),
+            hairpins = emptyList(), // Can be added later if needed
+            pois = emptyList(),
+            curvatureOffsets = emptyList(),
+            riderProgress = 0f,
+            windowStartMeters = startDist,
+            windowStartElevation = minElev,
+            subBlocks = subBlocks,
+            subBlockSizeMeters = subBlock,
+            majorBlockSizeMeters = majorBlock,
+            profileElevations = profileElevs,
+            activeClimbs = listOf(climb),
+            visibleAvgGrade = avgGrade,
+            visibleMaxGrade = trueMaxGrade,
+            routeName = climb.category // Passing category as routeName to display in the header
+        )
     }
 }

@@ -11,6 +11,8 @@
 
     <string name="data_type_fatigue_grade_title">Grado di Fatica (GF)</string>
     <string name="data_type_fatigue_grade_desc">Indice scientifico di difficoltà e fatica della salita</string>
+    <string name="data_type_climb_viewer_title">Visore Salite 3D</string>
+    <string name="data_type_climb_viewer_desc">Visore 3D indipendente dei passi di montagna del percorso</string>
 
     <string name="data_type_climb_pacing_title">Ritmo VAM Obiettivo</string>
     <string name="data_type_climb_pacing_desc">Assistente di ritmo VAM (m/h) secondo la pendenzaattuale</string>
@@ -72,4 +74,9 @@
     <string name="zone_orange">ARANCIONE</string>
     <string name="zone_red">ROSSO</string>
     <string name="zone_purple">VIOLA</string>
+
+    <!-- Legenda della scala per il profilo del passo -->
+    <string name="scale_legend_major_block_m">Ogni blocco = %1$dm</string>
+    <string name="scale_legend_major_block_km">Ogni blocco = %1$skm</string>
+    <string name="scale_legend_sub_block">Ogni sotto-blocco = %1$dm</string>
 </resources>

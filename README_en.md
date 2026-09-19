@@ -91,7 +91,8 @@ ALTGRAPH doesn't replace the native Climber; it complements it by offering a **c
 
 ### 📈 Exclusive Data Fields (Tactical Dashboard)
 Besides the graphics engine, ALTGRAPH exposes advanced metrics as individual fields so you can design your perfect screen:
-- **🧠 Altimetry Strategist**: Shows a smart visual block summarizing the upcoming kilometers. It divides the horizon into color-coded sections so you instantly know if a hard climb (red), a recovery (green), or rolling hills are ahead.
+- **🧠 Altimetry Strategist**: Displays a smart visual block summarizing the upcoming kilometers. It divides the horizon into colored segments so you can see at a glance if a hard climb (red), a flat rest (green), or rolling terrain is approaching.
+- **🏔️ 3D Mountain Pass Viewer (Visor de Puertos)**: Independently explore every mountain pass detected on your route. Rendered in full screen with touch navigation, it shows length, elevation gain, average grade, and official **La Vuelta a España** categorization (3rd, 2nd, 1st Cat, or Special/HC) mathematically calculated via our APM engine.
 - **⚡ Fatigue Grade (GF)**: A scientific engine based on the APM coefficient that evaluates the real hardness of the climb live, displaying a numerical wear coefficient.
 - **🚀 Target VAM Pace**: Set your ideal VAM (Average Ascent Speed) in the settings. This field calculates the exact slope under your wheels and dictates exactly what **speed (km/h)** you must ride at that moment to reach your target at the summit.
 - **📐 3D Trend & Max Ramp**: Warns you if the slope is getting steeper or mellowing out before your legs even feel it.

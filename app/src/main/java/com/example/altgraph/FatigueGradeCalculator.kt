@@ -71,25 +71,23 @@ object FatigueGradeCalculator {
     }
 
     /**
-     * Clasifica el puerto según su Grado de Fatiga (GF)
+     * Clasifica el puerto según su Grado de Fatiga (GF) siguiendo la lógica de La Vuelta a España
      */
     fun getClimbCategoryName(gf: Double): String {
         val lang = Locale.getDefault().language.lowercase()
         return when {
-            gf < 10.0 -> when {
-                lang.startsWith("es") -> "Repecho"
-                lang.startsWith("fr") -> "Côte courte"
-                lang.startsWith("it") -> "Strappetto"
-                lang.startsWith("de") -> "Kurzer Anstieg"
-                else -> "Short Rise"
+            gf < 40.0 -> when {
+                lang.startsWith("es") -> "No Puntuable"
+                lang.startsWith("fr") -> "Non Catégorisé"
+                lang.startsWith("it") -> "Non Classificato"
+                lang.startsWith("de") -> "Nicht Kategorisiert"
+                else -> "Uncategorized"
             }
-            gf <= 20.0 -> "5ª Cat"
-            gf <= 40.0 -> "4ª Cat"
-            gf <= 70.0 -> "3ª Cat"
-            gf <= 120.0 -> "2ª Cat"
-            gf <= 200.0 -> "1ª Cat"
+            gf <= 85.0 -> "3ª Cat"
+            gf <= 150.0 -> "2ª Cat"
+            gf <= 240.0 -> "1ª Cat"
             else -> when {
-                lang.startsWith("es") -> "Esp (HC)"
+                lang.startsWith("es") -> "Especial (C.E.)"
                 lang.startsWith("fr") -> "Hors Catégorie (HC)"
                 lang.startsWith("it") -> "Fuori Categoria (HC)"
                 lang.startsWith("de") -> "Ehrenkategorie (HC)"

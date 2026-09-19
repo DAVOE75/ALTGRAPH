@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png" alt="ALTGRAPH Logo" width="160" />
 </p>
 
-# ALTGRAPH (v0.4.1 STABLE)
+# ALTGRAPH (v0.4.62)
 
 *Leer en: [Español](README.md) | [English](README_en.md) | [Français](README_fr.md) | [Italiano](README_it.md) | [Deutsch](README_de.md)*
 
@@ -22,9 +22,9 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile.png" width="220" alt="Altimetría 3D 200m" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_1km.png" width="220" alt="Altimetría 3D 1km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_10km.png" width="220" alt="Altimetría 3D 10km" /> |
 
-| 🏔️ Altimetría 3D (Escala 20km) | 🏔️ Altimetría 3D (Escala 200km) | |
+| 🏔️ Altimetría 3D (Escala 20km) | 🏔️ Altimetría 3D (Escala 200km) | 🏔️ Visor de Puertos de Montaña |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_20km.png" width="220" alt="Altimetría 3D 20km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_200km.png" width="220" alt="Altimetría 3D 200km" /> | |
+| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_20km.png" width="220" alt="Altimetría 3D 20km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_200km.png" width="220" alt="Altimetría 3D 200km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer.png" width="220" alt="Visor de Puertos" /> |
 
 ---
 
@@ -33,7 +33,22 @@ Visita el **[Portal Web Oficial de ALTGRAPH (davoe75.github.io/ALTGRAPH)](https:
 
 ---
 
-## 🚀 Novedades y Funciones Destacadas (v0.4.1 Stable)
+## 🚀 Novedades y Funciones Destacadas (v0.4.62)
+
+### 🏔️ Visor de Puertos de Montaña (NUEVO en v0.4.5+)
+La funcionalidad más demandada por la comunidad ciclista. Un **campo de datos a pantalla completa** dedicado exclusivamente a la visualización integral de los puertos de montaña detectados automáticamente en tu ruta cargada:
+
+- **Navegación por puertos**: Flechas `<` y `>` para explorar todos los puertos de la ruta antes de salir o durante la marcha.
+- **Información de cada puerto**: Longitud exacta, desnivel acumulado, kilómetros restantes hasta el inicio y categoría oficial.
+- **Categorización estilo La Vuelta a España**: Motor APM propio que calcula y asigna categoría **3ª, 2ª, 1ª Cat o Especial C.E.** con los mismos criterios que los grandes corredores de ciclismo profesional.
+- **Perfil altimétrico 3D del puerto**: Visualización completa del perfil de cada puerto con el estilo gráfico 3D de ALTGRAPH.
+- **Cotas topográficas de los tres picos más altos**: Detecta automáticamente los 3 puntos más elevados del recorrido y los marca con un triángulo y cota en metros.
+- **Líneas verticales de kilómetros destacadas**: Las líneas que corresponden a los kilómetros enteros en el eje X se representan más gruesas y oscuras que las divisiones de sub-bloque.
+- **Leyenda de escala inferior**: Dos líneas de información debajo de la gráfica indican en todo momento `Cada bloque = Xkm` y `Cada sub-bloque = Xm` para contextualizar la escala visual.
+- **Baliza del ciclista inteligente**: La bola luminosa del ciclista solo aparece sobre la gráfica del puerto cuando el ciclista llega físicamente al kilómetro de inicio del puerto. Antes, la pantalla muestra el perfil completo limpio.
+- **Botones de zoom `+` y `−`** (posición ajustada para no solaparse con las cotas del eje Y).
+- **Texto del eje X más grande**: Etiquetas de distancia kilométrica más legibles.
+- **Internacionalización completa**: Todos los textos disponibles en 🇪🇸 Español, 🇬🇧 English, 🇫🇷 Français, 🇮🇹 Italiano y 🇩🇪 Deutsch.
 
 ### 🌟 Suite de 5 Modelos de Altimetría Revolucionarios (Conmutables al vuelo)
 Permite al ciclista elegir entre 5 formas visuales de interpretar la montaña desde la tarjeta superior de la pestaña **🎨 Estilo** de la extensión:
@@ -84,6 +99,7 @@ ALTGRAPH no sustituye el Climber nativo, sino que lo complementa ofreciendo una 
 - **Modelos de Visualización**: El nativo tiene una vista fija; ALTGRAPH te ofrece 5 modelos revolucionarios (Clásica 3D, Horizonte Isométrico, Oasis Tácticos, Campo de Fuerza y Monolito).
 - **Escalas Dinámicas al Toque**: Puedes cambiar instantáneamente el zoom de la ruta (200m, 1km, 10km, 20km, 50km, etc.) simplemente tocando el botón de lupa sin salir de tu entrenamiento.
 - **Grado de Fatiga (GF)**: Única herramienta en Karoo que calcula la dureza científica de un puerto basándose en el coeficiente APM (Altimetrías de Puertos de Montaña).
+- **Visor de Puertos de Montaña**: Campo dedicado con perfil completo de cada puerto, categorización estilo La Vuelta y leyenda de escala dinámica.
 
 ---
 
@@ -92,6 +108,7 @@ ALTGRAPH no sustituye el Climber nativo, sino que lo complementa ofreciendo una 
 ### 📈 Campos de Datos Exclusivos (Dashboard Táctico)
 Además del motor gráfico, ALTGRAPH expone métricas avanzadas como campos individuales para que diseñes tu pantalla perfecta:
 - **🧠 Estratega de Altimetría**: Muestra un bloque visual inteligente con el resumen de los próximos kilómetros. Divide el horizonte en tramos de color para que sepas de un vistazo rápido si lo que viene es puerto duro (rojo), descanso (verde) o terreno rompepiernas.
+- **🏔️ Visor de Puertos 3D**: Explora de forma independiente cada puerto de montaña detectado en tu ruta. Se renderiza a pantalla completa con navegación táctil, mostrando longitud, desnivel, kilómetros restantes, pendiente media y máxima, y categorización oficial tipo **La Vuelta a España** (3ª, 2ª, 1ª Cat o Especial C.E.) calculada matemáticamente. Incluye perfil 3D completo con cotas topográficas, leyenda de escala y baliza del ciclista inteligente.
 - **⚡ Grado de Fatiga (GF)**: Motor científico basado en el coeficiente APM que evalúa la dureza real del puerto en vivo, mostrándote un coeficiente numérico de desgaste.
 - **🚀 Ritmo VAM Objetivo**: Define tu VAM (Velocidad Ascensional Media) ideal en la configuración. Este campo calcula la pendiente exacta bajo tus ruedas y te dicta a qué **velocidad (km/h)** debes rodar en ese instante para cumplir tu objetivo en la cima.
 - **📐 Tendencia 3D y Rampa Máxima**: Te avisa de si la pendiente se está endureciendo o suavizando antes de que tus piernas lo noten.
@@ -175,6 +192,65 @@ El proyecto utiliza Gradle y Kotlin. Requiere JDK 17 y Android SDK (Plataforma 3
 Este proyecto de código abierto se distribuye bajo la licencia **MIT** - Copyright 2026 David García Pascual.
 
 *Descargo de responsabilidad: Esta extensión no está afiliada, respaldada, patrocinada ni soportada por Hammerhead o SRAM. Úsala bajo tu propio riesgo y, por favor, mantén siempre los ojos en la carretera y las manos en el manillar.*
+
+
+---
+## 🆕 What's new in v0.4.62 / Novedades v0.4.62
+
+### 🇪🇸 ESPAÑOL
+- **🏔️ Visor de Puertos de Montaña (Campo de datos a pantalla completa)**: Nuevo campo dedicado que muestra el perfil altimétrico 3D completo de cada puerto detectado en la ruta. Navegación `< >` entre puertos, longitud, desnivel, kilómetros restantes, pendiente media, pendiente máxima y categoría (3ª, 2ª, 1ª, Especial C.E.) al estilo La Vuelta a España.
+- **Categorización de puertos ajustada a La Vuelta a España**: El motor APM recalibrado asigna categorías con la misma filosofía que los organizadores de la Vuelta a España (p.ej. 5,6km al 6,6% = 3ª Categoría).
+- **Cotas topográficas de los 3 picos más altos**: Detección automática de los tres puntos más elevados de la gráfica con marcador triangular y cota en metros. Texto light (no bold) y tamaño reducido para no saturar la vista.
+- **Líneas verticales de kilómetros más gruesas y oscuras**: Solo las líneas correspondientes a los kilómetros enteros del eje X aparecen con grosor 3.0px y color `#0F172A`, mientras las divisiones menores mantienen su línea fina `1.2px`.
+- **Texto de distancia en eje X más grande**: Etiquetas kilométricas más legibles en pantalla.
+- **Leyenda de escala en dos líneas**: Debajo de cada gráfica de puerto aparece `Cada bloque = Xkm` (texto grande) y `Cada sub-bloque = Xm` (texto más pequeño).
+- **Baliza del ciclista inteligente**: La bola luminosa solo aparece cuando el ciclista está físicamente dentro del tramo del puerto. Antes de llegar, la gráfica muestra el perfil completo limpio.
+- **Botones de zoom reposicionados**: Los botones `+` y `−` se han desplazado para no solaparse con las cotas del eje Y.
+- **Internacionalización completa**: Todos los nuevos textos disponibles en Español, English, Français, Italiano y Deutsch.
+
+### 🇬🇧 ENGLISH
+- **🏔️ Mountain Pass Viewer (Full-screen data field)**: New dedicated field showing the complete 3D altimetric profile for each detected climb on the route. `< >` navigation between climbs, length, elevation gain, remaining kilometers, average grade, max grade and category (3rd, 2nd, 1st, Special HC) in the style of La Vuelta a España.
+- **Climb categorization aligned with La Vuelta a España**: The recalibrated APM engine assigns categories using the same philosophy as Vuelta a España organizers (e.g., 5.6km at 6.6% = 3rd Category).
+- **Topographic markers for the 3 highest peaks**: Automatic detection of the three highest points on the graph with a triangular pin and altitude in meters. Light (non-bold) text at reduced size to avoid visual clutter.
+- **Thicker, darker vertical km lines**: Only lines corresponding to full kilometers on the X-axis are rendered at 3.0px width and `#0F172A` color; sub-block dividers stay thin at 1.2px.
+- **Larger X-axis distance labels**: Kilometer labels are bigger and easier to read on screen.
+- **Two-line scale legend**: Below each climb profile: `Each block = Xkm` (larger) and `Each sub-block = Xm` (smaller).
+- **Smart cyclist beacon**: The glowing ball only appears when the rider is physically within the climb's distance range. Before reaching the start, the graph shows the full clean profile.
+- **Repositioned zoom buttons**: `+` and `−` buttons repositioned to avoid overlapping with Y-axis altitude labels.
+- **Full i18n**: All new text strings available in Spanish, English, French, Italian and German.
+
+### 🇫🇷 FRANÇAIS
+- **🏔️ Visionneuse de Cols (Champ plein écran)**: Nouveau champ dédié affichant le profil altimétrique 3D complet de chaque col détecté sur l'itinéraire. Navigation `< >` entre cols, longueur, dénivelé, kilomètres restants, pente moyenne, pente maximale et catégorie (3e, 2e, 1re, Hors Catégorie) à la manière de La Vuelta.
+- **Catégorisation des cols alignée sur La Vuelta a España**: Le moteur APM recalibré attribue les catégories avec la même philosophie que les organisateurs de la Vuelta (ex. 5,6 km à 6,6 % = 3e Catégorie).
+- **Repères topographiques des 3 sommets les plus élevés**: Détection automatique des trois points les plus hauts du graphique avec un repère triangulaire et l'altitude en mètres. Texte léger (non gras) et taille réduite pour ne pas surcharger la vue.
+- **Lignes verticales km plus épaisses et plus sombres**: Seules les lignes correspondant aux kilomètres entiers de l'axe X sont tracées à 3,0 px et couleur `#0F172A`; les divisions mineures gardent leur ligne fine 1,2 px.
+- **Étiquettes de distance axe X plus grandes**: Étiquettes kilométriques plus lisibles à l'écran.
+- **Légende d'échelle en deux lignes**: Sous chaque profil de col : `Chaque bloc = Xkm` (grand) et `Chaque sous-bloc = Xm` (plus petit).
+- **Balise cycliste intelligente**: La bille lumineuse n'apparaît que lorsque le cycliste est physiquement dans la plage du col. Avant d'y arriver, le graphique affiche le profil complet et propre.
+- **Boutons de zoom repositionnés**: Les boutons `+` et `−` ont été déplacés pour ne pas chevaucher les étiquettes de l'axe Y.
+- **i18n complet**: Toutes les nouvelles chaînes de texte disponibles en Espagnol, Anglais, Français, Italien et Allemand.
+
+### 🇮🇹 ITALIANO
+- **🏔️ Visualizzatore di Passi di Montagna (Campo a schermo intero)**: Nuovo campo dedicato che mostra il profilo altimetrico 3D completo di ogni salita rilevata sul percorso. Navigazione `< >` tra le salite, lunghezza, dislivello, chilometri mancanti, pendenza media, pendenza massima e categoria (3ª, 2ª, 1ª, Fuori Categoria) nello stile della Vuelta a España.
+- **Categorizzazione delle salite allineata alla Vuelta a España**: Il motore APM ricalibrato assegna categorie con la stessa filosofia degli organizzatori della Vuelta (es. 5,6km al 6,6% = 3ª Categoria).
+- **Marcatori topografici dei 3 punti più elevati**: Rilevamento automatico dei tre punti più alti del grafico con un segnaposto triangolare e la quota in metri. Testo light (non bold) a dimensione ridotta per non appesantire la vista.
+- **Linee verticali km più spesse e scure**: Solo le linee corrispondenti ai chilometri interi dell'asse X vengono disegnate a 3,0px e colore `#0F172A`; le divisione secondarie mantengono la linea sottile 1,2px.
+- **Etichette distanza asse X più grandi**: Etichette chilometriche più leggibili sullo schermo.
+- **Legenda di scala a due righe**: Sotto ogni profilo di salita: `Ogni blocco = Xkm` (grande) e `Ogni sotto-blocco = Xm` (più piccolo).
+- **Segnalatore ciclista intelligente**: La sfera luminosa appare solo quando il ciclista è fisicamente all'interno del tratto della salita. Prima di arrivare, il grafico mostra il profilo completo pulito.
+- **Pulsanti zoom riposizionati**: I pulsanti `+` e `−` sono stati spostati per non sovrapporsi alle etichette dell'asse Y.
+- **i18n completo**: Tutte le nuove stringhe di testo disponibili in Spagnolo, Inglese, Francese, Italiano e Tedesco.
+
+### 🇩🇪 DEUTSCH
+- **🏔️ Bergpass-Viewer (Vollbild-Datenfeld)**: Neues dediziertes Feld, das das vollständige 3D-Höhenprofil jedes erkannten Anstiegs auf der Route anzeigt. `< >`-Navigation zwischen Anstiegen, Länge, Höhengewinn, verbleibende Kilometer, Durchschnittssteigung, maximale Steigung und Kategorie (3., 2., 1., Hors Catégorie) im Stil der Vuelta a España.
+- **Anstieskategorisierung gemäß Vuelta a España**: Die neu kalibrierte APM-Engine vergibt Kategorien nach der gleichen Philosophie wie die Vuelta-Veranstalter (z. B. 5,6 km bei 6,6 % = 3. Kategorie).
+- **Topografische Markierungen der 3 höchsten Gipfel**: Automatische Erkennung der drei höchsten Punkte im Diagramm mit einem dreieckigen Symbol und der Höhe in Metern. Schlanker (nicht fetter) Text in reduzierter Größe, um die Ansicht nicht zu überladen.
+- **Dickere, dunklere vertikale km-Linien**: Nur Linien für ganze Kilometer auf der X-Achse werden mit 3,0 px und Farbe `#0F172A` gezeichnet; kleinere Unterteilungen behalten ihre dünne Linie von 1,2 px.
+- **Größere X-Achsen-Entfernungsbeschriftungen**: Kilometerbeschriftungen sind auf dem Bildschirm besser lesbar.
+- **Zweizeilige Maßstabslegende**: Unter jedem Anstiegsprofil: `Jeder Block = Xkm` (größer) und `Jeder Teilblock = Xm` (kleiner).
+- **Intelligenter Radfahrer-Beacon**: Die leuchtende Kugel erscheint nur, wenn der Fahrer physisch im Streckenabschnitt des Anstiegs ist. Vor der Ankunft zeigt das Diagramm das vollständige, saubere Profil.
+- **Zoom-Schaltflächen neu positioniert**: Die Schaltflächen `+` und `−` wurden verschoben, damit sie sich nicht mit den Y-Achsen-Höhenbeschriftungen überschneiden.
+- **Vollständige i18n**: Alle neuen Textzeichenketten in Spanisch, Englisch, Französisch, Italienisch und Deutsch verfügbar.
 
 
 ---

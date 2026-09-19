@@ -11,6 +11,8 @@
 
     <string name="data_type_fatigue_grade_title">Indice de Fatigue (GF)</string>
     <string name="data_type_fatigue_grade_desc">Indice scientifique de difficulté et fatigue de la montée</string>
+    <string name="data_type_climb_viewer_title">Visionneur de Cols 3D</string>
+    <string name="data_type_climb_viewer_desc">Visionneur 3D indépendant des cols de montagne de l\'itinéraire</string>
 
     <string name="data_type_climb_pacing_title">Rythme VAM Cible</string>
     <string name="data_type_climb_pacing_desc">Assistant de rythme VAM (m/h) selon la pente actuelle</string>
@@ -72,4 +74,9 @@
     <string name="zone_orange">ORANGE</string>
     <string name="zone_red">ROUGE</string>
     <string name="zone_purple">VIOLET</string>
+
+    <!-- Légende d'échelle pour le profil de col -->
+    <string name="scale_legend_major_block_m">Chaque bloc = %1$dm</string>
+    <string name="scale_legend_major_block_km">Chaque bloc = %1$skm</string>
+    <string name="scale_legend_sub_block">Chaque sous-bloc = %1$dm</string>
 </resources>

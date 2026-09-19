@@ -11,6 +11,8 @@
 
     <string name="data_type_fatigue_grade_title">Grado de Fatiga (GF)</string>
     <string name="data_type_fatigue_grade_desc">Índice científico de Grado de Fatiga y dureza para clasificación de puertos</string>
+    <string name="data_type_climb_3d_title">Visor de Puertos 3D</string>
+    <string name="data_type_climb_3d_desc">Visor 3D independiente de los puertos de montaña de la ruta</string>
 
     <string name="data_type_climb_pacing_title">Ritmo VAM Objetivo</string>
     <string name="data_type_climb_pacing_desc">Asistente de VAM objetivo (m/h) según la pendiente actual</string>
@@ -61,7 +63,7 @@
     <string name="setting_custom_maps_title">Gestor de Cartografía Personalizada</string>
     <string name="setting_custom_maps_desc">Detecta e importa paquetes de mapas vectoriales de alta resolución (.mbtiles / .map) para Karoo</string>
     <string name="font_normal">Normal</string>
-    <string name="font_large">Large</string>
+    <string name="font_large">Largo</string>
     <string name="font_xl">Extra Gr.</string>
     <string name="status_saved">Ajustes Guardados Automáticamente</string>
     <string name="btn_save_and_exit">Guardar y Salir</string>
@@ -72,4 +74,9 @@
     <string name="zone_orange">NARANJA</string>
     <string name="zone_red">ROJO</string>
     <string name="zone_purple">VIOLETA</string>
+
+    <!-- Leyenda de escala en el perfil de puerto -->
+    <string name="scale_legend_major_block_m">Cada bloque = %1$dm</string>
+    <string name="scale_legend_major_block_km">Cada bloque = %1$skm</string>
+    <string name="scale_legend_sub_block">Cada sub-bloque = %1$dm</string>
 </resources>

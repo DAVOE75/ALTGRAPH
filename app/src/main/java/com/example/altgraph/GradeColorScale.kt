@@ -32,6 +32,26 @@ object GradeColorScale {
     }
 
     /**
+     * Color scale specifically for climbs (White to Intense Red).
+     * Descents remain blue.
+     */
+    fun getClimbColorHex(grade: Double): String {
+        return when {
+            grade <= -10.0 -> "#041E42" // Descenso pronunciado
+            grade <= -5.0 -> "#004B87" // Descenso medio
+            grade <= -2.0 -> "#0072CE" // Descenso suave
+            grade < 0.0 -> "#41B6E6" // Falso llano bajada
+            grade < 3.0 -> "#FFFFFF" // Blanco llano
+            grade < 5.0 -> "#FEF08A" // Amarillo muy pálido
+            grade < 8.0 -> "#FACC15" // Amarillo fuerte
+            grade < 10.0 -> "#FB923C" // Naranja
+            grade < 13.0 -> "#EA580C" // Naranja oscuro / Rojo claro
+            grade <= 17.0 -> "#DC2626" // Rojo intenso
+            else -> "#7F1D1D"        // Rojo muy oscuro / Granate oscuro (> 17%)
+        }
+    }
+
+    /**
      * Color para telemetría de texto sobre fondo oscuro (evita texto negro sobre fondo negro)
      */
     fun getTelemetryColor(grade: Double): Int {

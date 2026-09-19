@@ -74,6 +74,12 @@ class Altimetria3DView @JvmOverloads constructor(
         style = Paint.Style.STROKE
     }
 
+    private val majorSliceSeparatorPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#0F172A") // Near black
+        strokeWidth = 3.0f
+        style = Paint.Style.STROKE
+    }
+
     private val pctBadgeBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#CC070C18") // Fondo cápsula oscuro para máximo contraste sobre cualquier color
         style = Paint.Style.FILL
@@ -136,6 +142,8 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     // 3. Campo de Fuerza y Fatiga
+    private var currentMicroSubDivisions = 1
+
     private val inertiaWavePath = Path()
     private val inertiaWavePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         strokeWidth = 2.2f
@@ -380,6 +388,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private var isDragging: Boolean = false
     private var lastTouchX: Float = 0.0f
     private var routeName: String? = null
+    var isClimbMode: Boolean = false
 
     private val ribbonQuadPath = Path()
     private val wallPath = Path()
@@ -391,6 +400,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private val cruciblePath = Path()
     private val pacingPath = Path()
     private val plasmaCorePath = Path()
+    private var showHeaderStats: Boolean = true
 
     fun update3DData(
         blocks: List<Float>,
@@ -406,6 +416,7 @@ class Altimetria3DView @JvmOverloads constructor(
         showMaxGrade: Boolean = true,
         fontFamilyKey: String = "sans-serif-condensed",
         rotate90: Boolean = false,
+        rotateMinus90: Boolean = false,
         rampMinSlope: Double = 10.0,
         rampMaxSlope: Double = 15.0,
         showHairpins: Boolean = true,
@@ -426,7 +437,9 @@ class Altimetria3DView @JvmOverloads constructor(
         activeClimbs: List<RouteClimb> = emptyList(),
         visibleAvgGrade: Double = 0.0,
         visibleMaxGrade: Double = 0.0,
-        routeName: String? = null
+        routeName: String? = null,
+        customTitle: String? = null,
+        showHeaderStats: Boolean = true
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -460,6 +473,8 @@ class Altimetria3DView @JvmOverloads constructor(
         this.activeClimbs = activeClimbs
         this.visibleAvgGrade = visibleAvgGrade
         this.visibleMaxGrade = visibleMaxGrade
+        this.routeName = routeName
+        this.showHeaderStats = showHeaderStats
         if (subBlocks.isNotEmpty()) {
             this.subBlocks = subBlocks
         }
@@ -607,6 +622,7 @@ class Altimetria3DView @JvmOverloads constructor(
         canvas.drawRect(0f, 0f, w, h, bgPaint)
 
         // 2. Encabezado Título ("Altimetría 3D")
+        if (showHeaderStats) {
         val baseTitle = context.getString(R.string.data_type_altimetria_3d_title)
         val titleText = if (!routeName.isNullOrEmpty()) "$baseTitle - $routeName" else baseTitle
         titlePaint.textSize = ((h * 0.080f) * fontScale).coerceIn(16f, 28f)
@@ -648,6 +664,7 @@ class Altimetria3DView @JvmOverloads constructor(
             maxGradePaint.color = GradeColorScale.getTelemetryColor(tramoMaxGrade)
             canvas.drawText(maxGradeText, col3X, h * 0.26f, maxGradePaint) // Pegado MÁS arriba
         }
+        } // Fin de if (showHeaderStats)
 
         // 3. Botones Minimalistas de Zoom [ - | + ]
         if (showZoomControls) {
@@ -688,82 +705,69 @@ class Altimetria3DView @JvmOverloads constructor(
         canvas.drawText(zoomLabel, centerX, centerY, zoomBtnPaint)
     }
 
-    private fun drawMountainGates(canvas: Canvas, xFront: FloatArray, yFront: FloatArray, yBase: FloatArray, totalMicroSamples: Int) {
-        if (activeClimbs.isEmpty()) return
+    private fun drawTopographicPeaks(canvas: Canvas, xFront: FloatArray, yFront: FloatArray, yBase: FloatArray, totalMicroSamples: Int, microElevations: FloatArray) {
+        if (totalMicroSamples < 3 || microElevations.isEmpty()) return
 
-        val windowEndMeters = windowStartMeters + lookaheadMeters
-        val h = height.toFloat()
-
-        for (climb in activeClimbs) {
-            // Draw Mountain Gate at Start
-            if (climb.startDistance in windowStartMeters..windowEndMeters) {
-                val startFrac = ((climb.startDistance - windowStartMeters) / lookaheadMeters).toFloat().coerceIn(0f, 1f)
-                val idx = (startFrac * (totalMicroSamples - 1)).roundToInt().coerceIn(0, totalMicroSamples - 1)
-                val px = xFront[idx]
-                val pyTop = yFront[idx]
-                
-                // Draw Glowing Gate / Arch
-                val gatePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = Color.parseColor("#EF4444")
-                    strokeWidth = 4f
-                    style = Paint.Style.STROKE
-                    setShadowLayer(10f, 0f, 0f, Color.parseColor("#EF4444"))
-                }
-                
-                // Draw a vertical line shooting up from the road as a gate
-                val archHeight = 120f
-                canvas.drawLine(px, pyTop, px, pyTop - archHeight, gatePaint)
-                canvas.drawLine(px - 30f, pyTop - archHeight, px + 30f, pyTop - archHeight, gatePaint) // Top crossbar
-                
-                // Label for Start
-                val gateTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = Color.WHITE
-                    textSize = 20f
-                    typeface = Typeface.DEFAULT_BOLD
-                    textAlign = Paint.Align.CENTER
-                }
-                canvas.drawText("START CLIMB", px, pyTop - archHeight - 10f, gateTextPaint)
+        val peaks = mutableListOf<Pair<Int, Float>>()
+        for (i in 1 until totalMicroSamples - 1) {
+            val curr = microElevations[i]
+            val prev = microElevations[i - 1]
+            val next = microElevations[i + 1]
+            if (curr > prev && curr > next) {
+                peaks.add(Pair(i, curr))
             }
-
-            // Draw Summit Beacon at End
-            if (climb.endDistance in windowStartMeters..windowEndMeters) {
-                val endFrac = ((climb.endDistance - windowStartMeters) / lookaheadMeters).toFloat().coerceIn(0f, 1f)
-                val idx = (endFrac * (totalMicroSamples - 1)).roundToInt().coerceIn(0, totalMicroSamples - 1)
-                val px = xFront[idx]
-                val pyTop = yFront[idx]
-                
-                // Pin Type Icon (Inverted Triangle)
-                val pinPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = Color.WHITE
-                    style = Paint.Style.FILL
-                    setShadowLayer(8f, 0f, 4f, Color.parseColor("#44000000"))
-                }
-                
-                val pinPath = Path().apply {
-                    moveTo(px, pyTop - 6f) // Bottom point
-                    lineTo(px - 14f, pyTop - 36f) // Top left
-                    lineTo(px + 14f, pyTop - 36f) // Top right
-                    close()
-                }
-                
-                // Draw white circle inside triangle
-                val pinCirclePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = Color.parseColor("#EF4444")
-                    style = Paint.Style.FILL
-                }
-                
-                canvas.drawPath(pinPath, pinPaint)
-                canvas.drawCircle(px, pyTop - 25f, 6f, pinCirclePaint)
-                
-                val cotaPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = Color.WHITE
-                    textSize = (h * 0.050f).coerceIn(12f, 18f)
-                    typeface = Typeface.DEFAULT_BOLD
-                    textAlign = Paint.Align.CENTER
-                    setShadowLayer(4f, 0f, 2f, Color.BLACK)
-                }
-                canvas.drawText("${climb.totalElevation.toInt()}m", px, pyTop - 45f, cotaPaint)
+        }
+        
+        if (microElevations.size > 1) {
+            if (microElevations[0] > microElevations[1]) peaks.add(Pair(0, microElevations[0]))
+            if (microElevations[totalMicroSamples - 1] > microElevations[totalMicroSamples - 2]) {
+                peaks.add(Pair(totalMicroSamples - 1, microElevations[totalMicroSamples - 1]))
             }
+        }
+
+        peaks.sortByDescending { it.second }
+
+        val minDistanceSeparationIdx = (totalMicroSamples * 0.05).toInt().coerceAtLeast(3)
+        val selectedPeaks = mutableListOf<Pair<Int, Float>>()
+
+        for (peak in peaks) {
+            if (selectedPeaks.size >= 3) break
+            val tooClose = selectedPeaks.any { Math.abs(it.first - peak.first) < minDistanceSeparationIdx }
+            if (!tooClose) {
+                selectedPeaks.add(peak)
+            }
+        }
+
+        val pinPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+            style = Paint.Style.FILL
+            setShadowLayer(4f, 0f, 2f, Color.parseColor("#80000000"))
+        }
+
+        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+            textSize = 14f // Reduced size
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL) // Light instead of bold
+            textAlign = Paint.Align.CENTER
+            setShadowLayer(3f, 0f, 1f, Color.parseColor("#99000000"))
+        }
+
+        for (peak in selectedPeaks) {
+            val idx = peak.first
+            val px = xFront[idx]
+            val pyTop = yFront[idx]
+            val elev = peak.second
+
+            val triSize = 12f
+            val triPath = Path().apply {
+                moveTo(px, pyTop - 6f)
+                lineTo(px - triSize / 2f, pyTop - 6f - triSize)
+                lineTo(px + triSize / 2f, pyTop - 6f - triSize)
+                close()
+            }
+            canvas.drawPath(triPath, pinPaint)
+            
+            canvas.drawText("${elev.toInt()}m", px, pyTop - 10f - triSize, textPaint)
         }
     }
 
@@ -782,6 +786,7 @@ class Altimetria3DView @JvmOverloads constructor(
             microGrades = subBlocks.toFloatArray()
             val ratio = (majorBlockSizeMeters / subBlockSizeMeters.coerceAtLeast(1.0)).roundToInt().coerceAtLeast(1)
             microSubDivisions = ratio
+            currentMicroSubDivisions = microSubDivisions
             majorBlocksCount = ((totalMicroSamples - 1) / microSubDivisions).coerceAtLeast(1)
         } else {
             majorBlocksCount = if (totalMetersAhead > 1000.0) {
@@ -790,6 +795,7 @@ class Altimetria3DView @JvmOverloads constructor(
                 (totalMetersAhead / blockSizeMeters.coerceAtLeast(10.0)).toInt().coerceIn(2, 10)
             }
             microSubDivisions = if (totalMetersAhead >= 1000.0) 20 else 5
+            currentMicroSubDivisions = microSubDivisions
             totalMicroSamples = (majorBlocksCount * microSubDivisions) + 1
 
             val microDistMeters = totalMetersAhead / (totalMicroSamples - 1)
@@ -812,7 +818,7 @@ class Altimetria3DView @JvmOverloads constructor(
 
         val startX = (w * 0.10f)
         val baseEndX = (w * 0.98f)
-        val baseGroundY = (h * 0.84f)
+        val baseGroundY = (h * 0.82f)
         val maxPeakHeight = (h * 0.48f)
 
         // Desplazamiento oblicuo 3D sutil y elegante (profundidad reducida a petición del usuario)
@@ -1023,7 +1029,7 @@ class Altimetria3DView @JvmOverloads constructor(
         }
 
         // 6.b. MOUNTAIN GATES & SUMMIT BEACONS (Puertos Oficiales SDK)
-        drawMountainGates(canvas, xFront, yFront, yBase, totalMicroSamples)
+        drawTopographicPeaks(canvas, xFront, yFront, yBase, totalMicroSamples, microElevations)
 
         // 7. Flechas con porcentaje para rampas duras (>= 10%)
         if (showRamps) {
@@ -1117,7 +1123,7 @@ class Altimetria3DView @JvmOverloads constructor(
         canvas.drawPath(leftBaseEndcapPath, baseBarBorderPaint)
 
         // Rótulos de distancia en la barra inferior (Ventana rodante de 50 metros)
-        baseDistTextPaint.textSize = (barH * 0.58f).coerceIn(10f, 15f)
+        baseDistTextPaint.textSize = (barH * 0.68f).coerceIn(12f, 18f)
         val majorDistMeters = if (profileElevations.isNotEmpty()) majorBlockSizeMeters else (totalMetersAhead / majorBlocksCount)
 
         for (k in 0 until majorSamples) {
@@ -1128,18 +1134,46 @@ class Altimetria3DView @JvmOverloads constructor(
                 if (m % 1000L == 0L) "${m / 1000}km" else "${m / 1000}.${(m % 1000L) / 100}km"
             }
             val px = majorX[k]
-            canvas.drawText(distLabel, px, baseGroundY + (barH * 0.70f), baseDistTextPaint)
+            canvas.drawText(distLabel, px, baseGroundY + (barH * 0.75f), baseDistTextPaint)
         }
 
-        // 10. Baliza del ciclista en 3D: avanza limpiamente por la cresta frontal de la pendiente
-        val progressClamped = riderProgress.coerceIn(0f, 1f)
-        val exactIndexF = progressClamped * (totalMicroSamples - 1)
-        val idx = exactIndexF.toInt().coerceIn(0, totalMicroSamples - 2)
-        val rem = exactIndexF - idx
-        val rx = xFront[idx] + rem * (xFront[idx + 1] - xFront[idx])
-        val ry = yFront[idx] + rem * (yFront[idx + 1] - yFront[idx])
+        // Leyenda de escala debajo de la gráfica
+        val scaleLegendText = if (majorDistMeters < 1000.0) {
+            context.getString(R.string.scale_legend_major_block_m, majorDistMeters.toInt())
+        } else {
+            val km = majorDistMeters / 1000.0
+            val kmStr = if (km % 1.0 == 0.0) km.toInt().toString() else String.format("%.1f", km)
+            context.getString(R.string.scale_legend_major_block_km, kmStr)
+        }
+        val scaleLegendPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#94A3B8") // Gris claro
+            textSize = (h * 0.055f).coerceIn(14f, 18f)
+            textAlign = Paint.Align.CENTER
+            typeface = Typeface.DEFAULT
+        }
+        
+        val subBlockMeters = subBlockSizeMeters.toInt()
+        val subScaleLegendText = context.getString(R.string.scale_legend_sub_block, subBlockMeters)
+        val subScaleLegendPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#64748B") // Gris un poco más oscuro
+            textSize = (h * 0.045f).coerceIn(10f, 15f)
+            textAlign = Paint.Align.CENTER
+            typeface = Typeface.DEFAULT
+        }
 
-        // Haz de luz frontal en Horizonte Isométrico (orientado según la pendiente que sube el ciclista)
+        canvas.drawText(scaleLegendText, w / 2f, h - 20f, scaleLegendPaint)
+        canvas.drawText(subScaleLegendText, w / 2f, h - 2f, subScaleLegendPaint)
+
+        // 10. Baliza del ciclista en 3D: avanza limpiamente por la cresta frontal de la pendiente
+        if (riderProgress >= 0f && riderProgress <= 1f) {
+            val progressClamped = riderProgress
+            val exactIndexF = progressClamped * (totalMicroSamples - 1)
+            val idx = exactIndexF.toInt().coerceIn(0, totalMicroSamples - 2)
+            val rem = exactIndexF - idx
+            val rx = xFront[idx] + rem * (xFront[idx + 1] - xFront[idx])
+            val ry = yFront[idx] + rem * (yFront[idx + 1] - yFront[idx])
+            
+            // Haz de luz frontal en Horizonte Isométrico (orientado según la pendiente que sube el ciclista)
         if (altimetriaStyle == AltimetriaStyle.HORIZON_ISOMETRIC) {
             val coneLen = (w * 0.26f)
             val slopeDy = if (idx + 1 < totalMicroSamples) yFront[idx + 1] - yFront[idx] else 0f
@@ -1165,9 +1199,10 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawPath(headlightPath, headlightPaint)
         }
 
-        canvas.drawCircle(rx, ry, 22f, beaconHaloPaint)
-        canvas.drawCircle(rx, ry, 10f, beaconPaint)
-        canvas.drawCircle(rx, ry, 4.5f, beaconCorePaint)
+        val pinY = ry - 20f
+        canvas.drawCircle(rx, pinY, 7f, beaconPaint)
+        canvas.drawCircle(rx, pinY, 4f, beaconCorePaint)
+        }
     }
 
     // --- MÉTODOS DE RENDERIZADO PARA LOS 5 MODELOS DE ALTIMETRÍA REVOLUCIONARIOS ---
@@ -1203,10 +1238,12 @@ class Altimetria3DView @JvmOverloads constructor(
             )
             wallPaint.shader = wallShader
             canvas.drawPath(wallPath, wallPaint)
-            canvas.drawLine(xFront[i], yFront[i], xFront[i], yBase[i], sliceSeparatorPaint)
+            val paint = if (i % currentMicroSubDivisions == 0) majorSliceSeparatorPaint else sliceSeparatorPaint
+            canvas.drawLine(xFront[i], yFront[i], xFront[i], yBase[i], paint)
         }
         val lastIdx = totalMicroSamples - 1
-        canvas.drawLine(xFront[lastIdx], yFront[lastIdx], xFront[lastIdx], yBase[lastIdx], sliceSeparatorPaint)
+        val lastPaint = if (lastIdx % currentMicroSubDivisions == 0) majorSliceSeparatorPaint else sliceSeparatorPaint
+        canvas.drawLine(xFront[lastIdx], yFront[lastIdx], xFront[lastIdx], yBase[lastIdx], lastPaint)
 
         val startGrade = if (microGrades.isNotEmpty()) microGrades[0].toDouble() else 4.0
         leftEndcapPath.reset()
@@ -1270,10 +1307,12 @@ class Altimetria3DView @JvmOverloads constructor(
             )
             wallPaint.shader = wallShader
             canvas.drawPath(wallPath, wallPaint)
-            canvas.drawLine(xFront[i], yFront[i], xFront[i], yBase[i], sliceSeparatorPaint)
+            val paint = if (i % currentMicroSubDivisions == 0) majorSliceSeparatorPaint else sliceSeparatorPaint
+            canvas.drawLine(xFront[i], yFront[i], xFront[i], yBase[i], paint)
         }
         val lastIdx = totalMicroSamples - 1
-        canvas.drawLine(xFront[lastIdx], yFront[lastIdx], xFront[lastIdx], yBase[lastIdx], sliceSeparatorPaint)
+        val lastPaint = if (lastIdx % currentMicroSubDivisions == 0) majorSliceSeparatorPaint else sliceSeparatorPaint
+        canvas.drawLine(xFront[lastIdx], yFront[lastIdx], xFront[lastIdx], yBase[lastIdx], lastPaint)
 
         // Corte 3D izquierdo isométrico
         val pFactor0 = 1.0f
@@ -1610,10 +1649,12 @@ class Altimetria3DView @JvmOverloads constructor(
             if (i % 2 == 0) {
                 canvas.drawLine(xFront[i], yFront[i], xFront[i] + (w * 0.04f), yBase[i], obsidianFacetPaint)
             }
-            canvas.drawLine(xFront[i], yFront[i], xFront[i], yBase[i], sliceSeparatorPaint)
+            val paint = if (i % currentMicroSubDivisions == 0) majorSliceSeparatorPaint else sliceSeparatorPaint
+            canvas.drawLine(xFront[i], yFront[i], xFront[i], yBase[i], paint)
         }
         val lastIdx = totalMicroSamples - 1
-        canvas.drawLine(xFront[lastIdx], yFront[lastIdx], xFront[lastIdx], yBase[lastIdx], sliceSeparatorPaint)
+        val lastPaint = if (lastIdx % currentMicroSubDivisions == 0) majorSliceSeparatorPaint else sliceSeparatorPaint
+        canvas.drawLine(xFront[lastIdx], yFront[lastIdx], xFront[lastIdx], yBase[lastIdx], lastPaint)
 
         // 2. Faceta superior 3D en cristal pulido oscuro con resplandor
         for (i in 0 until totalMicroSamples - 1) {

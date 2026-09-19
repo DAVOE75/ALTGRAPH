@@ -11,6 +11,8 @@
 
     <string name="data_type_fatigue_grade_title">Ermüdungsgrad (GF)</string>
     <string name="data_type_fatigue_grade_desc">Wissenschaftlicher Schwierigkeits- und Ermüdungsindex</string>
+    <string name="data_type_climb_viewer_title">3D Pässe-Viewer</string>
+    <string name="data_type_climb_viewer_desc">Unabhängiger 3D-Viewer für die Bergpässe der Route</string>
 
     <string name="data_type_climb_pacing_title">Ziel-VAM-Tempo</string>
     <string name="data_type_climb_pacing_desc">Ziel-VAM-Assistent (m/h) basierend auf aktueller Steigung</string>
@@ -72,4 +74,9 @@
     <string name="zone_orange">ORANGE</string>
     <string name="zone_red">ROT</string>
     <string name="zone_purple">VIOLETT</string>
+
+    <!-- Maßstabslegende für das Passprofile -->
+    <string name="scale_legend_major_block_m">Jeder Block = %1$dm</string>
+    <string name="scale_legend_major_block_km">Jeder Block = %1$skm</string>
+    <string name="scale_legend_sub_block">Jeder Teilblock = %1$dm</string>
 </resources>

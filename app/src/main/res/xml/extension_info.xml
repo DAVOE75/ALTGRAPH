@@ -41,4 +41,11 @@
         graphical="true"
         icon="@drawable/ic_altigraph_logo" />
 
+    <DataType
+        typeId="climb_3d"
+        displayName="@string/data_type_climb_3d_title"
+        description="@string/data_type_climb_3d_desc"
+        graphical="true"
+        icon="@drawable/ic_altigraph_logo" />
+
 </ExtensionInfo>
