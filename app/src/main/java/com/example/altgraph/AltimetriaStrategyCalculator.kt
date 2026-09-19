@@ -573,18 +573,25 @@ class AltimetriaStrategyCalculator {
         // 2. Ventana deslizante en bloques cuánticos de 50 metros
         val quantumMeters = 50.0
         var windowStartDist = (currentRiderDistance / quantumMeters).toLong() * quantumMeters
+        var actualLookahead = lookaheadDist
         
         // PANORAMIC FIX: Si el zoom es de 100km o más (ultra panorámico), forzamos
         // el inicio de la ventana al kilómetro 0 para mostrar la ruta completa, 
         // tal y como se ve en el Hammerhead Dashboard.
         if (lookaheadDist >= 100000.0) {
             windowStartDist = 0.0
+            // Si estamos en zoom panorámico, escalar la gráfica a la longitud total de la ruta
+            // para que no quede aplastada con una línea plana si la ruta es más corta que el zoom.
+            val totalLength = routeElevationProfile.lastOrNull()?.distance ?: (routePoints.lastOrNull()?.distance ?: 0.0)
+            if (totalLength > 0 && totalLength < lookaheadDist) {
+                actualLookahead = totalLength
+            }
         }
         
-        val windowEndDist = windowStartDist + lookaheadDist
+        val windowEndDist = windowStartDist + actualLookahead
 
         val riderOffsetInWindow = (currentRiderDistance - windowStartDist).coerceAtLeast(0.0)
-        val riderProgress = (riderOffsetInWindow / lookaheadDist).toFloat().coerceIn(0f, 1f)
+        val riderProgress = (riderOffsetInWindow / actualLookahead).toFloat().coerceIn(0f, 1f)
 
         // 3. Localizar el punto de ruta correspondiente al inicio de la ventana (windowStartDist)
         var windowStartIndex = nearestIndex
@@ -629,10 +636,10 @@ class AltimetriaStrategyCalculator {
         val secondsRemaining = if (currentSpeed > 0.1) (totalDistanceRemaining / currentSpeed).toLong() else 0L
 
         // 5. Cálculo de resolución adaptativa según escala (Lookahead)
-        val subBlockSize = getSubBlockSize(lookaheadDist)
-        val majorBlockSize = getMajorBlockSize(lookaheadDist)
+        val subBlockSize = getSubBlockSize(actualLookahead)
+        val majorBlockSize = getMajorBlockSize(actualLookahead)
 
-        val numSubBlocks = (lookaheadDist / subBlockSize).roundToInt().coerceIn(2, 200)
+        val numSubBlocks = (actualLookahead / subBlockSize).roundToInt().coerceIn(2, 2000)
         val routeSubBlocks = mutableListOf<Float>()
         val routeElevations = mutableListOf<Float>()
         routeElevations.add(windowStartElevation.toFloat())
@@ -695,7 +702,7 @@ class AltimetriaStrategyCalculator {
         }
 
         // Construcción de bloques mayores para telemetría y rótulos
-        val numMajorBlocks = (lookaheadDist / majorBlockSize).roundToInt().coerceIn(1, 20)
+        val numMajorBlocks = (actualLookahead / majorBlockSize).roundToInt().coerceIn(1, 200)
         val routeMajorBlocks = mutableListOf<Float>()
         for (m in 0 until numMajorBlocks) {
             val mDistStart = windowStartDist + (m * majorBlockSize)
@@ -725,7 +732,7 @@ class AltimetriaStrategyCalculator {
 
         val visibleHairpins = absoluteHairpins
             .map { it - windowStartDist }
-            .filter { it in 0.0..lookaheadDist }
+            .filter { it in 0.0..actualLookahead }
 
         val showPoiTowns = prefs?.showPoiTowns ?: true
         val showPoiWater = prefs?.showPoiWater ?: true
@@ -746,7 +753,7 @@ class AltimetriaStrategyCalculator {
                 PoiType.VIEWPOINT -> showPoiViewpoints
                 PoiType.SUMMIT -> showPoiSummits
             }
-            matchesCategory && poi.relativeDistance in 0.0..lookaheadDist
+            matchesCategory && poi.relativeDistance in 0.0..actualLookahead
         }
 
         // Cálculo de curvatura real de la carretera GPS por orientación vectorial muestreado a 50 puntos
@@ -784,7 +791,7 @@ class AltimetriaStrategyCalculator {
 
         // Muestreo uniforme en 50 puntos a lo largo de la ventana [windowStartDist, windowEndDist]
         val curvatureOffsets = List(50) { idx ->
-            val targetDist = windowStartDist + idx * (lookaheadDist / 49.0)
+            val targetDist = windowStartDist + idx * (actualLookahead / 49.0)
             if (rawOffsets.size >= 2) {
                 val nextIdx = rawOffsets.indexOfFirst { it.first >= targetDist }
                 if (nextIdx == -1) {
