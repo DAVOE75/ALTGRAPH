@@ -153,7 +153,9 @@ class AltimetriaStrategyCalculator {
             lookaheadDist <= 5000.0 -> 100.0
             lookaheadDist <= 20000.0 -> 500.0
             lookaheadDist <= 50000.0 -> 1000.0
-            else -> 10000.0
+            lookaheadDist <= 100000.0 -> 1000.0
+            lookaheadDist <= 200000.0 -> 1000.0
+            else -> 1000.0
         }
     }
 
@@ -163,6 +165,8 @@ class AltimetriaStrategyCalculator {
             lookaheadDist <= 5000.0 -> 500.0
             lookaheadDist <= 20000.0 -> 2000.0
             lookaheadDist <= 50000.0 -> 5000.0
+            lookaheadDist <= 100000.0 -> 10000.0
+            lookaheadDist <= 200000.0 -> 20000.0
             else -> 20000.0
         }
     }
