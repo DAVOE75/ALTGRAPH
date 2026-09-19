@@ -371,6 +371,8 @@ class Altimetria3DView @JvmOverloads constructor(
     private var activeClimbs: List<RouteClimb> = emptyList()
     private var altimetriaStyle: AltimetriaStyle = AltimetriaStyle.CLASSIC
     private var targetVam: Int = 900
+    private var visibleAvgGrade: Double = 0.0
+    private var visibleMaxGrade: Double = 0.0
 
     // Interactive Zoom & Pan
     private var zoomScale: Float = 1.0f
@@ -420,7 +422,9 @@ class Altimetria3DView @JvmOverloads constructor(
         showBlockPercentages: Boolean = true,
         altimetriaStyle: AltimetriaStyle = AltimetriaStyle.CLASSIC,
         targetVam: Int = 900,
-        activeClimbs: List<RouteClimb> = emptyList()
+        activeClimbs: List<RouteClimb> = emptyList(),
+        visibleAvgGrade: Double = 0.0,
+        visibleMaxGrade: Double = 0.0
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -452,6 +456,8 @@ class Altimetria3DView @JvmOverloads constructor(
         this.altimetriaStyle = altimetriaStyle
         this.targetVam = targetVam
         this.activeClimbs = activeClimbs
+        this.visibleAvgGrade = visibleAvgGrade
+        this.visibleMaxGrade = visibleMaxGrade
         if (subBlocks.isNotEmpty()) {
             this.subBlocks = subBlocks
         }
@@ -618,7 +624,7 @@ class Altimetria3DView @JvmOverloads constructor(
         canvas.drawText(liveGradeText, col1X, h * 0.24f, liveGradePaint)
 
         // COLUMNA 2: PENDIENTE MEDIA DEL TRAMO VISIBLE
-        val tramoAvgGrade = if (subBlocks.isNotEmpty()) subBlocks.average() else (if (nextBlocks.isNotEmpty()) nextBlocks.average() else currentGrade)
+        val tramoAvgGrade = if (visibleAvgGrade > 0.0) visibleAvgGrade else (if (subBlocks.isNotEmpty()) subBlocks.average() else (if (nextBlocks.isNotEmpty()) nextBlocks.average() else currentGrade))
         val labelAvgGrade = context.getString(R.string.label_avg_gradient_tramo)
         canvas.drawText(labelAvgGrade, col2X, h * 0.13f, subTitleLabelPaint)
 
@@ -629,7 +635,7 @@ class Altimetria3DView @JvmOverloads constructor(
 
         // COLUMNA 3: PENDIENTE MÁXIMA DEL TRAMO VISIBLE
         if (showMaxGrade) {
-            val tramoMaxGrade = if (subBlocks.isNotEmpty()) subBlocks.maxOrNull()?.toDouble() ?: 12.8 else (if (nextBlocks.isNotEmpty()) nextBlocks.maxOrNull()?.toDouble() ?: 12.8 else 12.8)
+            val tramoMaxGrade = if (visibleMaxGrade > 0.0) visibleMaxGrade else (if (subBlocks.isNotEmpty()) subBlocks.maxOrNull()?.toDouble() ?: 12.8 else (if (nextBlocks.isNotEmpty()) nextBlocks.maxOrNull()?.toDouble() ?: 12.8 else 12.8))
             val labelMaxGrade = context.getString(R.string.label_max_gradient_tramo)
             canvas.drawText(labelMaxGrade, col3X, h * 0.13f, subTitleLabelPaint)
 
@@ -682,6 +688,7 @@ class Altimetria3DView @JvmOverloads constructor(
         if (activeClimbs.isEmpty()) return
 
         val windowEndMeters = windowStartMeters + lookaheadMeters
+        val h = height.toFloat()
 
         for (climb in activeClimbs) {
             // Draw Mountain Gate at Start
@@ -721,21 +728,37 @@ class Altimetria3DView @JvmOverloads constructor(
                 val px = xFront[idx]
                 val pyTop = yFront[idx]
                 
-                val beaconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = Color.parseColor("#EAB308")
+                // Pin Type Icon (Inverted Triangle)
+                val pinPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = Color.WHITE
                     style = Paint.Style.FILL
-                    setShadowLayer(15f, 0f, 0f, Color.parseColor("#FDE047"))
+                    setShadowLayer(8f, 0f, 4f, Color.parseColor("#44000000"))
                 }
                 
-                canvas.drawCircle(px, pyTop - 40f, 15f, beaconPaint)
+                val pinPath = Path().apply {
+                    moveTo(px, pyTop - 6f) // Bottom point
+                    lineTo(px - 14f, pyTop - 36f) // Top left
+                    lineTo(px + 14f, pyTop - 36f) // Top right
+                    close()
+                }
                 
-                val summitTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                // Draw white circle inside triangle
+                val pinCirclePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = Color.parseColor("#EF4444")
+                    style = Paint.Style.FILL
+                }
+                
+                canvas.drawPath(pinPath, pinPaint)
+                canvas.drawCircle(px, pyTop - 25f, 6f, pinCirclePaint)
+                
+                val cotaPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                     color = Color.WHITE
-                    textSize = 22f
+                    textSize = (h * 0.050f).coerceIn(12f, 18f)
                     typeface = Typeface.DEFAULT_BOLD
                     textAlign = Paint.Align.CENTER
+                    setShadowLayer(4f, 0f, 2f, Color.BLACK)
                 }
-                canvas.drawText("SUMMIT", px, pyTop - 65f, summitTextPaint)
+                canvas.drawText("${climb.totalElevation.toInt()}m", px, pyTop - 45f, cotaPaint)
             }
         }
     }

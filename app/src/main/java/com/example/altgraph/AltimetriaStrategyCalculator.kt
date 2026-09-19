@@ -47,7 +47,9 @@ data class StrategyData(
     val subBlockSizeMeters: Double = 50.0,
     val majorBlockSizeMeters: Double = 100.0,
     val profileElevations: List<Float> = emptyList(),
-    val activeClimbs: List<RouteClimb> = emptyList()
+    val activeClimbs: List<RouteClimb> = emptyList(),
+    val visibleAvgGrade: Double = 0.0,
+    val visibleMaxGrade: Double = 0.0
 )
 
 class AltimetriaStrategyCalculator {
@@ -817,6 +819,50 @@ class AltimetriaStrategyCalculator {
             }
         }
 
+        // ── Cálculo de Pendiente Máxima y Media REAL del Tramo Visible ────────────────
+        val windowEndDist = windowStartDist + actualLookahead
+        val rawSource = if (routeElevationProfile.isNotEmpty()) routeElevationProfile else routePoints.map { ElevationPolylineDecoder.ElevationPoint(it.distance, it.elevation) }
+
+        var trueMaxGrade = 0.0
+        var visibleElevationGain = 0.0
+        var visibleAvgGrade = avgGradeRemaining // Fallback
+
+        if (rawSource.isNotEmpty()) {
+            var lastPt: ElevationPolylineDecoder.ElevationPoint? = null
+            var firstPt: ElevationPolylineDecoder.ElevationPoint? = null
+            var endPt: ElevationPolylineDecoder.ElevationPoint? = null
+
+            for (pt in rawSource) {
+                if (pt.distance < windowStartDist) {
+                    lastPt = pt
+                    continue
+                }
+                if (firstPt == null) firstPt = pt
+
+                if (lastPt != null) {
+                    val dDist = pt.distance - lastPt.distance
+                    if (dDist > 5.0) { // Ignorar distancias microscópicas para evitar ruido
+                        val grade = ((pt.elevation - lastPt.elevation) / dDist) * 100.0
+                        if (grade > trueMaxGrade) trueMaxGrade = grade
+                    }
+                }
+
+                lastPt = pt
+                endPt = pt
+
+                if (pt.distance > windowEndDist) {
+                    break
+                }
+            }
+            if (firstPt != null && endPt != null && endPt.distance > firstPt.distance) {
+                visibleElevationGain = (endPt.elevation - firstPt.elevation).coerceAtLeast(0.0)
+                val visibleDist = endPt.distance - firstPt.distance
+                if (visibleDist > 0) {
+                    visibleAvgGrade = (visibleElevationGain / visibleDist) * 100.0
+                }
+            }
+        }
+
         // 12. Filtrar puertos visibles en la ventana 3D actual
         val visibleClimbs = routeClimbs.filter { climb ->
             climb.startDistance < windowEndDist && climb.endDistance > windowStartDist
@@ -840,7 +886,9 @@ class AltimetriaStrategyCalculator {
             subBlockSizeMeters = subBlockSize,
             majorBlockSizeMeters = majorBlockSize,
             profileElevations = routeElevations,
-            activeClimbs = visibleClimbs
+            activeClimbs = visibleClimbs,
+            visibleAvgGrade = visibleAvgGrade,
+            visibleMaxGrade = trueMaxGrade
         )
     }
 

@@ -205,7 +205,7 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                 altimetriaView.updateStrategyData(
                     remainingDistance = strategy.remainingDistance,
                     timeToSummit = strategy.timeToSummit,
-                    avgGrade = strategy.avgGrade,
+                    avgGrade = strategy.visibleAvgGrade,
                     currentZoneColor = calculator.getZoneColor(calculator.currentElevation),
                     nextBlocks = strategy.nextBlocks,
                     attackAlert = strategy.attackAlert,

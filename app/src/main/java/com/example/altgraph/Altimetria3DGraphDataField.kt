@@ -313,7 +313,9 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     showBlockPercentages = prefs.showBlockPercentages,
                     altimetriaStyle = prefs.altimetriaStyle,
                     targetVam = prefs.targetVam,
-                    activeClimbs = strategy.activeClimbs
+                    activeClimbs = strategy.activeClimbs,
+                    visibleAvgGrade = strategy.visibleAvgGrade,
+                    visibleMaxGrade = strategy.visibleMaxGrade
                 )
 
                 if (cachedBitmap == null || cachedBitmap?.width != w || cachedBitmap?.height != h) {
