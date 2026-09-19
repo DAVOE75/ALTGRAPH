@@ -895,14 +895,21 @@ class Altimetria3DView @JvmOverloads constructor(
         // 5. DIVISORES DE BLOQUE MAYOR VERTICALES CON COTAS DE ALTITUD
         cotaTextPaint.textSize = ((h * 0.055f) * fontScale).coerceIn(12f, 18f)
         cotaTextPaint.color = Color.parseColor("#E2E8F0") // Más claro y visible
+        
+        val maxMajorIdx = if (majorElevations.isNotEmpty()) majorElevations.indices.maxByOrNull { majorElevations[it] } ?: -1 else -1
+        val minMajorIdx = if (majorElevations.isNotEmpty()) majorElevations.indices.minByOrNull { majorElevations[it] } ?: -1 else -1
+
         for (k in 0 until majorSamples) {
             val microIdx = (k * microSubDivisions).coerceAtMost(totalMicroSamples - 1)
             val px = xFront[microIdx]
             val pyTop = yFront[microIdx]
             val pyBase = yBase[microIdx]
 
-            // Se visualiza en TODAS las escalas, como se solicitó
-            if (showCotas) {
+            // A partir de 50km, mostrar solo los picos más altos y bajos
+            val isLargeScale = lookaheadMeters >= 50000
+            val shouldDrawCota = showCotas && (!isLargeScale || k == maxMajorIdx || k == minMajorIdx)
+
+            if (shouldDrawCota) {
                 // Línea vertical que sube un poco por encima del perfil
                 canvas.drawLine(px, pyTop - 12f, px, pyBase, cotaLinePaint)
                 
