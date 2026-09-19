@@ -63,6 +63,9 @@ class AltimetriaStrategyCalculator {
     var distanceFromBottom: Double = 0.0 // metros desde la base del climb
     var elevationFromBottom: Double = 0.0 // metros de desnivel desde la base
     var elevationRemaining: Double = 0.0 // desnivel restante total de la ruta
+    
+    // Distancia exacta reportada por Karoo en la ruta
+    var currentRouteDistance: Double = 0.0
 
     // GPX Elevation Profile Completo (SDK 1.1.7+)
     var routeElevationProfile: List<ElevationPolylineDecoder.ElevationPoint> = emptyList()
@@ -270,14 +273,15 @@ class AltimetriaStrategyCalculator {
         var accumulatedDist = 0.0
         val result = mutableListOf<RoutePoint>()
 
-        // First pass: compute accumulated distances
+        // First pass: compute accumulated distances using accurate Haversine/Android Location
         val rawDistances = DoubleArray(points.size)
+        val results = FloatArray(1)
         for (i in points.indices) {
             if (i > 0) {
                 val prev = points[i - 1]
                 val pt  = points[i]
-                val d = hypot(pt.first - prev.first, pt.second - prev.second) * 111000.0
-                accumulatedDist += d
+                android.location.Location.distanceBetween(prev.first, prev.second, pt.first, pt.second, results)
+                accumulatedDist += results[0]
             }
             rawDistances[i] = accumulatedDist
         }
@@ -469,19 +473,28 @@ class AltimetriaStrategyCalculator {
             )
         }
 
-        // MODO NAVEGANDO RUTA PRECARGADA (GPX / FIT):
-        // 1. Encuentra la posición GPS exacta del ciclista en el trazado de la ruta
+        // 1. Encuentra el índice más cercano para inicializar la ventana
         var nearestIndex = 0
-        var minDistance = Double.MAX_VALUE
-        routePoints.forEachIndexed { index, point ->
-            val dist = hypot(point.latitude - currentLatitude, point.longitude - currentLongitude)
-            if (dist < minDistance) {
-                minDistance = dist
-                nearestIndex = index
+        if (currentLatitude != 0.0 && currentLongitude != 0.0 && routePoints.isNotEmpty()) {
+            var minDistance = Double.MAX_VALUE
+            routePoints.forEachIndexed { index, point ->
+                val results = FloatArray(1)
+                android.location.Location.distanceBetween(point.latitude, point.longitude, currentLatitude, currentLongitude, results)
+                if (results[0] < minDistance) {
+                    minDistance = results[0].toDouble()
+                    nearestIndex = index
+                }
             }
         }
 
-        val currentRiderDistance = routePoints[nearestIndex].distance
+        // 1b. Usar la distancia en la ruta proporcionada por el Karoo, o calcularla si falla.
+        val currentRiderDistance = if (currentRouteDistance > 0.0) {
+            currentRouteDistance
+        } else if (routePoints.isNotEmpty()) {
+            routePoints[nearestIndex].distance
+        } else {
+            0.0
+        }
 
         // 2. Ventana deslizante en bloques cuánticos de 50 metros
         val quantumMeters = 50.0
