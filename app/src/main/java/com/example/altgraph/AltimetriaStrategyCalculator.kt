@@ -2,6 +2,8 @@ package com.example.altgraph
 
 import android.content.Context
 import io.hammerhead.karooext.models.Symbol
+import android.location.Location
+import android.util.Log
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.roundToInt
@@ -78,6 +80,10 @@ class AltimetriaStrategyCalculator {
 
     // GPX Elevation Profile Completo (SDK 1.1.7+)
     var routeElevationProfile: List<ElevationPolylineDecoder.ElevationPoint> = emptyList()
+
+    // Caches para evitar decodificación intensiva en cada emisión del SDK
+    private var lastRoutePolyline: String = ""
+    private var lastElevationPolyline: String = ""
 
     // Lista de puertos (climbs) de la ruta para marcar Mountain Gates en el 3D
     var routeClimbs: List<RouteClimb> = emptyList()
@@ -162,6 +168,10 @@ class AltimetriaStrategyCalculator {
     }
 
     fun getElevationAtDistance(dist: Double): Double {
+        if (routeElevationProfile.isNotEmpty()) {
+            return getTrueElevationAtDistance(dist)
+        }
+        
         if (routePoints.isEmpty()) return currentElevation
         if (dist <= routePoints.first().distance) return routePoints.first().elevation
         if (dist >= routePoints.last().distance) return routePoints.last().elevation
@@ -243,11 +253,18 @@ class AltimetriaStrategyCalculator {
     }
 
     fun setRouteElevationProfile(encoded: String?) {
+        val safeEncoded = encoded ?: ""
+        if (safeEncoded == lastElevationPolyline) return
+        lastElevationPolyline = safeEncoded
+        
+        Log.e("AltiCalc", "setRouteElevationProfile called, encoded length=${encoded?.length}")
         val result = ElevationPolylineDecoder.decodeSafe(encoded)
         if (result is ElevationPolylineDecoder.DecodeResult.Success) {
             this.routeElevationProfile = ElevationPolylineDecoder.smooth(result.points)
+            Log.e("AltiCalc", "Route elevation decoded successfully, points=${routeElevationProfile.size}")
             applyTrueElevationsToRoutePoints()
         } else {
+            Log.e("AltiCalc", "Route elevation decode failed!")
             this.routeElevationProfile = emptyList()
         }
     }
@@ -290,6 +307,9 @@ class AltimetriaStrategyCalculator {
     }
 
     fun setRouteFromPolyline(polyline: String) {
+        if (polyline == lastRoutePolyline) return
+        lastRoutePolyline = polyline
+        
         val points = decodePolyline(polyline)
         if (points.isEmpty()) {
             clearRoute()
@@ -425,6 +445,8 @@ class AltimetriaStrategyCalculator {
         this.distanceFromBottom = 0.0
         this.elevationFromBottom = 0.0
         this.elevationRemaining = 0.0
+        this.lastRoutePolyline = ""
+        this.lastElevationPolyline = ""
     }
 
     fun calculateStrategy(context: Context? = null): StrategyData {
