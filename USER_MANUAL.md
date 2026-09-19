@@ -1,4 +1,4 @@
-# 📖 Manual de Usuario - ALTGRAPH (v0.4.0 STABLE)
+# 📖 Manual de Usuario - ALTGRAPH (v0.4.1 STABLE)
 
 **ALTGRAPH** es una extensión avanzada de altimetría y análisis de rendimiento para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3), desarrollada por **David García Pascual**.
 
@@ -15,7 +15,7 @@
 ## 🇪🇸 ESPAÑOL
 
 ### 1. Instalación y Configuración
-1. Transfiere la APK `ALTGRAPH-v0.4.0.apk` a tu dispositivo Karoo mediante **ADB** (`adb install -r ALTGRAPH-v0.4.0.apk`).
+1. Transfiere la APK `ALTGRAPH-v0.4.1.apk` a tu dispositivo Karoo mediante **ADB** (`adb install -r ALTGRAPH-v0.4.1.apk`).
 2. En tu Karoo, entra en **Ajustes > Perfiles de Carrera** y selecciona el perfil donde quieras incluir los campos.
 3. Edita una página de datos, pulsa en **Añadir Campo** y selecciona la categoría **ALTGRAPH**.
 
@@ -56,7 +56,7 @@ Al abrir **ALTGRAPH** desde el menú de aplicaciones de tu Karoo 3, dispones de 
   - **VAM Objetivo (m/h)**: Ajuste desde 500 m/h hasta 2000 m/h.
   - **Tipo / Calidad de Asfalto (TA)**: Muy Bueno (0.1), Bueno (0.5), Regular (1.2), Malo / Gravilla (1.7).
 
-### 3. Campos de Datos Disponibles (v0.4.0)
+### 3. Campos de Datos Disponibles (v0.4.1)
 
 #### 🏔️ 1. Altimetría 3D (`3D Altimetry`)
 - **Descripción**: Perfil 3D avanzado con selector de 5 estilos (Clásico, Horizonte Iso, Oasis Tácticos, Campo Fuerza, Monolito Obsidiana). Incorpora ventana rodante cuántica de 50m, progresión física del ciclista por la cresta, resolución adaptativa multiescala (50m a 10km), escala monocromática suave de 15 tramos del 0 al 15% (blanco a rojo), cotas de altitud nítidas, cápsulas oscuras de alto contraste para %, lectura triple en encabezado (**Pendiente Actual**, **Pendiente Media del tramo** y **Pendiente Máxima**), marcas de herraduras, hitos POI y zoom táctil en pantalla.
@@ -79,7 +79,7 @@ Al abrir **ALTGRAPH** desde el menú de aplicaciones de tu Karoo 3, dispones de 
 ## 🇬🇧 ENGLISH
 
 ### 1. Installation & Setup
-1. Transfer `ALTGRAPH-v0.4.0.apk` to your Karoo device via **ADB** (`adb install -r ALTGRAPH-v0.4.0.apk`).
+1. Transfer `ALTGRAPH-v0.4.1.apk` to your Karoo device via **ADB** (`adb install -r ALTGRAPH-v0.4.1.apk`).
 2. On your Karoo, go to **Settings > Ride Profiles** and edit your preferred profile.
 3. Add a new Data Field and select the **ALTGRAPH** category.
 
@@ -102,7 +102,7 @@ Open **ALTGRAPH** from your Karoo app launcher to navigate 4 structured tabs:
 * **📊 2D Tab**: Profile Block Distance, Visible Blocks, Attack Alert Threshold.
 * **🚴 VAM Tab**: Target VAM, Asphalt Quality Factor.
 
-### 3. Available Data Fields (v0.4.0)
+### 3. Available Data Fields (v0.4.1)
 
 #### 🏔️ 1. 3D Altimetry
 - **Description**: Next-generation 3D elevation profile with 5 selectable visualization models, 50m quantum rolling window, physical beacon climbing along top edge, adaptive multi-scale resolution, 15-step monochromatic gradient, high-contrast badges, triple header telemetry, GPS hairpins, POIs, and touch zoom.
@@ -120,3 +120,37 @@ Open **ALTGRAPH** from your Karoo app launcher to navigate 4 structured tabs:
 #### 📈 5. 3D Gradient Trend & Max Ramp
 - **Description**: Predicts slope changes (↗️ Steepening, ➔ Steady, ↘️ Easing) and tracks peak % ramp.
 
+
+
+---
+## 🆕 What's new in v0.4.1 / Novedades v0.4.1
+
+### 🇪🇸 ESPAÑOL
+- **Precisión Algorítmica Dinámica**: La Pendiente Media y la Rampa Máxima ahora se calculan analizando el relieve metro a metro en alta resolución (ignorando el suavizado de los bloques visuales) y se acotan estrictamente a la distancia que tengas en pantalla (200m, 5km, 100km...).
+- **Cálculo de Pendiente Media Real**: La media del puerto ahora descarta automáticamente las bajadas y llaneos, haciendo el promedio matemático de esfuerzo puramente de las secciones de subida.
+- **Grado de Fatiga (GF) y VAM Desligados del Zoom**: El motor científico de APM ya no sufre de "dilución de pendiente" al alejar el zoom. Evalúa la dureza real sobre los puntos brutos de la telemetría, ofreciendo resultados perfectos independientemente de tu configuración de escala.
+- **Iconos de Cumbre (Map-Pin)**: Las antiguas balizas circulares se han sustituido por un icono profesional de chincheta topográfica blanca con el núcleo rojo para marcar los puertos oficiales.
+
+### 🇬🇧 ENGLISH
+- **Dynamic Algorithmic Precision**: Average Slope and Max Ramp are now calculated point-by-point in high resolution (ignoring visual block smoothing) and are strictly bounded to your current viewport distance (200m, 5km, 100km...).
+- **True Average Grade Calculation**: The climb's average grade now automatically discards descents and flats, mathematically averaging the effort only on pure ascending sections.
+- **Zoom-Independent Fatigue Grade (GF) & VAM**: The scientific APM engine no longer suffers from "slope dilution" when zooming out. It evaluates true hardness on raw telemetry points, providing perfect results regardless of your scale setting.
+- **Map-Pin Summit Icons**: The old circular beacons have been replaced by a professional white topographic map-pin icon with a red core to mark official climbs.
+
+### 🇫🇷 FRANÇAIS
+- **Précision Algorithmique Dynamique** : La pente moyenne et la rampe maximale sont désormais calculées point par point en haute résolution (ignorant le lissage visuel) et sont strictement limitées à la distance affichée à l'écran (200m, 5km, 100km...).
+- **Calcul de la Pente Moyenne Réelle** : La moyenne de l'ascension écarte automatiquement les descentes et les plats, calculant mathématiquement l'effort uniquement sur les sections montantes pures.
+- **Indice de Fatigue (GF) et VAM Indépendants du Zoom** : Le moteur scientifique APM ne souffre plus de "dilution de la pente" lors du dézoom. Il évalue la véritable dureté sur les points de télémétrie bruts, offrant des résultats parfaits quelle que soit votre échelle.
+- **Icônes de Sommet (Map-Pin)** : Les anciennes balises circulaires ont été remplacées par une icône professionnelle d'épingle topographique blanche avec un cœur rouge pour marquer les cols officiels.
+
+### 🇮🇹 ITALIANO
+- **Precisione Algoritmica Dinamica**: La pendenza media e la rampa massima sono ora calcolate punto per punto in alta risoluzione (ignorando l'arrotondamento visivo) e sono strettamente limitate alla distanza dello schermo (200m, 5km, 100km...).
+- **Calcolo della Pendenza Media Reale**: La media della salita ora scarta automaticamente le discese e le parti in piano, calcolando matematicamente lo sforzo puramente delle sezioni di salita.
+- **Grado di Fatica (GF) e VAM Indipendenti dallo Zoom**: Il motore scientifico APM non soffre più della "diluizione della pendenza" quando si rimpicciolisce. Valuta la vera durezza sui punti grezzi della telemetria, offrendo risultati perfetti indipendentemente dall'impostazione della scala.
+- **Icone Vetta (Map-Pin)**: I vecchi fari circolari sono stati sostituiti da un'icona professionale a forma di spillo topografico bianco con nucleo rosso per segnare le salite ufficiali.
+
+### 🇩🇪 DEUTSCH
+- **Dynamische algorithmische Präzision**: Durchschnittliche Steigung und maximale Rampe werden nun Punkt für Punkt in hoher Auflösung berechnet (visuelle Glättung wird ignoriert) und sind streng an die aktuelle Bildschirmdistanz gebunden (200m, 5km, 100km...).
+- **Echte Durchschnittssteigung**: Die Durchschnittssteigung des Anstiegs verwirft nun automatisch Abfahrten und flache Stücke und berechnet die mathematische Anstrengung nur auf reinen Steigungsabschnitten.
+- **Zoom-unabhängiger Ermüdungsgrad (GF) & VAM**: Die wissenschaftliche APM-Engine leidet nicht mehr unter "Steigungsverdünnung" beim Herauszoomen. Sie bewertet die wahre Härte anhand der rohen Telemetriedaten und liefert unabhängig von der Skalierung perfekte Ergebnisse.
+- **Karten-Pin Gipfelsymbole**: Die alten kreisförmigen Leuchtfeuer wurden durch ein professionelles weißes topografisches Karten-Pin-Symbol mit rotem Kern ersetzt, um offizielle Anstiege zu markieren.
