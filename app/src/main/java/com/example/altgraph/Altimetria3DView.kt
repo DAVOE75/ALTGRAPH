@@ -625,7 +625,7 @@ class Altimetria3DView @JvmOverloads constructor(
         val liveGradeText = "%.1f%%".format(currentGrade)
         liveGradePaint.textSize = ((h * 0.26f) * fontScale).coerceIn(44f, 82f) // Tamaño intermedio grande
         liveGradePaint.color = GradeColorScale.getTelemetryColor(currentGrade)
-        canvas.drawText(liveGradeText, col1X, h * 0.33f, liveGradePaint) // Pegado más arriba
+        canvas.drawText(liveGradeText, col1X, h * 0.28f, liveGradePaint) // Pegado MÁS arriba
 
         // COLUMNA 2: PENDIENTE MEDIA DEL TRAMO VISIBLE
         val tramoAvgGrade = if (visibleAvgGrade > 0.0) visibleAvgGrade else (if (subBlocks.isNotEmpty()) subBlocks.average() else (if (nextBlocks.isNotEmpty()) nextBlocks.average() else currentGrade))
@@ -635,7 +635,7 @@ class Altimetria3DView @JvmOverloads constructor(
         val avgGradeText = "%.1f%%".format(tramoAvgGrade)
         liveGradePaint.textSize = ((h * 0.18f) * fontScale).coerceIn(30f, 56f) // Tamaño intermedio grande
         liveGradePaint.color = GradeColorScale.getTelemetryColor(tramoAvgGrade)
-        canvas.drawText(avgGradeText, col2X, h * 0.30f, liveGradePaint) // Pegado más arriba
+        canvas.drawText(avgGradeText, col2X, h * 0.26f, liveGradePaint) // Pegado MÁS arriba
 
         // COLUMNA 3: PENDIENTE MÁXIMA DEL TRAMO VISIBLE
         if (showMaxGrade) {
@@ -646,7 +646,7 @@ class Altimetria3DView @JvmOverloads constructor(
             val maxGradeText = "%.1f%%".format(tramoMaxGrade)
             maxGradePaint.textSize = ((h * 0.18f) * fontScale).coerceIn(30f, 56f) // Tamaño intermedio grande
             maxGradePaint.color = GradeColorScale.getTelemetryColor(tramoMaxGrade)
-            canvas.drawText(maxGradeText, col3X, h * 0.30f, maxGradePaint)
+            canvas.drawText(maxGradeText, col3X, h * 0.26f, maxGradePaint) // Pegado MÁS arriba
         }
 
         // 3. Botones Minimalistas de Zoom [ - | + ]
