@@ -703,11 +703,6 @@ class AltimetriaStrategyCalculator {
 
             routeSubBlocks.add(grade.toFloat())
             routeElevations.add(sElevEnd.toFloat())
-
-            val distanceKm = sDist / 1000.0
-            if (grade > maxRampPct) maxRampPct = grade
-            accumulatedHardness += FatigueGradeCalculator.calculateSegmentHardness(grade, distanceKm)
-            if (attackAlertsEnabled && grade > thresholdAttack) attack = true
         }
 
         // Construcción de bloques mayores para telemetría y rótulos
@@ -731,13 +726,6 @@ class AltimetriaStrategyCalculator {
             routeMajorBlocks.add(mGrade.toFloat())
         }
 
-        val totalGf = FatigueGradeCalculator.calculateTotalFatigueGrade(
-            totalHardness = accumulatedHardness,
-            asphaltFactor = asphaltFactor,
-            maxRampPct = maxRampPct
-        ).roundToInt()
-
-        ClimbStateManager.updateApm(totalGf)
 
         val visibleHairpins = absoluteHairpins
             .map { it - windowStartDist }
@@ -825,6 +813,9 @@ class AltimetriaStrategyCalculator {
         var trueMaxGrade = 0.0
         var visibleElevationGain = 0.0
         var visibleAvgGrade = avgGradeRemaining // Fallback
+        
+        var trueAccumulatedHardness = 0.0
+        var attackAlert = false
 
         if (rawSource.isNotEmpty()) {
             var lastPt: ElevationPolylineDecoder.ElevationPoint? = null
@@ -848,6 +839,11 @@ class AltimetriaStrategyCalculator {
                         val grade = (dElev / dDist) * 100.0
                         if (grade > trueMaxGrade) trueMaxGrade = grade
                         
+                        if (grade > 0.0) {
+                            trueAccumulatedHardness += FatigueGradeCalculator.calculateSegmentHardness(grade, dDist / 1000.0)
+                        }
+                        if (attackAlertsEnabled && grade > thresholdAttack) attackAlert = true
+                        
                         if (dElev > 0.0) {
                             totalAscent += dElev
                             ascentDistance += dDist
@@ -870,6 +866,14 @@ class AltimetriaStrategyCalculator {
             }
         }
 
+        val totalGf = FatigueGradeCalculator.calculateTotalFatigueGrade(
+            totalHardness = trueAccumulatedHardness,
+            asphaltFactor = asphaltFactor,
+            maxRampPct = trueMaxGrade
+        ).roundToInt()
+
+        ClimbStateManager.updateApm(totalGf)
+
         // 12. Filtrar puertos visibles en la ventana 3D actual
         val visibleClimbs = routeClimbs.filter { climb ->
             climb.startDistance < windowEndDist && climb.endDistance > windowStartDist
@@ -880,7 +884,7 @@ class AltimetriaStrategyCalculator {
             timeToSummit = secondsRemaining,
             avgGrade = avgGradeRemaining,
             nextBlocks = routeMajorBlocks,
-            attackAlert = attack,
+            attackAlert = attackAlert,
             blockSizeMeters = majorBlockSize,
             totalFatigueGrade = totalGf,
             hairpins = visibleHairpins,
