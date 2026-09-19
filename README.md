@@ -89,7 +89,14 @@ ALTGRAPH no sustituye el Climber nativo, sino que lo complementa ofreciendo una 
 
 ## ⚙️ Características y Funciones en Detalle
 
-- **Panel Táctico (Dashboard)**: Incorpora campos de datos exclusivos de la extensión para añadirlos libremente a tus pantallas: *Estratega de Altimetría*, *Grado de Fatiga (GF)*, *Ritmo VAM Objetivo* y *Tendencia 3D*.
+### 📈 Campos de Datos Exclusivos (Dashboard Táctico)
+Además del motor gráfico, ALTGRAPH expone métricas avanzadas como campos individuales para que diseñes tu pantalla perfecta:
+- **🧠 Estratega de Altimetría**: Muestra un bloque visual inteligente con el resumen de los próximos kilómetros. Divide el horizonte en tramos de color para que sepas de un vistazo rápido si lo que viene es puerto duro (rojo), descanso (verde) o terreno rompepiernas.
+- **⚡ Grado de Fatiga (GF)**: Motor científico basado en el coeficiente APM que evalúa la dureza real del puerto en vivo, mostrándote un coeficiente numérico de desgaste.
+- **🚀 Ritmo VAM Objetivo**: Define tu VAM (Velocidad Ascensional Media) ideal en la configuración. Este campo calcula la pendiente exacta bajo tus ruedas y te dicta a qué **velocidad (km/h)** debes rodar en ese instante para cumplir tu objetivo en la cima.
+- **📐 Tendencia 3D y Rampa Máxima**: Te avisa de si la pendiente se está endureciendo o suavizando antes de que tus piernas lo noten.
+
+### 🗺️ Navegación y Topografía Avanzada
 - **Iconos Topográficos Oficiales**: Identificación de Cimas, Puertos de Montaña (Map-Pin), Pueblos y Fuentes extraídos directamente de la ruta o del relieve.
 - **Detección Matemática de Curvas**: El algoritmo detecta giros cerrados (tornanti/herraduras) y te avisa gráficamente.
 - **Cálculo Topográfico Puro**: Opcionalmente, puedes calcular las distancias en base a proyección horizontal para un rigor absoluto en puertos extremos de alta montaña.
