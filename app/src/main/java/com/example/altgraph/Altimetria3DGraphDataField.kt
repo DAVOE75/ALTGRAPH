@@ -115,6 +115,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                         if (state is OnNavigationState.NavigationState.NavigatingRoute) {
                             Log.d(TAG, "NAV: ruta='${state.name}' dist=${state.routeDistance}m pois=${state.pois.size}")
                             calculator.isNavigatingRoute = true
+                            calculator.activeRouteName = state.name
                             calculator.fallbackRemainingDistance = state.routeDistance
                             calculator.setRouteFromPolyline(state.routePolyline)
                             
@@ -315,7 +316,8 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     targetVam = prefs.targetVam,
                     activeClimbs = strategy.activeClimbs,
                     visibleAvgGrade = strategy.visibleAvgGrade,
-                    visibleMaxGrade = strategy.visibleMaxGrade
+                    visibleMaxGrade = strategy.visibleMaxGrade,
+                    routeName = strategy.routeName
                 )
 
                 if (cachedBitmap == null || cachedBitmap?.width != w || cachedBitmap?.height != h) {

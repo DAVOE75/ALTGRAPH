@@ -379,6 +379,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private var panOffsetX: Float = 0.0f
     private var isDragging: Boolean = false
     private var lastTouchX: Float = 0.0f
+    private var routeName: String? = null
 
     private val ribbonQuadPath = Path()
     private val wallPath = Path()
@@ -424,7 +425,8 @@ class Altimetria3DView @JvmOverloads constructor(
         targetVam: Int = 900,
         activeClimbs: List<RouteClimb> = emptyList(),
         visibleAvgGrade: Double = 0.0,
-        visibleMaxGrade: Double = 0.0
+        visibleMaxGrade: Double = 0.0,
+        routeName: String? = null
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -466,6 +468,7 @@ class Altimetria3DView @JvmOverloads constructor(
         if (profileElevations.isNotEmpty()) {
             this.profileElevations = profileElevations
         }
+        this.routeName = routeName
 
         FontHelper.applyFontToPaint(titlePaint, fontFamilyKey)
         FontHelper.applyFontToPaint(subTitleLabelPaint, fontFamilyKey)
@@ -604,7 +607,8 @@ class Altimetria3DView @JvmOverloads constructor(
         canvas.drawRect(0f, 0f, w, h, bgPaint)
 
         // 2. Encabezado Título ("Altimetría 3D")
-        val titleText = context.getString(R.string.data_type_altimetria_3d_title)
+        val baseTitle = context.getString(R.string.data_type_altimetria_3d_title)
+        val titleText = if (!routeName.isNullOrEmpty()) "$baseTitle - $routeName" else baseTitle
         titlePaint.textSize = ((h * 0.080f) * fontScale).coerceIn(16f, 28f)
         canvas.drawText(titleText, 18f, h * 0.07f, titlePaint)
 

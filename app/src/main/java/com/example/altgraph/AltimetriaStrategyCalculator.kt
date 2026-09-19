@@ -49,7 +49,8 @@ data class StrategyData(
     val profileElevations: List<Float> = emptyList(),
     val activeClimbs: List<RouteClimb> = emptyList(),
     val visibleAvgGrade: Double = 0.0,
-    val visibleMaxGrade: Double = 0.0
+    val visibleMaxGrade: Double = 0.0,
+    val routeName: String? = null
 )
 
 class AltimetriaStrategyCalculator {
@@ -61,6 +62,7 @@ class AltimetriaStrategyCalculator {
 
     var nearestIndex = 0
     var isNavigatingRoute = false
+    var activeRouteName: String? = null
     var routePoints: List<RoutePoint> = emptyList()
 
     // Historial y buffer de altitud barométrica instantánea en tiempo real
@@ -324,6 +326,8 @@ class AltimetriaStrategyCalculator {
         val points = decodePolyline(polyline)
         if (points.isEmpty()) {
             routePoints = emptyList()
+            activeRouteName = null
+            lastRoutePolyline = ""
             return
         }
 
@@ -450,6 +454,7 @@ class AltimetriaStrategyCalculator {
         this.absoluteHairpins.clear()
         this.routePois.clear()
         this.isNavigatingRoute = false
+        this.activeRouteName = null
         // Resetear datos del climb al salir de la navegación
         this.distanceToTop = 0.0
         this.elevationToTop = 0.0
@@ -535,7 +540,8 @@ class AltimetriaStrategyCalculator {
                 subBlockSizeMeters = subBlockSize,
                 majorBlockSizeMeters = majorBlockSize,
                 profileElevations = freeElevations,
-                activeClimbs = emptyList()
+                activeClimbs = emptyList(),
+                routeName = activeRouteName
             )
         }
 
