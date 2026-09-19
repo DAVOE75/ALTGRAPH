@@ -17,13 +17,13 @@ object GradeColorScale {
      */
     fun getColorHex(grade: Double): String {
         return when {
-            grade < 0.0 -> "#E5E7EB" // Gris claro tirando a blanco
-            grade < 3.0 -> "#65A30D" // Verde
-            grade < 5.0 -> "#FACC15" // Amarillo
-            grade < 8.0 -> "#F97316" // Naranja
-            grade < 10.0 -> "#78350F" // Marrón oscuro
-            grade < 13.0 -> "#DC2626" // Rojo
-            grade <= 17.0 -> "#7F1D1D" // Granate
+            grade < 0.0 -> "#F3F4F6" // Gris claro casi blanco
+            grade < 3.0 -> "#16A34A" // Verde intenso
+            grade < 5.0 -> "#FFD600" // Amarillo vivo
+            grade < 8.0 -> "#FF6D00" // Naranja intenso
+            grade < 10.0 -> "#8B4513" // Marrón fuerte (SaddleBrown)
+            grade < 13.0 -> "#D50000" // Rojo puro intenso
+            grade <= 17.0 -> "#800000" // Granate oscuro
             else -> "#000000"        // Negro (> 17%)
         }
     }
