@@ -319,7 +319,7 @@ class AltimetriaStrategyCalculator {
         
         val points = decodePolyline(polyline)
         if (points.isEmpty()) {
-            clearRoute()
+            routePoints = emptyList()
             return
         }
 
@@ -562,13 +562,11 @@ class AltimetriaStrategyCalculator {
             }
         }
 
-        // 1b. Usar el índice más cercano para determinar la distancia del ciclista
-        val currentRiderDistance = if (routePoints.isNotEmpty()) {
-            routePoints[nearestIndex].distance
-        } else {
-            val totalLength = routeElevationProfile.lastOrNull()?.distance ?: 0.0
-            (totalLength - fallbackRemainingDistance).coerceAtLeast(0.0)
-        }
+        // 1. Usar la distancia restante reportada por el Karoo para un seguimiento perfecto
+        // Esto evita los problemas de 'snapping' en rutas circulares o con cruces, ya que Karoo
+        // sabe exactamente en qué punto de la ruta estamos navegando.
+        val totalLength = routeElevationProfile.lastOrNull()?.distance ?: (routePoints.lastOrNull()?.distance ?: 0.0)
+        val currentRiderDistance = (totalLength - fallbackRemainingDistance).coerceAtLeast(0.0)
 
         // 2. Ventana deslizante en bloques cuánticos de 50 metros
         val quantumMeters = 50.0
