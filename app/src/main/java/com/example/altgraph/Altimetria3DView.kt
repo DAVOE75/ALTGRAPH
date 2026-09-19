@@ -873,9 +873,9 @@ class Altimetria3DView @JvmOverloads constructor(
             val pyTop = yFront[microIdx]
             val pyBase = yBase[microIdx]
 
-            canvas.drawLine(px, pyTop, px, pyBase, cotaLinePaint)
-
-            if (showCotas) {
+            // Ocultar cotas a partir de 50km para limpiar el gráfico
+            if (showCotas && lookaheadMeters < 50000) {
+                canvas.drawLine(px, pyTop, px, pyBase, cotaLinePaint)
                 val cotaText = "${majorElevations[k].toInt()} m"
                 canvas.save()
                 val textOffsetX = if (k == 0) px + 8f else px - 5f
