@@ -136,11 +136,12 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                             calculator.fallbackRemainingDistance = state.routeDistance
                             
                         } else if (state is OnNavigationState.NavigationState.NavigatingToDestination) {
-                            Log.d(TAG, "NAV: Destino dinámico detectado, dist=${state.destinationDistance}m")
+                            val dist = (state.javaClass.methods.find { it.name == "getDestinationDistance" || it.name == "getDistance" }?.invoke(state) as? Double) ?: 0.0
+                            Log.d(TAG, "NAV: Destino dinámico detectado, dist=${dist}m")
                             calculator.isNavigatingRoute = true
                             // Rutas a destino no suelen tener routePolyline, pero sí elevationPolyline
                             calculator.setRouteElevationProfile(state.elevationPolyline)
-                            calculator.fallbackRemainingDistance = state.destinationDistance
+                            calculator.fallbackRemainingDistance = dist
                             
                         } else {
                             if (state.javaClass.simpleName == "Idle") {
