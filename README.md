@@ -38,13 +38,13 @@ Permite al ciclista elegir entre 5 formas visuales de interpretar la montaña de
 5. **💎 Monolito de Obsidiana y Plasma (`Monolito`)**: Montaña esculpida en cristal de obsidiana facetado oscuro (`#151D2C` a `#04070D`), faceta superior 3D en cristal pulido, núcleo interior de plasma radiante y cresta superior en haz láser blanco con resplandor neón celeste.
 
 ### 🎨 Escala de Gradientes Intensa de Alta Visibilidad
-* **$< 0.0\%$**: Gris claro casi blanco `#F3F4F6` (Descensos y llaneos).
-* **$0.0\%$ a $3.0\%$**: Verde intenso `#16A34A`.
-* **$3.0\%$ a $5.0\%$**: Amarillo vivo `#FFD600`.
-* **$5.0\%$ a $8.0\%$**: Naranja intenso `#FF6D00`.
-* **$8.0\%$ a $10.0\%$**: Marrón fuerte `#8B4513`.
-* **$10.0\%$ a $13.0\%$**: Rojo puro intenso `#D50000`.
-* **$13.0\%$ a $17.0\%$**: Granate oscuro `#800000`.
+* **$< 0.0\%$**: Blanco puro `#FFFFFF` (Descensos y llaneos).
+* **$0.0\%$ a $3.0\%$**: Verde puro flúor `#00FF00`.
+* **$3.0\%$ a $5.0\%$**: Amarillo puro flúor `#FFFF00`.
+* **$5.0\%$ a $8.0\%$**: Naranja puro eléctrico `#FF6600`.
+* **$8.0\%$ a $10.0\%$**: Marrón puro intenso `#964B00`.
+* **$10.0\%$ a $13.0\%$**: Rojo puro sangre `#FF0000`.
+* **$13.0\%$ a $17.0\%$**: Granate rojo oscuro `#8B0000`.
 * **$> 17.0\%$**: Negro azabache `#000000`.
 
 ### 🔄 Ventana Rodante Cuántica de 50m y Avance Físico
