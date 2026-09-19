@@ -67,7 +67,6 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                         val state = navEvent.state
                         if (state is OnNavigationState.NavigationState.NavigatingRoute) {
                             calculator.isNavigatingRoute = true
-                            calculator.routeProgressDistance = (state.routeDistance - state.destinationDistance).coerceAtLeast(0.0)
                             calculator.setRouteFromPolyline(state.routePolyline)
                             calculator.setRoutePois(state.pois)
 
