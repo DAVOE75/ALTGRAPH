@@ -57,6 +57,7 @@ class AltimetriaStrategyCalculator {
     var currentSpeed = 0.0
     var currentElevation = 350.0
 
+    var nearestIndex = 0
     var isNavigatingRoute = false
     var routePoints: List<RoutePoint> = emptyList()
 
