@@ -2048,23 +2048,26 @@ class Altimetria3DView @JvmOverloads constructor(
 
     private fun drawIsoLegend(canvas: Canvas, w: Float, h: Float) {
         val paint = Paint().apply { style = Paint.Style.FILL }
-        val textPaint = Paint().apply { color = Color.WHITE; textSize = 14f * fontScale; isAntiAlias = true }
-        val legendX = w * 0.5f
+        val textPaint = Paint().apply { color = Color.WHITE; textSize = 11f * fontScale; isAntiAlias = true }
+        val legendX = w * 0.05f
         val legendY = h * 0.82f
-        val grades = listOf(0.0, 5.0, 9.0, 13.0, 18.0)
-        val labels = listOf("0%-4%", "4%-8%", "8%-10%", "10%-15%", "15%+")
+        val grades = listOf(-1.0, 1.0, 4.0, 6.0, 9.0, 11.0, 14.0, 18.0)
+        val labels = listOf("<0%", "0-3%", "3-5%", "5-8%", "8-10%", "10-13%", "13-17%", "17%+")
         
-        canvas.drawText("Pendiente Media", legendX, legendY - 20f, textPaint)
+        val titlePaint = Paint().apply { color = Color.WHITE; textSize = 13f * fontScale; typeface = Typeface.DEFAULT_BOLD; isAntiAlias = true }
+        canvas.drawText("Pendiente Media", legendX, legendY - 10f, titlePaint)
         
         var currentX = legendX
         grades.forEachIndexed { idx, grade ->
             paint.color = android.graphics.Color.parseColor(com.example.altgraph.GradeColorScale.getColorHex(grade))
-            val boxWidth = 35f
+            val boxWidth = 24f
             val labelW = textPaint.measureText(labels[idx])
-            val spacing = maxOf(labelW, boxWidth) + 12f
+            val spacing = maxOf(labelW, boxWidth) + 10f
             
-            canvas.drawRect(currentX, legendY, currentX + boxWidth, legendY + 15f, paint)
-            canvas.drawText(labels[idx], currentX, legendY + 32f, textPaint)
+            canvas.drawRect(currentX, legendY, currentX + boxWidth, legendY + 10f, paint)
+            // Center text under box
+            val textX = currentX + (boxWidth / 2f) - (labelW / 2f)
+            canvas.drawText(labels[idx], textX, legendY + 24f, textPaint)
             currentX += spacing
         }
     }
