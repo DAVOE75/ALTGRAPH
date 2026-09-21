@@ -24,10 +24,6 @@ It revolutionizes the traditional concept of cycling altimetry by incorporating 
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_especial.png" width="220" alt="🏔️ Climb Viewer - HC (Especial)" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_iso.png" width="220" alt="🏔️ Climb Viewer (Isometric)" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps.png" width="220" alt="🗺️ GPS Isometric (Global)" /> |
 
-| 🗺️ GPS Isometric (1km) | 🗺️ GPS Isometric (200m) | |
-| :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps_1km.png" width="220" alt="🗺️ GPS Isometric (1km)" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps_200m.png" width="220" alt="🗺️ GPS Isometric (200m)" /> | |
-
 
 ---
 ## 🌐 Official Web Portal & Multi-language Support

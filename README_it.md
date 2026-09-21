@@ -25,10 +25,6 @@ Rivoluziona il concetto tradizionale di altimetria ciclistica integrando una **S
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_especial.png" width="220" alt="🏔️ Visualizzatore - HC" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_iso.png" width="220" alt="🏔️ Visualizzatore (Isometrico)" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps.png" width="220" alt="🗺️ GPS Isometrico (Globale)" /> |
 
-| 🗺️ GPS Isometrico (1km) | 🗺️ GPS Isometrico (200m) | |
-| :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps_1km.png" width="220" alt="🗺️ GPS Isometrico (1km)" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps_200m.png" width="220" alt="🗺️ GPS Isometrico (200m)" /> | |
-
 ## 🆚 ALTGRAPH vs Climber Nativo di Karoo
 ALTGRAPH non sostituisce il Climber nativo, ma lo integra offrendo una **vista grafica completa** e personalizzabile. Le differenze principali sono:
 - **Risoluzione Adattiva e Rendering Continuo**: Il profilo avanza fisicamente in finestre scorrevoli di 50m. Le barre non "saltano" staticamente, ma scorrono verso di te al ritmo della tua pedalata.

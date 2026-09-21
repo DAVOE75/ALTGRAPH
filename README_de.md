@@ -25,10 +25,6 @@ Es revolutioniert das traditionelle Konzept der Radsport-Höhenmessung durch die
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_especial.png" width="220" alt="🏔️ Anstiegsbetrachter - HC" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_iso.png" width="220" alt="🏔️ Anstiegsbetrachter (Isometrisch)" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps.png" width="220" alt="🗺️ GPS Isometrisch (Global)" /> |
 
-| 🗺️ GPS Isometrisch (1km) | 🗺️ GPS Isometrisch (200m) | |
-| :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps_1km.png" width="220" alt="🗺️ GPS Isometrisch (1km)" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps_200m.png" width="220" alt="🗺️ GPS Isometrisch (200m)" /> | |
-
 ## 🆚 ALTGRAPH vs Nativer Karoo Climber
 ALTGRAPH ersetzt den nativen Climber nicht, sondern ergänzt ihn durch eine **umfassende grafische Ansicht**. Die Hauptunterschiede sind:
 - **Adaptive Auflösung & kontinuierliches Rendering**: Das Profil bewegt sich physisch in 50-m-Fenstern vorwärts. Die Balken "springen" nicht statisch, sondern fließen im Rhythmus Ihrer Trittfrequenz.
