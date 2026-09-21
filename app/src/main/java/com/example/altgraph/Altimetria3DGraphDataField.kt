@@ -325,7 +325,8 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     activeClimbs = strategy.activeClimbs,
                     visibleAvgGrade = strategy.visibleAvgGrade,
                     visibleMaxGrade = strategy.visibleMaxGrade,
-                    routeName = strategy.routeName
+                    routeName = strategy.routeName,
+                    routeCoords = strategy.routeCoords
                 )
 
                 if (cachedBitmap == null || cachedBitmap?.width != w || cachedBitmap?.height != h) {

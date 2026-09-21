@@ -472,11 +472,13 @@ class Altimetria3DView @JvmOverloads constructor(
         visibleMaxGrade: Double = 0.0,
         routeName: String? = null,
         customTitle: String? = null,
-        showHeaderStats: Boolean = true
+        showHeaderStats: Boolean = true,
+        routeCoords: List<Pair<Double, Double>> = emptyList()
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
         }
+        this.routeCoords = routeCoords
         if (elevation > 0) {
             this.currentElevation = elevation
         }

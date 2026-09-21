@@ -285,7 +285,8 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                         visibleMaxGrade = strategy.visibleMaxGrade,
                         routeName = "",
                         customTitle = "",
-                        showHeaderStats = false
+                        showHeaderStats = false,
+                        routeCoords = strategy.routeCoords
                     )
                     
                     altimetria3DView.draw(currentCanvas)

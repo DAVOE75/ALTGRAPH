@@ -40,8 +40,8 @@ Visit the **[ALTGRAPH Official Web Portal (davoe75.github.io/ALTGRAPH)](https://
 
 ## 🚀 Features & Highlights (v0.4.1 Stable)
 
-### 🌟 Suite of 5 Revolutionary Altimetry Models (Switchable on the fly)
-Allows the cyclist to choose between 5 visual ways to interpret the mountain from the top card of the **🎨 Style** tab:
+### 🌟 Suite of 6 Revolutionary Altimetry Models (Switchable on the fly)
+Allows the cyclist to choose between 6 visual ways to interpret the mountain from the top card of the **🎨 Style** tab:
 1. **🏔️ Classic 3D (Default)**: Professional profile with a subtle 3D bevel, smooth monochromatic gradient from 0 to 15%, rotated altitude markers, and high-contrast dark capsules with crisp typography for percentages.
 2. **🌅 Isometric Horizon (`Horizonte Iso`)**: Deep cockpit perspective projecting towards the horizon, a dashed central runway-style lane, and a **dynamic front light beam** that tilts according to the physical slope of the imminent ramp.
 3. **❄️ Oasis and Tactical Crucibles (`Oasis Tácticos`)**: Smart detection of recovery flats (<=3% and >=30m) glowing in ice blue with dynamic badges, fire crucibles for critical ramps (>=12%) with tactical badges, and an atmospheric hypoxia haze at altitudes >=1400m.

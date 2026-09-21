@@ -8,7 +8,7 @@
 
 **ALTGRAPH** ist eine professionelle Höhen- und Leistungserweiterung der nächsten Generation für **Hammerhead Karoo** Fahrradcomputer (Karoo 2 und Karoo 3), entwickelt von **David García Pascual** mit dem offiziellen `karoo-ext` SDK.
 
-Es revolutioniert das traditionelle Konzept der Radsport-Höhenmessung durch die Integration einer **Suite von 5 Höhenvisualisierungsmodellen** mit dynamischer Live-Auswahl, einer 15-stufigen kontinuierlichen monochromatischen Skala, einem gleitenden 50-Meter-Fenster, adaptiver Multiskalen-Auflösung, topografischer Berechnung, mathematischer Erkennung von Haarnadelkurven (Tornanti), einem dynamischen Zoom, **VAM**-Tempo und der wissenschaftlichen Berechnung des **Ermüdungsgrades (GF)**.
+Es revolutioniert das traditionelle Konzept der Radsport-Höhenmessung durch die Integration einer **Suite von 6 Höhenvisualisierungsmodellen** mit dynamischer Live-Auswahl, einer 15-stufigen kontinuierlichen monochromatischen Skala, einem gleitenden 50-Meter-Fenster, adaptiver Multiskalen-Auflösung, topografischer Berechnung, mathematischer Erkennung von Haarnadelkurven (Tornanti), einem dynamischen Zoom, **VAM**-Tempo und der wissenschaftlichen Berechnung des **Ermüdungsgrades (GF)**.
 
 ---
 

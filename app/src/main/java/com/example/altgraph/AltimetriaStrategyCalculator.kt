@@ -60,7 +60,8 @@ data class StrategyData(
     // ELITE Features
     val stravaSegmentDistance: Double? = null,
     val stravaPrGhostDistance: Double? = null,
-    val windEffectIntensity: Double? = null // -1 to 1 (-1 headwind, 1 tailwind)
+    val windEffectIntensity: Double? = null, // -1 to 1 (-1 headwind, 1 tailwind)
+    val routeCoords: List<Pair<Double, Double>> = emptyList() // Added for Global Isometric GPS
 )
 
 class AltimetriaStrategyCalculator {
@@ -1210,7 +1211,8 @@ class AltimetriaStrategyCalculator {
             energyBatteryLevel = energyBatteryLevel,
             stravaSegmentDistance = stravaRelDist,
             stravaPrGhostDistance = stravaGhostRelDist,
-            windEffectIntensity = windEffect
+            windEffectIntensity = windEffect,
+            routeCoords = getVisibleRouteCoords(windowStartIndex, routePoints, lookaheadDist.toInt())
         )
     }
 
@@ -1337,7 +1339,8 @@ class AltimetriaStrategyCalculator {
             activeClimbs = listOf(climb),
             visibleAvgGrade = avgGrade,
             visibleMaxGrade = trueMaxGrade,
-            routeName = climb.category // Passing category as routeName to display in the header
+            routeName = climb.category, // Passing category as routeName to display in the header
+            routeCoords = getVisibleRouteCoords(routePoints.indexOfFirst { it.distance >= startDist }.coerceAtLeast(0), routePoints, (endDist - startDist).toInt())
         )
     }
 }
