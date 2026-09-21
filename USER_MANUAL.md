@@ -1,4 +1,4 @@
-# 📖 Manual de Usuario - ALTGRAPH (v0.5.0 STABLE)
+# 📖 Manual de Usuario - ALTGRAPH (v0.6.0 STABLE)
 
 **ALTGRAPH** es una extensión avanzada de altimetría y análisis de rendimiento para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3), desarrollada por **David García Pascual**.
 
@@ -15,7 +15,7 @@
 ## 🇪🇸 ESPAÑOL
 
 ### 1. Instalación y Configuración
-1. Transfiere la APK `ALTGRAPH-v0.5.0.apk` a tu dispositivo Karoo mediante **ADB** (`adb install -r ALTGRAPH-v0.5.0.apk`).
+1. Transfiere la APK `ALTGRAPH-v0.6.0.apk` a tu dispositivo Karoo mediante **ADB** (`adb install -r ALTGRAPH-v0.6.0.apk`).
 2. En tu Karoo, entra en **Ajustes > Perfiles de Carrera** y selecciona el perfil donde quieras incluir los campos.
 3. Edita una página de datos, pulsa en **Añadir Campo** y selecciona la categoría **ALTGRAPH**.
 
@@ -56,7 +56,7 @@ Al abrir **ALTGRAPH** desde el menú de aplicaciones de tu Karoo 3, dispones de 
   - **VAM Objetivo (m/h)**: Ajuste desde 500 m/h hasta 2000 m/h.
   - **Tipo / Calidad de Asfalto (TA)**: Muy Bueno (0.1), Bueno (0.5), Regular (1.2), Malo / Gravilla (1.7).
 
-### 3. Campos de Datos Disponibles (v0.5.0)
+### 3. Campos de Datos Disponibles (v0.6.0)
 
 #### 🏔️ 1. Altimetría 3D (`3D Altimetry`)
 - **Descripción**: Perfil 3D avanzado con selector de 5 estilos (Clásico, Horizonte Iso, Oasis Tácticos, Campo Fuerza, Monolito Obsidiana). Incorpora ventana rodante cuántica de 50m, progresión física del ciclista por la cresta, resolución adaptativa multiescala (50m a 10km), escala monocromática suave de 15 tramos del 0 al 15% (blanco a rojo), cotas de altitud nítidas, cápsulas oscuras de alto contraste para %, lectura triple en encabezado (**Pendiente Actual**, **Pendiente Media del tramo** y **Pendiente Máxima**), marcas de herraduras, hitos POI y zoom táctil en pantalla.
@@ -79,7 +79,7 @@ Al abrir **ALTGRAPH** desde el menú de aplicaciones de tu Karoo 3, dispones de 
 ## 🇬🇧 ENGLISH
 
 ### 1. Installation & Setup
-1. Transfer `ALTGRAPH-v0.5.0.apk` to your Karoo device via **ADB** (`adb install -r ALTGRAPH-v0.5.0.apk`).
+1. Transfer `ALTGRAPH-v0.6.0.apk` to your Karoo device via **ADB** (`adb install -r ALTGRAPH-v0.6.0.apk`).
 2. On your Karoo, go to **Settings > Ride Profiles** and edit your preferred profile.
 3. Add a new Data Field and select the **ALTGRAPH** category.
 
@@ -102,7 +102,7 @@ Open **ALTGRAPH** from your Karoo app launcher to navigate 4 structured tabs:
 * **📊 2D Tab**: Profile Block Distance, Visible Blocks, Attack Alert Threshold.
 * **🚴 VAM Tab**: Target VAM, Asphalt Quality Factor.
 
-### 3. Available Data Fields (v0.5.0)
+### 3. Available Data Fields (v0.6.0)
 
 #### 🏔️ 1. 3D Altimetry
 - **Description**: Next-generation 3D elevation profile with 5 selectable visualization models, 50m quantum rolling window, physical beacon climbing along top edge, adaptive multi-scale resolution, 15-step monochromatic gradient, high-contrast badges, triple header telemetry, GPS hairpins, POIs, and touch zoom.
@@ -123,7 +123,7 @@ Open **ALTGRAPH** from your Karoo app launcher to navigate 4 structured tabs:
 
 
 ---
-## 🆕 What's new in v0.5.0 / Novedades v0.5.0
+## 🆕 What's new in v0.6.0 / Novedades v0.6.0
 
 ### 🇪🇸 ESPAÑOL
 - **Precisión Algorítmica Dinámica**: La Pendiente Media y la Rampa Máxima ahora se calculan analizando el relieve metro a metro en alta resolución (ignorando el suavizado de los bloques visuales) y se acotan estrictamente a la distancia que tengas en pantalla (200m, 5km, 100km...).
@@ -154,3 +154,41 @@ Open **ALTGRAPH** from your Karoo app launcher to navigate 4 structured tabs:
 - **Echte Durchschnittssteigung**: Die Durchschnittssteigung des Anstiegs verwirft nun automatisch Abfahrten und flache Stücke und berechnet die mathematische Anstrengung nur auf reinen Steigungsabschnitten.
 - **Zoom-unabhängiger Ermüdungsgrad (GF) & VAM**: Die wissenschaftliche APM-Engine leidet nicht mehr unter "Steigungsverdünnung" beim Herauszoomen. Sie bewertet die wahre Härte anhand der rohen Telemetriedaten und liefert unabhängig von der Skalierung perfekte Ergebnisse.
 - **Karten-Pin Gipfelsymbole**: Die alten kreisförmigen Leuchtfeuer wurden durch ein professionelles weißes topografisches Karten-Pin-Symbol mit rotem Kern ersetzt, um offizielle Anstiege zu markieren.
+
+---
+## 🚀 What's new in v0.6.0 (World Tour Pro Features) / Novedades v0.6.0
+
+### 🇪🇸 ESPAÑOL
+- **Smart Zoom Táctico (Auto-Escala)**: El zoom 3D se ajusta automáticamente según la pendiente instantánea, cerrándose en muros y abriéndose en llanos panorámicos.
+- **Oasis Tracking**: El sistema calcula y proyecta un holograma en el cielo indicando la distancia exacta hasta el próximo "Crisol de Fuego" (rampa > 8%), permitiendo gestionar el esfuerzo y recuperación.
+- **Virtual Pacer**: Añadido el cálculo físico por VAM que proyecta una orbe fantasma Cyan que avanza por el perfil de la altimetría.
+- **Dinámica de Herraduras 3D (Switchbacks)**: La geometría de la carretera hace un zig-zag lateral tridimensional al llegar a una curva de herradura real.
+- **Human Battery (Energy Management)**: HUD táctico que evalúa tu quema por VAM, baja tus reservas al subir fuerte y las recarga en llano.
+
+### 🇬🇧 ENGLISH
+- **Tactical Smart Zoom (Auto-Scale)**: The 3D zoom automatically adjusts based on the instant slope, zooming in on walls and opening up on panoramic flats.
+- **Oasis Tracking**: The system calculates and projects a hologram in the sky indicating the exact distance to the next "Crucible" (ramp > 8%), allowing you to manage effort and recovery.
+- **Virtual Pacer**: Physical VAM calculation added that projects a Cyan ghost orb advancing along the altimetry profile.
+- **3D Switchback Dynamics**: The road geometry makes a 3D lateral zigzag when approaching a real hairpin curve.
+- **Human Battery (Energy Management)**: Tactical HUD that evaluates your VAM burn, lowers your reserves when pushing hard, and recharges them on flats.
+
+### 🇫🇷 FRANÇAIS
+- **Smart Zoom Tactique (Auto-Scale)**: Le zoom 3D s'ajuste automatiquement en fonction de la pente instantanée.
+- **Oasis Tracking**: Le système calcule et projette un hologramme dans le ciel indiquant la distance exacte jusqu'au prochain "Creuset" (rampa > 8%).
+- **Virtual Pacer**: Ajout du calcul physique par VAM qui projette un orbe fantôme Cyan avançant sur le profil.
+- **Dynamique de Lacets 3D (Switchbacks)**: La géométrie de la route effectue un zigzag latéral 3D à l'approche d'un véritable lacet.
+- **Human Battery (Energy Management)**: HUD tactique qui évalue votre dépense VAM, réduit vos réserves lors d'efforts intenses et les recharge sur le plat.
+
+### 🇮🇹 ITALIANO
+- **Smart Zoom Tattico (Auto-Scale)**: Lo zoom 3D si adatta automaticamente in base alla pendenza istantanea.
+- **Oasis Tracking**: Il sistema calcola e proietta un ologramma nel cielo indicando la distanza esatta fino al prossimo "Crogiolo" (rampa > 8%).
+- **Virtual Pacer**: Aggiunto il calcolo fisico tramite VAM che proietta una sfera fantasma Cyan che avanza lungo il profilo.
+- **Dinamiche Tornanti 3D (Switchbacks)**: La geometria della strada compie uno zig-zag laterale 3D quando ci si avvicina a un vero tornante.
+- **Human Battery (Energy Management)**: HUD tattico che valuta il tuo dispendio VAM, riduce le tue riserve durante gli sforzi intensi e le ricarica in pianura.
+
+### 🇩🇪 DEUTSCH
+- **Taktischer Smart Zoom (Auto-Scale)**: Der 3D-Zoom passt sich automatisch der aktuellen Steigung an.
+- **Oasis Tracking**: Das System berechnet und projiziert ein Hologramm in den Himmel, das die genaue Entfernung zur nächsten "Bewährungsprobe" (Rampe > 8%) anzeigt.
+- **Virtual Pacer**: Physische VAM-Berechnung hinzugefügt, die eine Cyan Geisterkugel projiziert, die entlang des Höhenprofils voranschreitet.
+- **3D-Kehren-Dynamik (Switchbacks)**: Die Straßengeometrie macht einen lateralen 3D-Zickzack, wenn man sich einer echten Haarnadelkurve nähert.
+- **Human Battery (Energy Management)**: Taktisches HUD, das deinen VAM-Verbrauch bewertet, deine Reserven bei harter Anstrengung senkt und sie in der Ebene wieder auflädt.

@@ -1,9 +1,8 @@
-﻿import re
+﻿import os
 
-def update_docs():
-    files = ['USER_MANUAL.md', 'README.md', 'README_es.md', 'README_fr.md', 'README_it.md', 'README_de.md', 'README_en.md']
-    
-    changelog = """
+files = ['USER_MANUAL.md', 'README.md', 'README_fr.md', 'README_it.md', 'README_de.md', 'README_en.md']
+
+changelog = """
 ---
 ## 🚀 What's new in v0.6.0 (World Tour Pro Features) / Novedades v0.6.0
 
@@ -23,7 +22,7 @@ def update_docs():
 
 ### 🇫🇷 FRANÇAIS
 - **Smart Zoom Tactique (Auto-Scale)**: Le zoom 3D s'ajuste automatiquement en fonction de la pente instantanée.
-- **Oasis Tracking**: Le système calcule et projette un hologramme dans le ciel indiquant la distance exacte jusqu'au prochain "Creuset" (rampe > 8%).
+- **Oasis Tracking**: Le système calcule et projette un hologramme dans le ciel indiquant la distance exacte jusqu'au prochain "Creuset" (rampa > 8%).
 - **Virtual Pacer**: Ajout du calcul physique par VAM qui projette un orbe fantôme Cyan avançant sur le profil.
 - **Dynamique de Lacets 3D (Switchbacks)**: La géométrie de la route effectue un zigzag latéral 3D à l'approche d'un véritable lacet.
 - **Human Battery (Energy Management)**: HUD tactique qui évalue votre dépense VAM, réduit vos réserves lors d'efforts intenses et les recharge sur le plat.
@@ -43,22 +42,11 @@ def update_docs():
 - **Human Battery (Energy Management)**: Taktisches HUD, das deinen VAM-Verbrauch bewertet, deine Reserven bei harter Anstrengung senkt und sie in der Ebene wieder auflädt.
 """
 
-    for file in files:
-        try:
-            with open(file, 'r', encoding='utf-8') as f:
-                content = f.read()
-            
-            # Replace v0.5.0 with v0.6.0
-            content = content.replace('v0.5.0', 'v0.6.0')
-            
-            # Append changelog if not already there
-            if "Novedades v0.6.0" not in content:
-                content += "\n" + changelog
-                
-            with open(file, 'w', encoding='utf-8') as f:
-                f.write(content)
-        except Exception as e:
-            print(f"Error updating {file}: {e}")
+for file in files:
+    if os.path.exists(file):
+        with open(file, 'a', encoding='utf-8') as f:
+            f.write(changelog)
+        print(f"Appended changelog to {file}")
+    else:
+        print(f"File {file} not found")
 
-update_docs()
-print("Docs updated.")
