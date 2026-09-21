@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png" alt="ALTGRAPH Logo" width="160" />
 </p>
 # ALTGRAPH (v0.4.1 STABLE)
-*Read in: [Español](README.md) | [English](README_en.md) | [Français](README_fr.md) | [Italiano](README_it.md) | [Deutsch](README_de.md)*
+*Read in: [Español](https://github.com/DAVOE75/ALTGRAPH/blob/main/README.md) | [English](https://github.com/DAVOE75/ALTGRAPH/blob/main/README_en.md) | [Français](https://github.com/DAVOE75/ALTGRAPH/blob/main/README_fr.md) | [Italiano](https://github.com/DAVOE75/ALTGRAPH/blob/main/README_it.md) | [Deutsch](https://github.com/DAVOE75/ALTGRAPH/blob/main/README_de.md)*
 **ALTGRAPH** is a next-generation professional altimetry and performance extension for **Hammerhead Karoo** cycling computers (Karoo 2 and Karoo 3), developed by **David García Pascual** using the official `karoo-ext` SDK.
 It revolutionizes the traditional concept of cycling altimetry by incorporating a **Suite of 5 Altimetry Visualization Models** with a live dynamic selector, a 15-stage continuous monochromatic scale, a 50-meter rolling window quantum advance, adaptive multiscale resolution, mountain pass analysis, optional topographic calculation (pure horizontal projection), mathematical detection of hairpin turns (tornanti), filtering by POI categories (Towns, Fountains, Viewpoints, Summits), a tap-to-zoom scale switcher, Google Sans / Condensed typography, a 90° rotated full-screen landscape mode, dual **VAM** pace with recommended speed, and scientific calculation of the **Fatigue Grade (GF)**.
 ---
