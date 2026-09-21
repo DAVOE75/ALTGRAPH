@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png" alt="ALTGRAPH Logo" width="160" />
 </p>
 # ALTGRAPH (v0.5.0 STABLE)
-*Leggi in: [Español](https://github.com/DAVOE75/ALTGRAPH/blob/main/README.md) | [English](https://github.com/DAVOE75/ALTGRAPH/blob/main/README_en.md) | [Français](https://github.com/DAVOE75/ALTGRAPH/blob/main/README_fr.md) | [Italiano](https://github.com/DAVOE75/ALTGRAPH/blob/main/README_it.md) | [Deutsch](https://github.com/DAVOE75/ALTGRAPH/blob/main/README_de.md)*
+*Leggi in: [Español](README.md) | [English](README_en.md) | [Français](README_fr.md) | [Italiano](README_it.md) | [Deutsch](README_de.md)*
 **ALTGRAPH** è un'estensione professionale per l'altimetria e le prestazioni di ultima generazione per i ciclocomputer **Hammerhead Karoo** (Karoo 2 e Karoo 3), sviluppata da **David García Pascual** utilizzando l'SDK ufficiale `karoo-ext`.
 Rivoluziona il concetto tradizionale di altimetria ciclistica integrando una **Suite di 6 Modelli di Visualizzazione Altimetrica** con selettore dinamico in tempo reale, risoluzione adattiva multiscala, calcolo topografico, rilevamento matematico dei tornanti, filtraggio POI, layout a schermo intero ruotato a 90°, passo **VAM** e calcolo scientifico del **Grado di Fatica (GF)**.
 ---
