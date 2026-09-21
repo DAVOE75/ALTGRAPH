@@ -401,6 +401,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private var isDragging: Boolean = false
     private var lastTouchX: Float = 0.0f
     private var routeName: String? = null
+    private var routeCoords: List<Pair<Double, Double>> = emptyList()
     var oasisDistanceToNextCrucible: Double? = null
     var virtualPacerRelativeDistance: Double? = null
     var energyBatteryLevel: Double = 100.0
@@ -1879,12 +1880,73 @@ class Altimetria3DView @JvmOverloads constructor(
             elevations[i] = (elevations[i] - minElev) * zScale
         }
 
-        // Generate Snake Path
-        val path = Array(n) { i ->
-            val t = i.toFloat() / (n - 1).coerceAtLeast(1)
-            val logicalY = t * gridH
-            val logicalX = ((Math.sin(t * Math.PI * 6.0) + 1.0) / 2.0).toFloat() * gridW
-            Pair(logicalX, logicalY)
+        // Generate GPS Path
+        val path = Array(n) { Pair(0f, 0f) }
+        
+        if (routeCoords.isNotEmpty()) {
+            val minLat = routeCoords.minOf { it.first }
+            val maxLat = routeCoords.maxOf { it.first }
+            val minLng = routeCoords.minOf { it.second }
+            val maxLng = routeCoords.maxOf { it.second }
+            
+            val avgLatRad = Math.toRadians((minLat + maxLat) / 2.0)
+            
+            // Convert to relative metric-proportional grid
+            val pointsMetric = routeCoords.map { 
+                val mx = (it.second - minLng) * Math.cos(avgLatRad)
+                val my = (maxLat - it.first) // Invert so North is Top
+                Pair(mx, my)
+            }
+            
+            val maxMx = pointsMetric.maxOf { it.first }
+            val maxMy = pointsMetric.maxOf { it.second }
+            val maxSpan = maxMx.coerceAtLeast(maxMy)
+            
+            // Normalize to [0, gridW]
+            val normalizedPoints = pointsMetric.map {
+                val nx = if (maxSpan > 0) (it.first / maxSpan) * gridW else 0.0
+                val ny = if (maxSpan > 0) (it.second / maxSpan) * gridH else 0.0
+                Pair(nx.toFloat(), ny.toFloat())
+            }
+            
+            // Compute cumulative distances of the path
+            val dists = FloatArray(normalizedPoints.size)
+            dists[0] = 0f
+            for (i in 1 until normalizedPoints.size) {
+                val dx = normalizedPoints[i].first - normalizedPoints[i-1].first
+                val dy = normalizedPoints[i].second - normalizedPoints[i-1].second
+                dists[i] = dists[i-1] + Math.sqrt((dx*dx + dy*dy).toDouble()).toFloat()
+            }
+            
+            val totalPathDist = dists.lastOrNull() ?: 1f
+            
+            // Interpolate subBlocks evenly along the path
+            for (i in 0 until n) {
+                val t = i.toFloat() / (n - 1).coerceAtLeast(1)
+                val targetD = t * totalPathDist
+                
+                // Find segment
+                var segIdx = dists.binarySearch(targetD)
+                if (segIdx < 0) segIdx = -segIdx - 2
+                segIdx = segIdx.coerceIn(0, dists.size - 2)
+                
+                val d0 = dists[segIdx]
+                val d1 = dists[segIdx + 1]
+                val p0 = normalizedPoints[segIdx]
+                val p1 = normalizedPoints[segIdx + 1]
+                
+                val ratio = if (d1 > d0) (targetD - d0) / (d1 - d0) else 0f
+                val interpX = p0.first + ratio * (p1.first - p0.first)
+                val interpY = p0.second + ratio * (p1.second - p0.second)
+                
+                path[i] = Pair(interpX, interpY)
+            }
+        } else {
+            // Fallback to straight line if no GPS
+            for (i in 0 until n) {
+                val t = i.toFloat() / (n - 1).coerceAtLeast(1)
+                path[i] = Pair(t * gridW, t * gridH)
+            }
         }
 
         // Create segments and sort by depth (y in screen space)

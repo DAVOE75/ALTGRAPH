@@ -64,6 +64,26 @@ data class StrategyData(
 )
 
 class AltimetriaStrategyCalculator {
+    private fun getVisibleRouteCoords(startIdx: Int, points: List<RoutePoint>, rangeMeters: Int): List<Pair<Double, Double>> {
+        if (points.isEmpty() || startIdx >= points.size) return emptyList()
+        val coords = mutableListOf<Pair<Double, Double>>()
+        val startDist = points[startIdx].distance
+        val endDist = startDist + rangeMeters
+        for (i in startIdx until points.size) {
+            val pt = points[i]
+            if (pt.distance > endDist) {
+                // Add the last point just to close the shape correctly
+                coords.add(Pair(pt.latitude, pt.longitude))
+                break
+            }
+            // Skip points with no valid GPS coordinates (0.0, 0.0) which might occur if decoding fails partially
+            if (pt.latitude != 0.0 || pt.longitude != 0.0) {
+                coords.add(Pair(pt.latitude, pt.longitude))
+            }
+        }
+        return coords
+    }
+
 
     var currentLatitude = 0.0
     var currentLongitude = 0.0
