@@ -131,6 +131,22 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_ENERGY_MANAGEMENT_ENABLED, true)
         set(value) = prefs.edit().putBoolean(KEY_ENERGY_MANAGEMENT_ENABLED, value).apply()
 
+    // --- ELITE FEATURES (PAYWALL) ---
+    var licenseKey: String
+        get() = prefs.getString(KEY_LICENSE_KEY, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_LICENSE_KEY, value).apply()
+
+    val isEliteUnlocked: Boolean
+        get() = licenseKey == "ALTGRAPH-ELITE-2026"
+        
+    var weatherOverlayEnabled: Boolean
+        get() = prefs.getBoolean(KEY_WEATHER_OVERLAY_ENABLED, true) && isEliteUnlocked
+        set(value) = prefs.edit().putBoolean(KEY_WEATHER_OVERLAY_ENABLED, value).apply()
+
+    var stravaSegmentsEnabled: Boolean
+        get() = prefs.getBoolean(KEY_STRAVA_SEGMENTS_ENABLED, true) && isEliteUnlocked
+        set(value) = prefs.edit().putBoolean(KEY_STRAVA_SEGMENTS_ENABLED, value).apply()
+
     companion object {
         private const val PREFS_NAME = "altgraph_settings"
         private const val KEY_FONT_FAMILY = "font_family_key"
@@ -164,6 +180,10 @@ class AppPreferences(context: Context) {
         private const val KEY_VIRTUAL_PACER_ENABLED = "virtual_pacer_enabled"
         private const val KEY_SWITCHBACK_RENDERING_ENABLED = "switchback_rendering_enabled"
         private const val KEY_ENERGY_MANAGEMENT_ENABLED = "energy_management_enabled"
+
+        private const val KEY_LICENSE_KEY = "license_key"
+        private const val KEY_WEATHER_OVERLAY_ENABLED = "weather_overlay_enabled"
+        private const val KEY_STRAVA_SEGMENTS_ENABLED = "strava_segments_enabled"
 
         @Volatile
         private var INSTANCE: AppPreferences? = null

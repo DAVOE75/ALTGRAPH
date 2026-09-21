@@ -87,16 +87,18 @@ class MainActivity : Activity() {
         val tab2dContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val tabVamContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val tabProContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val tabEliteContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
 
         val tabContainers = listOf(
             tabEstiloContainer,
             tab3dContainer,
             tab2dContainer,
             tabVamContainer,
-            tabProContainer
+            tabProContainer,
+            tabEliteContainer
         )
 
-        val tabTitles = listOf("🎨 Estilo", "🏔️ 3D", "📊 2D", "🚴 VAM", "🚀 Pro")
+        val tabTitles = listOf("🎨 Estilo", "🏔️ 3D", "📊 2D", "🚴 VAM", "🚀 Pro", "👑 Elite")
         val tabButtons = mutableListOf<Button>()
 
         fun selectTab(activeIdx: Int) {
@@ -791,6 +793,94 @@ class MainActivity : Activity() {
         energyCard.addView(switchEnergy)
         tabProContainer.addView(energyCard)
 
+        // ==========================================
+        // PESTAÑA 6: 👑 ELITE (PAYWALL)
+        // ==========================================
+        val eliteLabel = createSectionLabel("👑 ALTGRAPH ELITE 👑")
+        tabEliteContainer.addView(eliteLabel)
+        
+        val unlockTitle = TextView(this).apply {
+            text = if (prefs.isEliteUnlocked) "STATUS: UNLOCKED" else "STATUS: LOCKED (Requires License Key)"
+            textSize = 14f
+            setTextColor(if (prefs.isEliteUnlocked) Color.GREEN else Color.RED)
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 16)
+        }
+        tabEliteContainer.addView(unlockTitle)
+        
+        val licenseCard = createCardContainer()
+        val licenseInput = android.widget.EditText(this).apply {
+            hint = "Enter License Key (e.g. ALTGRAPH-ELITE-2026)"
+            setHintTextColor(Color.parseColor("#71717A"))
+            setTextColor(Color.WHITE)
+            textSize = 14f
+            setText(prefs.licenseKey)
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { bottomMargin = 8 }
+        }
+        
+        val activateBtn = Button(this).apply {
+            text = "ACTIVATE"
+            textSize = 12f
+            setTextColor(Color.WHITE)
+            background = GradientDrawable().apply {
+                setColor(Color.parseColor("#2563EB")) // Blue
+                cornerRadius = 12f
+            }
+        }
+        
+        licenseCard.addView(licenseInput)
+        licenseCard.addView(activateBtn)
+        tabEliteContainer.addView(licenseCard)
+        
+
+
+        // Strava Mock
+        val stravaCard = createCardContainer()
+        val switchStrava = Switch(this).apply {
+            text = "Strava Live Segments 3D (Beta)"
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.stravaSegmentsEnabled
+            isEnabled = prefs.isEliteUnlocked
+            setOnCheckedChangeListener { _, isChecked -> prefs.stravaSegmentsEnabled = isChecked }
+        }
+        stravaCard.addView(switchStrava)
+        tabEliteContainer.addView(stravaCard)
+        
+        // Weather Mock
+        val weatherCard = createCardContainer()
+        val switchWeather = Switch(this).apply {
+            text = "Wind & Weather Overlay"
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.weatherOverlayEnabled
+            isEnabled = prefs.isEliteUnlocked
+            setOnCheckedChangeListener { _, isChecked -> prefs.weatherOverlayEnabled = isChecked }
+        }
+        weatherCard.addView(switchWeather)
+        tabEliteContainer.addView(weatherCard)
+
+        activateBtn.setOnClickListener {
+            val key = licenseInput.text.toString().trim()
+            prefs.licenseKey = key
+            val unlocked = prefs.isEliteUnlocked
+            unlockTitle.text = if (unlocked) "STATUS: UNLOCKED" else "STATUS: LOCKED (Requires License Key)"
+            unlockTitle.setTextColor(if (unlocked) Color.GREEN else Color.RED)
+            
+            // Dynamically enable/disable switches
+            switchStrava.isEnabled = unlocked
+            switchWeather.isEnabled = unlocked
+            
+            if (unlocked) {
+                Toast.makeText(this, "Elite Features Unlocked!", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, "Invalid License Key", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         // Final Button Layout
         val saveExitButton = Button(this).apply {
             text = "💾 " + getString(R.string.btn_save_and_exit)
@@ -822,6 +912,7 @@ class MainActivity : Activity() {
         rootLayout.addView(tab2dContainer)
         rootLayout.addView(tabVamContainer)
         rootLayout.addView(tabProContainer)
+        rootLayout.addView(tabEliteContainer)
         rootLayout.addView(saveExitButton)
 
         scrollView.addView(rootLayout)

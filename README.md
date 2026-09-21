@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png" alt="ALTGRAPH Logo" width="160" />
 </p>
 
-# ALTGRAPH (v0.6.0 PRO)
+# ALTGRAPH (v0.7.0 ELITE)
 
 *Leer en: [Español](README.md) | [English](README_en.md) | [Français](README_fr.md) | [Italiano](README_it.md) | [Deutsch](README_de.md)*
 
@@ -37,7 +37,12 @@ Visita el **[Portal Web Oficial de ALTGRAPH (davoe75.github.io/ALTGRAPH)](https:
 
 ---
 
-## 🚀 Novedades y Funciones Destacadas (v0.6.0 PRO)
+## 👑 ALTGRAPH ELITE 👑 (v0.7.0)
+- **Strava Live Segments 3D (Beta):** Simulación en vivo (KOM Ghost) en puertos de alta dureza.
+- **Wind & Weather Overlay:** Integración nativa (Open-Meteo) para representar dirección del viento en vivo mediante vectores 3D (Headwind/Tailwind).
+
+
+## 🚀 Novedades y Funciones Destacadas (v0.7.0 ELITE)
 
 ### 🏔️ Visor de Puertos de Montaña (NUEVO en v0.4.5+)
 La funcionalidad más demandada por la comunidad ciclista. Un **campo de datos a pantalla completa** dedicado exclusivamente a la visualización integral de los puertos de montaña detectados automáticamente en tu ruta cargada:
@@ -291,7 +296,7 @@ Este proyecto de código abierto se distribuye bajo la licencia **MIT** - Copyri
 - **Karten-Pin Gipfelsymbole**: Die alten kreisförmigen Leuchtfeuer wurden durch ein professionelles weißes topografisches Karten-Pin-Symbol mit rotem Kern ersetzt, um offizielle Anstiege zu markieren.
 
 ---
-## 🚀 What's new in v0.6.0 (World Tour Pro Features) / Novedades v0.6.0
+## 🚀 What's new in v0.7.0 (World Tour Pro Features) / Novedades v0.7.0
 
 ### 🇪🇸 ESPAÑOL
 - **Smart Zoom Táctico (Auto-Escala)**: El zoom 3D se ajusta automáticamente según la pendiente instantánea, cerrándose en muros y abriéndose en llanos panorámicos.

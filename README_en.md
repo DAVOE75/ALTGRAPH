@@ -33,6 +33,11 @@ Visit the **[ALTGRAPH Official Web Portal (davoe75.github.io/ALTGRAPH)](https://
 
 ---
 
+## 👑 ALTGRAPH ELITE 👑 (v0.7.0)
+- **Strava Live Segments 3D (Beta):** Live simulation (KOM Ghost) on extremely hard climbs.
+- **Wind & Weather Overlay:** Native integration (Open-Meteo) to render live wind direction using 3D vectors (Headwind/Tailwind).
+
+
 ## 🚀 Features & Highlights (v0.4.1 Stable)
 
 ### 🌟 Suite of 5 Revolutionary Altimetry Models (Switchable on the fly)
@@ -174,7 +179,7 @@ This open-source project is distributed under the **MIT** license - Copyright 20
 *Disclaimer: This extension is not affiliated with, endorsed, sponsored, or supported by Hammerhead or SRAM.*
 
 ---
-## 🚀 What's new in v0.6.0 (World Tour Pro Features) / Novedades v0.6.0
+## 🚀 What's new in v0.7.0 (World Tour Pro Features) / Novedades v0.7.0
 
 ### 🇪🇸 ESPAÑOL
 - **Smart Zoom Táctico (Auto-Escala)**: El zoom 3D se ajusta automáticamente según la pendiente instantánea, cerrándose en muros y abriéndose en llanos panorámicos.

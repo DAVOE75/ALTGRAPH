@@ -56,7 +56,11 @@ data class StrategyData(
     // PRO Features
     val oasisDistanceToNextCrucible: Double? = null,
     val virtualPacerRelativeDistance: Double? = null,
-    val energyBatteryLevel: Double = 100.0
+    val energyBatteryLevel: Double = 100.0,
+    // ELITE Features
+    val stravaSegmentDistance: Double? = null,
+    val stravaPrGhostDistance: Double? = null,
+    val windEffectIntensity: Double? = null // -1 to 1 (-1 headwind, 1 tailwind)
 )
 
 class AltimetriaStrategyCalculator {
@@ -82,6 +86,12 @@ class AltimetriaStrategyCalculator {
     private var smartLookahead: Double = 350.0
     private var virtualPacerDistance: Double = 0.0
     private var energyBatteryLevel: Double = 100.0
+    
+    // ELITE Feature States
+    private var isStravaSegmentActive = false
+    private var stravaSegmentStartDist = 0.0
+    private var stravaPrGhostDist = 0.0
+    private var lastWindCheckTime = 0L
 
     private fun getFreeRideElevationAt(dist: Double): Double {
         if (freeRideHistory.isEmpty()) return currentElevation
@@ -1102,6 +1112,57 @@ class AltimetriaStrategyCalculator {
         // Virtual pacer init logic for route mode
         if (virtualPacerDistance == 0.0) virtualPacerDistance = currentRiderDistance
 
+        // ELITE FEATURE: Wind Overlay
+        var windEffect: Double? = null
+        var stravaRelDist: Double? = null
+        var stravaGhostRelDist: Double? = null
+        
+        context?.let { ctx ->
+            val prefs = AppPreferences.getInstance(ctx)
+            if (prefs.weatherOverlayEnabled) {
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - lastWindCheckTime > 5 * 60 * 1000) { // Check every 5 mins
+                    if (routePoints.isNotEmpty()) {
+                        val pt = routePoints[windowStartIndex]
+                        WeatherService.fetchWeatherData(pt.latitude, pt.longitude)
+                    }
+                    lastWindCheckTime = currentTime
+                }
+                if (WeatherService.isDataFresh && windowStartIndex < routePoints.size - 10) {
+                    val pt1 = routePoints[windowStartIndex]
+                    val pt2 = routePoints[windowStartIndex + 10]
+                    val dLon = (pt2.longitude - pt1.longitude)
+                    val y = Math.sin(Math.toRadians(dLon)) * Math.cos(Math.toRadians(pt2.latitude))
+                    val x = Math.cos(Math.toRadians(pt1.latitude)) * Math.sin(Math.toRadians(pt2.latitude)) - Math.sin(Math.toRadians(pt1.latitude)) * Math.cos(Math.toRadians(pt2.latitude)) * Math.cos(Math.toRadians(dLon))
+                    val heading = (Math.toDegrees(Math.atan2(y, x)) + 360) % 360
+                    
+                    val windDir = WeatherService.currentWindDirectionDegrees.toDouble()
+                    val tailwindComponent = -Math.cos(Math.toRadians(heading - windDir))
+                    windEffect = tailwindComponent * (WeatherService.currentWindSpeedKmh / 50.0).coerceIn(0.0, 1.0)
+                }
+            }
+
+            // ELITE FEATURE: Strava Live Segments Mock
+            if (prefs.stravaSegmentsEnabled) {
+                if (!isStravaSegmentActive && instantBarometricGrade > 7.0 && currentRiderDistance > stravaSegmentStartDist + 3000) {
+                    isStravaSegmentActive = true
+                    stravaSegmentStartDist = currentRiderDistance
+                    stravaPrGhostDist = currentRiderDistance
+                }
+                
+                if (isStravaSegmentActive) {
+                    val distInSegment = currentRiderDistance - stravaSegmentStartDist
+                    if (distInSegment > 2000.0) {
+                        isStravaSegmentActive = false // Segment finished
+                    } else {
+                        stravaRelDist = distInSegment
+                        stravaPrGhostDist += (5.5 * 1.0) // Ghost runs at 1300 VAM (approx 5.5 m/s)
+                        stravaGhostRelDist = stravaPrGhostDist - currentRiderDistance
+                    }
+                }
+            }
+        }
+
         return StrategyData(
             remainingDistance = totalDistanceRemaining,
             timeToSummit = secondsRemaining,
@@ -1126,7 +1187,10 @@ class AltimetriaStrategyCalculator {
             routeName = activeRouteName,
             oasisDistanceToNextCrucible = oasisDistance,
             virtualPacerRelativeDistance = if (virtualPacerEnabled) virtualPacerDistance - currentRiderDistance else null,
-            energyBatteryLevel = energyBatteryLevel
+            energyBatteryLevel = energyBatteryLevel,
+            stravaSegmentDistance = stravaRelDist,
+            stravaPrGhostDistance = stravaGhostRelDist,
+            windEffectIntensity = windEffect
         )
     }
 

@@ -91,7 +91,12 @@ Ce projet open-source est distribué sous la licence **MIT** - Copyright 2026 Da
 - **Korrektur der Skalierung in flachem Gelände**: Der falsche 5%-Sprung in völlig flachem Gelände wurde behoben. 0% ist jetzt wirklich 0%.
 
 ---
-## 🚀 What's new in v0.6.0 (World Tour Pro Features) / Novedades v0.6.0
+## 👑 ALTGRAPH ELITE 👑 (v0.7.0)
+- **Strava Live Segments 3D (Beta):** Simulation en direct (KOM Ghost) sur les ascensions très difficiles.
+- **Wind & Weather Overlay:** Intégration native (Open-Meteo) pour représenter la direction du vent en direct à l'aide de vecteurs 3D.
+
+
+## 🚀 What's new in v0.7.0 (World Tour Pro Features) / Novedades v0.7.0
 
 ### 🇪🇸 ESPAÑOL
 - **Smart Zoom Táctico (Auto-Escala)**: El zoom 3D se ajusta automáticamente según la pendiente instantánea, cerrándose en muros y abriéndose en llanos panorámicos.
