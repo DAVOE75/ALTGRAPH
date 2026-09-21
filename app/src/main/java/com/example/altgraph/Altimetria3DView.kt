@@ -703,8 +703,12 @@ class Altimetria3DView @JvmOverloads constructor(
             drawZoomOverlay(canvas, w, h)
         }
 
-        // 4. Perfil Altimétrico 3D Recto y Limpio (Estilo La Flamme Rouge)
-        draw3DStraightRibbon(canvas, w, h)
+        // 4. Perfil Altimétrico
+        if (altimetriaStyle == AltimetriaStyle.GLOBAL_ISOMETRIC) {
+            drawGlobalIsometricRibbon(canvas, w, h)
+        } else {
+            draw3DStraightRibbon(canvas, w, h)
+        }
     }
 
     private fun drawZoomOverlay(canvas: Canvas, w: Float, h: Float) {
@@ -949,6 +953,7 @@ class Altimetria3DView @JvmOverloads constructor(
             AltimetriaStyle.MONOLITHIC_OBSIDIAN -> {
                 drawMonolithicObsidianRibbon(canvas, w, h, totalMicroSamples, microGrades, xFront, yFront, xBack, yBack, yBase, startX, baseEndX, baseGroundY, maxPeakHeight)
             }
+            else -> {}
         }
 
         // 5. DIVISORES DE BLOQUE MAYOR VERTICALES CON COTAS DE ALTITUD
@@ -1817,4 +1822,166 @@ class Altimetria3DView @JvmOverloads constructor(
         val b = (Color.blue(baseColor) * 0.82f).toInt()
         return Color.rgb(r, g, b)
     }
+
+    private data class IsoSegment(
+        val idx: Int,
+        val x1: Float, val y1: Float, val z1: Float,
+        val x2: Float, val y2: Float, val z2: Float,
+        val grade: Float,
+        val km: Float
+    )
+
+    private fun projectIso(x: Float, y: Float, z: Float): Pair<Float, Float> {
+        val isoX = (x - y) * 0.866025f // cos(30)
+        val isoY = (x + y) * 0.5f - z // sin(30)
+        return Pair(isoX, isoY)
+    }
+
+    private fun drawGlobalIsometricRibbon(canvas: Canvas, w: Float, h: Float) {
+        val n = subBlocks.size
+        if (n < 2) return
+
+        val gridW = w * 0.6f
+        val gridH = gridW
+        val centerX = w / 2f
+        val centerY = h * 0.3f // Move down a bit for header
+
+        // Draw Base Grid
+        val gridPaint = Paint().apply {
+            color = Color.parseColor("#33FFFFFF")
+            strokeWidth = 1f
+            style = Paint.Style.STROKE
+        }
+        val gridLines = 10
+        for (i in 0..gridLines) {
+            val t = i.toFloat() / gridLines
+            // Line along X
+            val (p1x, p1y) = projectIso(0f, t * gridH, 0f)
+            val (p2x, p2y) = projectIso(gridW, t * gridH, 0f)
+            canvas.drawLine(p1x + centerX, p1y + centerY, p2x + centerX, p2y + centerY, gridPaint)
+            // Line along Y
+            val (p3x, p3y) = projectIso(t * gridW, 0f, 0f)
+            val (p4x, p4y) = projectIso(t * gridW, gridH, 0f)
+            canvas.drawLine(p3x + centerX, p3y + centerY, p4x + centerX, p4y + centerY, gridPaint)
+        }
+
+        // Calculate Elevations
+        val elevations = FloatArray(n)
+        var currentElev = 0f
+        for (i in 0 until n) {
+            elevations[i] = currentElev
+            currentElev += (subBlocks[i] / 100f) * subBlockSizeMeters.toFloat()
+        }
+        val maxElev = elevations.maxOrNull() ?: 1f
+        val minElev = elevations.minOrNull() ?: 0f
+        val zScale = (h * 0.25f) / (maxElev - minElev).coerceAtLeast(1f)
+        for (i in 0 until n) {
+            elevations[i] = (elevations[i] - minElev) * zScale
+        }
+
+        // Generate Snake Path
+        val path = Array(n) { i ->
+            val t = i.toFloat() / (n - 1).coerceAtLeast(1)
+            val logicalY = t * gridH
+            val logicalX = ((Math.sin(t * Math.PI * 6.0) + 1.0) / 2.0).toFloat() * gridW
+            Pair(logicalX, logicalY)
+        }
+
+        // Create segments and sort by depth (y in screen space)
+        val segments = mutableListOf<IsoSegment>()
+        for (i in 0 until n - 1) {
+            segments.add(IsoSegment(
+                idx = i,
+                x1 = path[i].first, y1 = path[i].second, z1 = elevations[i],
+                x2 = path[i+1].first, y2 = path[i+1].second, z2 = elevations[i+1],
+                grade = subBlocks[i],
+                km = (i * subBlockSizeMeters / 1000.0).toFloat()
+            ))
+        }
+        segments.sortBy { (it.x1 + it.y1 + it.x2 + it.y2) }
+
+        val wallPaint = Paint().apply { style = Paint.Style.FILL }
+        val topPaint = Paint().apply {
+            color = Color.WHITE
+            strokeWidth = 3f
+            style = Paint.Style.STROKE
+            isAntiAlias = true
+        }
+        val kmTextPaint = Paint().apply {
+            color = Color.LTGRAY
+            textSize = 14f * fontScale
+            isAntiAlias = true
+        }
+
+        val ramps = mutableListOf<String>()
+
+        for (seg in segments) {
+            val (p1x, p1y) = projectIso(seg.x1, seg.y1, seg.z1)
+            val (p2x, p2y) = projectIso(seg.x2, seg.y2, seg.z2)
+            val (b1x, b1y) = projectIso(seg.x1, seg.y1, 0f)
+            val (b2x, b2y) = projectIso(seg.x2, seg.y2, 0f)
+            
+            wallPaint.color = android.graphics.Color.parseColor(com.example.altgraph.GradeColorScale.getColorHex(seg.grade.toDouble()))
+            
+            val poly = Path()
+            poly.moveTo(p1x + centerX, p1y + centerY)
+            poly.lineTo(p2x + centerX, p2y + centerY)
+            poly.lineTo(b2x + centerX, b2y + centerY)
+            poly.lineTo(b1x + centerX, b1y + centerY)
+            poly.close()
+            canvas.drawPath(poly, wallPaint)
+            
+            canvas.drawLine(p1x + centerX, p1y + centerY, p2x + centerX, p2y + centerY, topPaint)
+            
+            // Draw km marker every 50 blocks (e.g. 50 * 50m = 2.5km)
+            if (seg.idx % 50 == 0 && seg.idx > 0) {
+                canvas.drawText("${"%.1f".format(seg.km)}km", b1x + centerX + 5f, b1y + centerY + 15f, kmTextPaint)
+            }
+
+            if (seg.grade > 10.0 && seg.idx % 10 == 0) { // Throttle ramp logs
+                val rText = "${"%.1f".format(seg.km)}km - ${"%.1f".format(seg.grade)}%"
+                if (!ramps.contains(rText) && ramps.size < 8) ramps.add(rText)
+            }
+        }
+
+        // Draw Ramps Info Box in center
+        if (ramps.isNotEmpty()) {
+            val (cx, cy) = projectIso(gridW / 2f, gridH / 2f, h * 0.15f)
+            val textPaint = Paint().apply {
+                color = Color.WHITE
+                textSize = 18f * fontScale
+                typeface = Typeface.DEFAULT_BOLD
+                isAntiAlias = true
+            }
+            canvas.drawText("RAMPAS DURAS:", cx + centerX - 60f, cy + centerY - 20f, textPaint)
+            textPaint.textSize = 15f * fontScale
+            textPaint.typeface = Typeface.DEFAULT
+            ramps.forEachIndexed { idx, txt ->
+                canvas.drawText(txt, cx + centerX - 50f, cy + centerY + (idx * 22f), textPaint)
+            }
+        }
+        
+        // Draw Legend at bottom right
+        drawIsoLegend(canvas, w, h)
+    }
+
+    private fun drawIsoLegend(canvas: Canvas, w: Float, h: Float) {
+        val paint = Paint().apply { style = Paint.Style.FILL }
+        val textPaint = Paint().apply { color = Color.WHITE; textSize = 14f * fontScale; isAntiAlias = true }
+        val legendX = w * 0.5f
+        val legendY = h * 0.9f
+        val grades = listOf(0.0, 5.0, 9.0, 13.0, 18.0)
+        val labels = listOf("0%-4%", "4%-8%", "8%-10%", "10%-15%", "15%+")
+        
+        canvas.drawText("Pendiente Media", legendX, legendY - 20f, textPaint)
+        
+        var currentX = legendX
+        grades.forEachIndexed { idx, grade ->
+            paint.color = android.graphics.Color.parseColor(com.example.altgraph.GradeColorScale.getColorHex(grade))
+            canvas.drawRect(currentX, legendY, currentX + 40f, legendY + 15f, paint)
+            canvas.drawText(labels[idx], currentX, legendY + 30f, textPaint)
+            currentX += 65f
+        }
+    }
+
 }

@@ -226,6 +226,12 @@ enum class AltimetriaStyle(val key: String, val icon: String, val title: String,
         icon = "💎",
         title = "Monolito Obsidiana y Plasma",
         description = "Cristal oscuro facetado con núcleo de plasma luminoso y cresta láser"
+    ),
+    GLOBAL_ISOMETRIC(
+        key = "global_iso",
+        icon = "🗺️",
+        title = "Mapa Isométrico Global",
+        description = "Visión arquitectónica 3D de todo el recorrido en forma de serpiente"
     );
 
     companion object {
