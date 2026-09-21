@@ -1847,7 +1847,7 @@ class Altimetria3DView @JvmOverloads constructor(
         val gridW = w * 0.6f
         val gridH = gridW
         val centerX = w / 2f
-        val centerY = h * 0.3f // Move down a bit for header
+        val centerY = if (rotate90) h * 0.3f else h * 0.55f // Move down significantly in portrait to avoid ClimbViewer header
 
         // Draw Base Grid
         val gridPaint = Paint().apply {

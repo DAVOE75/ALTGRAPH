@@ -20,9 +20,9 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps.png" width="220" alt="GPS Global" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps_1km.png" width="220" alt="GPS 1km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps_200m.png" width="220" alt="GPS 200m" /> |
 
-| 🏔️ Visor de Puertos - Especial C.E. | | |
+| 🏔️ Visor de Puertos - Especial C.E. | 🏔️ Visor de Puertos (Isométrico) | |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_especial.png" width="220" alt="Climb Viewer HC" /> | | |
+| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_especial.png" width="220" alt="Climb Viewer HC" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_iso.png" width="220" alt="Climb Viewer Iso" /> | |
 ---
 ## 🌐 Portal Web Oficial y Soporte Multilingüe (5 Idiomas)
 Visita el **[Portal Web Oficial de ALTGRAPH (davoe75.github.io/ALTGRAPH)](https://davoe75.github.io/ALTGRAPH/)** para la documentación interactiva en español, inglés, francés, italiano y alemán.
