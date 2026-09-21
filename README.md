@@ -16,13 +16,12 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
 | 🏔️ Altimetría 3D (Escala 20km) | 🏔️ Altimetría 3D (Escala 200km) | 🏔️ Visor de Puertos - 3ª Cat |
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_20km.png" width="220" alt="Altimetría 3D 20km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_200km.png" width="220" alt="Altimetría 3D 200km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer.png" width="220" alt="Visor de Puertos 3ª Cat" /> |
-| 🗺️ GPS Isométrico (Global) | 🗺️ GPS Isométrico (1km) | 🗺️ GPS Isométrico (200m) |
+| 🏔️ Visor de Puertos - Especial C.E. | 🏔️ Visor de Puertos (Isométrico) | 🗺️ GPS Isométrico (Global) |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps.png" width="220" alt="GPS Global" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps_1km.png" width="220" alt="GPS 1km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps_200m.png" width="220" alt="GPS 200m" /> |
-
-| 🏔️ Visor de Puertos - Especial C.E. | 🏔️ Visor de Puertos (Isométrico) | |
+| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_especial.png" width="220" alt="Visor de Puertos Especial CE" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_iso.png" width="220" alt="Visor de Puertos Isométrico" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps.png" width="220" alt="GPS Isométrico Global" /> |
+| 🗺️ GPS Isométrico (1km) | 🗺️ GPS Isométrico (200m) | |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_especial.png" width="220" alt="Climb Viewer HC" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_iso.png" width="220" alt="Climb Viewer Iso" /> | |
+| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps_1km.png" width="220" alt="GPS Isométrico 1km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps_200m.png" width="220" alt="GPS Isométrico 200m" /> | |
 ---
 ## 🌐 Portal Web Oficial y Soporte Multilingüe (5 Idiomas)
 Visita el **[Portal Web Oficial de ALTGRAPH (davoe75.github.io/ALTGRAPH)](https://davoe75.github.io/ALTGRAPH/)** para la documentación interactiva en español, inglés, francés, italiano y alemán.
