@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png" alt="ALTGRAPH Logo" width="160" />
 </p>
 # ALTGRAPH (v0.5.0 STABLE)
-*Lire en : [Español](README.md) | [English](README_en.md) | [Français](README_fr.md) | [Italiano](README_it.md) | [Deutsch](README_de.md)*
+*Lire en : [🇪🇸 Español](https://github.com/DAVOE75/ALTGRAPH/blob/main/README.md) | [🇬🇧 English](https://github.com/DAVOE75/ALTGRAPH/blob/main/README_en.md) | [🇫🇷 Français](https://github.com/DAVOE75/ALTGRAPH/blob/main/README_fr.md) | [🇮🇹 Italiano](https://github.com/DAVOE75/ALTGRAPH/blob/main/README_it.md) | [🇩🇪 Deutsch](https://github.com/DAVOE75/ALTGRAPH/blob/main/README_de.md)*
 **ALTGRAPH** est une extension professionnelle d'altimétrie et de performance de nouvelle génération pour les compteurs GPS **Hammerhead Karoo** (Karoo 2 et Karoo 3), développée par **David García Pascual** à l'aide du SDK officiel `karoo-ext`.
 Elle révolutionne le concept traditionnel de l'altimétrie cycliste en intégrant une **Suite de 6 Modèles de Visualisation Altimétrique** avec sélecteur dynamique en direct, une échelle monochromatique continue de 15 niveaux, une avancée quantique en fenêtre glissante de 50 mètres, une résolution adaptative multi-échelle, l'analyse des cols de montagne, le calcul topographique (projection horizontale pure), la détection mathématique des virages en épingle (tornanti), le filtrage par catégories de POI, le commutateur d'échelle tactile, le mode paysage pivoté à 90°, l'allure **VAM** et le calcul scientifique du **Degré de Fatigue (GF)**.
 ---
