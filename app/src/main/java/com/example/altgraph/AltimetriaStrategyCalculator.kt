@@ -71,7 +71,28 @@ class AltimetriaStrategyCalculator {
     private val liveElevationHistory = mutableListOf<Double>()
     private var lastElevationSample = 350.0
     private var liveDistanceAccumulated = 0.0
+    private val freeRideHistory = mutableListOf<Pair<Double, Double>>() // Distancia, Elevación
     var instantBarometricGrade = 0.0
+    
+    private fun getFreeRideElevationAt(dist: Double): Double {
+        if (freeRideHistory.isEmpty()) return currentElevation
+        if (dist <= freeRideHistory.first().first) return freeRideHistory.first().second
+        if (dist >= freeRideHistory.last().first) return freeRideHistory.last().second
+
+        var low = 0
+        var high = freeRideHistory.size - 1
+        while (low <= high) {
+            val mid = (low + high) ushr 1
+            val p = freeRideHistory[mid]
+            if (p.first < dist) low = mid + 1
+            else if (p.first > dist) high = mid - 1
+            else return p.second
+        }
+        val p1 = freeRideHistory[low - 1]
+        val p2 = freeRideHistory[low]
+        val t = (dist - p1.first) / (p2.first - p1.first).coerceAtLeast(0.01)
+        return p1.second + t * (p2.second - p1.second)
+    }
 
     // ── Datos del Climber nativo de Karoo (DISTANCE_TO_TOP, ELEVATION_TO_TOP, …) ──
     // El SDK expone estos valores calculados directamente desde el archivo de ruta (GPX/FIT).
@@ -609,15 +630,22 @@ class AltimetriaStrategyCalculator {
         val isNavigating = isNavigatingRoute && (routePoints.isNotEmpty() || routeElevationProfile.isNotEmpty())
 
         // MODO LIBRE / ENTRENAMIENTO REAL SIN RUTA PRECARGADA:
-        // Genera el perfil 3D barométrico ajustándose exactamente a la pendiente en vivo de la carretera
+        // Genera el perfil 3D con el historial acumulado en tiempo real en lugar de proyectar al futuro
         if (!isNavigating) {
-            val baseGrade = if (instantBarometricGrade != 0.0) instantBarometricGrade else 5.0
+            val baseGrade = instantBarometricGrade
             if (currentSpeed > 0.1) {
                 liveDistanceAccumulated += currentSpeed * 1.0 // Medido cada segundo
             }
 
-            val quantumMeters = 50.0
-            val windowStartDist = (liveDistanceAccumulated / quantumMeters).toLong() * quantumMeters
+            // Acumular el punto actual en el historial si avanzamos más de 5 metros
+            if (freeRideHistory.isEmpty() || liveDistanceAccumulated - freeRideHistory.last().first >= 5.0) {
+                freeRideHistory.add(Pair(liveDistanceAccumulated, currentElevation))
+            }
+
+            // La ventana ahora mira hacia atrás desde la posición actual
+            val windowStartDist = (liveDistanceAccumulated - lookaheadDist).coerceAtLeast(0.0)
+            
+            // El ciclista avanza hacia la derecha al empezar, y luego se queda en el borde derecho
             val riderDistInWindow = (liveDistanceAccumulated - windowStartDist).coerceAtLeast(0.0)
             val riderProgress = (riderDistInWindow / lookaheadDist).toFloat().coerceIn(0f, 1f)
 
@@ -627,18 +655,23 @@ class AltimetriaStrategyCalculator {
 
             val freeSubBlocks = mutableListOf<Float>()
             val freeElevations = mutableListOf<Float>()
-            var accElev = currentElevation
-            freeElevations.add(accElev.toFloat())
 
-            // Proyectar la pendiente actual de forma constante hacia adelante.
-            // NO añadimos oscilaciones sinusoidales — el perfil debe reflejar la
-            // carretera real que el altímetro barométrico está leyendo, no un adorno.
-            val constantGrade = baseGrade.coerceIn(-30.0, 30.0).toFloat()
-            for (idx in 0 until numSubBlocks) {
-                freeSubBlocks.add(constantGrade)
-                accElev += subBlockSize * (constantGrade / 100.0)
-                freeElevations.add(accElev.toFloat())
+            // Remuestrear el historial en los sub-bloques de la ventana
+            for (idx in 0..numSubBlocks) {
+                val ptDist = windowStartDist + (idx * subBlockSize)
+                val ptElev = getFreeRideElevationAt(ptDist)
+                freeElevations.add(ptElev.toFloat())
+                
+                if (idx > 0) {
+                    val prevElev = freeElevations[idx - 1]
+                    val dE = ptElev - prevElev
+                    val dD = subBlockSize
+                    val grade = if (dD > 0) (dE / dD) * 100.0 else 0.0
+                    freeSubBlocks.add(grade.toFloat())
+                }
             }
+
+            val windowStartElevation = freeElevations.first().toDouble()
 
             val hasAttack = attackAlertsEnabled && freeSubBlocks.any { it > thresholdAttack }
             val liveFatigue = (freeSubBlocks.average() * 8.5 + asphaltFactor * 10).roundToInt().coerceIn(10, 250)
@@ -666,7 +699,7 @@ class AltimetriaStrategyCalculator {
                 curvatureOffsets = liveCurvatures,
                 riderProgress = riderProgress,
                 windowStartMeters = windowStartDist,
-                windowStartElevation = currentElevation,
+                windowStartElevation = windowStartElevation,
                 subBlocks = freeSubBlocks,
                 subBlockSizeMeters = subBlockSize,
                 majorBlockSizeMeters = majorBlockSize,

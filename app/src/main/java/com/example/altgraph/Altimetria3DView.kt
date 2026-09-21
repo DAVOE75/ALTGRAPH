@@ -834,14 +834,23 @@ class Altimetria3DView @JvmOverloads constructor(
         val yBack = FloatArray(totalMicroSamples)
         val yBase = FloatArray(totalMicroSamples)
 
-        val minElev = microElevations.minOrNull() ?: currentElevation.toFloat()
-        val maxElev = microElevations.maxOrNull() ?: (minElev + 50f)
-        val elevRange = (maxElev - minElev).coerceAtLeast(15f)
+        var rawMinElev = microElevations.minOrNull() ?: currentElevation.toFloat()
+        var rawMaxElev = microElevations.maxOrNull() ?: (rawMinElev + 50f)
+        val actualRange = (rawMaxElev - rawMinElev).coerceAtLeast(0f)
+
+        // Escala visual proporcional: un 15% de pendiente debe ocupar todo el alto.
+        // Limitamos este rango mínimo a 250m para que rutas largas no queden planas.
+        val minProportionalRange = (totalMetersAhead * 0.15f).toFloat().coerceAtMost(250f)
+        val effectiveRange = actualRange.coerceAtLeast(minProportionalRange).coerceAtLeast(15f)
+
+        val padding = (effectiveRange - actualRange) / 2f
+        val displayMinElev = rawMinElev - padding
+        val finalElevRange = effectiveRange
 
         // GRÁFICA RECTA: xFront avanza de forma estrictamente lineal, sin zigzagueo de carretera
         for (i in 0 until totalMicroSamples) {
             val px = startX + (i * microStepX) - panOffsetX
-            val normalizedHeight = ((microElevations[i] - minElev) / elevRange).coerceIn(0f, 1f)
+            val normalizedHeight = ((microElevations[i] - displayMinElev) / finalElevRange).coerceIn(0f, 1f)
 
             val pYFront = baseGroundY - (normalizedHeight * maxPeakHeight)
 
@@ -872,7 +881,7 @@ class Altimetria3DView @JvmOverloads constructor(
         axisTextPaint.textAlign = Paint.Align.LEFT
         for (k in 0..steps) {
             val ratio = k.toFloat() / steps
-            val elevMark = (minElev + (ratio * elevRange)).toInt()
+            val elevMark = (displayMinElev + (ratio * finalElevRange)).toInt()
             val yIso = baseGroundY - (ratio * maxPeakHeight)
 
             canvas.drawLine(startX - depth3dX, yIso, baseEndX, yIso, gridPaint)

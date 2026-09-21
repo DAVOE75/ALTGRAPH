@@ -1,4 +1,4 @@
-# 📖 Manual de Usuario - ALTGRAPH (v0.4.1 STABLE)
+# 📖 Manual de Usuario - ALTGRAPH (v0.5.0 STABLE)
 
 **ALTGRAPH** es una extensión avanzada de altimetría y análisis de rendimiento para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3), desarrollada por **David García Pascual**.
 
@@ -15,7 +15,7 @@
 ## 🇪🇸 ESPAÑOL
 
 ### 1. Instalación y Configuración
-1. Transfiere la APK `ALTGRAPH-v0.4.1.apk` a tu dispositivo Karoo mediante **ADB** (`adb install -r ALTGRAPH-v0.4.1.apk`).
+1. Transfiere la APK `ALTGRAPH-v0.5.0.apk` a tu dispositivo Karoo mediante **ADB** (`adb install -r ALTGRAPH-v0.5.0.apk`).
 2. En tu Karoo, entra en **Ajustes > Perfiles de Carrera** y selecciona el perfil donde quieras incluir los campos.
 3. Edita una página de datos, pulsa en **Añadir Campo** y selecciona la categoría **ALTGRAPH**.
 
@@ -56,7 +56,7 @@ Al abrir **ALTGRAPH** desde el menú de aplicaciones de tu Karoo 3, dispones de 
   - **VAM Objetivo (m/h)**: Ajuste desde 500 m/h hasta 2000 m/h.
   - **Tipo / Calidad de Asfalto (TA)**: Muy Bueno (0.1), Bueno (0.5), Regular (1.2), Malo / Gravilla (1.7).
 
-### 3. Campos de Datos Disponibles (v0.4.1)
+### 3. Campos de Datos Disponibles (v0.5.0)
 
 #### 🏔️ 1. Altimetría 3D (`3D Altimetry`)
 - **Descripción**: Perfil 3D avanzado con selector de 5 estilos (Clásico, Horizonte Iso, Oasis Tácticos, Campo Fuerza, Monolito Obsidiana). Incorpora ventana rodante cuántica de 50m, progresión física del ciclista por la cresta, resolución adaptativa multiescala (50m a 10km), escala monocromática suave de 15 tramos del 0 al 15% (blanco a rojo), cotas de altitud nítidas, cápsulas oscuras de alto contraste para %, lectura triple en encabezado (**Pendiente Actual**, **Pendiente Media del tramo** y **Pendiente Máxima**), marcas de herraduras, hitos POI y zoom táctil en pantalla.
@@ -79,7 +79,7 @@ Al abrir **ALTGRAPH** desde el menú de aplicaciones de tu Karoo 3, dispones de 
 ## 🇬🇧 ENGLISH
 
 ### 1. Installation & Setup
-1. Transfer `ALTGRAPH-v0.4.1.apk` to your Karoo device via **ADB** (`adb install -r ALTGRAPH-v0.4.1.apk`).
+1. Transfer `ALTGRAPH-v0.5.0.apk` to your Karoo device via **ADB** (`adb install -r ALTGRAPH-v0.5.0.apk`).
 2. On your Karoo, go to **Settings > Ride Profiles** and edit your preferred profile.
 3. Add a new Data Field and select the **ALTGRAPH** category.
 
@@ -102,7 +102,7 @@ Open **ALTGRAPH** from your Karoo app launcher to navigate 4 structured tabs:
 * **📊 2D Tab**: Profile Block Distance, Visible Blocks, Attack Alert Threshold.
 * **🚴 VAM Tab**: Target VAM, Asphalt Quality Factor.
 
-### 3. Available Data Fields (v0.4.1)
+### 3. Available Data Fields (v0.5.0)
 
 #### 🏔️ 1. 3D Altimetry
 - **Description**: Next-generation 3D elevation profile with 5 selectable visualization models, 50m quantum rolling window, physical beacon climbing along top edge, adaptive multi-scale resolution, 15-step monochromatic gradient, high-contrast badges, triple header telemetry, GPS hairpins, POIs, and touch zoom.
@@ -123,7 +123,7 @@ Open **ALTGRAPH** from your Karoo app launcher to navigate 4 structured tabs:
 
 
 ---
-## 🆕 What's new in v0.4.1 / Novedades v0.4.1
+## 🆕 What's new in v0.5.0 / Novedades v0.5.0
 
 ### 🇪🇸 ESPAÑOL
 - **Precisión Algorítmica Dinámica**: La Pendiente Media y la Rampa Máxima ahora se calculan analizando el relieve metro a metro en alta resolución (ignorando el suavizado de los bloques visuales) y se acotan estrictamente a la distancia que tengas en pantalla (200m, 5km, 100km...).

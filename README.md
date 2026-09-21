@@ -258,7 +258,7 @@ Este proyecto de código abierto se distribuye bajo la licencia **MIT** - Copyri
 
 
 ---
-## 🆕 What's new in v0.4.1 / Novedades v0.4.1
+## 🆕 What's new in v0.5.0 / Novedades v0.5.0
 
 ### 🇪🇸 ESPAÑOL
 - **Precisión Algorítmica Dinámica**: La Pendiente Media y la Rampa Máxima ahora se calculan analizando el relieve metro a metro en alta resolución (ignorando el suavizado de los bloques visuales) y se acotan estrictamente a la distancia que tengas en pantalla (200m, 5km, 100km...).
