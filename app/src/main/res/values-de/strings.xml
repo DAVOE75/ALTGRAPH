@@ -79,4 +79,12 @@
     <string name="scale_legend_major_block_m">Jeder Block = %1$dm</string>
     <string name="scale_legend_major_block_km">Jeder Block = %1$skm</string>
     <string name="scale_legend_sub_block">Jeder Teilblock = %1$dm</string>
+
+    <!-- Pro Features -->
+    <string name="setting_smart_zoom">Taktischen Smart Zoom aktivieren (Auto-Scale)</string>
+    <string name="setting_oasis_tracking">Oasis Tracking aktivieren (Erholungszonen)</string>
+    <string name="setting_virtual_pacer">Biomechanischen Virtual Pacer aktivieren (Geist)</string>
+    <string name="setting_switchback_rendering">3D-Kehren-Dynamik aktivieren</string>
+    <string name="setting_energy_management">Energy Management System aktivieren (Menschliche Batterie)</string>
+
 </resources>
