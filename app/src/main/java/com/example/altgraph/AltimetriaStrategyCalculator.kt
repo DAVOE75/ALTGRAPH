@@ -52,7 +52,11 @@ data class StrategyData(
     val activeClimbs: List<RouteClimb> = emptyList(),
     val visibleAvgGrade: Double = 0.0,
     val visibleMaxGrade: Double = 0.0,
-    val routeName: String? = null
+    val routeName: String? = null,
+    // PRO Features
+    val oasisDistanceToNextCrucible: Double? = null,
+    val virtualPacerRelativeDistance: Double? = null,
+    val energyBatteryLevel: Double = 100.0
 )
 
 class AltimetriaStrategyCalculator {
@@ -74,6 +78,11 @@ class AltimetriaStrategyCalculator {
     private val freeRideHistory = mutableListOf<Pair<Double, Double>>() // Distancia, Elevación
     var instantBarometricGrade = 0.0
     
+    // PRO Feature States
+    private var smartLookahead: Double = 350.0
+    private var virtualPacerDistance: Double = 0.0
+    private var energyBatteryLevel: Double = 100.0
+
     private fun getFreeRideElevationAt(dist: Double): Double {
         if (freeRideHistory.isEmpty()) return currentElevation
         if (dist <= freeRideHistory.first().first) return freeRideHistory.first().second
@@ -621,11 +630,31 @@ class AltimetriaStrategyCalculator {
         val prefs = context?.let { AppPreferences.getInstance(it) }
 
         val blockSize = prefs?.blockSizeMeters ?: 100.0
-        val lookaheadDist = (prefs?.lookaheadMeters3d ?: 350).toDouble()
+        val baseLookahead = (prefs?.lookaheadMeters3d ?: 350).toDouble()
         val thresholdAttack = prefs?.thresholdAttackPct ?: 10.0
         val attackAlertsEnabled = prefs?.attackAlertEnabled ?: true
         val asphaltFactor = prefs?.asphaltFactor ?: 0.5
         val useTopographicCalculation = prefs?.useTopographicCalculation ?: false
+
+        // PRO Features Settings
+        val smartZoomEnabled = prefs?.smartZoomEnabled ?: true
+        val oasisTrackingEnabled = prefs?.oasisTrackingEnabled ?: true
+        val virtualPacerEnabled = prefs?.virtualPacerEnabled ?: true
+        val energyManagementEnabled = prefs?.energyManagementEnabled ?: true
+
+        // SMART ZOOM LOGIC
+        var lookaheadDist = baseLookahead
+        if (smartZoomEnabled && baseLookahead < 100000.0) {
+            val targetLookahead = when {
+                instantBarometricGrade >= 8.0 -> baseLookahead.coerceAtMost(350.0) // Crucible
+                instantBarometricGrade >= 4.0 -> baseLookahead.coerceAtLeast(1000.0) // Normal climb
+                else -> baseLookahead.coerceAtLeast(3000.0) // Flat or descent
+            }
+            smartLookahead = smartLookahead + (targetLookahead - smartLookahead) * 0.05
+            lookaheadDist = smartLookahead
+        } else {
+            smartLookahead = baseLookahead
+        }
 
         val isNavigating = isNavigatingRoute && (routePoints.isNotEmpty() || routeElevationProfile.isNotEmpty())
 
@@ -686,7 +715,7 @@ class AltimetriaStrategyCalculator {
                 (sin((windowStartDist + distAlongWindow) / 75.0) * 0.75 + sin((windowStartDist + distAlongWindow) / 200.0) * 0.25).toFloat()
             }
 
-            return StrategyData(
+        return StrategyData(
                 remainingDistance = 0.0,
                 timeToSummit = 0L,
                 avgGrade = baseGrade,
@@ -1049,6 +1078,30 @@ class AltimetriaStrategyCalculator {
             climb.startDistance < windowEndDist && climb.endDistance > windowStartDist
         }
 
+        // OASIS TRACKING LOGIC
+        var oasisDistance: Double? = null
+        if (oasisTrackingEnabled && instantBarometricGrade < 3.0) {
+            var distToCrucible = 0.0
+            for (i in (windowStartIndex..routePoints.size-2)) {
+                val pt1 = routePoints[i]
+                val pt2 = routePoints[i+1]
+                val dist = pt2.distance - pt1.distance
+                if (dist > 0) {
+                    val grade = ((pt2.elevation - pt1.elevation) / dist) * 100.0
+                    if (grade >= 8.0) {
+                        distToCrucible = (pt1.distance - currentRiderDistance).coerceAtLeast(0.0)
+                        break
+                    }
+                }
+            }
+            if (distToCrucible > 50.0) {
+                oasisDistance = distToCrucible
+            }
+        }
+
+        // Virtual pacer init logic for route mode
+        if (virtualPacerDistance == 0.0) virtualPacerDistance = currentRiderDistance
+
         return StrategyData(
             remainingDistance = totalDistanceRemaining,
             timeToSummit = secondsRemaining,
@@ -1070,7 +1123,10 @@ class AltimetriaStrategyCalculator {
             activeClimbs = visibleClimbs,
             visibleAvgGrade = visibleAvgGrade,
             visibleMaxGrade = trueMaxGrade,
-            routeName = activeRouteName
+            routeName = activeRouteName,
+            oasisDistanceToNextCrucible = oasisDistance,
+            virtualPacerRelativeDistance = if (virtualPacerEnabled) virtualPacerDistance - currentRiderDistance else null,
+            energyBatteryLevel = energyBatteryLevel
         )
     }
 

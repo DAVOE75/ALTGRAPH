@@ -62,6 +62,13 @@
     <string name="setting_show_3d_zoom">Enable Touch Zoom Controls (🔍) on 3D Graph</string>
     <string name="setting_custom_maps_title">Custom Cartography Management</string>
     <string name="setting_custom_maps_desc">Discovers and imports high-resolution vector map packs (.mbtiles / .map) for Karoo</string>
+
+    <!-- Pro Features -->
+    <string name="setting_smart_zoom">Enable Tactical Smart Zoom (Auto-Scale)</string>
+    <string name="setting_oasis_tracking">Enable Tactical Oasis Tracking (Recovery Zones)</string>
+    <string name="setting_virtual_pacer">Enable APM Virtual Pacer (Hologram Ghost)</string>
+    <string name="setting_switchback_rendering">Enable 3D Switchback Dynamics</string>
+    <string name="setting_energy_management">Enable Energy Management System (Human Battery)</string>
     <string name="font_normal">Normal</string>
     <string name="font_large">Large</string>
     <string name="font_xl">XL</string>

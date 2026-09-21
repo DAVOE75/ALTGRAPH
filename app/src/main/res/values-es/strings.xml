@@ -60,8 +60,16 @@
     <string name="setting_poi_viewpoints">📸 Miradores y Panorámicas</string>
     <string name="setting_poi_summits">📡 Cimas y Puertos</string>
     <string name="setting_show_3d_zoom">Mostrar Controles de Zoom Táctil (🔍) en Gráfico 3D</string>
-    <string name="setting_custom_maps_title">Gestor de Cartografía Personalizada</string>
-    <string name="setting_custom_maps_desc">Detecta e importa paquetes de mapas vectoriales de alta resolución (.mbtiles / .map) para Karoo</string>
+    <string name="setting_custom_maps_title">Gestión de Cartografía Personalizada</string>
+    <string name="setting_custom_maps_desc">Descubre e importa packs de mapas vectoriales de alta resolución (.mbtiles / .map) para Karoo</string>
+
+    <!-- Pro Features -->
+    <string name="setting_smart_zoom">Habilitar Smart Zoom Táctico (Auto-Escala)</string>
+    <string name="setting_oasis_tracking">Habilitar Oasis Tracking (Zonas de Recuperación)</string>
+    <string name="setting_virtual_pacer">Habilitar Virtual Pacer Biomecánico (Holograma Fantasma)</string>
+    <string name="setting_switchback_rendering">Habilitar Dinámica de Herraduras 3D</string>
+    <string name="setting_energy_management">Habilitar Energy Management System (Batería Humana)</string>
+
     <string name="font_normal">Normal</string>
     <string name="font_large">Largo</string>
     <string name="font_xl">Extra Gr.</string>

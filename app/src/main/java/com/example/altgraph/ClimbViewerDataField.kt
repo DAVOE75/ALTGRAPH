@@ -240,7 +240,10 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                         -1f // -1f ocultará la baliza en la gráfica
                     }
                     
-                    altimetria3DView.update3DData(
+                    altimetria3DView.oasisDistanceToNextCrucible = strategy.oasisDistanceToNextCrucible
+                altimetria3DView.virtualPacerRelativeDistance = strategy.virtualPacerRelativeDistance
+                altimetria3DView.energyBatteryLevel = strategy.energyBatteryLevel
+                altimetria3DView.update3DData(
                         blocks = strategy.nextBlocks,
                         elevation = strategy.windowStartElevation,
                         maxElev = 0.0, // Let view calculate it

@@ -110,6 +110,27 @@ class AppPreferences(context: Context) {
         }
         set(value) = prefs.edit().putString(KEY_ALTIMETRIA_STYLE, value.key).apply()
 
+    // --- PRO FEATURES (NIVEL SDK MÁXIMO) ---
+    var smartZoomEnabled: Boolean
+        get() = prefs.getBoolean(KEY_SMART_ZOOM_ENABLED, true)
+        set(value) = prefs.edit().putBoolean(KEY_SMART_ZOOM_ENABLED, value).apply()
+
+    var oasisTrackingEnabled: Boolean
+        get() = prefs.getBoolean(KEY_OASIS_TRACKING_ENABLED, true)
+        set(value) = prefs.edit().putBoolean(KEY_OASIS_TRACKING_ENABLED, value).apply()
+
+    var virtualPacerEnabled: Boolean
+        get() = prefs.getBoolean(KEY_VIRTUAL_PACER_ENABLED, true)
+        set(value) = prefs.edit().putBoolean(KEY_VIRTUAL_PACER_ENABLED, value).apply()
+
+    var switchbackRenderingEnabled: Boolean
+        get() = prefs.getBoolean(KEY_SWITCHBACK_RENDERING_ENABLED, true)
+        set(value) = prefs.edit().putBoolean(KEY_SWITCHBACK_RENDERING_ENABLED, value).apply()
+
+    var energyManagementEnabled: Boolean
+        get() = prefs.getBoolean(KEY_ENERGY_MANAGEMENT_ENABLED, true)
+        set(value) = prefs.edit().putBoolean(KEY_ENERGY_MANAGEMENT_ENABLED, value).apply()
+
     companion object {
         private const val PREFS_NAME = "altgraph_settings"
         private const val KEY_FONT_FAMILY = "font_family_key"
@@ -137,6 +158,12 @@ class AppPreferences(context: Context) {
         private const val KEY_SHOW_3D_ZOOM = "show_3d_zoom_controls"
         private const val KEY_CUSTOM_MAP_PROVIDER = "custom_map_provider_key"
         private const val KEY_ALTIMETRIA_STYLE = "altimetria_style_key"
+
+        private const val KEY_SMART_ZOOM_ENABLED = "smart_zoom_enabled"
+        private const val KEY_OASIS_TRACKING_ENABLED = "oasis_tracking_enabled"
+        private const val KEY_VIRTUAL_PACER_ENABLED = "virtual_pacer_enabled"
+        private const val KEY_SWITCHBACK_RENDERING_ENABLED = "switchback_rendering_enabled"
+        private const val KEY_ENERGY_MANAGEMENT_ENABLED = "energy_management_enabled"
 
         @Volatile
         private var INSTANCE: AppPreferences? = null

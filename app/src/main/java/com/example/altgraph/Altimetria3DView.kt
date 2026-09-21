@@ -243,6 +243,19 @@ class Altimetria3DView @JvmOverloads constructor(
         color = Color.parseColor("#38BDF8")
         typeface = Typeface.DEFAULT_BOLD
     }
+    private val oasisHoloPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#38BDF8")
+        textSize = 14f
+        typeface = Typeface.DEFAULT_BOLD
+        textAlign = Paint.Align.CENTER
+        setShadowLayer(6f, 0f, 0f, Color.parseColor("#800284C7"))
+    }
+    private val virtualPacerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#8022D3EE") // Semi-transparent Cyan
+        style = Paint.Style.FILL
+        setShadowLayer(10f, 0f, 0f, Color.parseColor("#22D3EE"))
+    }
+
 
     private val liveGradePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#38BDF8")
@@ -388,6 +401,9 @@ class Altimetria3DView @JvmOverloads constructor(
     private var isDragging: Boolean = false
     private var lastTouchX: Float = 0.0f
     private var routeName: String? = null
+    var oasisDistanceToNextCrucible: Double? = null
+    var virtualPacerRelativeDistance: Double? = null
+    var energyBatteryLevel: Double = 100.0
     var isClimbMode: Boolean = false
 
     private val ribbonQuadPath = Path()
@@ -851,14 +867,26 @@ class Altimetria3DView @JvmOverloads constructor(
         for (i in 0 until totalMicroSamples) {
             val px = startX + (i * microStepX) - panOffsetX
             val normalizedHeight = ((microElevations[i] - displayMinElev) / finalElevRange).coerceIn(0f, 1f)
-
             val pYFront = baseGroundY - (normalizedHeight * maxPeakHeight)
 
-            xFront[i] = px
+            var curveOffset = 0f
+            if (showHairpins && hairpins.isNotEmpty()) {
+                val dist = windowStartMeters + (i.toDouble() / totalMicroSamples.coerceAtLeast(1)) * lookaheadMeters
+                for (hp in hairpins) {
+                    val diff = dist - hp
+                    if (Math.abs(diff) < 25.0) {
+                        val phase = (diff + 25.0) / 50.0
+                        curveOffset = (Math.sin(phase * Math.PI * 2.0) * 20.0).toFloat()
+                        break
+                    }
+                }
+            }
+
+            xFront[i] = px + curveOffset
             yFront[i] = pYFront
 
             // Cara trasera extruida en 3D sutil hacia arriba y atrás
-            xBack[i] = px - depth3dX
+            xBack[i] = (px + curveOffset) - depth3dX
             yBack[i] = pYFront - depth3dY
 
             yBase[i] = baseGroundY

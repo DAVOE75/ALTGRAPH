@@ -86,15 +86,17 @@ class MainActivity : Activity() {
         val tab3dContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val tab2dContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         val tabVamContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val tabProContainer = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
 
         val tabContainers = listOf(
             tabEstiloContainer,
             tab3dContainer,
             tab2dContainer,
-            tabVamContainer
+            tabVamContainer,
+            tabProContainer
         )
 
-        val tabTitles = listOf("🎨 Estilo", "🏔️ 3D", "📊 2D", "🚴 VAM")
+        val tabTitles = listOf("🎨 Estilo", "🏔️ 3D", "📊 2D", "🚴 VAM", "🚀 Pro")
         val tabButtons = mutableListOf<Button>()
 
         fun selectTab(activeIdx: Int) {
@@ -721,6 +723,75 @@ class MainActivity : Activity() {
         tabVamContainer.addView(asphaltCard)
 
         // Botón de Guardar y Salir Fijado al Final
+
+        // ==========================================
+        // PESTAÑA 5: 🚀 PRO (MÁXIMO NIVEL SDK)
+        // ==========================================
+
+        val proLabel = createSectionLabel("WORLD TOUR PRO FEATURES")
+        tabProContainer.addView(proLabel)
+
+        // Smart Zoom
+        val smartZoomCard = createCardContainer()
+        val switchSmartZoom = Switch(this).apply {
+            text = getString(R.string.setting_smart_zoom)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.smartZoomEnabled
+            setOnCheckedChangeListener { _, isChecked -> prefs.smartZoomEnabled = isChecked }
+        }
+        smartZoomCard.addView(switchSmartZoom)
+        tabProContainer.addView(smartZoomCard)
+
+        // Oasis Tracking
+        val oasisCard = createCardContainer()
+        val switchOasis = Switch(this).apply {
+            text = getString(R.string.setting_oasis_tracking)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.oasisTrackingEnabled
+            setOnCheckedChangeListener { _, isChecked -> prefs.oasisTrackingEnabled = isChecked }
+        }
+        oasisCard.addView(switchOasis)
+        tabProContainer.addView(oasisCard)
+
+        // Virtual Pacer
+        val pacerCard = createCardContainer()
+        val switchPacer = Switch(this).apply {
+            text = getString(R.string.setting_virtual_pacer)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.virtualPacerEnabled
+            setOnCheckedChangeListener { _, isChecked -> prefs.virtualPacerEnabled = isChecked }
+        }
+        pacerCard.addView(switchPacer)
+        tabProContainer.addView(pacerCard)
+
+        // Switchback Dynamics
+        val switchbackCard = createCardContainer()
+        val switchSwitchback = Switch(this).apply {
+            text = getString(R.string.setting_switchback_rendering)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.switchbackRenderingEnabled
+            setOnCheckedChangeListener { _, isChecked -> prefs.switchbackRenderingEnabled = isChecked }
+        }
+        switchbackCard.addView(switchSwitchback)
+        tabProContainer.addView(switchbackCard)
+
+        // Energy Management
+        val energyCard = createCardContainer()
+        val switchEnergy = Switch(this).apply {
+            text = getString(R.string.setting_energy_management)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.energyManagementEnabled
+            setOnCheckedChangeListener { _, isChecked -> prefs.energyManagementEnabled = isChecked }
+        }
+        energyCard.addView(switchEnergy)
+        tabProContainer.addView(energyCard)
+
+        // Final Button Layout
         val saveExitButton = Button(this).apply {
             text = "💾 " + getString(R.string.btn_save_and_exit)
             textSize = 16f
@@ -750,6 +821,7 @@ class MainActivity : Activity() {
         rootLayout.addView(tab3dContainer)
         rootLayout.addView(tab2dContainer)
         rootLayout.addView(tabVamContainer)
+        rootLayout.addView(tabProContainer)
         rootLayout.addView(saveExitButton)
 
         scrollView.addView(rootLayout)

@@ -283,6 +283,9 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                 val prefs = AppPreferences.getInstance(context)
                 val strategy = calculator.calculateStrategy(context)
                 val startElev = if (strategy.windowStartElevation > 0.0) strategy.windowStartElevation else calculator.currentElevation
+                altimetria3DView.oasisDistanceToNextCrucible = strategy.oasisDistanceToNextCrucible
+                altimetria3DView.virtualPacerRelativeDistance = strategy.virtualPacerRelativeDistance
+                altimetria3DView.energyBatteryLevel = strategy.energyBatteryLevel
                 altimetria3DView.update3DData(
                     blocks = strategy.nextBlocks,
                     elevation = startElev,
