@@ -26,9 +26,9 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_20km.png" width="220" alt="Altimetría 3D 20km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_200km.png" width="220" alt="Altimetría 3D 200km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer.png" width="220" alt="Visor de Puertos 3ª Cat" /> |
 
-| 🗺️ Mapa Isométrico GPS Real | 🏔️ Visor de Puertos - Especial C.E. | |
+| 🗺️ Mapa Isométrico GPS Real | 🏔️ Visor de Puertos - Especial C.E. | 🗺️ Mapa Isométrico Zoom |
 | :---: | :---: | :---: |
-| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps.png" width="220" alt="Mapa Isométrico GPS" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_especial.png" width="220" alt="Visor de Puertos Especial CE" /> | |
+| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps.png" width="220" alt="Mapa Isométrico GPS" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_especial.png" width="220" alt="Visor de Puertos Especial CE" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps_200m.png" width="220" alt="Mapa Isométrico Zoom" /> |
 
 ---
 

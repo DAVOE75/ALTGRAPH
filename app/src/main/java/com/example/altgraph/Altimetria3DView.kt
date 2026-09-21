@@ -2002,26 +2002,43 @@ class Altimetria3DView @JvmOverloads constructor(
                 canvas.drawText("${"%.1f".format(seg.km)}km", b1x + centerX + 5f, b1y + centerY + 15f, kmTextPaint)
             }
 
-            if (seg.grade > 10.0 && seg.idx % 10 == 0) { // Throttle ramp logs
-                val rText = "${"%.1f".format(seg.km)}km - ${"%.1f".format(seg.grade)}%"
-                if (!ramps.contains(rText) && ramps.size < 8) ramps.add(rText)
-            }
-        }
-
-        // Draw Ramps Info Box in center
-        if (ramps.isNotEmpty()) {
-            val (cx, cy) = projectIso(gridW / 2f, gridH / 2f, h * 0.15f)
-            val textPaint = Paint().apply {
-                color = Color.WHITE
-                textSize = 18f * fontScale
-                typeface = Typeface.DEFAULT_BOLD
-                isAntiAlias = true
-            }
-            canvas.drawText("RAMPAS DURAS:", cx + centerX - 60f, cy + centerY - 20f, textPaint)
-            textPaint.textSize = 15f * fontScale
-            textPaint.typeface = Typeface.DEFAULT
-            ramps.forEachIndexed { idx, txt ->
-                canvas.drawText(txt, cx + centerX - 50f, cy + centerY + (idx * 22f), textPaint)
+            // Iso Ramps: Draw vertical pills for local maxima
+            if (showRamps && seg.grade >= rampMinSlope) {
+                val startIdx = maxOf(0, seg.idx - 3)
+                val endIdx = minOf(subBlocks.size - 1, seg.idx + 3)
+                var isMax = true
+                for (k in startIdx..endIdx) {
+                    val g = subBlocks[k].toFloat()
+                    if (g > seg.grade) {
+                        isMax = false
+                        break
+                    }
+                }
+                
+                // Only draw if we haven't drawn a ramp too close recently to prevent overlap
+                val isFarEnough = ramps.isEmpty() || abs(seg.km - ramps.last().toFloat()) > 0.3f
+                
+                if (isMax && isFarEnough) {
+                    ramps.add(seg.km.toString())
+                    
+                    val mx = p1x + centerX
+                    val my = p1y + centerY
+                    val arrowTopY = my - 45f
+                    val arrowBottomY = my - 15f
+                    
+                    canvas.drawLine(mx, arrowTopY, mx, arrowBottomY, rampArrowPaint)
+                    
+                    val arrowPath = Path()
+                    arrowPath.moveTo(mx, arrowBottomY)
+                    arrowPath.lineTo(mx - 6f, arrowBottomY - 10f)
+                    arrowPath.lineTo(mx + 6f, arrowBottomY - 10f)
+                    arrowPath.close()
+                    canvas.drawPath(arrowPath, rampArrowHeadPaint)
+                    
+                    rampTextPaint.textSize = ((h * 0.052f) * fontScale).coerceIn(11f, 17f)
+                    val rampLabel = "%.0f%%".format(seg.grade)
+                    canvas.drawText(rampLabel, mx, arrowTopY - 4f, rampTextPaint)
+                }
             }
         }
         
@@ -2033,7 +2050,7 @@ class Altimetria3DView @JvmOverloads constructor(
         val paint = Paint().apply { style = Paint.Style.FILL }
         val textPaint = Paint().apply { color = Color.WHITE; textSize = 14f * fontScale; isAntiAlias = true }
         val legendX = w * 0.5f
-        val legendY = h * 0.9f
+        val legendY = h * 0.82f
         val grades = listOf(0.0, 5.0, 9.0, 13.0, 18.0)
         val labels = listOf("0%-4%", "4%-8%", "8%-10%", "10%-15%", "15%+")
         
@@ -2042,9 +2059,13 @@ class Altimetria3DView @JvmOverloads constructor(
         var currentX = legendX
         grades.forEachIndexed { idx, grade ->
             paint.color = android.graphics.Color.parseColor(com.example.altgraph.GradeColorScale.getColorHex(grade))
-            canvas.drawRect(currentX, legendY, currentX + 40f, legendY + 15f, paint)
-            canvas.drawText(labels[idx], currentX, legendY + 30f, textPaint)
-            currentX += 65f
+            val boxWidth = 35f
+            val labelW = textPaint.measureText(labels[idx])
+            val spacing = maxOf(labelW, boxWidth) + 12f
+            
+            canvas.drawRect(currentX, legendY, currentX + boxWidth, legendY + 15f, paint)
+            canvas.drawText(labels[idx], currentX, legendY + 32f, textPaint)
+            currentX += spacing
         }
     }
 
