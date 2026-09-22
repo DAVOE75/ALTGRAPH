@@ -5,7 +5,7 @@
 <p>Read in: <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README.md">🇪🇸 Español</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_en.md">🇬🇧 English</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_fr.md">🇫🇷 Français</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_it.md">🇮🇹 Italiano</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_de.md">🇩🇪 Deutsch</a></p>
 **ALTGRAPH** is a next-generation professional altimetry and performance extension for **Hammerhead Karoo** cycling computers (Karoo 2 and Karoo 3), developed by **David García Pascual** using the official `karoo-ext` SDK.
 It revolutionizes the traditional concept of cycling altimetry by incorporating a **Suite of 5 Altimetry Visualization Models** with a live dynamic selector, a 15-stage continuous monochromatic scale, a 50-meter rolling window quantum advance, adaptive multiscale resolution, mountain pass analysis, optional topographic calculation (pure horizontal projection), mathematical detection of hairpin turns (tornanti), filtering by POI categories (Towns, Fountains, Viewpoints, Summits), a tap-to-zoom scale switcher, Google Sans / Condensed typography, a 90° rotated full-screen landscape mode, dual **VAM** pace with recommended speed, and scientific calculation of the **Fatigue Grade (GF)**.
----
+
 ## 📸 Capturas en Pantalla Real de Karoo 3
 
 | 🎨 Style Tab | 🎛️ Selection Menu | 📊 Full Dashboard |
@@ -28,7 +28,7 @@ It revolutionizes the traditional concept of cycling altimetry by incorporating 
 ---
 ## 🌐 Official Web Portal & Multi-language Support
 Visit the **[ALTGRAPH Official Web Portal (davoe75.github.io/ALTGRAPH)](https://davoe75.github.io/ALTGRAPH/)** for interactive documentation in Spanish, English, French, Italian, and German.
----
+
 ## 👑 ALTGRAPH ELITE 👑 (v0.7.0)
 - **Strava Live Segments 3D (Beta):** Live simulation (KOM Ghost) on extremely hard climbs.
 - **Wind & Weather Overlay:** Native integration (Open-Meteo) to render live wind direction using 3D vectors (Headwind/Tailwind).
@@ -67,14 +67,14 @@ Allows the cyclist to choose between 6 visual ways to interpret the mountain fro
 ### 📊 Triple Header and Telemetry
 * Live readout of **CURRENT GRADE**, **AVERAGE GRADE** of the visible stretch, and **MAX GRADE**.
 * Vector detection of hairpin turns (tornanti), POI filtering (Towns, Fountains, Viewpoints, Summits), exact topographic method, target VAM pace, and Fatigue Grade (GF) index.
----
+
 ## 🆚 ALTGRAPH vs Native Karoo Climber
 ALTGRAPH doesn't replace the native Climber; it complements it by offering a **comprehensive graphical view** that can be customized as a `Data Field` or full-screen. Its main differences are:
 - **Adaptive Resolution & Continuous Rendering**: The profile physically advances in 50m rolling windows. The bars don't "jump" statically; they flow towards you matching your pedaling cadence.
 - **Visualization Models**: The native Climber has a fixed view; ALTGRAPH offers 5 revolutionary models.
 - **Dynamic Touch Scales**: You can instantly change the route zoom (200m, 1km, 10km, 20km, 50km, etc.) simply by tapping the magnifying glass without leaving your workout.
 - **Fatigue Grade (GF)**: The only tool on Karoo that calculates the scientific hardness of a climb based on the APM coefficient.
----
+
 ## ⚙️ Features & Functions in Detail
 ### 📈 Exclusive Data Fields (Tactical Dashboard)
 Besides the graphics engine, ALTGRAPH exposes advanced metrics as individual fields so you can design your perfect screen:
@@ -88,7 +88,7 @@ Besides the graphics engine, ALTGRAPH exposes advanced metrics as individual fie
 - **Mathematical Curve Detection**: The algorithm detects tight turns (tornanti/hairpins) and gives you a graphical warning.
 - **Pure Topographic Calculation**: Optionally, calculate distances based on horizontal projection for absolute rigor in extreme high-mountain passes.
 - **Dark and High Contrast Themes**: Interface designed for instant readability under direct sunlight.
----
+
 ## 📲 Installation on Karoo 2 and Karoo 3
 Built on the official `karoo-ext` SDK, the installation **requires no root** or dangerous OS modifications. It is 100% safe.
 **Via Sideloading (Recommended for Karoo 3)**
@@ -98,19 +98,19 @@ Built on the official `karoo-ext` SDK, the installation **requires no root** or 
 **Via ADB (Advanced)**
 1. Enable Developer Options and USB debugging on your Karoo device.
 2. Connect the device to your PC and run: `adb install -r altgraph.apk`
----
+
 ## 🔧 Initial Configuration
 To bring ALTGRAPH to life on your training screen:
 1. On your Karoo, go to **Profiles** and edit your usual profile (e.g., Road or MTB).
 2. Edit one of the data pages and select your preferred layout (supports everything from a central graphical block to 100% full screen).
 3. Tap the cell to choose the field, scroll down to the extensions section, and choose **ALTGRAPH**.
 4. Optional: Open the ALTGRAPH companion app from the App Launcher to adjust your preferences, like the default 3D model or your target VAM.
----
+
 ## 🧠 Architecture and How It Works
 - **Total Native Integration**: Extracts the route, track, and live progress from the `OnNavigationState` of the official `karoo-ext` API.
 - **Telemetry Processing**: The cyclist's progress is triangulated by crossing the `DISTANCE_TO_DESTINATION` stream with the original elevation polyline, filtering out GPS errors.
 - **Zero-Allocation Rendering**: The entire 3D graphics engine has been programmed on a pure Android Canvas. No "garbage" objects are generated in the loop (Zero GC pauses), guaranteeing 0 visual lags and minimal battery impact.
----
+
 ## ⚠️ Known Limitations
 - If you go off the loaded route (Off-Route), the graph will stop advancing until the navigation system recalculates or you return to the official path.
 - If Karoo doesn't provide the elevation polyline for a third-party imported route, ALTGRAPH will rely on averages to draw the profile.
@@ -119,13 +119,13 @@ To bring ALTGRAPH to life on your training screen:
 
 The next big milestone in ALTGRAPH's development is **Real-Time Altimetric Generation (Free-Ride Mode)**. 
 Currently, the extension requires loading a route (GPX) to obtain the profiles. As soon as Hammerhead releases and enables access to imminent elevation data in its SDK for external developers, **ALTGRAPH will generate the 3D graph and all its tactical metrics on the fly**, without needing a loaded track. You'll be able to explore freely, and the mountain will draw itself in front of you in real-time.
----
+
 ## 📦 Compilation for Developers
 ```bash
 ./gradlew assembleDebug # Compile test APK
 ./gradlew testDebugUnitTest # Run math tests
 ```
----
+
 ## 🤝 Credits and Acknowledgements
 - Built on the official Hammerhead **[karoo-ext](https://github.com/hammerheadnav/karoo-ext)** SDK (Apache 2.0 License).
 - Inspired by the open-source modding community for Karoo (such as the legendary *Ki2* extension or *Climber+*).
@@ -135,7 +135,7 @@ Currently, the extension requires loading a route (GPX) to obtain the profiles. 
 
 This open-source project is distributed under the **MIT** license - Copyright 2026 David García Pascual.
 *Disclaimer: This extension is not affiliated with, endorsed, sponsored, or supported by Hammerhead or SRAM.*
----
+
 ## 🚀 What's new in v0.7.0 (World Tour Pro Features) / Novedades v0.7.0
 ### 🇪🇸 ESPAÑOL
 - **Smart Zoom Táctico (Auto-Escala)**: El zoom 3D se ajusta automáticamente según la pendiente instantánea, cerrándose en muros y abriéndose en llanos panorámicos.

@@ -31,7 +31,7 @@ ALTGRAPH ne remplace pas le Climber natif, mais le complète en offrant une **vu
 - **Modèles de Visualisation** : Le Climber natif a une vue fixe ; ALTGRAPH vous offre 5 modèles révolutionnaires.
 - **Échelles Tactiles Dynamiques** : Changez instantanément le zoom de l'itinéraire (200m, 1km, 10km, 20km, 50km, etc.) en touchant simplement la loupe.
 - **Degré de Fatigue (GF)** : Le seul outil sur Karoo qui calcule la dureté scientifique d'un col en se basant sur le coefficient APM.
----
+
 ## ⚙️ Caractéristiques et Fonctions en Détail
 ### 📈 Champs de Données Exclusifs (Tableau de Bord Tactique)
 - **🧠 Stratège d'Altimétrie** : Affiche un bloc visuel intelligent résumant les prochains kilomètres.
@@ -43,7 +43,7 @@ ALTGRAPH ne remplace pas le Climber natif, mais le complète en offrant une **vu
 - **Détection Mathématique des Virages** : L'algorithme détecte les virages serrés et vous avertit graphiquement.
 - **Calcul Topographique Pur** : Calculez les distances basées sur la projection horizontale pour une rigueur absolue.
 - **Thèmes Sombres à Haut Contraste** : Interface conçue pour une lisibilité instantanée en plein soleil.
----
+
 ## 📲 Installation sur Karoo 2 et Karoo 3
 Basée sur le SDK officiel `karoo-ext`, l'installation **ne nécessite pas de root** ni de modifications dangereuses du système.
 **Via Sideloading (Recommandé pour Karoo 3)**
@@ -60,7 +60,7 @@ Actuellement, l'extension nécessite le chargement d'un itinéraire (GPX) pour o
 
 Ce projet open-source est distribué sous la licence **MIT** - Copyright 2026 David García Pascual.
 *Clause de non-responsabilité : Cette extension n'est pas affiliée, approuvée, sponsorisée ou soutenue par Hammerhead ou SRAM.*
----
+
 ## 🆕 What's new in v0.5.0 / Novedades v0.5.0
 ### 🇪🇸 ESPAÑOL
 - **Modo Libre con Historial Real (Free Ride History)**: En el modo libre (sin ruta cargada), la gráfica 3D ya no proyecta una pendiente infinita. Ahora acumula y dibuja con precisión métrica el terreno real que acabas de superar, fluyendo de forma espectacular bajo las ruedas de tu avatar.
@@ -82,7 +82,7 @@ Ce projet open-source est distribué sous la licence **MIT** - Copyright 2026 Da
 - **Freeride-Modus mit echtem Verlauf (Free Ride History)**: Im Freeride-Modus (keine Route geladen) projiziert das 3D-Diagramm keine unendliche Steigung mehr. Es sammelt und zeichnet nun mit metrischer Präzision das reale Terrain, das Sie gerade bezwungen haben, und fließt spektakulär unter den Rädern Ihres Avatars.
 - **Dynamische visuelle 3D-Skala**: Das 3D-Band skaliert nun seine visuelle Höhe perfekt. Eine flache Rampe (0%) sieht perfekt horizontal aus, und eine 15%ige Steigung füllt den Bildschirm aus, wobei unabhängig von der Länge des Diagramms immer ein realistisches Maßverhältnis beibehalten wird.
 - **Korrektur der Skalierung in flachem Gelände**: Der falsche 5%-Sprung in völlig flachem Gelände wurde behoben. 0% ist jetzt wirklich 0%.
----
+
 ## 👑 ALTGRAPH ELITE 👑 (v0.7.0)
 - **Strava Live Segments 3D (Beta):** Simulation en direct (KOM Ghost) sur les ascensions très difficiles.
 - **Wind & Weather Overlay:** Intégration native (Open-Meteo) pour représenter la direction du vent en direct à l'aide de vecteurs 3D.
