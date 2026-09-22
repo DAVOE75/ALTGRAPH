@@ -50,12 +50,12 @@ Basata sull'SDK ufficiale `karoo-ext`, l'installazione **non richiede permessi d
 2. Invialo al tuo Karoo usando l'app ufficiale **Hammerhead Companion**.
 3. Una volta installata, l'estensione si aggiornerà automaticamente leggendo il `manifest.json`.
 
-**🔮 Roadmap e Prossimi Sviluppi (Modalità Free-Ride)**
+#### 🔮 Roadmap e Prossimi Sviluppi (Modalità Free-Ride)
 
 Il prossimo grande traguardo nello sviluppo di ALTGRAPH è la **Generazione Altimetrica in Tempo Reale (Modalità Free-Ride)**. 
 Attualmente, l'estensione richiede il caricamento di un percorso (GPX) per ottenere i profili. Non appena Hammerhead sbloccherà l'accesso ai dati di altimetria imminente nel suo SDK, **ALTGRAPH genererà il grafico 3D e le metriche tattiche al volo**, senza bisogno di un tracciato caricato. Potrai esplorare liberamente e la montagna si disegnerà davanti a te in tempo reale.
 
-**📄 Licenza e Disclaimer**
+#### 📄 Licenza e Disclaimer
 
 Questo progetto open source è distribuito sotto licenza **MIT** - Copyright 2026 David García Pascual.
 *Disclaimer: Questa estensione non è affiliata, approvata, sponsorizzata o supportata da Hammerhead o SRAM.*
