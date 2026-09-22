@@ -59,7 +59,7 @@ class MainActivity : Activity() {
         }
 
         val subtitle = TextView(this).apply {
-            text = "${getString(R.string.title_settings)} • v0.4.0"
+            text = "${getString(R.string.title_settings)} • v0.7.0 ELITE"
             textSize = 12f
             setTextColor(Color.parseColor("#A1A1AA"))
             gravity = Gravity.CENTER
@@ -283,7 +283,7 @@ class MainActivity : Activity() {
         // Opción: Girar 90° Modo Apaisado
         val rotate90Card = createCardContainer()
         val switchRotate90 = Switch(this).apply {
-            text = getString(R.string.setting_rotate_90_cw)
+            text = getString(R.string.setting_rotate_90_cw) + " (RUTA GLOBAL)"
             textSize = 15f
             setTextColor(Color.WHITE)
             isChecked = prefs.rotate90Clockwise
@@ -292,6 +292,18 @@ class MainActivity : Activity() {
             }
         }
         rotate90Card.addView(switchRotate90)
+
+        val climbRotate90Card = createCardContainer()
+        val climbSwitchRotate90 = Switch(this).apply {
+            text = getString(R.string.setting_rotate_90_cw) + " (VISOR PUERTOS)"
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.climbRotate90Clockwise
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.climbRotate90Clockwise = isChecked
+            }
+        }
+        climbRotate90Card.addView(climbSwitchRotate90)
 
         // Opción: Tamaño de Letra 3D
         val font3dCard = createCardContainer()
@@ -336,6 +348,7 @@ class MainActivity : Activity() {
         tabEstiloContainer.addView(climbStyleCard)
         tabEstiloContainer.addView(fontCard)
         tabEstiloContainer.addView(rotate90Card)
+        tabEstiloContainer.addView(climbRotate90Card)
         tabEstiloContainer.addView(font3dCard)
         tabEstiloContainer.addView(showZoomCard)
 
