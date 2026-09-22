@@ -129,7 +129,7 @@ Para dar vida a ALTGRAPH en tu pantalla de entrenamiento:
 - Si te sales de la ruta cargada (Off-Route), el gráfico dejará de avanzar hasta que el sistema de navegación recalcule o vuelvas a la trazada oficial.
 - Si Karoo no proporciona la polilínea de elevación para una ruta importada de terceros, ALTGRAPH se basará en medias para trazar el perfil, disminuyendo la fidelidad hiperrealista.
 ---
-## 🔮 Roadmap y Próximos Avances (Free-Ride Mode)
+**🔮 Roadmap y Próximos Avances (Free-Ride Mode)**
 El próximo gran hito en el desarrollo de ALTGRAPH es la **Generación Altimétrica en Tiempo Real (Modo Free-Ride)**. 
 Actualmente la extensión requiere cargar una ruta (GPX) para obtener los perfiles. Tan pronto como Hammerhead libere y habilite el acceso a los datos de elevación inminente en su SDK para desarrolladores externos, **ALTGRAPH generará la gráfica 3D y todas sus métricas tácticas sobre la marcha**, sin necesidad de llevar un track cargado. Podrás salir a explorar libremente y la montaña se dibujará frente a ti en tiempo real.
 ---
@@ -145,7 +145,7 @@ El proyecto utiliza Gradle y Kotlin. Requiere JDK 17 y Android SDK (Plataforma 3
 - Inspirado por la comunidad open-source de modding para Karoo (como la mítica extensión *Ki2* o *Climber+*).
 - Desarrollado por **David García Pascual**.
 ---
-## 📄 Licencia y Descargo de Responsabilidad
+**📄 Licencia y Descargo de Responsabilidad**
 Este proyecto de código abierto se distribuye bajo la licencia **MIT** - Copyright 2026 David García Pascual.
 *Descargo de responsabilidad: Esta extensión no está afiliada, respaldada, patrocinada ni soportada por Hammerhead o SRAM. Úsala bajo tu propio riesgo y, por favor, mantén siempre los ojos en la carretera y las manos en el manillar.*
 ---
