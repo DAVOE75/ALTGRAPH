@@ -316,7 +316,7 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                     }
                     FontHelper.applyFontToPaint(maxGradePaint, prefs.fontFamilyKey)
                     
-                    val climbTitle = "<   Puerto ${currentClimbIndex + 1}/${climbs.size} - ${climb.category}   >"
+                    val climbTitle = "◀   Puerto ${currentClimbIndex + 1}/${climbs.size} - ${climb.category}   ▶"
                     currentCanvas.drawText(climbTitle, drawW / 2f, drawH * 0.10f, overlayPaint)
                     
                     // Line 1: Length | Elevation | Status

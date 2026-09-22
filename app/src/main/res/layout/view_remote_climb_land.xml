@@ -11,36 +11,43 @@
         android:scaleType="fitXY"
         android:contentDescription="@string/app_name" />
 
+    <!-- Prev Button (<) : Left side of landscape = top edge of portrait -->
     <Button
         android:id="@+id/btn_prev"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="120dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="160dp"
         android:background="#00000000" />
 
+    <!-- Next Button (>) : Right side of landscape = bottom edge of portrait -->
     <Button
         android:id="@+id/btn_next"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="120dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="160dp"
         android:background="#00000000" />
 
+    <!-- Zoom buttons: Left side of landscape = top edge of portrait -->
+    <!-- We put them in the middle of the top edge. 
+         First element (left in portrait) = bottom in landscape = "-"
+         Second element (right in portrait) = top in landscape = "+"
+    -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:orientation="horizontal"
-        android:layout_gravity="bottom"
-        android:gravity="center_horizontal|bottom"
-        android:layout_marginBottom="16dp"
+        android:layout_gravity="top"
+        android:gravity="center_horizontal|top"
+        android:layout_marginTop="16dp"
         android:padding="8dp">
 
         <Button
-            android:id="@+id/btn_zoom_in"
+            android:id="@+id/btn_zoom_out"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:text="+"
+            android:text="-"
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -48,10 +55,10 @@
             android:layout_marginEnd="16dp" />
 
         <Button
-            android:id="@+id/btn_zoom_out"
+            android:id="@+id/btn_zoom_in"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:text="-"
+            android:text="+"
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"
