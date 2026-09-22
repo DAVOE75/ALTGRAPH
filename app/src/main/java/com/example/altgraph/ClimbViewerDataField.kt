@@ -291,11 +291,23 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                     
                     altimetria3DView.draw(currentCanvas)
                     
+
                     // Draw Header Overlay
-                    overlayPaint.textSize = (h * 0.12f).coerceIn(26f, 42f)
+                    val isRotated = prefs.climbRotate90Clockwise
+                    var drawW = w.toFloat()
+                    var drawH = h.toFloat()
+
+                    if (isRotated) {
+                        currentCanvas.save()
+                        currentCanvas.translate(w.toFloat(), 0f)
+                        currentCanvas.rotate(90f)
+                        drawW = h.toFloat()
+                        drawH = w.toFloat()
+                    }
+                    overlayPaint.textSize = (drawH * 0.12f).coerceIn(26f, 42f)
                     FontHelper.applyFontToPaint(overlayPaint, prefs.fontFamilyKey)
                     
-                    subPaint.textSize = (h * 0.06f).coerceIn(16f, 24f)
+                    subPaint.textSize = (drawH * 0.06f).coerceIn(16f, 24f)
                     subPaint.textAlign = Paint.Align.LEFT
                     FontHelper.applyFontToPaint(subPaint, prefs.fontFamilyKey)
                     
@@ -305,7 +317,7 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                     FontHelper.applyFontToPaint(maxGradePaint, prefs.fontFamilyKey)
                     
                     val climbTitle = "<   Puerto ${currentClimbIndex + 1}/${climbs.size} - ${climb.category}   >"
-                    currentCanvas.drawText(climbTitle, w / 2f, h * 0.10f, overlayPaint)
+                    currentCanvas.drawText(climbTitle, drawW / 2f, drawH * 0.10f, overlayPaint)
                     
                     // Line 1: Length | Elevation | Status
                     val distStr = if (calculator.isNavigatingRoute) {
@@ -332,22 +344,29 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                     val wLine2P1 = subPaint.measureText(line2Part1)
                     val wLine2P2 = maxGradePaint.measureText(line2Part2)
                     
-                    val statsY1 = h * 0.18f
+                    val statsY1 = drawH * 0.18f
                     val statsY2 = statsY1 + 40f
                     
                     subPaint.textAlign = Paint.Align.CENTER
-                    currentCanvas.drawText(line1, w / 2f, statsY1, subPaint)
+                    currentCanvas.drawText(line1, drawW / 2f, statsY1, subPaint)
                     
                     subPaint.textAlign = Paint.Align.LEFT
                     val line2TotalW = wLine2P1 + wLine2P2
-                    var currentX = (w / 2f) - (line2TotalW / 2f)
+                    var currentX = (drawW / 2f) - (line2TotalW / 2f)
                     currentCanvas.drawText(line2Part1, currentX, statsY2, subPaint)
                     currentX += wLine2P1
                     currentCanvas.drawText(line2Part2, currentX, statsY2, maxGradePaint)
                 }
 
-                val remoteViews = RemoteViews(context.packageName, R.layout.view_remote_climb)
+                val isRotated = AppPreferences.getInstance(context).climbRotate90Clockwise
+                if (isRotated) {
+                    currentCanvas.restore()
+                }
+
+                val layoutRes = if (isRotated) R.layout.view_remote_climb_land else R.layout.view_remote_climb
+                val remoteViews = RemoteViews(context.packageName, layoutRes)
                 remoteViews.setImageViewBitmap(R.id.img_graphic, currentBmp)
+
 
                 // Navigation Intents
                 val intentNext = Intent(ACTION_CLIMB_NEXT).apply { setPackage(context.packageName) }
