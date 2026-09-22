@@ -110,6 +110,13 @@ class AppPreferences(context: Context) {
         }
         set(value) = prefs.edit().putString(KEY_ALTIMETRIA_STYLE, value.key).apply()
 
+    var climbAltimetriaStyle: AltimetriaStyle
+        get() {
+            val key = prefs.getString(KEY_CLIMB_ALTIMETRIA_STYLE, AltimetriaStyle.CLASSIC.key) ?: AltimetriaStyle.CLASSIC.key
+            return AltimetriaStyle.fromKey(key)
+        }
+        set(value) = prefs.edit().putString(KEY_CLIMB_ALTIMETRIA_STYLE, value.key).apply()
+
     // --- PRO FEATURES (NIVEL SDK MÁXIMO) ---
     var smartZoomEnabled: Boolean
         get() = prefs.getBoolean(KEY_SMART_ZOOM_ENABLED, true)
@@ -174,6 +181,7 @@ class AppPreferences(context: Context) {
         private const val KEY_SHOW_3D_ZOOM = "show_3d_zoom_controls"
         private const val KEY_CUSTOM_MAP_PROVIDER = "custom_map_provider_key"
         private const val KEY_ALTIMETRIA_STYLE = "altimetria_style_key"
+        private const val KEY_CLIMB_ALTIMETRIA_STYLE = "climb_altimetria_style_key"
 
         private const val KEY_SMART_ZOOM_ENABLED = "smart_zoom_enabled"
         private const val KEY_OASIS_TRACKING_ENABLED = "oasis_tracking_enabled"

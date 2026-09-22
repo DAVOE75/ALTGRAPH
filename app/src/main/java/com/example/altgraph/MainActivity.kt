@@ -144,7 +144,7 @@ class MainActivity : Activity() {
 
         // Opción: Modelo de Altimetría (Selector de las 5 Vistas Revolucionarias)
         val styleCard = createCardContainer()
-        val styleLabel = createSectionLabel("VISTA Y MODELO DE ALTIMETRÍA")
+        val styleLabel = createSectionLabel("VISTA Y MODELO DE ALTIMETRÍA (RUTA GLOBAL)")
         val initialStyle = prefs.altimetriaStyle
         val styleValueText = createValueText("${initialStyle.icon} ${initialStyle.title}")
         val styleDescText = TextView(this).apply {
@@ -191,6 +191,54 @@ class MainActivity : Activity() {
         styleCard.addView(styleValueText)
         styleCard.addView(styleDescText)
         styleCard.addView(styleCol)
+
+        // Opción: Modelo de Altimetría (Visor de Puertos)
+        val climbStyleCard = createCardContainer()
+        val climbStyleLabel = createSectionLabel("VISTA Y MODELO DE ALTIMETRÍA (VISOR DE PUERTOS)")
+        val climbInitialStyle = prefs.climbAltimetriaStyle
+        val climbStyleValueText = createValueText("${climbInitialStyle.icon} ${climbInitialStyle.title}")
+        val climbStyleDescText = TextView(this).apply {
+            text = climbInitialStyle.description
+            textSize = 12f
+            setTextColor(Color.parseColor("#94A3B8"))
+            gravity = Gravity.CENTER
+            setPadding(8, 0, 8, 12)
+        }
+
+        val climbStyleButtons = mutableListOf<Button>()
+        val climbStyleCol = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        }
+
+        styleOptions.forEachIndexed { idx, styleOpt ->
+            val isSelected = styleOpt == climbInitialStyle
+            val btn = Button(this).apply {
+                text = "${styleOpt.icon} ${styleOpt.title}"
+                textSize = 12f
+                typeface = Typeface.DEFAULT_BOLD
+                setPadding(10, 10, 10, 10)
+                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                    topMargin = 3
+                    bottomMargin = 3
+                }
+                applyButtonStyle(this, isSelected)
+                setOnClickListener {
+                    prefs.climbAltimetriaStyle = styleOpt
+                    climbStyleValueText.text = "${styleOpt.icon} ${styleOpt.title}"
+                    climbStyleDescText.text = styleOpt.description
+                    updateSegmentActiveStates(climbStyleButtons, idx)
+                    Toast.makeText(this@MainActivity, "Visor Puertos: ${styleOpt.title}", Toast.LENGTH_SHORT).show()
+                }
+            }
+            climbStyleButtons.add(btn)
+            climbStyleCol.addView(btn)
+        }
+
+        climbStyleCard.addView(climbStyleLabel)
+        climbStyleCard.addView(climbStyleValueText)
+        climbStyleCard.addView(climbStyleDescText)
+        climbStyleCard.addView(climbStyleCol)
 
         // Opción: Tipografía (Dropdown Spinner)
         val fontCard = createCardContainer()

@@ -278,7 +278,7 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                         majorBlockSizeMeters = strategy.majorBlockSizeMeters,
                         profileElevations = strategy.profileElevations,
                         showBlockPercentages = prefs.showBlockPercentages,
-                        altimetriaStyle = AltimetriaStyle.CLASSIC,
+                        altimetriaStyle = prefs.climbAltimetriaStyle,
                         targetVam = prefs.targetVam,
                         activeClimbs = emptyList(),
                         visibleAvgGrade = strategy.visibleAvgGrade,
