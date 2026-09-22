@@ -261,7 +261,7 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                         showRamps = prefs.show3dRamps,
                         showMaxGrade = prefs.showMaxGradient,
                         fontFamilyKey = prefs.fontFamilyKey,
-                        rotate90 = false,
+                        rotate90 = prefs.climbRotate90Clockwise,
                         rotateMinus90 = false,
                         rampMinSlope = prefs.rampMinSlopePct,
                         rampMaxSlope = prefs.rampMaxSlopePct,
