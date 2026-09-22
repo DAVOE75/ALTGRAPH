@@ -356,67 +356,86 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                 val currentCanvas = cachedCanvas!!
                 altimetria3DView.draw(currentCanvas)
 
-                // --- DRAW COMPASS ---
-                if (strategy.routeCoords.isNotEmpty()) {
-                    val compassX = w - 40f
-                    val compassY = 40f
-                    val cx = compassX
-                    val cy = compassY
+                  // --- DRAW COMPASS ---
+                  if (prefs.showRouteCompass && strategy.routeCoords.isNotEmpty()) {
+                      val rotate90 = prefs.rotate90Clockwise
+                      val vw = if (rotate90) h.toFloat() else w.toFloat()
+                      val vh = if (rotate90) w.toFloat() else h.toFloat()
+
+                      val pillW = (vw * 0.24f).coerceIn(86f, 135f)
+                      val pillH = (vh * 0.15f).coerceIn(26f, 40f)
+                      val marginT = 4f
+                      val marginR = 16f
+                      val bottom = marginT + pillH
+                      
+                      val vCompassX = vw - marginR - (pillW / 2f)
+                      val vCompassY = bottom + 35f
+                      
+                      currentCanvas.save()
+                      if (rotate90) {
+                          currentCanvas.translate(w.toFloat(), 0f)
+                          currentCanvas.rotate(90f)
+                      }
+                      
+                      val cx = vCompassX
+                      val cy = vCompassY
                     
-                    val compassPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-                        color = android.graphics.Color.WHITE
-                        style = android.graphics.Paint.Style.STROKE
-                        strokeWidth = 3f
-                    }
-                    currentCanvas.drawCircle(cx, cy, 20f, compassPaint)
-                    
-                    val arrowPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-                        color = android.graphics.Color.RED
-                        style = android.graphics.Paint.Style.FILL
-                    }
-                    val bgArrowPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-                        color = android.graphics.Color.GRAY
-                        style = android.graphics.Paint.Style.FILL
-                    }
-                    
-                    val angleOffset = if (isHeadingUp) -calculator.currentHeading else 0.0
-                    
-                    currentCanvas.save()
-                    currentCanvas.rotate(angleOffset.toFloat(), cx, cy)
-                    
-                    // Draw north arrow (red)
-                    val pathNorth = android.graphics.Path()
-                    pathNorth.moveTo(cx, cy - 20f)
-                    pathNorth.lineTo(cx + 8f, cy)
-                    pathNorth.lineTo(cx - 8f, cy)
-                    pathNorth.close()
-                    currentCanvas.drawPath(pathNorth, arrowPaint)
-                    
-                    // Draw south arrow (gray)
-                    val pathSouth = android.graphics.Path()
-                    pathSouth.moveTo(cx, cy + 20f)
-                    pathSouth.lineTo(cx + 8f, cy)
-                    pathSouth.lineTo(cx - 8f, cy)
-                    pathSouth.close()
-                    currentCanvas.drawPath(pathSouth, bgArrowPaint)
-                    
-                    currentCanvas.restore()
-                    
-                    // Draw text N
-                    val textPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
-                        color = android.graphics.Color.WHITE
-                        textSize = 14f
-                        textAlign = android.graphics.Paint.Align.CENTER
-                        typeface = android.graphics.Typeface.DEFAULT_BOLD
-                    }
-                    
-                    if (!isHeadingUp) {
-                        currentCanvas.drawText("N", cx, cy - 25f, textPaint)
-                    } else {
-                        // Letra "R" de Rumbo o "H" de Heading
-                        currentCanvas.drawText("H", cx, cy - 25f, textPaint)
-                    }
-                }
+                      val compassPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                          color = android.graphics.Color.WHITE
+                          style = android.graphics.Paint.Style.STROKE
+                          strokeWidth = 3f
+                      }
+                      currentCanvas.drawCircle(cx, cy, 20f, compassPaint)
+                      
+                      val arrowPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                          color = android.graphics.Color.RED
+                          style = android.graphics.Paint.Style.FILL
+                      }
+                      val bgArrowPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                          color = android.graphics.Color.GRAY
+                          style = android.graphics.Paint.Style.FILL
+                      }
+                      
+                      val angleOffset = if (isHeadingUp) -calculator.currentHeading else 0.0
+                      
+                      currentCanvas.save()
+                      currentCanvas.rotate(angleOffset.toFloat(), cx, cy)
+                      
+                      // Draw north arrow (red)
+                      val pathNorth = android.graphics.Path()
+                      pathNorth.moveTo(cx, cy - 20f)
+                      pathNorth.lineTo(cx + 8f, cy)
+                      pathNorth.lineTo(cx - 8f, cy)
+                      pathNorth.close()
+                      currentCanvas.drawPath(pathNorth, arrowPaint)
+                      
+                      // Draw south arrow (gray)
+                      val pathSouth = android.graphics.Path()
+                      pathSouth.moveTo(cx, cy + 20f)
+                      pathSouth.lineTo(cx + 8f, cy)
+                      pathSouth.lineTo(cx - 8f, cy)
+                      pathSouth.close()
+                      currentCanvas.drawPath(pathSouth, bgArrowPaint)
+                      
+                      currentCanvas.restore()
+                      
+                      // Draw text N
+                      val textPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                          color = android.graphics.Color.WHITE
+                          textSize = 14f
+                          textAlign = android.graphics.Paint.Align.CENTER
+                          typeface = android.graphics.Typeface.DEFAULT_BOLD
+                      }
+                      
+                      if (!isHeadingUp) {
+                          currentCanvas.drawText("N", cx, cy - 25f, textPaint)
+                      } else {
+                          // Letra "R" de Rumbo o "H" de Heading
+                          currentCanvas.drawText("H", cx, cy - 25f, textPaint)
+                      }
+                      
+                      currentCanvas.restore()
+                  }
 
                 val remoteViews = RemoteViews(context.packageName, R.layout.view_remote_3d)
                 remoteViews.setImageViewBitmap(R.id.img_graphic, currentBmp)
@@ -433,17 +452,24 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     )
                     remoteViews.setOnClickPendingIntent(R.id.img_graphic, pendingIntent)
                 }
-                
-                val intentCompass = Intent(ACTION_TOGGLE_COMPASS).apply {
-                    setPackage(context.packageName)
-                }
-                val pendingIntentCompass = PendingIntent.getBroadcast(
-                    context,
-                    1,
-                    intentCompass,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-                remoteViews.setOnClickPendingIntent(R.id.btn_toggle_compass, pendingIntentCompass)
+                                if (prefs.showRouteCompass && strategy.routeCoords.isNotEmpty()) {
+                      val intentCompass = Intent(ACTION_TOGGLE_COMPASS).apply {
+                          setPackage(context.packageName)
+                      }
+                      val pendingIntentCompass = PendingIntent.getBroadcast(
+                          context,
+                          1,
+                          intentCompass,
+                          PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                      )
+                      remoteViews.setViewVisibility(R.id.btn_toggle_compass, android.view.View.VISIBLE)
+                      remoteViews.setViewVisibility(R.id.btn_toggle_compass_land, android.view.View.VISIBLE)
+                      remoteViews.setOnClickPendingIntent(R.id.btn_toggle_compass, pendingIntentCompass)
+                      remoteViews.setOnClickPendingIntent(R.id.btn_toggle_compass_land, pendingIntentCompass)
+                  } else {
+                      remoteViews.setViewVisibility(R.id.btn_toggle_compass, android.view.View.GONE)
+                      remoteViews.setViewVisibility(R.id.btn_toggle_compass_land, android.view.View.GONE)
+                  }
 
                 emitter.updateView(remoteViews)
 

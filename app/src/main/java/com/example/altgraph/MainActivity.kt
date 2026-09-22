@@ -589,7 +589,21 @@ class MainActivity : Activity() {
         }
         showMaxGradCard.addView(switchShowMaxGrad)
 
+        // Opción: Mostrar Brujula en Ruta
+        val showCompassCard = createCardContainer()
+        val switchShowCompass = Switch(this).apply {
+            text = getString(R.string.setting_show_route_compass)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.showRouteCompass
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.showRouteCompass = isChecked
+            }
+        }
+        showCompassCard.addView(switchShowCompass)
+
         tab3dContainer.addView(lookaheadCard)
+        tab3dContainer.addView(showCompassCard)
         tab3dContainer.addView(showCotasCard)
         tab3dContainer.addView(showRampsCard)
         tab3dContainer.addView(rampMinCard)

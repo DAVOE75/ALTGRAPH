@@ -48,6 +48,7 @@
     <string name="setting_show_block_percentages">Show Slope % Inside Profile Blocks</string>
     <string name="setting_show_3d_cotas">Show Altitude Labels in 3D Graph</string>
     <string name="setting_show_3d_ramps">Show Steep Ramp Callouts (≥10%) in 3D Graph</string>
+    <string name="setting_show_route_compass">Show Compass on Global Route</string>
     <string name="setting_ramp_min_slope">Ramp Minimum Slope Alert (%)</string>
     <string name="setting_ramp_max_slope">Ramp Maximum Slope Alert (%)</string>
     <string name="setting_show_max_gradient">Show Section Max Gradient in 3D Header</string>

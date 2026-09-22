@@ -1972,7 +1972,7 @@ class Altimetria3DView @JvmOverloads constructor(
             // Fallback to straight line if no GPS
             for (i in 0 until n) {
                 val t = i.toFloat() / (n - 1).coerceAtLeast(1)
-                path[i] = Pair(t * gridW, t * gridH)
+                path[i] = Pair(t * gridW, gridH / 2f)
             }
         }
 

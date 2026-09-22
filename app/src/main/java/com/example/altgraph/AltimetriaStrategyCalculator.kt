@@ -74,7 +74,9 @@ class AltimetriaStrategyCalculator {
             val pt = points[i]
             if (pt.distance > endDist) {
                 // Add the last point just to close the shape correctly
-                coords.add(Pair(pt.latitude, pt.longitude))
+                if (pt.latitude != 0.0 || pt.longitude != 0.0) {
+                    coords.add(Pair(pt.latitude, pt.longitude))
+                }
                 break
             }
             // Skip points with no valid GPS coordinates (0.0, 0.0) which might occur if decoding fails partially
