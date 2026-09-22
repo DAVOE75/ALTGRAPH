@@ -48,6 +48,7 @@
     <string name="setting_show_block_percentages">Mostra % Pendenza nei Blocchi</string>
     <string name="setting_show_3d_cotas">Mostra Altitudini sul Grafico 3D</string>
     <string name="setting_show_3d_ramps">Mostra Rampe Dure (≥10%) in 3D</string>
+    <string name="setting_show_route_compass">Mostra Bussola sul Percorso Globale</string>
     <string name="setting_ramp_min_slope">Pendenza Minima Freccia Rampa (%)</string>
     <string name="setting_ramp_max_slope">Pendenza Massima Freccia Rampa (%)</string>
     <string name="setting_show_max_gradient">Mostra Pendenza Massima nell\'Intestazione 3D</string>

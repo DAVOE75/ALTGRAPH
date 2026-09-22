@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png" alt="ALTGRAPH Logo" width="160" />
 </p>
 # ALTGRAPH (v0.4.1 STABLE)
-<p>Read in: <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README.md">🇪🇸 Español</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_en.md">🇬🇧 English</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_fr.md">🇫🇷 Français</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_it.md">🇮🇹 Italiano</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_de.md">🇩🇪 Deutsch</a></p>
+<p>Read in: <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README.md">🇪🇸 Español</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_en.md">🇬🇧 English</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_fr.md">🇫🇷 Français</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_it.md">🇮🇹 Italiano</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_de.md">🇩🇪 Deutsch</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_pt.md">🇵🇹 Português</a></p>
 **ALTGRAPH** is a next-generation professional altimetry and performance extension for **Hammerhead Karoo** cycling computers (Karoo 2 and Karoo 3), developed by **David García Pascual** using the official `karoo-ext` SDK.
 It revolutionizes the traditional concept of cycling altimetry by incorporating a **Suite of 5 Altimetry Visualization Models** with a live dynamic selector, a 15-stage continuous monochromatic scale, a 50-meter rolling window quantum advance, adaptive multiscale resolution, mountain pass analysis, optional topographic calculation (pure horizontal projection), mathematical detection of hairpin turns (tornanti), filtering by POI categories (Towns, Fountains, Viewpoints, Summits), a tap-to-zoom scale switcher, Google Sans / Condensed typography, a 90° rotated full-screen landscape mode, dual **VAM** pace with recommended speed, and scientific calculation of the **Fatigue Grade (GF)**.
 
@@ -29,7 +29,7 @@ It revolutionizes the traditional concept of cycling altimetry by incorporating 
 
 ---
 ## 🌐 Official Web Portal & Multi-language Support
-Visit the **[ALTGRAPH Official Web Portal (davoe75.github.io/ALTGRAPH)](https://davoe75.github.io/ALTGRAPH/)** for interactive documentation in Spanish, English, French, Italian, and German.
+Visit the **[ALTGRAPH Official Web Portal (davoe75.github.io/ALTGRAPH)](https://davoe75.github.io/ALTGRAPH/)** for interactive documentation in Spanish, English, French, Italian, German, and Portuguese.
 
 ## 👑 ALTGRAPH ELITE 👑 (v0.7.0)
 - **Strava Live Segments 3D (Beta):** Live simulation (KOM Ghost) on extremely hard climbs.

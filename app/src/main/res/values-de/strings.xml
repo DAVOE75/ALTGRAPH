@@ -48,6 +48,7 @@
     <string name="setting_show_block_percentages">Steigung % in Blöcken anzeigen</string>
     <string name="setting_show_3d_cotas">Höhenmarkierungen im 3D-Diagramm</string>
     <string name="setting_show_3d_ramps">Steile Rampen (≥10%) in 3D anzeigen</string>
+    <string name="setting_show_route_compass">Kompass auf der Globalen Route anzeigen</string>
     <string name="setting_ramp_min_slope">Mindeststeigung für Rampenpfeil (%)</string>
     <string name="setting_ramp_max_slope">Maximalsteigung für Rampenpfeil (%)</string>
     <string name="setting_show_max_gradient">Max. Steigung im 3D-Header anzeigen</string>

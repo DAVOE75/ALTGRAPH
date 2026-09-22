@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ALTGRAPH</string>
+
+    <!-- Extension Data Fields -->
+    <string name="data_type_altimetria_title">Estrategista de Altimetria</string>
+    <string name="data_type_altimetria_desc">Gráfico de perfil dinâmico com inclinações por trechos e alertas de ataque</string>
+
+    <string name="data_type_altimetria_3d_title">Rota Global 3D</string>
+    <string name="data_type_altimetria_3d_desc">Perfil de altimetria e rota em perspectiva isométrica 3D com inclinações em relevo</string>
+
+    <string name="data_type_fatigue_grade_title">Grau de Fadiga (GF)</string>
+    <string name="data_type_fatigue_grade_desc">Índice científico de Grau de Fadiga e dificuldade para classificação de subidas</string>
+    <string name="data_type_climb_3d_title">Visualizador de Subidas 3D</string>
+    <string name="data_type_climb_3d_desc">Visualizador 3D independente das subidas da rota</string>
+
+    <string name="data_type_climb_pacing_title">Ritmo VAM Objetivo</string>
+    <string name="data_type_climb_pacing_desc">Assistente de VAM objetivo (m/h) com base na inclinação atual</string>
+
+    <string name="data_type_gradient_trend_title">Tendência 3D e Rampa Máxima</string>
+    <string name="data_type_gradient_trend_desc">Tendência de inclinação em tempo real e pico máximo % do trecho</string>
+
+    <string name="data_type_altgraph_map_title">Mapa Topográfico IGN (ALTGRAPH)</string>
+    <string name="data_type_altgraph_map_desc">Mapa topográfico IGN 1:25.000 MBTILES em tela cheia com rota e posição GPS</string>
+
+    <!-- UI Labels for AltimetriaView -->
+    <string name="header_climb_strategist">ESTRATEGISTA DE SUBIDA</string>
+    <string name="label_dist_remaining">DIST. RESTANTE</string>
+    <string name="label_time_to_summit">TEMPO P/ TOPO</string>
+    <string name="label_next_blocks">PRÓXIMOS %1$d m (BLOCOS DE %2$d m)</string>
+    <string name="label_current_gradient">INCLINAÇÃO ATUAL</string>
+    <string name="label_avg_gradient_tramo">INCLINAÇÃO MÉDIA</string>
+    <string name="label_max_gradient_tramo">INCLINAÇÃO MÁXIMA</string>
+    <string name="alert_attack">ATAQUE!</string>
+    <string name="alert_attack_sub">Rampa íngreme no próximo bloco</string>
+
+    <!-- Settings Panel Strings -->
+    <string name="title_settings">Painel de Configurações</string>
+    <string name="setting_font_family">Fonte (Google Sans / Condensed)</string>
+    <string name="setting_block_size">Distância por Bloco do Perfil</string>
+    <string name="setting_visible_blocks_count">Número de Trechos Visíveis no Perfil (1 a 10)</string>
+    <string name="setting_lookahead_meters_3d">Distância de Antecipação 3D (Eixo X)</string>
+    <string name="setting_attack_threshold">Limiar de Alerta de Ataque (%)</string>
+    <string name="setting_target_vam">VAM Objetivo (m/h)</string>
+    <string name="setting_asphalt_factor">Tipo / Qualidade do Asfalto (TA)</string>
+    <string name="setting_enable_alerts">Ativar Alertas Visuais de Ataque</string>
+    <string name="setting_font_size_3d">Tamanho da Fonte na Altimetria 3D</string>
+    <string name="setting_show_block_percentages">Mostrar % de Inclinação nos Blocos do Perfil</string>
+    <string name="setting_show_3d_cotas">Mostrar Cotas de Altitude no Gráfico 3D</string>
+    <string name="setting_show_3d_ramps">Mostrar Indicadores de Rampas Íngremes (≥10%) em 3D</string>
+    <string name="setting_show_route_compass">Mostrar Bússola na Rota Global</string>
+    <string name="setting_ramp_min_slope">Inclinação Mínima para Seta de Rampa (%)</string>
+    <string name="setting_ramp_max_slope">Inclinação Máxima para Seta de Rampa (%)</string>
+    <string name="setting_show_max_gradient">Mostrar Inclinação Máxima no Cabeçalho 3D</string>
+    <string name="setting_rotate_90_cw">Girar Gráfico 90° (Modo Paisagem)</string>
+    <string name="setting_use_topographic">Usar Método de Cálculo de Inclinação Topográfica (Projeção Horizontal)</string>
+    <string name="setting_show_hairpins">Mostrar Curvas Fechadas (Linhas Pretas)</string>
+    <string name="setting_poi_filter">Filtro de Pontos de Interesse (POIs)</string>
+    <string name="setting_poi_towns">🏘️ Cidades e Povoados</string>
+    <string name="setting_poi_water">💧 Fontes de Água</string>
+    <string name="setting_poi_viewpoints">📸 Mirantes e Panorâmicas</string>
+    <string name="setting_poi_summits">⛰️ Cumes e Passos</string>
+    <string name="setting_show_3d_zoom">Mostrar Controles de Zoom de Toque (🔍) no Gráfico 3D</string>
+    <string name="setting_custom_maps_title">Gestão de Cartografia Personalizada</string>
+    <string name="setting_custom_maps_desc">Descobre e importa pacotes de mapas vetoriais de alta resolução (.mbtiles / .map) para Karoo</string>
+
+    <!-- Pro Features -->
+    <string name="setting_smart_zoom">Ativar Smart Zoom Tático (Auto-Escala)</string>
+    <string name="setting_oasis_tracking">Ativar Oasis Tracking (Zonas de Recuperação)</string>
+    <string name="setting_virtual_pacer">Ativar Virtual Pacer Biomecânico (Holograma Fantasma)</string>
+    <string name="setting_switchback_rendering">Ativar Dinâmica de Curvas 3D</string>
+    <string name="setting_energy_management">Ativar Energy Management System (Bateria Humana)</string>
+    <string name="font_normal">Normal</string>
+    <string name="font_large">Grande</string>
+    <string name="font_xl">XL</string>
+    <string name="status_saved">Configurações Salvas Automaticamente</string>
+    <string name="btn_save_and_exit">Salvar e Sair</string>
+
+    <!-- Zone Colors -->
+    <string name="zone_green">VERDE</string>
+    <string name="zone_yellow">AMARELO</string>
+    <string name="zone_orange">LARANJA</string>
+    <string name="zone_red">VERMELHO</string>
+    <string name="zone_purple">ROXO</string>
+
+    <!-- Scale legend for climb profile -->
+    <string name="scale_legend_major_block_m">Cada bloco = %1$dm</string>
+    <string name="scale_legend_major_block_km">Cada bloco = %1$skm</string>
+    <string name="scale_legend_sub_block">Cada sub-bloco = %1$dm</string>
+</resources>

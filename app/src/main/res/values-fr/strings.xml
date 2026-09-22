@@ -48,6 +48,7 @@
     <string name="setting_show_block_percentages">Afficher % de Pente dans les Blocks</string>
     <string name="setting_show_3d_cotas">Afficher Altitudes sur Graphique 3D</string>
     <string name="setting_show_3d_ramps">Afficher Rampes Raides (≥10%) en 3D</string>
+    <string name="setting_show_route_compass">Afficher la Boussole sur la Route Globale</string>
     <string name="setting_ramp_min_slope">Pente Minimale pour Flèche de Rampe (%)</string>
     <string name="setting_ramp_max_slope">Pente Maximale pour Flèche de Rampe (%)</string>
     <string name="setting_show_max_gradient">Afficher Pente Max dans l\'En-tête 3D</string>

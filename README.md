@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png" alt="ALTGRAPH Logo" width="160" />
 </p>
 # ALTGRAPH (v0.7.0 ELITE)
-<p>Leer en: <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README.md">🇪🇸 Español</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_en.md">🇬🇧 English</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_fr.md">🇫🇷 Français</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_it.md">🇮🇹 Italiano</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_de.md">🇩🇪 Deutsch</a></p>
+<p>Leer en: <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README.md">🇪🇸 Español</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_en.md">🇬🇧 English</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_fr.md">🇫🇷 Français</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_it.md">🇮🇹 Italiano</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_de.md">🇩🇪 Deutsch</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_pt.md">🇵🇹 Português</a></p>
 **ALTGRAPH** es una extensión de rendimiento y altimetría profesional de última generación para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3) desarrollada por **David García Pascual** utilizando el SDK oficial `karoo-ext`.
 Revoluciona el concepto tradicional de altimetría ciclista incorporando una **Suite de 6 Modelos de Visualización Altimétrica** con selector dinámico en vivo, escala monocromática continua de 15 tramos, avance cuántico en ventana rodante de 50 metros, resolución adaptativa multiescala, análisis de puertos de montaña, cálculo topográfico opcional (proyección horizontal pura), detección matemática de curvas de herradura (tornanti), filtrado por categorías de Hitos (Pueblos, Fuentes, Miradores, Cimas), conmutador de escala de zoom al tocar la pantalla, tipografías Google Sans / Condensed, modo apaisado rotado a 90° a pantalla completa, ritmo **VAM** dual con velocidad recomendada y cálculo científico del **Grado de Fatiga (GF)**.
 
@@ -27,8 +27,8 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_especial.png" width="220" alt="Visor de Puertos Especial CE" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_iso.png" width="220" alt="Visor de Puertos Isométrico" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps.png" width="220" alt="GPS Isométrico Global" /> |
 
 ---
-## 🌐 Portal Web Oficial y Soporte Multilingüe (5 Idiomas)
-Visita el **[Portal Web Oficial de ALTGRAPH (davoe75.github.io/ALTGRAPH)](https://davoe75.github.io/ALTGRAPH/)** para la documentación interactiva en español, inglés, francés, italiano y alemán.
+## 🌐 Portal Web Oficial y Soporte Multilingüe (6 Idiomas)
+Visita el **[Portal Web Oficial de ALTGRAPH (davoe75.github.io/ALTGRAPH)](https://davoe75.github.io/ALTGRAPH/)** para la documentación interactiva en español, inglés, francés, italiano, alemán y portugués.
 
 ## 👑 ALTGRAPH ELITE 👑 (v0.7.0)
 - **Strava Live Segments 3D (Beta):** Simulación en vivo (KOM Ghost) en puertos de alta dureza.
@@ -203,7 +203,7 @@ Este proyecto de código abierto se distribuye bajo la licencia **MIT** - Copyri
 - **Zweizeilige Maßstabslegende**: Unter jedem Anstiegsprofil: `Jeder Block = Xkm` (größer) und `Jeder Teilblock = Xm` (kleiner).
 - **Intelligenter Radfahrer-Beacon**: Die leuchtende Kugel erscheint nur, wenn der Fahrer physisch im Streckenabschnitt des Anstiegs ist. Vor der Ankunft zeigt das Diagramm das vollständige, saubere Profil.
 - **Zoom-Schaltflächen neu positioniert**: Die Schaltflächen `+` und `−` wurden verschoben, damit sie sich nicht mit den Y-Achsen-Höhenbeschriftungen überschneiden.
-- **Vollständige i18n**: Alle neuen Textzeichenketten in Spanisch, Englisch, Französisch, Italienisch und Deutsch verfügbar.
+- **Vollständige i18n**: Alle neuen Textzeichenketten in Spanisch, Englisch, Französisch, Italienisch, Deutsch und Portugiesisch verfügbar.
 
 ## 🆕 What's new in v0.5.0 / Novedades v0.5.0
 ### 🇪🇸 ESPAÑOL
