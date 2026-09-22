@@ -18,6 +18,7 @@ It revolutionizes the traditional concept of cycling altimetry by incorporating 
 
 | 🏔️ 3D Altimetry (20km) | 🏔️ 3D Altimetry (200km) | 🏔️ Climb Viewer - 3rd Cat |
 - **Independent Settings (v0.7.0)**: You can now separately configure the 3D style (Classic, Isometric, etc.) for the Global Graph and the Climb Viewer from the settings.
+- **Screen Rotation (v0.7.0)**: Adjust landscape mode (Rotate 90°) separately for the global graph and climb viewer.
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_20km.png" width="220" alt="🏔️ 3D Altimetry (20km)" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_200km.png" width="220" alt="🏔️ 3D Altimetry (200km)" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer.png" width="220" alt="🏔️ Climb Viewer - 3rd Cat" /> |
 

@@ -18,6 +18,7 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
 
 | 🏔️ Altimetría 3D (20km) | 🏔️ Altimetría 3D (200km) | 🏔️ Visor de Puertos - 3ª Cat |
 - **Ajustes Independientes (v0.7.0)**: Ahora puedes configurar de forma separada el estilo 3D (Clásico, Isométrico, etc.) para la Gráfica Global y para el Visor de Puertos desde los ajustes.
+- **Rotación de Pantalla (v0.7.0)**: Ajusta el modo apaisado (Girar 90°) de manera separada para la gráfica global y el visor de puertos.
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_20km.png" width="220" alt="Altimetría 3D 20km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_200km.png" width="220" alt="Altimetría 3D 200km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer.png" width="220" alt="Visor de Puertos 3ª Cat" /> |
 
