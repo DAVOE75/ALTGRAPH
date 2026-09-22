@@ -219,7 +219,20 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
 
                 val climbs = calculator.routeClimbs
                 if (climbs.isEmpty()) {
-                    currentCanvas.drawText("Sin puertos detectados / No climbs", w / 2f, h / 2f, overlayPaint)
+                    val isRotated = AppPreferences.getInstance(context).climbRotate90Clockwise
+                    var drawW = w.toFloat()
+                    var drawH = h.toFloat()
+                    if (isRotated) {
+                        currentCanvas.save()
+                        currentCanvas.translate(w.toFloat(), 0f)
+                        currentCanvas.rotate(90f)
+                        drawW = h.toFloat()
+                        drawH = w.toFloat()
+                    }
+                    currentCanvas.drawText("Sin puertos detectados / No climbs", drawW / 2f, drawH / 2f, overlayPaint)
+                    if (isRotated) {
+                        currentCanvas.restore()
+                    }
                 } else {
                     if (currentClimbIndex >= climbs.size) currentClimbIndex = 0
                     val climb = climbs[currentClimbIndex]
@@ -356,14 +369,13 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                     currentCanvas.drawText(line2Part1, currentX, statsY2, subPaint)
                     currentX += wLine2P1
                     currentCanvas.drawText(line2Part2, currentX, statsY2, maxGradePaint)
+                    if (isRotated) {
+                        currentCanvas.restore()
+                    }
                 }
 
-                val isRotated = AppPreferences.getInstance(context).climbRotate90Clockwise
-                if (isRotated) {
-                    currentCanvas.restore()
-                }
-
-                val layoutRes = if (isRotated) R.layout.view_remote_climb_land else R.layout.view_remote_climb
+                val isRotatedOuter = AppPreferences.getInstance(context).climbRotate90Clockwise
+                val layoutRes = if (isRotatedOuter) R.layout.view_remote_climb_land else R.layout.view_remote_climb
                 val remoteViews = RemoteViews(context.packageName, layoutRes)
                 remoteViews.setImageViewBitmap(R.id.img_graphic, currentBmp)
 
