@@ -41,6 +41,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
 
     companion object {
         const val ACTION_CYCLE_3D_ZOOM = "com.example.altgraph.ACTION_CYCLE_3D_ZOOM"
+        const val ACTION_TOGGLE_COMPASS = "com.example.altgraph.ACTION_TOGGLE_COMPASS"
     }
 
     override fun startStream(emitter: Emitter<StreamState>) {
@@ -92,10 +93,16 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                             else -> 200
                         }
                         prefs.lookaheadMeters3d = nextVal
+                    } else if (intent?.action == ACTION_TOGGLE_COMPASS && ctx != null) {
+                        val prefs = AppPreferences.getInstance(ctx)
+                        prefs.routeMapHeadingUp = !prefs.routeMapHeadingUp
                     }
                 }
             }
-            val filter = IntentFilter(ACTION_CYCLE_3D_ZOOM)
+            val filter = IntentFilter().apply {
+                addAction(ACTION_CYCLE_3D_ZOOM)
+                addAction(ACTION_TOGGLE_COMPASS)
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 context.applicationContext.registerReceiver(zoomReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
             } else {
@@ -291,6 +298,14 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                 altimetria3DView.stravaSegmentDistance = strategy.stravaSegmentDistance
                 altimetria3DView.stravaPrGhostDistance = strategy.stravaPrGhostDistance
                 altimetria3DView.windEffectIntensity = strategy.windEffectIntensity
+                val isHeadingUp = prefs.routeMapHeadingUp
+                val mapRotAngle = if (isHeadingUp) {
+                    // Si el heading es 90, la cámara apunta al este, así que rotamos -90 para que apunte arriba
+                    -calculator.currentHeading 
+                } else {
+                    0.0 
+                }
+                
                 altimetria3DView.update3DData(
                     blocks = strategy.nextBlocks,
                     elevation = startElev,
@@ -326,7 +341,8 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     visibleAvgGrade = strategy.visibleAvgGrade,
                     visibleMaxGrade = strategy.visibleMaxGrade,
                     routeName = strategy.routeName,
-                    routeCoords = strategy.routeCoords
+                    routeCoords = strategy.routeCoords,
+                    mapRotationAngle = mapRotAngle
                 )
 
                 if (cachedBitmap == null || cachedBitmap?.width != w || cachedBitmap?.height != h) {
@@ -340,7 +356,69 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                 val currentCanvas = cachedCanvas!!
                 altimetria3DView.draw(currentCanvas)
 
-                val remoteViews = RemoteViews(context.packageName, R.layout.view_remote_graphic)
+                // --- DRAW COMPASS ---
+                if (strategy.routeCoords.isNotEmpty()) {
+                    val compassX = w - 40f
+                    val compassY = 40f
+                    val cx = compassX
+                    val cy = compassY
+                    
+                    val compassPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                        color = android.graphics.Color.WHITE
+                        style = android.graphics.Paint.Style.STROKE
+                        strokeWidth = 3f
+                    }
+                    currentCanvas.drawCircle(cx, cy, 20f, compassPaint)
+                    
+                    val arrowPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                        color = android.graphics.Color.RED
+                        style = android.graphics.Paint.Style.FILL
+                    }
+                    val bgArrowPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                        color = android.graphics.Color.GRAY
+                        style = android.graphics.Paint.Style.FILL
+                    }
+                    
+                    val angleOffset = if (isHeadingUp) -calculator.currentHeading else 0.0
+                    
+                    currentCanvas.save()
+                    currentCanvas.rotate(angleOffset.toFloat(), cx, cy)
+                    
+                    // Draw north arrow (red)
+                    val pathNorth = android.graphics.Path()
+                    pathNorth.moveTo(cx, cy - 20f)
+                    pathNorth.lineTo(cx + 8f, cy)
+                    pathNorth.lineTo(cx - 8f, cy)
+                    pathNorth.close()
+                    currentCanvas.drawPath(pathNorth, arrowPaint)
+                    
+                    // Draw south arrow (gray)
+                    val pathSouth = android.graphics.Path()
+                    pathSouth.moveTo(cx, cy + 20f)
+                    pathSouth.lineTo(cx + 8f, cy)
+                    pathSouth.lineTo(cx - 8f, cy)
+                    pathSouth.close()
+                    currentCanvas.drawPath(pathSouth, bgArrowPaint)
+                    
+                    currentCanvas.restore()
+                    
+                    // Draw text N
+                    val textPaint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+                        color = android.graphics.Color.WHITE
+                        textSize = 14f
+                        textAlign = android.graphics.Paint.Align.CENTER
+                        typeface = android.graphics.Typeface.DEFAULT_BOLD
+                    }
+                    
+                    if (!isHeadingUp) {
+                        currentCanvas.drawText("N", cx, cy - 25f, textPaint)
+                    } else {
+                        // Letra "R" de Rumbo o "H" de Heading
+                        currentCanvas.drawText("H", cx, cy - 25f, textPaint)
+                    }
+                }
+
+                val remoteViews = RemoteViews(context.packageName, R.layout.view_remote_3d)
                 remoteViews.setImageViewBitmap(R.id.img_graphic, currentBmp)
 
                 if (prefs.show3dZoomControls) {
@@ -355,6 +433,17 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     )
                     remoteViews.setOnClickPendingIntent(R.id.img_graphic, pendingIntent)
                 }
+                
+                val intentCompass = Intent(ACTION_TOGGLE_COMPASS).apply {
+                    setPackage(context.packageName)
+                }
+                val pendingIntentCompass = PendingIntent.getBroadcast(
+                    context,
+                    1,
+                    intentCompass,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                remoteViews.setOnClickPendingIntent(R.id.btn_toggle_compass, pendingIntentCompass)
 
                 emitter.updateView(remoteViews)
 

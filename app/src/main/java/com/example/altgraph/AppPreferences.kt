@@ -158,6 +158,10 @@ class AppPreferences(context: Context) {
     var climbRotate90Clockwise: Boolean
         get() = prefs.getBoolean(KEY_CLIMB_ROTATE_90_CW, false)
         set(value) = prefs.edit().putBoolean(KEY_CLIMB_ROTATE_90_CW, value).apply()
+        
+    var routeMapHeadingUp: Boolean
+        get() = prefs.getBoolean(KEY_ROUTE_MAP_HEADING_UP, false)
+        set(value) = prefs.edit().putBoolean(KEY_ROUTE_MAP_HEADING_UP, value).apply()
 
     companion object {
         private const val PREFS_NAME = "altgraph_settings"
@@ -173,8 +177,9 @@ class AppPreferences(context: Context) {
         private const val KEY_SHOW_3D_COTAS = "show_3d_cotas"
         private const val KEY_SHOW_3D_RAMPS = "show_3d_ramps"
         private const val KEY_SHOW_MAX_GRADIENT = "show_max_gradient"
-        private const val KEY_ROTATE_90_CW = "rotate_90_cw"
-        private const val KEY_CLIMB_ROTATE_90_CW = "climb_rotate_90_cw"
+        private const val KEY_ROTATE_90_CW = "rotate_90_clockwise"
+        private const val KEY_CLIMB_ROTATE_90_CW = "climb_rotate_90_clockwise"
+        private const val KEY_ROUTE_MAP_HEADING_UP = "route_map_heading_up"
         private const val KEY_VISIBLE_BLOCKS_COUNT = "visible_blocks_count"
         private const val KEY_RAMP_MIN_SLOPE = "ramp_min_slope_pct"
         private const val KEY_RAMP_MAX_SLOPE = "ramp_max_slope_pct"

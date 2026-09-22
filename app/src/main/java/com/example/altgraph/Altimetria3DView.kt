@@ -383,6 +383,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private var showZoomControls: Boolean = true
     private var showBlockPercentages: Boolean = true
     private var curvatureOffsets: List<Float> = emptyList()
+    private var mapRotationAngle: Double = 0.0
     private var riderProgress: Float = 0.0f
     private var windowStartMeters: Double = 0.0
     private var subBlocks: List<Float> = emptyList()
@@ -473,7 +474,8 @@ class Altimetria3DView @JvmOverloads constructor(
         routeName: String? = null,
         customTitle: String? = null,
         showHeaderStats: Boolean = true,
-        routeCoords: List<Pair<Double, Double>> = emptyList()
+        routeCoords: List<Pair<Double, Double>> = emptyList(),
+        mapRotationAngle: Double = 0.0
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -510,6 +512,7 @@ class Altimetria3DView @JvmOverloads constructor(
         this.visibleMaxGrade = visibleMaxGrade
         this.routeName = routeName
         this.showHeaderStats = showHeaderStats
+        this.mapRotationAngle = mapRotationAngle
         if (subBlocks.isNotEmpty()) {
             this.subBlocks = subBlocks
         }
@@ -1894,18 +1897,40 @@ class Altimetria3DView @JvmOverloads constructor(
             val avgLatRad = Math.toRadians((minLat + maxLat) / 2.0)
             
             // Convert to relative metric-proportional grid
-            val pointsMetric = routeCoords.map { 
+            val rawPointsMetric = routeCoords.map { 
                 val mx = (it.second - minLng) * Math.cos(avgLatRad)
                 val my = (maxLat - it.first) // Invert so North is Top
                 Pair(mx, my)
             }
             
-            val maxMx = pointsMetric.maxOf { it.first }
-            val maxMy = pointsMetric.maxOf { it.second }
-            val maxSpan = maxMx.coerceAtLeast(maxMy)
+            val maxMx = rawPointsMetric.maxOf { it.first }
+            val maxMy = rawPointsMetric.maxOf { it.second }
+            val cx = maxMx / 2.0
+            val cy = maxMy / 2.0
+            
+            val rad = Math.toRadians(mapRotationAngle)
+            val cosA = Math.cos(rad)
+            val sinA = Math.sin(rad)
+            
+            val pointsMetric = rawPointsMetric.map {
+                val dx = it.first - cx
+                val dy = it.second - cy
+                val rx = dx * cosA - dy * sinA
+                val ry = dx * sinA + dy * cosA
+                Pair(rx, ry)
+            }
+            
+            val minRotX = pointsMetric.minOf { it.first }
+            val minRotY = pointsMetric.minOf { it.second }
+            
+            val shiftedPoints = pointsMetric.map {
+                Pair(it.first - minRotX, it.second - minRotY)
+            }
+            
+            val maxSpan = shiftedPoints.maxOf { it.first }.coerceAtLeast(shiftedPoints.maxOf { it.second })
             
             // Normalize to [0, gridW]
-            val normalizedPoints = pointsMetric.map {
+            val normalizedPoints = shiftedPoints.map {
                 val nx = if (maxSpan > 0) (it.first / maxSpan) * gridW else 0.0
                 val ny = if (maxSpan > 0) (it.second / maxSpan) * gridH else 0.0
                 Pair(nx.toFloat(), ny.toFloat())

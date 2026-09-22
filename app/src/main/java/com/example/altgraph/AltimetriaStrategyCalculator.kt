@@ -163,6 +163,8 @@ class AltimetriaStrategyCalculator {
     // Curvas de herradura (distancias absolutas detectadas)
     private val absoluteHairpins = mutableListOf<Double>()
     private val routePois = mutableListOf<Poi>()
+    
+    var currentHeading: Double = 0.0
 
     fun updateLiveGrade(grade: Double) {
         this.instantBarometricGrade = grade
@@ -273,6 +275,12 @@ class AltimetriaStrategyCalculator {
 
     fun updateCurrentLocation(lat: Double, lng: Double) {
         if (lat == 0.0 && lng == 0.0) return
+        if (this.currentLatitude != 0.0 && this.currentLongitude != 0.0) {
+            val dist = Math.hypot(lat - this.currentLatitude, lng - this.currentLongitude)
+            if (dist > 0.00002) { // aprox 2 metros
+                this.currentHeading = bearing(this.currentLatitude, this.currentLongitude, lat, lng)
+            }
+        }
         this.currentLatitude = lat
         this.currentLongitude = lng
     }
