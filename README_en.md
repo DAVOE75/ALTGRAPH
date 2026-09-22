@@ -114,8 +114,9 @@ To bring ALTGRAPH to life on your training screen:
 ## ⚠️ Known Limitations
 - If you go off the loaded route (Off-Route), the graph will stop advancing until the navigation system recalculates or you return to the official path.
 - If Karoo doesn't provide the elevation polyline for a third-party imported route, ALTGRAPH will rely on averages to draw the profile.
----
+
 **🔮 Roadmap and Upcoming Features (Free-Ride Mode)**
+
 The next big milestone in ALTGRAPH's development is **Real-Time Altimetric Generation (Free-Ride Mode)**. 
 Currently, the extension requires loading a route (GPX) to obtain the profiles. As soon as Hammerhead releases and enables access to imminent elevation data in its SDK for external developers, **ALTGRAPH will generate the 3D graph and all its tactical metrics on the fly**, without needing a loaded track. You'll be able to explore freely, and the mountain will draw itself in front of you in real-time.
 ---
@@ -129,8 +130,9 @@ Currently, the extension requires loading a route (GPX) to obtain the profiles. 
 - Built on the official Hammerhead **[karoo-ext](https://github.com/hammerheadnav/karoo-ext)** SDK (Apache 2.0 License).
 - Inspired by the open-source modding community for Karoo (such as the legendary *Ki2* extension or *Climber+*).
 - Developed by **David García Pascual**.
----
+
 **📄 License and Disclaimer**
+
 This open-source project is distributed under the **MIT** license - Copyright 2026 David García Pascual.
 *Disclaimer: This extension is not affiliated with, endorsed, sponsored, or supported by Hammerhead or SRAM.*
 ---
