@@ -333,6 +333,7 @@ class MainActivity : Activity() {
         showZoomCard.addView(switchShowZoom)
 
         tabEstiloContainer.addView(styleCard)
+        tabEstiloContainer.addView(climbStyleCard)
         tabEstiloContainer.addView(fontCard)
         tabEstiloContainer.addView(rotate90Card)
         tabEstiloContainer.addView(font3dCard)
