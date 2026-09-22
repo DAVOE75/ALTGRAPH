@@ -60,3 +60,12 @@ Sistema biomecânico para analisar a reserva de energia do ciclista.
 
 **Autor:** David García Pascual (DAVOE75)
 **Licença:** MIT
+
+### 🏅 Categorização de Subidas (Estilo Grand Tour)
+ALTGRAPH detecta e classifica automaticamente os passos de montanha na sua rota usando critérios técnicos dos Grand Tours (La Vuelta a España, Tour de France), com base no **Grau de Fadiga (APM)**. Os critérios de detecção exigem um mínimo de 3 km a 3% (ou muros curtos de 10%) ou uma dureza acumulada mínima de 20,0 APM.
+As categorias oficiais atribuídas são:
+- **Especial (HC)**: > 240 APM
+- **1ª Categoria**: 150 - 240 APM
+- **2ª Categoria**: 85 - 150 APM
+- **3ª Categoria**: 40 - 85 APM
+- **4ª Categoria**: 20 - 40 APM

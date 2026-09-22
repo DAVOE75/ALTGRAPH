@@ -115,3 +115,11 @@ Dieses Open-Source-Projekt wird unter der **MIT**-Lizenz vertrieben - Copyright 
 - **Virtual Pacer**: Physische VAM-Berechnung hinzugefügt, die eine `Cyan` Geisterkugel projiziert, die entlang des Höhenprofils voranschreitet.
 - **3D-Kehren-Dynamik (Switchbacks)**: Die Straßengeometrie macht einen lateralen 3D-Zickzack, wenn man sich einer echten Haarnadelkurve nähert.
 - **Human Battery (Energy Management)**: Taktisches HUD, das deinen VAM-Verbrauch bewertet, deine Reserven bei harter Anstrengung senkt und sie in der Ebene wieder auflädt.
+### 🏅 Bergkategorisierung (Grand Tour Stil)
+ALTGRAPH erkennt und klassifiziert Bergpässe auf Ihrer Route automatisch nach den technischen Kriterien der Grand Tours (La Vuelta, Tour de France), basierend auf dem **Ermüdungsgrad (APM)**. Die Erkennungskriterien erfordern ein Minimum von 3 km bei 3 % (oder kurze 10 %-Mauern) oder eine akkumulierte Mindesthärte von 20,0 APM.
+Die zugewiesenen offiziellen Kategorien sind:
+- **Ehrenkategorie (HC)**: > 240 APM
+- **1. Kategorie**: 150 - 240 APM
+- **2. Kategorie**: 85 - 150 APM
+- **3. Kategorie**: 40 - 85 APM
+- **4. Kategorie**: 20 - 40 APM

@@ -264,3 +264,11 @@ Este proyecto de código abierto se distribuye bajo la licencia **MIT** - Copyri
 - **Virtual Pacer**: Physische VAM-Berechnung hinzugefügt, die eine `Cyan` Geisterkugel projiziert, die entlang des Höhenprofils voranschreitet.
 - **3D-Kehren-Dynamik (Switchbacks)**: Die Straßengeometrie macht einen lateralen 3D-Zickzack, wenn man sich einer echten Haarnadelkurve nähert.
 - **Human Battery (Energy Management)**: Taktisches HUD, das deinen VAM-Verbrauch bewertet, deine Reserven bei harter Anstrengung senkt und sie in der Ebene wieder auflädt.
+### 🏅 Categorización de Puertos (Estilo La Vuelta)
+ALTGRAPH detecta y clasifica automáticamente los puertos de montaña de tu ruta usando los criterios técnicos de las Grandes Vueltas (La Vuelta a España, Tour de France), basándose en el **Grado de Fatiga (APM)**. Los criterios de detección exigen un mínimo de 3 km al 3% (o muros cortos del 10%) o una dureza acumulada mínima de 20.0 APM. 
+Las categorías oficiales asignadas son:
+- **Especial (C.E. / HC)**: > 240 APM
+- **1ª Categoría**: 150 - 240 APM
+- **2ª Categoría**: 85 - 150 APM
+- **3ª Categoría**: 40 - 85 APM
+- **4ª Categoría**: 20 - 40 APM

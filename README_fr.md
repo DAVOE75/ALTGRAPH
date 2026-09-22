@@ -117,3 +117,11 @@ Ce projet open-source est distribué sous la licence **MIT** - Copyright 2026 Da
 - **Virtual Pacer**: Physische VAM-Berechnung hinzugefügt, die eine `Cyan` Geisterkugel projiziert, die entlang des Höhenprofils voranschreitet.
 - **3D-Kehren-Dynamik (Switchbacks)**: Die Straßengeometrie macht einen lateralen 3D-Zickzack, wenn man sich einer echten Haarnadelkurve nähert.
 - **Human Battery (Energy Management)**: Taktisches HUD, das deinen VAM-Verbrauch bewertet, deine Reserven bei harter Anstrengung senkt und sie in der Ebene wieder auflädt.
+### 🏅 Catégorisation des Cols (Style Grand Tour)
+ALTGRAPH détecte et classe automatiquement les cols de votre itinéraire en utilisant les critères techniques des Grands Tours (La Vuelta, Tour de France), basés sur le **Degré de Fatigue (APM)**. Les critères de détection exigent un minimum de 3 km à 3 % (ou des murs courts à 10 %) ou une dureté cumulée minimale de 20,0 APM.
+Les catégories officielles attribuées sont :
+- **Hors Catégorie (HC)**: > 240 APM
+- **1ère Catégorie**: 150 - 240 APM
+- **2ème Catégorie**: 85 - 150 APM
+- **3ème Catégorie**: 40 - 85 APM
+- **4ème Catégorie**: 20 - 40 APM

@@ -170,3 +170,11 @@ This open-source project is distributed under the **MIT** license - Copyright 20
 - **Virtual Pacer**: Physische VAM-Berechnung hinzugefügt, die eine `Cyan` Geisterkugel projiziert, die entlang des Höhenprofils voranschreitet.
 - **3D-Kehren-Dynamik (Switchbacks)**: Die Straßengeometrie macht einen lateralen 3D-Zickzack, wenn man sich einer echten Haarnadelkurve nähert.
 - **Human Battery (Energy Management)**: Taktisches HUD, das deinen VAM-Verbrauch bewertet, deine Reserven bei harter Anstrengung senkt und sie in der Ebene wieder auflädt.
+### 🏅 Climb Categorization (Grand Tour Style)
+ALTGRAPH automatically detects and classifies mountain passes on your route using technical criteria from Grand Tours (La Vuelta a España, Tour de France), based on the **Fatigue Grade (APM)**. Detection criteria require a minimum of 3 km at 3% (or short 10% walls) or a minimum accumulated hardness of 20.0 APM.
+The official categories assigned are:
+- **Special (HC)**: > 240 APM
+- **1st Category**: 150 - 240 APM
+- **2nd Category**: 85 - 150 APM
+- **3rd Category**: 40 - 85 APM
+- **4th Category**: 20 - 40 APM

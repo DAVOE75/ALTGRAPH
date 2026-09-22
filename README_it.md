@@ -116,3 +116,11 @@ Questo progetto open source è distribuito sotto licenza **MIT** - Copyright 202
 - **Virtual Pacer**: Physische VAM-Berechnung hinzugefügt, die eine `Cyan` Geisterkugel projiziert, die entlang des Höhenprofils voranschreitet.
 - **3D-Kehren-Dynamik (Switchbacks)**: Die Straßengeometrie macht einen lateralen 3D-Zickzack, wenn man sich einer echten Haarnadelkurve nähert.
 - **Human Battery (Energy Management)**: Taktisches HUD, das deinen VAM-Verbrauch bewertet, deine Reserven bei harter Anstrengung senkt und sie in der Ebene wieder auflädt.
+### 🏅 Categorizzazione delle Salite (Stile Grand Tour)
+ALTGRAPH rileva e classifica automaticamente i passi di montagna sul tuo percorso utilizzando i criteri tecnici dei Grandi Giri (La Vuelta, Tour de France), basandosi sul **Grado di Fatica (APM)**. I criteri di rilevamento richiedono un minimo di 3 km al 3% (o brevi muri al 10%) o una durezza accumulata minima di 20.0 APM.
+Le categorie ufficiali assegnate sono:
+- **Fuori Categoria (HC)**: > 240 APM
+- **1ª Categoria**: 150 - 240 APM
+- **2ª Categoria**: 85 - 150 APM
+- **3ª Categoria**: 40 - 85 APM
+- **4ª Categoria**: 20 - 40 APM
