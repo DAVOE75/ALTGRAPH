@@ -1989,6 +1989,24 @@ class Altimetria3DView @JvmOverloads constructor(
         }
         segments.sortBy { (it.x1 + it.y1 + it.x2 + it.y2) }
 
+        // Posición del ciclista sobre la ruta global: mismo índice fraccional (riderProgress)
+        // que el resto de estilos, proyectado sobre la polilínea GPS real de este renderizador.
+        var riderIdxGlobal = -1
+        var riderRemGlobal = 0f
+        var beaconX = 0f
+        var beaconY = 0f
+        if (riderProgress in 0f..1f) {
+            val riderIndexF = riderProgress * (n - 1)
+            riderIdxGlobal = riderIndexF.toInt().coerceIn(0, n - 2)
+            riderRemGlobal = riderIndexF - riderIdxGlobal
+            val rxRaw = path[riderIdxGlobal].first + riderRemGlobal * (path[riderIdxGlobal + 1].first - path[riderIdxGlobal].first)
+            val ryRaw = path[riderIdxGlobal].second + riderRemGlobal * (path[riderIdxGlobal + 1].second - path[riderIdxGlobal].second)
+            val rzRaw = elevations[riderIdxGlobal] + riderRemGlobal * (elevations[riderIdxGlobal + 1] - elevations[riderIdxGlobal])
+            val (bx, by) = projectIso(rxRaw, ryRaw, rzRaw)
+            beaconX = bx + centerX
+            beaconY = by + centerY
+        }
+
         val wallPaint = Paint().apply { style = Paint.Style.FILL }
         val topPaint = Paint().apply {
             color = Color.WHITE
@@ -2010,7 +2028,10 @@ class Altimetria3DView @JvmOverloads constructor(
             val (b1x, b1y) = projectIso(seg.x1, seg.y1, 0f)
             val (b2x, b2y) = projectIso(seg.x2, seg.y2, 0f)
             
-            wallPaint.color = android.graphics.Color.parseColor(com.example.altgraph.GradeColorScale.getColorHex(seg.grade.toDouble()))
+            val baseColor = android.graphics.Color.parseColor(com.example.altgraph.GradeColorScale.getColorHex(seg.grade.toDouble()))
+            val isTraveled = riderIdxGlobal >= 0 && seg.idx < riderIdxGlobal
+            wallPaint.color = if (isTraveled) darkenColor(baseColor, 0.32f) else baseColor
+            topPaint.color = if (isTraveled) Color.parseColor("#4B5563") else Color.WHITE
             
             val poly = Path()
             poly.moveTo(p1x + centerX, p1y + centerY)
@@ -2066,9 +2087,24 @@ class Altimetria3DView @JvmOverloads constructor(
                 }
             }
         }
+
+        // Baliza del ciclista avanzando por la ruta global (oculta si -1f, fuera de tramo)
+        if (riderIdxGlobal >= 0) {
+            val pinY = beaconY - 10f
+            canvas.drawCircle(beaconX, pinY, 9f, beaconHaloPaint)
+            canvas.drawCircle(beaconX, pinY, 7f, beaconPaint)
+            canvas.drawCircle(beaconX, pinY, 4f, beaconCorePaint)
+        }
         
         // Draw Legend at bottom right
         drawIsoLegend(canvas, w, h)
+    }
+
+    private fun darkenColor(color: Int, factor: Float): Int {
+        val hsv = FloatArray(3)
+        Color.colorToHSV(color, hsv)
+        hsv[2] *= factor.coerceIn(0f, 1f)
+        return Color.HSVToColor(Color.alpha(color), hsv)
     }
 
     private fun drawIsoLegend(canvas: Canvas, w: Float, h: Float) {

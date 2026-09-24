@@ -876,7 +876,7 @@ class MainActivity : Activity() {
         tabEliteContainer.addView(eliteLabel)
         
         val unlockTitle = TextView(this).apply {
-            text = if (prefs.isEliteUnlocked) "STATUS: UNLOCKED" else "STATUS: LOCKED (Requires License Key)"
+            text = if (prefs.isEliteUnlocked) getString(R.string.elite_status_unlocked) else getString(R.string.elite_status_locked)
             textSize = 14f
             setTextColor(if (prefs.isEliteUnlocked) Color.GREEN else Color.RED)
             gravity = Gravity.CENTER
@@ -886,7 +886,7 @@ class MainActivity : Activity() {
         
         val licenseCard = createCardContainer()
         val licenseInput = android.widget.EditText(this).apply {
-            hint = "Enter License Key (e.g. ALTGRAPH-ELITE-2026)"
+            hint = getString(R.string.elite_hint_license)
             setHintTextColor(Color.parseColor("#71717A"))
             setTextColor(Color.WHITE)
             textSize = 14f
@@ -898,7 +898,7 @@ class MainActivity : Activity() {
         }
         
         val activateBtn = Button(this).apply {
-            text = "ACTIVATE"
+            text = getString(R.string.elite_btn_activate)
             textSize = 12f
             setTextColor(Color.WHITE)
             background = GradientDrawable().apply {
@@ -916,7 +916,7 @@ class MainActivity : Activity() {
         // Strava Mock
         val stravaCard = createCardContainer()
         val switchStrava = Switch(this).apply {
-            text = "Strava Live Segments 3D (Beta)"
+            text = getString(R.string.elite_strava_segments)
             textSize = 15f
             setTextColor(Color.WHITE)
             isChecked = prefs.stravaSegmentsEnabled
@@ -929,7 +929,7 @@ class MainActivity : Activity() {
         // Weather Mock
         val weatherCard = createCardContainer()
         val switchWeather = Switch(this).apply {
-            text = "Wind & Weather Overlay"
+            text = getString(R.string.elite_weather_overlay)
             textSize = 15f
             setTextColor(Color.WHITE)
             isChecked = prefs.weatherOverlayEnabled
@@ -943,7 +943,7 @@ class MainActivity : Activity() {
             val key = licenseInput.text.toString().trim()
             prefs.licenseKey = key
             val unlocked = prefs.isEliteUnlocked
-            unlockTitle.text = if (unlocked) "STATUS: UNLOCKED" else "STATUS: LOCKED (Requires License Key)"
+            unlockTitle.text = if (unlocked) getString(R.string.elite_status_unlocked) else getString(R.string.elite_status_locked)
             unlockTitle.setTextColor(if (unlocked) Color.GREEN else Color.RED)
             
             // Dynamically enable/disable switches
@@ -951,9 +951,9 @@ class MainActivity : Activity() {
             switchWeather.isEnabled = unlocked
             
             if (unlocked) {
-                Toast.makeText(this, "Elite Features Unlocked!", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.elite_toast_unlocked), Toast.LENGTH_LONG).show()
             } else {
-                Toast.makeText(this, "Invalid License Key", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.elite_toast_invalid), Toast.LENGTH_SHORT).show()
             }
         }
 

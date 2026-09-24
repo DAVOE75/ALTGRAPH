@@ -310,7 +310,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     blocks = strategy.nextBlocks,
                     elevation = startElev,
                     maxElev = 727.0,
-                    grade = strategy.avgGrade,
+                    grade = calculator.instantBarometricGrade,
                     remainingDist = strategy.remainingDistance,
                     blockSizeMeters = strategy.blockSizeMeters,
                     fontScale = prefs.fontSize3dScale,

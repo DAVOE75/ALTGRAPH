@@ -88,4 +88,12 @@
     <string name="setting_switchback_rendering">Activer Dynamique de Lacets 3D</string>
     <string name="setting_energy_management">Activer Energy Management System (Batterie Humaine)</string>
 
+    <string name="elite_status_unlocked">STATUT : DÉBLOQUÉ</string>
+    <string name="elite_status_locked">STATUT : BLOQUÉ (Licence requise)</string>
+    <string name="elite_hint_license">Entrez la licence (ex: ALTGRAPH-ELITE-2026)</string>
+    <string name="elite_btn_activate">ACTIVER</string>
+    <string name="elite_strava_segments">Strava Live Segments 3D (Bêta)</string>
+    <string name="elite_weather_overlay">Calque Vent &amp; Météo</string>
+    <string name="elite_toast_unlocked">Fonctions Elite débloquées !</string>
+    <string name="elite_toast_invalid">Licence invalide</string>
 </resources>

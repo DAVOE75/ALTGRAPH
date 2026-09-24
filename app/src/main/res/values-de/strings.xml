@@ -88,4 +88,12 @@
     <string name="setting_switchback_rendering">3D-Kehren-Dynamik aktivieren</string>
     <string name="setting_energy_management">Energy Management System aktivieren (Menschliche Batterie)</string>
 
+    <string name="elite_status_unlocked">STATUS: ENTSPERRT</string>
+    <string name="elite_status_locked">STATUS: GESPERRT (Lizenz erforderlich)</string>
+    <string name="elite_hint_license">Lizenz eingeben (z.B. ALTGRAPH-ELITE-2026)</string>
+    <string name="elite_btn_activate">AKTIVIEREN</string>
+    <string name="elite_strava_segments">Strava Live Segments 3D (Beta)</string>
+    <string name="elite_weather_overlay">Wind- &amp; Wetter-Overlay</string>
+    <string name="elite_toast_unlocked">Elite-Funktionen entsperrt!</string>
+    <string name="elite_toast_invalid">Ungültige Lizenz</string>
 </resources>

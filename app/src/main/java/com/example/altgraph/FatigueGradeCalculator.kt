@@ -76,13 +76,14 @@ object FatigueGradeCalculator {
     fun getClimbCategoryName(gf: Double): String {
         val lang = Locale.getDefault().language.lowercase()
         return when {
-            gf < 40.0 -> when {
+            gf < 20.0 -> when {
                 lang.startsWith("es") -> "No Puntuable"
                 lang.startsWith("fr") -> "Non Catégorisé"
                 lang.startsWith("it") -> "Non Classificato"
                 lang.startsWith("de") -> "Nicht Kategorisiert"
                 else -> "Uncategorized"
             }
+            gf <= 40.0 -> "4ª Cat"
             gf <= 85.0 -> "3ª Cat"
             gf <= 150.0 -> "2ª Cat"
             gf <= 240.0 -> "1ª Cat"

@@ -451,21 +451,23 @@ class AltimetriaStrategyCalculator {
                     val climbDist = maxPt.distance - startPt.distance
                     val climbElev = maxPt.elevation - startPt.elevation
                     
-                    if (climbDist >= 1000.0) {
+                    if (climbDist >= 500.0) {
                         val avgGrade = (climbElev / climbDist) * 100.0
                         
-                        val isStandardClimb = climbDist >= 3000.0 && avgGrade >= 3.0
-                        val isMuroClimb = climbDist >= 1000.0 && avgGrade >= 12.0
+                        val potentialClimb = RouteClimb(
+                            startDistance = startPt.distance,
+                            endDistance = maxPt.distance,
+                            length = climbDist,
+                            totalElevation = climbElev,
+                            avgGrade = avgGrade
+                        )
+                        val categorizedClimb = calculateClimbCategory(potentialClimb)
                         
-                        if (isStandardClimb || isMuroClimb) {
-                            val potentialClimb = RouteClimb(
-                                startDistance = startPt.distance,
-                                endDistance = maxPt.distance,
-                                length = climbDist,
-                                totalElevation = climbElev,
-                                avgGrade = avgGrade
-                            )
-                            val categorizedClimb = calculateClimbCategory(potentialClimb)
+                        val isStandardClimb = climbDist >= 3000.0 && avgGrade >= 3.0
+                        val isMuroClimb = climbDist >= 500.0 && avgGrade >= 10.0
+                        val isVueltaCategoria = categorizedClimb.apm >= 20.0
+                        
+                        if (isStandardClimb || isMuroClimb || isVueltaCategoria) {
                             customClimbs.add(categorizedClimb)
                         }
                     }
