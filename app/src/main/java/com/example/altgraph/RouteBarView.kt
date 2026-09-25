@@ -16,15 +16,9 @@ class RouteBarView(context: Context) : View(context) {
         style = Paint.Style.FILL
     }
     
-    private val outlinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.BLACK
-        style = Paint.Style.STROKE
-        strokeWidth = 3f
-    }
-    
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        textSize = 28f
+        textSize = 20f
         typeface = Typeface.DEFAULT_BOLD
         textAlign = Paint.Align.CENTER
         setShadowLayer(4f, 0f, 2f, Color.BLACK)
@@ -63,11 +57,12 @@ class RouteBarView(context: Context) : View(context) {
         val isHorizontal = w > h
 
         if (isHorizontal) {
-            // HORIZONTAL MODE (e.g. bottom map slot)
-            val barHeight = h * 0.4f
+            // HORIZONTAL MODE
+            val barHeight = h * 0.45f
             val barTop = (h - barHeight) / 2f
             val barBottom = barTop + barHeight
             val blockWidth = w / numBlocks.toFloat()
+            val cy = barTop + (barHeight / 2f) + (textPaint.textSize / 3f)
             
             // Draw Blocks (Left to Right)
             for (i in blocks.indices) {
@@ -76,20 +71,10 @@ class RouteBarView(context: Context) : View(context) {
                 val left = i * blockWidth
                 val right = left + blockWidth
                 canvas.drawRect(left, barTop, right + 1f, barBottom, segmentPaint) // +1f to prevent gaps
-            }
-            
-            // Draw Outline
-            canvas.drawRect(0f, barTop, w, barBottom, outlinePaint)
-            
-            // Draw Distance Markers (1km, 2km...)
-            val blocksPerKm = (1000.0 / strat.subBlockSizeMeters).toInt()
-            if (blocksPerKm > 0) {
-                for (i in 0 until numBlocks step blocksPerKm) {
-                    if (i == 0) continue
-                    val kmLabel = "${i / blocksPerKm}k"
-                    val px = i * blockWidth
-                    canvas.drawLine(px, barTop, px, barBottom, outlinePaint)
-                    canvas.drawText(kmLabel, px, barTop - 8f, textPaint)
+                
+                // Draw text inside the block if it's wide enough
+                if (blockWidth > 20f) {
+                    canvas.drawText("${grade.toInt()}%", (left + right) / 2f, cy, textPaint)
                 }
             }
             
@@ -106,23 +91,24 @@ class RouteBarView(context: Context) : View(context) {
             
             // Draw Cyclist Triangle pointing Right at the far left
             val path = Path()
-            val cy = barTop + (barHeight / 2f)
+            val cyCyc = barTop + (barHeight / 2f)
             val cWidth = 35f
             val cHeight = barHeight * 0.9f
-            path.moveTo(cWidth, cy) // Point Right
-            path.lineTo(5f, cy - (cHeight / 2f)) // Top Left
-            path.lineTo(15f, cy) // Inner Left
-            path.lineTo(5f, cy + (cHeight / 2f)) // Bottom Left
+            path.moveTo(cWidth, cyCyc) // Point Right
+            path.lineTo(5f, cyCyc - (cHeight / 2f)) // Top Left
+            path.lineTo(15f, cyCyc) // Inner Left
+            path.lineTo(5f, cyCyc + (cHeight / 2f)) // Bottom Left
             path.close()
             canvas.drawPath(path, cyclistPaint)
             canvas.drawPath(path, cyclistOutline)
             
         } else {
-            // VERTICAL MODE (e.g. side map slot)
-            val barWidth = w * 0.4f
+            // VERTICAL MODE
+            val barWidth = w * 0.45f
             val barLeft = (w - barWidth) / 2f
             val barRight = barLeft + barWidth
             val blockHeight = h / numBlocks.toFloat()
+            val cx = barLeft + (barWidth / 2f)
             
             // Draw Blocks (Bottom to Top)
             for (i in blocks.indices) {
@@ -131,20 +117,11 @@ class RouteBarView(context: Context) : View(context) {
                 val bottom = h - (i * blockHeight)
                 val top = bottom - blockHeight
                 canvas.drawRect(barLeft, top - 1f, barRight, bottom, segmentPaint) // -1f to prevent gaps
-            }
-            
-            // Draw Outline
-            canvas.drawRect(barLeft, 0f, barRight, h, outlinePaint)
-            
-            // Draw Distance Markers (1km, 2km...)
-            val blocksPerKm = (1000.0 / strat.subBlockSizeMeters).toInt()
-            if (blocksPerKm > 0) {
-                for (i in 0 until numBlocks step blocksPerKm) {
-                    if (i == 0) continue
-                    val kmLabel = "${i / blocksPerKm}k"
-                    val py = h - (i * blockHeight)
-                    canvas.drawLine(barLeft, py, barRight, py, outlinePaint)
-                    canvas.drawText(kmLabel, barRight + (w * 0.25f), py + 10f, textPaint)
+                
+                // Draw text inside the block if it's tall enough
+                if (blockHeight > 20f) {
+                    val cy = (top + bottom) / 2f + (textPaint.textSize / 3f)
+                    canvas.drawText("${grade.toInt()}%", cx, cy, textPaint)
                 }
             }
             
@@ -161,8 +138,7 @@ class RouteBarView(context: Context) : View(context) {
             
             // Draw Cyclist Triangle pointing Up at the bottom
             val path = Path()
-            val cx = barLeft + (barWidth / 2f)
-            val cy = h - 25f
+            val cyCyc = h - 25f
             val cWidth = barWidth * 0.9f
             val cHeight = 35f
             path.moveTo(cx, h - cHeight - 10f) // Top point
