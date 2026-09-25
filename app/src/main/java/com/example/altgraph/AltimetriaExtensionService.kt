@@ -8,12 +8,12 @@ class AltimetriaExtensionService : KarooExtension("altgraph", "0.4.62") {
     override val types: List<DataTypeImpl> by lazy {
         listOf(
             ClimbViewerDataType("altgraph"),
+            RouteBarDataType("altgraph"),
             AltimetriaGraphDataType("altgraph"),
             Altimetria3DGraphDataType("altgraph"),
             FatigueGradeDataField("altgraph"),
             ClimbPacingDataField("altgraph"),
-            GradientTrendDataField("altgraph"),
-            RouteBarDataType("altgraph")
+            GradientTrendDataField("altgraph")
         )
     }
 }
