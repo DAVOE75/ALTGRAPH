@@ -938,6 +938,19 @@ class MainActivity : Activity() {
         }
         weatherCard.addView(switchWeather)
         tabEliteContainer.addView(weatherCard)
+        
+        // Radar Altimetrico
+        val radarCard = createCardContainer()
+        val switchRadar = Switch(this).apply {
+            text = getString(R.string.elite_radar_enabled)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.eliteRadarEnabled
+            isEnabled = prefs.isEliteUnlocked
+            setOnCheckedChangeListener { _, isChecked -> prefs.eliteRadarEnabled = isChecked }
+        }
+        radarCard.addView(switchRadar)
+        tabEliteContainer.addView(radarCard)
 
         activateBtn.setOnClickListener {
             val key = licenseInput.text.toString().trim()
@@ -949,6 +962,7 @@ class MainActivity : Activity() {
             // Dynamically enable/disable switches
             switchStrava.isEnabled = unlocked
             switchWeather.isEnabled = unlocked
+            switchRadar.isEnabled = unlocked
             
             if (unlocked) {
                 Toast.makeText(this, getString(R.string.elite_toast_unlocked), Toast.LENGTH_LONG).show()

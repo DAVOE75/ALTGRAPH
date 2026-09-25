@@ -158,6 +158,10 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_STRAVA_SEGMENTS_ENABLED, true) && isEliteUnlocked
         set(value) = prefs.edit().putBoolean(KEY_STRAVA_SEGMENTS_ENABLED, value).apply()
 
+    var eliteRadarEnabled: Boolean
+        get() = prefs.getBoolean(KEY_ELITE_RADAR_ENABLED, true) && isEliteUnlocked
+        set(value) = prefs.edit().putBoolean(KEY_ELITE_RADAR_ENABLED, value).apply()
+
 
     var climbRotate90Clockwise: Boolean
         get() = prefs.getBoolean(KEY_CLIMB_ROTATE_90_CW, false)
@@ -208,6 +212,7 @@ class AppPreferences(context: Context) {
         private const val KEY_LICENSE_KEY = "license_key"
         private const val KEY_WEATHER_OVERLAY_ENABLED = "weather_overlay_enabled"
         private const val KEY_STRAVA_SEGMENTS_ENABLED = "strava_segments_enabled"
+        private const val KEY_ELITE_RADAR_ENABLED = "elite_radar_enabled"
 
         @Volatile
         private var INSTANCE: AppPreferences? = null
