@@ -23,6 +23,10 @@
     <string name="data_type_altgraph_map_title">Mapa Topográfico IGN (ALTGRAPH)</string>
     <string name="data_type_altgraph_map_desc">Mapa topográfico IGN 1:25.000 MBTILES a pantalla completa con ruta y posición GPS</string>
 
+    <string name="data_type_route_bar_title">Radar Altimétrico</string>
+    <string name="data_type_route_bar_desc">Cinta vertical de pendiente estilo radar para los próximos kilómetros</string>
+
+
     <!-- UI Labels for AltimetriaView -->
     <string name="header_climb_strategist">ESTRATEGA DE PUERTO</string>
     <string name="label_dist_remaining">DIST. RESTANTE</string>
@@ -94,6 +98,7 @@
     <string name="elite_btn_activate">ACTIVAR</string>
     <string name="elite_strava_segments">Strava Live Segments 3D (Beta)</string>
     <string name="elite_weather_overlay">Capa de Viento y Clima</string>
+    <string name="elite_radar_enabled">Radar Altimétrico (Data Field)</string>
     <string name="elite_toast_unlocked">¡Funciones Elite Desbloqueadas!</string>
     <string name="elite_toast_invalid">Licencia Inválida</string>
 </resources>
