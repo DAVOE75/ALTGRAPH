@@ -23,6 +23,10 @@
     <string name="data_type_altgraph_map_title">Topographic Map IGN (ALTGRAPH)</string>
     <string name="data_type_altgraph_map_desc">Fullscreen IGN 1:25.000 MBTILES topographic map with route and GPS position</string>
 
+    <string name="data_type_route_bar_title">Radar Altimétrico</string>
+    <string name="data_type_route_bar_desc">Cinta vertical de pendiente estilo radar para los próximos kilómetros</string>
+
+
     <!-- UI Labels for AltimetriaView -->
     <string name="header_climb_strategist">CLIMB STRATEGIST</string>
     <string name="label_dist_remaining">DIST. REMAINING</string>
