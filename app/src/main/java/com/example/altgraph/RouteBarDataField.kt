@@ -136,10 +136,20 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                 // Clear the canvas with transparent background so map shows through
                 currentCanvas.drawColor(Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR)
                 
-                val strategy = calculator.calculateStrategy(context)
-                routeBarView.strategyData = strategy
+                val isElite = AppPreferences.getInstance(context).eliteRadarEnabled
                 
-                routeBarView.draw(currentCanvas)
+                if (isElite) {
+                    val strategy = calculator.calculateStrategy(context)
+                    routeBarView.strategyData = strategy
+                    routeBarView.draw(currentCanvas)
+                } else {
+                    val p = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                        color = Color.RED
+                        textSize = 14f
+                        textAlign = Paint.Align.CENTER
+                    }
+                    currentCanvas.drawText("ELITE", w/2f, h/2f, p)
+                }
 
                 val remoteViews = RemoteViews(context.packageName, R.layout.view_remote_graphic)
                 remoteViews.setImageViewBitmap(R.id.img_graphic, currentBmp)
