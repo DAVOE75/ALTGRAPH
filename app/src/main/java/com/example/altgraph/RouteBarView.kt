@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Typeface
 import android.view.View
+import kotlin.math.min
 
 class RouteBarView(context: Context) : View(context) {
 
@@ -26,12 +27,12 @@ class RouteBarView(context: Context) : View(context) {
         color = Color.WHITE
         textSize = 28f
         typeface = Typeface.DEFAULT_BOLD
-        textAlign = Paint.Align.CENTER
+        textAlign = Paint.Align.RIGHT // Align right because it will be on the left of the bar
         setShadowLayer(4f, 0f, 2f, Color.BLACK)
     }
     
     private val chevronOutline = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.argb(150, 0, 0, 0) // Semi-transparent black for inner chevrons
+        color = Color.argb(150, 0, 0, 0)
         style = Paint.Style.STROKE
         strokeWidth = 4f
         strokeJoin = Paint.Join.ROUND
@@ -60,118 +61,62 @@ class RouteBarView(context: Context) : View(context) {
         
         val numBlocks = blocks.size
         
-        val isHorizontal = w > h
-
-        if (isHorizontal) {
-            // HORIZONTAL MODE (e.g. bottom map slot)
-            val barHeight = h * 0.4f
-            val barTop = (h - barHeight) / 2f
-            val barBottom = barTop + barHeight
-            val blockWidth = w / numBlocks.toFloat()
-            
-            // Draw Blocks (Left to Right)
-            for (i in blocks.indices) {
-                val grade = blocks[i]
-                segmentPaint.color = Color.parseColor(GradeColorScale.getColorHex(grade.toDouble()))
-                val left = i * blockWidth
-                val right = left + blockWidth
-                canvas.drawRect(left, barTop, right + 1f, barBottom, segmentPaint) // +1f to prevent gaps
-            }
-            
-            // Draw Outline
-            canvas.drawRect(0f, barTop, w, barBottom, outlinePaint)
-            
-            // Draw Distance Markers (1km, 2km...)
-            val blocksPerKm = (1000.0 / strat.subBlockSizeMeters).toInt()
-            if (blocksPerKm > 0) {
-                for (i in 0 until numBlocks step blocksPerKm) {
-                    if (i == 0) continue
-                    val kmLabel = "${i / blocksPerKm}k"
-                    val px = i * blockWidth
-                    canvas.drawLine(px, barTop, px, barBottom, outlinePaint)
-                    canvas.drawText(kmLabel, px, barTop - 8f, textPaint)
-                }
-            }
-            
-            // Draw Directional Chevrons ( > > > )
-            val chevronSpacing = w / 6f
-            for (i in 1..5) {
-                val cx = i * chevronSpacing
-                val path = Path()
-                path.moveTo(cx - 10f, barTop + 5f)
-                path.lineTo(cx + 10f, barTop + (barHeight / 2f))
-                path.lineTo(cx - 10f, barBottom - 5f)
-                canvas.drawPath(path, chevronOutline)
-            }
-            
-            // Draw Cyclist Triangle pointing Right at the far left
-            val path = Path()
-            val cy = barTop + (barHeight / 2f)
-            val cWidth = 35f
-            val cHeight = barHeight * 0.9f
-            path.moveTo(cWidth, cy) // Point Right
-            path.lineTo(5f, cy - (cHeight / 2f)) // Top Left
-            path.lineTo(15f, cy) // Inner Left
-            path.lineTo(5f, cy + (cHeight / 2f)) // Bottom Left
-            path.close()
-            canvas.drawPath(path, cyclistPaint)
-            canvas.drawPath(path, cyclistOutline)
-            
-        } else {
-            // VERTICAL MODE (e.g. side map slot)
-            val barWidth = w * 0.4f
-            val barLeft = (w - barWidth) / 2f
-            val barRight = barLeft + barWidth
-            val blockHeight = h / numBlocks.toFloat()
-            
-            // Draw Blocks (Bottom to Top)
-            for (i in blocks.indices) {
-                val grade = blocks[i]
-                segmentPaint.color = Color.parseColor(GradeColorScale.getColorHex(grade.toDouble()))
-                val bottom = h - (i * blockHeight)
-                val top = bottom - blockHeight
-                canvas.drawRect(barLeft, top - 1f, barRight, bottom, segmentPaint) // -1f to prevent gaps
-            }
-            
-            // Draw Outline
-            canvas.drawRect(barLeft, 0f, barRight, h, outlinePaint)
-            
-            // Draw Distance Markers (1km, 2km...)
-            val blocksPerKm = (1000.0 / strat.subBlockSizeMeters).toInt()
-            if (blocksPerKm > 0) {
-                for (i in 0 until numBlocks step blocksPerKm) {
-                    if (i == 0) continue
-                    val kmLabel = "${i / blocksPerKm}k"
-                    val py = h - (i * blockHeight)
-                    canvas.drawLine(barLeft, py, barRight, py, outlinePaint)
-                    canvas.drawText(kmLabel, barRight + (w * 0.25f), py + 10f, textPaint)
-                }
-            }
-            
-            // Draw Directional Chevrons ( ^ ^ ^ )
-            val chevronSpacing = h / 6f
-            for (i in 1..5) {
-                val cy = h - (i * chevronSpacing)
-                val path = Path()
-                path.moveTo(barLeft + 5f, cy + 10f)
-                path.lineTo(barLeft + (barWidth / 2f), cy - 10f)
-                path.lineTo(barRight - 5f, cy + 10f)
-                canvas.drawPath(path, chevronOutline)
-            }
-            
-            // Draw Cyclist Triangle pointing Up at the bottom
-            val path = Path()
-            val cx = barLeft + (barWidth / 2f)
-            val cy = h - 25f
-            val cWidth = barWidth * 0.9f
-            val cHeight = 35f
-            path.moveTo(cx, h - cHeight - 10f) // Top point
-            path.lineTo(cx + (cWidth / 2f), h - 10f) // Bottom right
-            path.lineTo(cx, h - 20f) // Inner bottom
-            path.lineTo(cx - (cWidth / 2f), h - 10f) // Bottom left
-            path.close()
-            canvas.drawPath(path, cyclistPaint)
-            canvas.drawPath(path, cyclistOutline)
+        // FORCED VERTICAL ON THE RIGHT
+        // The bar will always be vertical, positioned on the far right edge of the canvas.
+        val barWidth = min(w, h) * 0.4f
+        val barRight = w
+        val barLeft = barRight - barWidth
+        val blockHeight = h / numBlocks.toFloat()
+        
+        // Draw Blocks (Bottom to Top)
+        for (i in blocks.indices) {
+            val grade = blocks[i]
+            segmentPaint.color = Color.parseColor(GradeColorScale.getColorHex(grade.toDouble()))
+            val bottom = h - (i * blockHeight)
+            val top = bottom - blockHeight
+            canvas.drawRect(barLeft, top - 1f, barRight, bottom, segmentPaint) // -1f to prevent gaps
         }
+        
+        // Draw Outline around the whole bar
+        canvas.drawRect(barLeft, 0f, barRight, h, outlinePaint)
+        
+        // Draw Distance Markers (1km, 2km...) extending to the left of the bar
+        val blocksPerKm = (1000.0 / strat.subBlockSizeMeters).toInt()
+        if (blocksPerKm > 0) {
+            for (i in 0 until numBlocks step blocksPerKm) {
+                if (i == 0) continue
+                val kmLabel = "${i / blocksPerKm}k"
+                val py = h - (i * blockHeight)
+                // Line across the bar
+                canvas.drawLine(barLeft, py, barRight, py, outlinePaint)
+                // Text to the left of the bar
+                canvas.drawText(kmLabel, barLeft - 10f, py + 10f, textPaint)
+            }
+        }
+        
+        // Draw Directional Chevrons ( ^ ^ ^ ) inside the bar
+        val chevronSpacing = h / 6f
+        for (i in 1..5) {
+            val cy = h - (i * chevronSpacing)
+            val path = Path()
+            path.moveTo(barLeft + 5f, cy + 10f)
+            path.lineTo(barLeft + (barWidth / 2f), cy - 10f)
+            path.lineTo(barRight - 5f, cy + 10f)
+            canvas.drawPath(path, chevronOutline)
+        }
+        
+        // Draw Cyclist Triangle pointing Up at the bottom
+        val path = Path()
+        val cx = barLeft + (barWidth / 2f)
+        val cy = h - 25f
+        val cWidth = barWidth * 0.9f
+        val cHeight = 35f
+        path.moveTo(cx, h - cHeight - 10f) // Top point
+        path.lineTo(cx + (cWidth / 2f), h - 10f) // Bottom right
+        path.lineTo(cx, h - 20f) // Inner bottom
+        path.lineTo(cx - (cWidth / 2f), h - 10f) // Bottom left
+        path.close()
+        canvas.drawPath(path, cyclistPaint)
+        canvas.drawPath(path, cyclistOutline)
     }
 }
