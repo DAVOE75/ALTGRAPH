@@ -68,7 +68,7 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                         
                         if (state is OnNavigationState.NavigationState.NavigatingRoute) {
                             calculator.isNavigatingRoute = true
-                            calculator.fallbackRemainingDistance = state.routeDistance
+                            calculator.syncRouteDistance(state.routeDistance)
                             calculator.setRouteFromPolyline(state.routePolyline)
                             
                             var elevPoly = state.routeElevationPolyline
@@ -95,7 +95,7 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                             val dist = (state.javaClass.methods.find { it.name == "getDestinationDistance" || it.name == "getDistance" }?.invoke(state) as? Double) ?: 0.0
                             calculator.isNavigatingRoute = true
                             calculator.setRouteElevationProfile(state.elevationPolyline)
-                            calculator.fallbackRemainingDistance = dist
+                            calculator.syncRouteDistance(dist)
                             
                         } else {
                             if (state.javaClass.simpleName == "Idle") {

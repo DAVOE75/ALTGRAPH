@@ -19,6 +19,7 @@ import io.hammerhead.karooext.internal.Emitter
 import io.hammerhead.karooext.internal.ViewEmitter
 import io.hammerhead.karooext.models.DataPoint
 import io.hammerhead.karooext.models.DataType
+import io.hammerhead.karooext.models.OnLocationChanged
 import io.hammerhead.karooext.models.OnNavigationState
 import io.hammerhead.karooext.models.OnStreamState
 import io.hammerhead.karooext.models.StreamState
@@ -126,7 +127,7 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                             calculator.activeRouteName = state.name
                             val routeLength = calculator.routePoints.lastOrNull()?.distance ?: (calculator.routeElevationProfile.lastOrNull()?.distance ?: 0.0)
                             if (routeLength > 0.0) {
-                                calculator.currentRouteDistance = routeLength - state.routeDistance
+                                calculator.syncRouteDistance(state.routeDistance)
                             }
                             calculator.setRouteFromPolyline(state.routePolyline)
                             
@@ -152,7 +153,7 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                             val dist = (state.javaClass.methods.find { it.name == "getDestinationDistance" || it.name == "getDistance" }?.invoke(state) as? Double) ?: 0.0
                             val routeLength = calculator.routePoints.lastOrNull()?.distance ?: (calculator.routeElevationProfile.lastOrNull()?.distance ?: 0.0)
                             if (routeLength > 0.0) {
-                                calculator.currentRouteDistance = routeLength - dist
+                                calculator.syncRouteDistance(dist)
                             }
                             val elevPoly = state.elevationPolyline
                             calculator.setRouteElevationProfile(elevPoly)
@@ -170,6 +171,10 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                                 ?: 0.0
                             calculator.updateLiveGrade(grade)
                         }
+                    }
+                    
+                    system.addConsumer<OnLocationChanged> { locEvent ->
+                        calculator.updateCurrentLocation(locEvent.lat, locEvent.lng)
                     }
                 }
             }

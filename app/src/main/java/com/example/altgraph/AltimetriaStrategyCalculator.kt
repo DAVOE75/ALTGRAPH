@@ -150,6 +150,7 @@ class AltimetriaStrategyCalculator {
 
     // Distancia exacta restante reportada por Karoo en la ruta (útil si no hay puntos GPS)
     var fallbackRemainingDistance: Double = 0.0
+    var routeDistanceOffset: Double = 0.0
 
     // GPX Elevation Profile Completo (SDK 1.1.7+)
     var routeElevationProfile: List<ElevationPolylineDecoder.ElevationPoint> = emptyList()
@@ -285,6 +286,46 @@ class AltimetriaStrategyCalculator {
         }
         this.currentLatitude = lat
         this.currentLongitude = lng
+        
+        if (routePoints.isNotEmpty()) {
+            var minDistance = Double.MAX_VALUE
+            var realMinDistance = Double.MAX_VALUE
+            val dists = FloatArray(1)
+            
+            val searchStart = if (nearestIndex == 0) 0 else (nearestIndex - 20).coerceAtLeast(0)
+            val searchEnd = if (nearestIndex == 0) routePoints.size else (nearestIndex + 500).coerceAtMost(routePoints.size)
+            
+            var newNearestIdx = nearestIndex
+            for (i in searchStart until searchEnd) {
+                val pt = routePoints[i]
+                android.location.Location.distanceBetween(lat, lng, pt.latitude, pt.longitude, dists)
+                val dist = dists[0].toDouble()
+                if (dist < minDistance) {
+                    minDistance = dist
+                    realMinDistance = dist
+                    newNearestIdx = i
+                }
+            }
+            nearestIndex = newNearestIdx
+            
+            // PREVIEW FIX: Si el punto más cercano está a más de 5km, asumimos que está en casa probando.
+            if (realMinDistance > 5000.0) {
+                nearestIndex = 0
+            }
+            
+            val computedDist = routePoints[nearestIndex].distance
+            this.currentRouteDistance = computedDist + routeDistanceOffset
+        }
+    }
+
+    fun syncRouteDistance(karooRemainingDistance: Double) {
+        this.fallbackRemainingDistance = karooRemainingDistance
+        val totalLength = routePoints.lastOrNull()?.distance ?: (routeElevationProfile.lastOrNull()?.distance ?: 0.0)
+        if (totalLength > 0.0 && routePoints.isNotEmpty() && nearestIndex < routePoints.size) {
+            val karooRidden = totalLength - karooRemainingDistance
+            val polylineRidden = routePoints[nearestIndex].distance
+            routeDistanceOffset = karooRidden - polylineRidden
+        }
     }
 
     fun setRoutePois(symbols: List<io.hammerhead.karooext.models.Symbol.POI>) {
@@ -665,6 +706,7 @@ class AltimetriaStrategyCalculator {
         this.distanceFromBottom = 0.0
         this.elevationFromBottom = 0.0
         this.elevationRemaining = 0.0
+        this.routeDistanceOffset = 0.0
         this.lastRoutePolyline = ""
         this.lastElevationPolyline = ""
     }
@@ -781,47 +823,12 @@ class AltimetriaStrategyCalculator {
             )
         }
 
-        // 1. Encuentra el índice más cercano en una ventana local para inicializar la ventana
-        if (currentLatitude != 0.0 && currentLongitude != 0.0 && routePoints.isNotEmpty()) {
-            var minDistance = Double.MAX_VALUE
-            var realMinDistance = Double.MAX_VALUE
-            val dists = FloatArray(1)
-            
-            val searchStart = if (nearestIndex == 0) 0 else (nearestIndex - 20).coerceAtLeast(0)
-            val searchEnd = if (nearestIndex == 0) routePoints.size else (nearestIndex + 500).coerceAtMost(routePoints.size)
-            
-            var newNearestIdx = nearestIndex
-            for (i in searchStart until searchEnd) {
-                val pt = routePoints[i]
-                Location.distanceBetween(currentLatitude, currentLongitude, pt.latitude, pt.longitude, dists)
-                val dist = dists[0].toDouble()
-                if (dist < minDistance) {
-                    minDistance = dist
-                    realMinDistance = dist
-                    newNearestIdx = i
-                }
-            }
-            nearestIndex = newNearestIdx
-            
-            // PREVIEW FIX: Si el punto más cercano está a más de 5km, asumimos que está en casa probando.
-            if (realMinDistance > 5000.0) {
-                nearestIndex = 0
-            }
-        }
+        // 1. Encuentra el índice más cercano (movido a updateCurrentLocation para que sea continuo)
 
-        // 1. Usar la distancia restante reportada por el Karoo para un seguimiento perfecto,
-        // pero si aún no está disponible (ej. arranque inicial o rutas sin valhalla), usamos
-        // el índice más cercano del escáner geográfico (que ahora tiene protección contra cruces).
-        val currentRiderDistance = if (fallbackRemainingDistance > 0.0) {
-            val totalLength = routeElevationProfile.lastOrNull()?.distance ?: (routePoints.lastOrNull()?.distance ?: 0.0)
-            (totalLength - fallbackRemainingDistance).coerceAtLeast(0.0)
-        } else if (routePoints.isNotEmpty()) {
-            routePoints[nearestIndex].distance
-        } else {
-            0.0
-        }
+        // 1. Usar la distancia reportada y suavizada
+        val currentRiderDistance = currentRouteDistance
 
-        // 2. Ventana deslizante en bloques cuánticos de 50 metros
+        // 2. Ventana deslizante en bloques cuánticos de 50 metros (avance gradual y continuo)
         val quantumMeters = 50.0
         var windowStartDist = (currentRiderDistance / quantumMeters).toLong() * quantumMeters
         var actualLookahead = lookaheadDist

@@ -123,7 +123,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                             Log.d(TAG, "NAV: ruta='${state.name}' dist=${state.routeDistance}m pois=${state.pois.size}")
                             calculator.isNavigatingRoute = true
                             calculator.activeRouteName = state.name
-                            calculator.fallbackRemainingDistance = state.routeDistance
+                            calculator.syncRouteDistance(state.routeDistance)
                             calculator.setRouteFromPolyline(state.routePolyline)
                             
                             var elevPoly = state.routeElevationPolyline
@@ -148,7 +148,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                             calculator.syncRouteClimbs(routeKey, routeClimbs)
                             
                             // Usar routeDistance como fallback si no tenemos puntos GPS
-                            calculator.fallbackRemainingDistance = state.routeDistance
+                            calculator.syncRouteDistance(state.routeDistance)
                             
                         } else if (state is OnNavigationState.NavigationState.NavigatingToDestination) {
                             val dist = (state.javaClass.methods.find { it.name == "getDestinationDistance" || it.name == "getDistance" }?.invoke(state) as? Double) ?: 0.0
@@ -156,7 +156,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                             calculator.isNavigatingRoute = true
                             // Rutas a destino no suelen tener routePolyline, pero sí elevationPolyline
                             calculator.setRouteElevationProfile(state.elevationPolyline)
-                            calculator.fallbackRemainingDistance = dist
+                            calculator.syncRouteDistance(dist)
                             
                         } else {
                             if (state.javaClass.simpleName == "Idle") {
@@ -342,7 +342,8 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     visibleMaxGrade = strategy.visibleMaxGrade,
                     routeName = strategy.routeName,
                     routeCoords = strategy.routeCoords,
-                    mapRotationAngle = mapRotAngle
+                    mapRotationAngle = mapRotAngle,
+                    isHeadingUp = isHeadingUp
                 )
 
                 if (cachedBitmap == null || cachedBitmap?.width != w || cachedBitmap?.height != h) {

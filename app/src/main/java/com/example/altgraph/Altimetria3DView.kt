@@ -384,6 +384,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private var showBlockPercentages: Boolean = true
     private var curvatureOffsets: List<Float> = emptyList()
     private var mapRotationAngle: Double = 0.0
+    private var isHeadingUp: Boolean = false
     private var riderProgress: Float = 0.0f
     private var windowStartMeters: Double = 0.0
     private var subBlocks: List<Float> = emptyList()
@@ -475,7 +476,8 @@ class Altimetria3DView @JvmOverloads constructor(
         customTitle: String? = null,
         showHeaderStats: Boolean = true,
         routeCoords: List<Pair<Double, Double>> = emptyList(),
-        mapRotationAngle: Double = 0.0
+        mapRotationAngle: Double = 0.0,
+        isHeadingUp: Boolean = false
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -513,6 +515,7 @@ class Altimetria3DView @JvmOverloads constructor(
         this.routeName = routeName
         this.showHeaderStats = showHeaderStats
         this.mapRotationAngle = mapRotationAngle
+        this.isHeadingUp = isHeadingUp
         if (subBlocks.isNotEmpty()) {
             this.subBlocks = subBlocks
         }
@@ -1847,10 +1850,18 @@ class Altimetria3DView @JvmOverloads constructor(
         val n = subBlocks.size
         if (n < 2) return
 
+        // Cuando el mapa NO está anclado al norte (heading-up), el ciclista mira siempre
+        // "hacia arriba" en pantalla, así que bajamos la ruta hacia el centro inferior
+        // para dejar el máximo espacio libre arriba y que la vista sea más clara.
         val gridW = w * 0.6f
         val gridH = gridW
         val centerX = w / 2f
-        val centerY = if (rotate90) h * 0.3f else h * 0.55f // Move down significantly in portrait to avoid ClimbViewer header
+        val centerY = when {
+            isHeadingUp && rotate90 -> h * 0.38f
+            isHeadingUp -> h * 0.68f
+            rotate90 -> h * 0.3f
+            else -> h * 0.55f // Move down significantly in portrait to avoid ClimbViewer header
+        }
 
         // Draw Base Grid
         val gridPaint = Paint().apply {
