@@ -107,8 +107,7 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
 
         val routeBarView = RouteBarView(context)
         // If it's a very tall and thin view, it's likely on the side. 
-        // We'll set isMapRightSide to true for now as requested.
-        routeBarView.isMapRightSide = true
+
 
         val w = if (config.viewSize.first > 0) config.viewSize.first else 120
         val h = if (config.viewSize.second > 0) config.viewSize.second else 600
