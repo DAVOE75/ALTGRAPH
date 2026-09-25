@@ -18,7 +18,7 @@ class RouteBarView(context: Context) : View(context) {
     
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        textSize = 32f
+        textSize = 42f
         typeface = Typeface.DEFAULT_BOLD
         textAlign = Paint.Align.CENTER
         setShadowLayer(5f, 0f, 2f, Color.BLACK)
