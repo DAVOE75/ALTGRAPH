@@ -48,4 +48,11 @@
         graphical="true"
         icon="@drawable/ic_altigraph_logo" />
 
+    <DataType
+        typeId="route_bar"
+        displayName="@string/data_type_route_bar_title"
+        description="@string/data_type_route_bar_desc"
+        graphical="true"
+        icon="@drawable/ic_altigraph_logo" />
+
 </ExtensionInfo>
