@@ -1,1 +1,1 @@
-haz captura de
+plugins {
