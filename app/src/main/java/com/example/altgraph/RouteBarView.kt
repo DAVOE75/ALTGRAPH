@@ -18,12 +18,12 @@ class RouteBarView(context: Context) : View(context) {
     }
     
     private val headerOverlayPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.argb(160, 0, 0, 0)
+        color = Color.argb(40, 0, 0, 0)
         style = Paint.Style.FILL
     }
     
     private val pastOverlayPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.argb(180, 0, 0, 0) // Oscurece el tramo ya recorrido
+        color = Color.argb(200, 0, 0, 0) // Oscurece el tramo ya recorrido
         style = Paint.Style.FILL
     }
 
@@ -43,7 +43,7 @@ class RouteBarView(context: Context) : View(context) {
 
     private val tickTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        textSize = 24f
+        textSize = 28f
         textAlign = Paint.Align.CENTER
         setShadowLayer(3f, 0f, 2f, Color.BLACK)
     }
@@ -107,7 +107,7 @@ class RouteBarView(context: Context) : View(context) {
         if (isHorizontal) {
             // HORIZONTAL MODE
             val blockWidth = w / numBlocks.toFloat()
-            val radarH = h * 0.75f
+            val radarH = h * 0.60f
             val headerHeight = radarH * 0.45f
             
             // 1. Dibujar franjas de color (Fondo completo)
@@ -180,7 +180,7 @@ class RouteBarView(context: Context) : View(context) {
         } else {
             // VERTICAL MODE
             val blockHeight = h / numBlocks.toFloat()
-            val radarW = w * 0.75f
+            val radarW = w * 0.60f
             val headerWidth = radarW * 0.45f
             
             // 1. Dibujar franjas de color
@@ -313,7 +313,7 @@ class RouteBarView(context: Context) : View(context) {
             
             val alertPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 color = Color.BLACK // Texto negro sobre fondo claro
-                textSize = 32f
+                textSize = 45f
                 textAlign = Paint.Align.CENTER
                 setShadowLayer(0f, 0f, 0f, Color.TRANSPARENT)
                 FontHelper.applyFontToPaint(this, AppPreferences.getInstance(context).fontFamilyKey, android.graphics.Typeface.BOLD)
@@ -321,7 +321,7 @@ class RouteBarView(context: Context) : View(context) {
 
             if (isHorizontal) {
                 // Franja inferior completa
-                val radarH = h * 0.75f
+                val radarH = h * 0.60f
                 val rect = android.graphics.RectF(0f, radarH, w, h)
                 canvas.drawRect(rect, bgPaint)
                 
@@ -330,14 +330,14 @@ class RouteBarView(context: Context) : View(context) {
                 canvas.drawText(alertText, w / 2f, cy, alertPaint)
             } else {
                 // Franja derecha completa (vertical mode)
-                val radarW = w * 0.75f
+                val radarW = w * 0.60f
                 val rect = android.graphics.RectF(radarW, 0f, w, h)
                 canvas.drawRect(rect, bgPaint)
                 
                 // Texto centrado rotado o vertical
                 // Para no complicarlo con rotación, lo centramos normal en la zona superior
                 alertPaint.textAlign = Paint.Align.CENTER
-                alertPaint.textSize = 24f
+                alertPaint.textSize = 35f
                 canvas.drawText(alertText, radarW + (w - radarW) / 2f, 40f, alertPaint)
             }
         }
