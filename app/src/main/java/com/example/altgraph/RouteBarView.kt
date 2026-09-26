@@ -134,8 +134,8 @@ class RouteBarView(context: Context) : View(context) {
             }
             
             // Draw checkered start pattern if we are before the actual route starts
-            val lookahead = strat.subBlockSizeMeters * strat.subBlocks.size
-            val startX = w * (0.0 - strat.windowStartMeters).toFloat() / lookahead.toFloat()
+            val totalLookahead = strat.subBlockSizeMeters * strat.subBlocks.size
+            val startX = w * (0.0 - strat.windowStartMeters).toFloat() / totalLookahead.toFloat()
             if (startX > 0f) {
                 canvas.drawRect(0f, 0f, startX, headerHeight, checkeredPaint)
             }
@@ -229,8 +229,8 @@ class RouteBarView(context: Context) : View(context) {
             }
 
             // Draw checkered start pattern if before actual route starts
-            val lookahead = strat.subBlockSizeMeters * strat.subBlocks.size
-            val startY = h - (h * (0.0 - strat.windowStartMeters).toFloat() / lookahead.toFloat())
+            val totalLookahead = strat.subBlockSizeMeters * strat.subBlocks.size
+            val startY = h - (h * (0.0 - strat.windowStartMeters).toFloat() / totalLookahead.toFloat())
             if (startY < h) {
                 canvas.drawRect(0f, startY, headerWidth, h, checkeredPaint)
             }
