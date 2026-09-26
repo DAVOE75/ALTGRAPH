@@ -307,7 +307,8 @@ class RouteBarView(context: Context) : View(context) {
             val nextClimb = strat.activeClimbs.filter { it.startDistance > riderDist }.minByOrNull { it.startDistance }
             if (nextClimb != null) {
                 val distToStart = nextClimb.startDistance - riderDist
-                alertText = "Puerto a ${formatDist(distToStart)}"
+                val gradeStr = String.format("%.1f", nextClimb.avgGrade)
+                alertText = "Puerto a ${formatDist(distToStart)} - ${formatDist(nextClimb.length)} al $gradeStr%"
                 alertColorHex = "#FFC107" // Amber
             }
         }
