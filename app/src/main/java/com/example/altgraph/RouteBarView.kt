@@ -309,7 +309,7 @@ class RouteBarView(context: Context) : View(context) {
                 val distToStart = nextClimb.startDistance - riderDist
                 val gradeStr = String.format("%.1f", nextClimb.avgGrade)
                 alertText = "Puerto a ${formatDist(distToStart)} - ${formatDist(nextClimb.length)} al $gradeStr%"
-                alertColorHex = "#FFC107" // Amber
+                alertColorHex = GradeColorScale.getColorHex(nextClimb.avgGrade)
             }
         }
 
@@ -337,7 +337,7 @@ class RouteBarView(context: Context) : View(context) {
         
         val alertPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.BLACK // Texto negro sobre fondo claro
-            textSize = 45f
+            textSize = 38f // Reduced text size as requested
             textAlign = Paint.Align.CENTER
             setShadowLayer(0f, 0f, 0f, Color.TRANSPARENT)
             FontHelper.applyFontToPaint(this, AppPreferences.getInstance(context).fontFamilyKey, android.graphics.Typeface.BOLD)
