@@ -14,6 +14,7 @@ import io.hammerhead.karooext.internal.ViewEmitter
 import io.hammerhead.karooext.models.DataPoint
 import io.hammerhead.karooext.models.DataType
 import io.hammerhead.karooext.models.OnLocationChanged
+import io.hammerhead.karooext.models.OnMapZoomLevel
 import io.hammerhead.karooext.models.OnNavigationState
 import io.hammerhead.karooext.models.OnStreamState
 import io.hammerhead.karooext.models.StreamState
@@ -89,6 +90,10 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
 
                     system.addConsumer<OnLocationChanged> { locEvent ->
                         calculator.updateCurrentLocation(locEvent.lat, locEvent.lng)
+                    }
+                    
+                    system.addConsumer<OnMapZoomLevel> { zoomEvent ->
+                        calculator.mapZoomLevel = zoomEvent.zoomLevel
                     }
                     
                     system.addConsumer(OnStreamState.StartStreaming(DataType.Type.ELEVATION_GRADE)) { state: OnStreamState ->

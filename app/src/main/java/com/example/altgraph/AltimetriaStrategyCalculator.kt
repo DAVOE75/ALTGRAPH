@@ -168,6 +168,7 @@ class AltimetriaStrategyCalculator {
     private val routePois = mutableListOf<Poi>()
     
     var currentHeading: Double = 0.0
+    var mapZoomLevel: Double? = null
 
     fun updateLiveGrade(grade: Double) {
         this.instantBarometricGrade = grade
@@ -729,7 +730,19 @@ class AltimetriaStrategyCalculator {
 
         // SMART ZOOM LOGIC
         var lookaheadDist = baseLookahead
-        if (smartZoomEnabled && baseLookahead < 100000.0) {
+        
+        // MAP ZOOM OVERRIDE
+        if (mapZoomLevel != null) {
+            lookaheadDist = when {
+                mapZoomLevel!! >= 17.0 -> 1000.0   // Max Zoom In -> 1km
+                mapZoomLevel!! >= 16.0 -> 2000.0   // Zoom In -> 2km
+                mapZoomLevel!! >= 15.0 -> 5000.0   // Normal -> 5km
+                mapZoomLevel!! >= 14.0 -> 10000.0  // Zoom Out -> 10km
+                mapZoomLevel!! >= 13.0 -> 20000.0
+                mapZoomLevel!! >= 10.0 -> 50000.0
+                else -> 100000.0                   // Max Zoom Out -> 100km
+            }
+        } else if (smartZoomEnabled && baseLookahead < 100000.0) {
             val targetLookahead = when {
                 instantBarometricGrade >= 8.0 -> baseLookahead.coerceAtMost(350.0) // Crucible
                 instantBarometricGrade >= 4.0 -> baseLookahead.coerceAtLeast(1000.0) // Normal climb
