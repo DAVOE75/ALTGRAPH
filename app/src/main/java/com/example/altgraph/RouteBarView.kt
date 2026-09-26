@@ -63,10 +63,10 @@ class RouteBarView(context: Context) : View(context) {
 
     // Paint for max-grade-per-block label (top-left of each band, only at 50m scale)
     private val maxGradeBlockPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#FF8C00") // Dark orange, clearly different from white avg%
+        color = Color.BLACK
         textSize = 24f
         textAlign = Paint.Align.LEFT
-        setShadowLayer(3f, 0f, 2f, Color.BLACK)
+        setShadowLayer(4f, 0f, 2f, Color.WHITE) // White shadow so it pops on any color band
     }
     
     private val cyclistPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
