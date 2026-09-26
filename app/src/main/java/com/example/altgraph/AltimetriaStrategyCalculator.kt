@@ -734,18 +734,18 @@ class AltimetriaStrategyCalculator {
         // MAP ZOOM OVERRIDE
         if (mapZoomLevel != null) {
             lookaheadDist = when {
-                mapZoomLevel!! >= 18.0 -> 150.0    // ~150m screen width
-                mapZoomLevel!! >= 17.5 -> 250.0
-                mapZoomLevel!! >= 17.0 -> 350.0    // ~350m screen width
-                mapZoomLevel!! >= 16.5 -> 500.0
-                mapZoomLevel!! >= 16.0 -> 700.0    // ~700m screen width
-                mapZoomLevel!! >= 15.0 -> 1500.0   // ~1.5km
-                mapZoomLevel!! >= 14.0 -> 3000.0   // ~3km
-                mapZoomLevel!! >= 13.0 -> 6000.0   // ~6km
-                mapZoomLevel!! >= 12.0 -> 12000.0  // ~12km
-                mapZoomLevel!! >= 11.0 -> 25000.0
-                mapZoomLevel!! >= 10.0 -> 50000.0
-                else -> 100000.0
+                mapZoomLevel!! >= 18.0 -> 350.0    // ~350m screen width
+                mapZoomLevel!! >= 17.5 -> 500.0
+                mapZoomLevel!! >= 17.0 -> 700.0    // ~700m screen width
+                mapZoomLevel!! >= 16.5 -> 1000.0
+                mapZoomLevel!! >= 16.0 -> 1400.0   // ~1.4km screen width
+                mapZoomLevel!! >= 15.0 -> 3000.0   // ~3.0km
+                mapZoomLevel!! >= 14.0 -> 6000.0   // ~6km
+                mapZoomLevel!! >= 13.0 -> 12000.0  // ~12km
+                mapZoomLevel!! >= 12.0 -> 25000.0  // ~25km
+                mapZoomLevel!! >= 11.0 -> 50000.0
+                mapZoomLevel!! >= 10.0 -> 100000.0
+                else -> 200000.0
             }
         } else if (smartZoomEnabled && baseLookahead < 100000.0) {
             val targetLookahead = when {
