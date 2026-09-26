@@ -180,7 +180,7 @@ class RouteBarView(context: Context) : View(context) {
             percentTextPaint.setShadowLayer(4f, 0f, 2f, Color.BLACK) // Sombra fuerte para legibilidad sin fondo oscuro
             FontHelper.applyFontToPaint(maxGradeBlockPaint, fontFamilyKey, Typeface.BOLD)
             val cyPercent = (headerHeight / 2f) + (percentTextPaint.textSize / 3f)
-            val show50mMax = strat.subBlockSizeMeters == 50.0 && strat.subBlocksMax.isNotEmpty()
+            val show50mMax = strat.subBlockSizeMeters in setOf(50.0, 100.0, 150.0, 200.0) && strat.subBlocksMax.isNotEmpty()
             for (band in bands) {
                 val left = band.startIndex * blockWidth
                 val right = (band.endIndex + 1) * blockWidth
