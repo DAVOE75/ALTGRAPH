@@ -242,13 +242,19 @@ class RouteBarView(context: Context) : View(context) {
                     val drawCenter = actualLeft + (actualRight - actualLeft) / 2f
                     canvas.drawText("${avgGrade}%", drawCenter, cyPercent, percentTextPaint)
                     
-                    // Max grade label (top-left corner) — computed as max across all subBlocks in the band
+                    // Max grade label (top-left corner) — computed as extreme across all subBlocks in the band
                     if (showMaxGrade) {
-                        val maxG = (band.startIndex..band.endIndex)
+                        val blockGrades = (band.startIndex..band.endIndex)
                             .mapNotNull { strat.subBlocksMax.getOrNull(it) }
-                            .maxOrNull()
-                        if (maxG != null && maxG > avgGrade + 1f) { // Only if meaningfully above avg
-                            val maxLabel = "▲${Math.round(maxG)}%"
+                        val maxG = blockGrades.maxOrNull()
+                        val minG = blockGrades.minOrNull()
+                        // Pick the most extreme value: if avg is negative, look at the most negative peak
+                        val extremeG = if (avgGrade < 0 && minG != null && minG < avgGrade - 1f) minG
+                                       else if (maxG != null && maxG > avgGrade + 1f) maxG
+                                       else null
+                        if (extremeG != null) {
+                            val arrow = if (extremeG < 0) "▼" else "▲"
+                            val maxLabel = "$arrow${Math.abs(Math.round(extremeG))}%"
                             val labelX = actualLeft + 4f
                             val labelY = maxGradeBlockPaint.textSize + 4f
                             canvas.drawText(maxLabel, labelX, labelY, maxGradeBlockPaint)
