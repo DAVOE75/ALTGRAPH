@@ -142,7 +142,17 @@ class RouteBarView(context: Context) : View(context) {
 
             // 2. Dibujar overlay oscuro (pasado) a la izquierda de la flecha
             val cWidth = 30f
-            val riderX = (w * strat.riderProgress).coerceAtLeast(cWidth / 2f).coerceAtMost(w - (cWidth / 2f))
+            var riderX = (w * strat.riderProgress).coerceAtLeast(cWidth / 2f).coerceAtMost(w - (cWidth / 2f))
+            
+            // Si la ruta está empezando (startX visible) y el ciclista está muy cerca del inicio (a menos de 25m),
+            // clavamos la flecha exactamente en la línea de meta (0m) para que visualmente cuadre perfecto.
+            if (startX > 0f) {
+                val distMeters = (riderX - startX) * totalLookahead / w
+                if (distMeters in 0f..25f) {
+                    riderX = startX
+                }
+            }
+
             if (riderX > cWidth / 2f) {
                 // Oscurecer lo que queda atrás (solo en la franja superior donde hay colores)
                 // Hacemos que el overlay empiece desde startX para no oscurecer la bandera de cuadros
@@ -237,7 +247,15 @@ class RouteBarView(context: Context) : View(context) {
 
             // 2. Oscurecer lo que queda atrás (abajo)
             val cHeight = 30f
-            val riderY = (h - (h * strat.riderProgress)).coerceAtLeast(cHeight / 2f).coerceAtMost(h - (cHeight / 2f))
+            var riderY = (h - (h * strat.riderProgress)).coerceAtLeast(cHeight / 2f).coerceAtMost(h - (cHeight / 2f))
+            
+            if (startY < h) {
+                val distMeters = (startY - riderY) * totalLookahead / h
+                if (distMeters in 0f..25f) {
+                    riderY = startY
+                }
+            }
+
             if (riderY < h - (cHeight / 2f)) {
                 // Overlay termina en startY para no oscurecer la bandera
                 val limitY = Math.min(h.toFloat(), startY)
