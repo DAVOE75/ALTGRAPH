@@ -844,9 +844,13 @@ class AltimetriaStrategyCalculator {
 
         // 2. Ventana deslizante en bloques cuánticos de 50 metros (avance gradual y continuo)
         val quantumMeters = 50.0
-        // Desplazamos la ventana 1/3 hacia atrás para que el ciclista aparezca a 1/3 de la pantalla
+        // Desplazamos la ventana 1/4 hacia atrás para que el ciclista aparezca al 25% de la pantalla SIEMPRE
         val targetStart = currentRiderDistance - (lookaheadDist / 4.0)
-        var windowStartDist = (targetStart.coerceAtLeast(0.0) / quantumMeters).toLong() * quantumMeters
+        
+        // Eliminamos el coerceAtLeast(0.0) para permitir que la ventana empiece en negativo
+        // Esto asegura que la flecha siempre esté desplazada hacia la derecha (al 25%) incluso en el km 0.
+        // Math.floor para redondear negativos correctamente hacia abajo
+        var windowStartDist = Math.floor(targetStart / quantumMeters).toLong() * quantumMeters
         var actualLookahead = lookaheadDist
         
         // PANORAMIC FIX: Si el zoom es de 100km o más (ultra panorámico), forzamos
