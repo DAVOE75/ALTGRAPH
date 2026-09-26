@@ -41,6 +41,19 @@ class RouteBarView(context: Context) : View(context) {
         setShadowLayer(4f, 0f, 2f, Color.BLACK)
     }
 
+    private val checkeredPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        val size = 20
+        val bitmap = android.graphics.Bitmap.createBitmap(size * 2, size * 2, android.graphics.Bitmap.Config.ARGB_8888)
+        val cvs = android.graphics.Canvas(bitmap)
+        val pWhite = Paint().apply { color = Color.WHITE; style = Paint.Style.FILL }
+        val pBlack = Paint().apply { color = Color.BLACK; style = Paint.Style.FILL }
+        cvs.drawRect(0f, 0f, size.toFloat(), size.toFloat(), pWhite)
+        cvs.drawRect(size.toFloat(), size.toFloat(), size * 2f, size * 2f, pWhite)
+        cvs.drawRect(size.toFloat(), 0f, size * 2f, size.toFloat(), pBlack)
+        cvs.drawRect(0f, size.toFloat(), size.toFloat(), size * 2f, pBlack)
+        shader = android.graphics.BitmapShader(bitmap, android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT)
+    }
+
     private val tickTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         textSize = 28f
@@ -119,13 +132,21 @@ class RouteBarView(context: Context) : View(context) {
                 segmentPaint.color = Color.parseColor(band.colorHex)
                 canvas.drawRect(left, 0f, right + 1f, headerHeight, segmentPaint) // +1f para evitar huecos
             }
+            
+            // Draw checkered start pattern if we are before the actual route starts
+            val lookahead = strat.subBlockSizeMeters * strat.subBlocks.size
+            val startX = w * (0.0 - strat.windowStartMeters).toFloat() / lookahead.toFloat()
+            if (startX > 0f) {
+                canvas.drawRect(0f, 0f, startX, headerHeight, checkeredPaint)
+            }
 
             // 2. Dibujar overlay oscuro (pasado) a la izquierda de la flecha
             val cWidth = 30f
             val riderX = (w * strat.riderProgress).coerceAtLeast(cWidth / 2f).coerceAtMost(w - (cWidth / 2f))
             if (riderX > cWidth / 2f) {
                 // Oscurecer lo que queda atrás (solo en la franja superior donde hay colores)
-                canvas.drawRect(0f, 0f, riderX, headerHeight, pastOverlayPaint)
+                // Hacemos que el overlay empiece desde startX para no oscurecer la bandera de cuadros
+                canvas.drawRect(Math.max(0f, startX), 0f, riderX, headerHeight, pastOverlayPaint)
             }
 
             // 3. Textos de porcentaje medio en la franja superior (sin el fondo oscurecido general)
@@ -136,10 +157,16 @@ class RouteBarView(context: Context) : View(context) {
                 val right = (band.endIndex + 1) * blockWidth
                 val bandWidth = right - left
                 
+                // Si la banda está en el área previa al inicio de la ruta, no dibujamos su %
+                if (right <= startX) continue
+                
                 if (bandWidth > 50f) {
                     val count = band.endIndex - band.startIndex + 1
                     val avgGrade = (Math.round(band.sumGrade / count)).toInt()
-                    canvas.drawText("${avgGrade}%", left + (bandWidth / 2f), cyPercent, percentTextPaint)
+                    // Adjust drawing to not overlap with checkered start if it crosses it
+                    val actualLeft = Math.max(left, startX)
+                    val drawCenter = actualLeft + (right - actualLeft) / 2f
+                    canvas.drawText("${avgGrade}%", drawCenter, cyPercent, percentTextPaint)
                 }
             }
 
@@ -201,11 +228,20 @@ class RouteBarView(context: Context) : View(context) {
                 canvas.drawRect(0f, top - 1f, headerWidth, bottom, segmentPaint)
             }
 
+            // Draw checkered start pattern if before actual route starts
+            val lookahead = strat.subBlockSizeMeters * strat.subBlocks.size
+            val startY = h - (h * (0.0 - strat.windowStartMeters).toFloat() / lookahead.toFloat())
+            if (startY < h) {
+                canvas.drawRect(0f, startY, headerWidth, h, checkeredPaint)
+            }
+
             // 2. Oscurecer lo que queda atrás (abajo)
             val cHeight = 30f
             val riderY = (h - (h * strat.riderProgress)).coerceAtLeast(cHeight / 2f).coerceAtMost(h - (cHeight / 2f))
             if (riderY < h - (cHeight / 2f)) {
-                canvas.drawRect(0f, riderY, headerWidth, h, pastOverlayPaint)
+                // Overlay termina en startY para no oscurecer la bandera
+                val limitY = Math.min(h.toFloat(), startY)
+                canvas.drawRect(0f, riderY, headerWidth, limitY, pastOverlayPaint)
             }
 
             // 3. Textos de %
@@ -216,10 +252,14 @@ class RouteBarView(context: Context) : View(context) {
                 val bottom = h - (band.startIndex * blockHeight)
                 val bandHeight = bottom - top
                 
+                // Si la banda está debajo de startY (pre-ruta), no dibujar
+                if (top >= startY) continue
+                
                 if (bandHeight > 40f) {
                     val count = band.endIndex - band.startIndex + 1
                     val avgGrade = (Math.round(band.sumGrade / count)).toInt()
-                    val cyPercent = top + (bandHeight / 2f) + (percentTextPaint.textSize / 3f)
+                    val actualBottom = Math.min(bottom, startY)
+                    val cyPercent = top + ((actualBottom - top) / 2f) + (percentTextPaint.textSize / 3f)
                     canvas.drawText("${avgGrade}%", cxPercent, cyPercent, percentTextPaint)
                 }
             }
