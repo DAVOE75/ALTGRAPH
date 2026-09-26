@@ -767,33 +767,45 @@ class AltimetriaStrategyCalculator {
                 freeRideHistory.add(Pair(liveDistanceAccumulated, currentElevation))
             }
 
-            // La ventana ahora mira hacia atrás desde la posición actual
-            val windowStartDist = (liveDistanceAccumulated - lookaheadDist).coerceAtLeast(0.0)
-            
-            // El ciclista avanza hacia la derecha al empezar, y luego se queda en el borde derecho
+            // MODO LIBRE: Igual que con ruta, flecha al 25% (para ver un poco hacia atrás)
+            val targetStart = liveDistanceAccumulated - (lookaheadDist / 4.0)
+            val windowStartDist = targetStart
+
             val riderDistInWindow = (liveDistanceAccumulated - windowStartDist).coerceAtLeast(0.0)
             val riderProgress = (riderDistInWindow / lookaheadDist).toFloat().coerceIn(0f, 1f)
 
-            val subBlockSize = getSubBlockSize(lookaheadDist)
-            val majorBlockSize = getMajorBlockSize(lookaheadDist)
-            val numSubBlocks = (lookaheadDist / subBlockSize).toInt().coerceIn(2, 60)
+            val idealSubBlockSize = getSubBlockSize(lookaheadDist)
+            val idealMajorBlockSize = getMajorBlockSize(lookaheadDist)
+            val numSubBlocks = (lookaheadDist / idealSubBlockSize).roundToInt().coerceIn(2, 60)
+            val subBlockSize = lookaheadDist / numSubBlocks.toDouble()
+            val majorBlockSize = lookaheadDist / ((lookaheadDist / idealMajorBlockSize).roundToInt().coerceIn(1, 10)).toDouble()
 
             val freeSubBlocks = mutableListOf<Float>()
             val freeElevations = mutableListOf<Float>()
 
             // Remuestrear el historial en los sub-bloques de la ventana
-            for (idx in 0..numSubBlocks) {
-                val ptDist = windowStartDist + (idx * subBlockSize)
-                val ptElev = getFreeRideElevationAt(ptDist)
-                freeElevations.add(ptElev.toFloat())
-                
-                if (idx > 0) {
-                    val prevElev = freeElevations[idx - 1]
-                    val dE = ptElev - prevElev
-                    val dD = subBlockSize
-                    val grade = if (dD > 0) (dE / dD) * 100.0 else 0.0
-                    freeSubBlocks.add(grade.toFloat())
+            for (idx in 0 until numSubBlocks) {
+                val ptDistStart = windowStartDist + (idx * subBlockSize)
+                val ptDistEnd = windowStartDist + ((idx + 1) * subBlockSize)
+
+                if (ptDistEnd <= 0.0) {
+                    freeSubBlocks.add(-999f)
+                    freeElevations.add(currentElevation.toFloat())
+                    continue
                 }
+
+                val ptElevStart = getFreeRideElevationAt(ptDistStart)
+                val ptElevEnd = getFreeRideElevationAt(ptDistEnd)
+                
+                if (idx == 0) {
+                    freeElevations.add(ptElevStart.toFloat())
+                }
+                freeElevations.add(ptElevEnd.toFloat())
+                
+                val dE = ptElevEnd - ptElevStart
+                val dD = subBlockSize
+                val grade = if (dD > 0) (dE / dD) * 100.0 else 0.0
+                freeSubBlocks.add(grade.toFloat())
             }
 
             val windowStartElevation = freeElevations.first().toDouble()
