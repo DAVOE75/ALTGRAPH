@@ -167,9 +167,11 @@ class RouteBarView(context: Context) : View(context) {
                 // Línea de marca hacia abajo
                 canvas.drawLine(px, headerHeight, px, headerHeight + 15f, dividerPaint)
                 // Texto
-                val kmLabel = if (tickDist >= 1000) "${(tickDist / 1000).toInt()}km" else "${tickDist.toInt()}m"
-                val cyTick = headerHeight + 20f + tickTextPaint.textSize
-                canvas.drawText(kmLabel, px, cyTick, tickTextPaint)
+                if (tickDist >= 0) {
+                    val kmLabel = if (tickDist >= 1000) "${(tickDist / 1000).toInt()}km" else "${tickDist.toInt()}m"
+                    val cyTick = headerHeight + 20f + tickTextPaint.textSize
+                    canvas.drawText(kmLabel, px, cyTick, tickTextPaint)
+                }
                 tickDist += tickInterval
             }
 
@@ -245,9 +247,11 @@ class RouteBarView(context: Context) : View(context) {
                 val progress = (tickDist - strat.windowStartMeters) / lookahead
                 val py = h - (h * progress).toFloat()
                 canvas.drawLine(headerWidth, py, headerWidth + 15f, py, dividerPaint)
-                val kmLabel = if (tickDist >= 1000) "${(tickDist / 1000).toInt()}km" else "${tickDist.toInt()}m"
-                val cyTick = py + (tickTextPaint.textSize / 3f)
-                canvas.drawText(kmLabel, headerWidth + 20f, cyTick, tickTextPaint)
+                if (tickDist >= 0) {
+                    val kmLabel = if (tickDist >= 1000) "${(tickDist / 1000).toInt()}km" else "${tickDist.toInt()}m"
+                    val cyTick = py + (tickTextPaint.textSize / 3f)
+                    canvas.drawText(kmLabel, headerWidth + 20f, cyTick, tickTextPaint)
+                }
                 tickDist += tickInterval
             }
 

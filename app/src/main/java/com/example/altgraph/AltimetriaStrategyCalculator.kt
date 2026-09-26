@@ -907,10 +907,12 @@ class AltimetriaStrategyCalculator {
         val secondsRemaining = if (currentSpeed > 0.1) (totalDistanceRemaining / currentSpeed).toLong() else 0L
 
         // 5. Cálculo de resolución adaptativa según escala (Lookahead)
-        val subBlockSize = getSubBlockSize(actualLookahead)
-        val majorBlockSize = getMajorBlockSize(actualLookahead)
+        val idealSubBlockSize = getSubBlockSize(actualLookahead)
+        val idealMajorBlockSize = getMajorBlockSize(actualLookahead)
 
-        val numSubBlocks = (actualLookahead / subBlockSize).roundToInt().coerceIn(2, 2000)
+        val numSubBlocks = (actualLookahead / idealSubBlockSize).roundToInt().coerceIn(2, 2000)
+        val subBlockSize = actualLookahead / numSubBlocks.toDouble()
+        
         val routeSubBlocks = mutableListOf<Float>()
         val routeElevations = mutableListOf<Float>()
         routeElevations.add(windowStartElevation.toFloat())
@@ -974,7 +976,8 @@ class AltimetriaStrategyCalculator {
         }
 
         // Construcción de bloques mayores para telemetría y rótulos
-        val numMajorBlocks = (actualLookahead / majorBlockSize).roundToInt().coerceIn(1, 200)
+        val numMajorBlocks = (actualLookahead / idealMajorBlockSize).roundToInt().coerceIn(1, 200)
+        val majorBlockSize = actualLookahead / numMajorBlocks.toDouble()
         val routeMajorBlocks = mutableListOf<Float>()
         for (m in 0 until numMajorBlocks) {
             val mDistStart = windowStartDist + (m * majorBlockSize)
