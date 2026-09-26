@@ -735,16 +735,17 @@ class AltimetriaStrategyCalculator {
         if (mapZoomLevel != null) {
             // Calculated for Karoo 480px width at ~40 degrees latitude
             // mapWidthMeters = 57557280 / (2^zoom)
+            // Note: Karoo applies a 2x visual overzoom at high zoom levels (>= 16)
             lookaheadDist = when {
-                mapZoomLevel!! >= 18.0 -> 220.0
-                mapZoomLevel!! >= 17.5 -> 310.0
-                mapZoomLevel!! >= 17.0 -> 440.0
-                mapZoomLevel!! >= 16.5 -> 620.0
-                mapZoomLevel!! >= 16.0 -> 880.0
-                mapZoomLevel!! >= 15.5 -> 1240.0
-                mapZoomLevel!! >= 15.0 -> 1750.0
-                mapZoomLevel!! >= 14.5 -> 2480.0
-                mapZoomLevel!! >= 14.0 -> 3500.0
+                mapZoomLevel!! >= 18.0 -> 440.0
+                mapZoomLevel!! >= 17.5 -> 620.0
+                mapZoomLevel!! >= 17.0 -> 880.0
+                mapZoomLevel!! >= 16.5 -> 1240.0
+                mapZoomLevel!! >= 16.0 -> 1760.0
+                mapZoomLevel!! >= 15.5 -> 2200.0
+                mapZoomLevel!! >= 15.0 -> 2800.0
+                mapZoomLevel!! >= 14.5 -> 3500.0
+                mapZoomLevel!! >= 14.0 -> 4500.0
                 mapZoomLevel!! >= 13.0 -> 7000.0
                 mapZoomLevel!! >= 12.0 -> 14000.0
                 mapZoomLevel!! >= 11.0 -> 28000.0
