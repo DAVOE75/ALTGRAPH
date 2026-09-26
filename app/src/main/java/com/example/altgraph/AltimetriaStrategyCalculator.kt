@@ -735,23 +735,10 @@ class AltimetriaStrategyCalculator {
         if (mapZoomLevel != null) {
             // Calculated for Karoo 480px width at ~40 degrees latitude
             // mapWidthMeters = 57557280 / (2^zoom)
-            // Note: Karoo applies a 2x visual overzoom at high zoom levels (>= 16)
-            lookaheadDist = when {
-                mapZoomLevel!! >= 18.0 -> 440.0
-                mapZoomLevel!! >= 17.5 -> 620.0
-                mapZoomLevel!! >= 17.0 -> 880.0
-                mapZoomLevel!! >= 16.5 -> 1240.0
-                mapZoomLevel!! >= 16.0 -> 1760.0
-                mapZoomLevel!! >= 15.5 -> 2200.0
-                mapZoomLevel!! >= 15.0 -> 2800.0
-                mapZoomLevel!! >= 14.5 -> 3500.0
-                mapZoomLevel!! >= 14.0 -> 4500.0
-                mapZoomLevel!! >= 13.0 -> 7000.0
-                mapZoomLevel!! >= 12.0 -> 14000.0
-                mapZoomLevel!! >= 11.0 -> 28000.0
-                mapZoomLevel!! >= 10.0 -> 56000.0
-                else -> 100000.0
-            }
+            val zoom = mapZoomLevel!!
+            lookaheadDist = 57557280.0 / Math.pow(2.0, zoom)
+            // Clamp lookahead to sensible min/max values
+            lookaheadDist = lookaheadDist.coerceIn(50.0, 200000.0)
         } else if (smartZoomEnabled && baseLookahead < 100000.0) {
             val targetLookahead = when {
                 instantBarometricGrade >= 8.0 -> baseLookahead.coerceAtMost(350.0) // Crucible
