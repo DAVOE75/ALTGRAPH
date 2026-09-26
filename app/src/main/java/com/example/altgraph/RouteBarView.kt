@@ -141,8 +141,9 @@ class RouteBarView(context: Context) : View(context) {
             }
             
             // 4.5 Posición actual del ciclista y sombreado del pasado
-            val riderX = w * strat.riderProgress
-            if (riderX > 0f) {
+            val cWidth = 30f
+            val riderX = (w * strat.riderProgress).coerceAtLeast(cWidth / 2f).coerceAtMost(w - (cWidth / 2f))
+            if (riderX > cWidth / 2f) {
                 // Oscurecer lo que queda atrás
                 canvas.drawRect(0f, 0f, riderX, h, pastOverlayPaint)
             }
@@ -163,7 +164,6 @@ class RouteBarView(context: Context) : View(context) {
 
             // 5. Indicador de posición (Ciclista) en la parte superior, apuntando hacia abajo
             val path = Path()
-            val cWidth = 30f
             val cHeight = headerHeight * 0.8f
             path.moveTo(riderX, headerHeight) // Punta abajo (tocando la divisoria)
             path.lineTo(riderX - (cWidth / 2f), 0f) // Esquina superior izq
@@ -172,6 +172,9 @@ class RouteBarView(context: Context) : View(context) {
             path.close()
             canvas.drawPath(path, cyclistPaint)
             canvas.drawPath(path, cyclistOutline)
+            
+            // 6. Alertas dinámicas
+            drawAlerts(canvas, strat, isHorizontal = true, w, h)
             
         } else {
             // VERTICAL MODE
@@ -208,8 +211,9 @@ class RouteBarView(context: Context) : View(context) {
             }
             
             // 4.5 Posición actual del ciclista y sombreado
-            val riderY = h - (h * strat.riderProgress)
-            if (riderY < h) {
+            val cHeight = 30f
+            val riderY = (h - (h * strat.riderProgress)).coerceAtLeast(cHeight / 2f).coerceAtMost(h - (cHeight / 2f))
+            if (riderY < h - (cHeight / 2f)) {
                 // Oscurecer lo que queda abajo (ya recorrido)
                 canvas.drawRect(0f, riderY, w, h, pastOverlayPaint)
             }
@@ -230,7 +234,6 @@ class RouteBarView(context: Context) : View(context) {
             // 5. Indicador de posición (Ciclista) en la derecha apuntando a la izquierda
             val path = Path()
             val cWidth = (w - headerWidth) * 0.8f
-            val cHeight = 30f
             path.moveTo(headerWidth, riderY) // Punta izq (tocando la divisoria)
             path.lineTo(w, riderY + (cHeight / 2f)) // Esquina abajo
             path.lineTo(w - 10f, riderY) // Centro izq (muesca)
@@ -238,6 +241,93 @@ class RouteBarView(context: Context) : View(context) {
             path.close()
             canvas.drawPath(path, cyclistPaint)
             canvas.drawPath(path, cyclistOutline)
+            
+            // 6. Alertas dinámicas
+            drawAlerts(canvas, strat, isHorizontal = false, w, h)
+        }
+    }
+    
+    private fun formatDist(m: Double): String {
+        return if (m < 1000) "${m.roundToInt()}m" else String.format("%.1fkm", m / 1000.0)
+    }
+
+    private fun drawAlerts(canvas: Canvas, strat: StrategyData, isHorizontal: Boolean, w: Float, h: Float) {
+        val riderDist = strat.windowStartMeters + strat.riderProgress * (strat.subBlockSizeMeters * strat.subBlocks.size)
+        
+        var alertText = ""
+        var alertColor = Color.WHITE
+        
+        val activeClimb = strat.activeClimbs.find { riderDist >= it.startDistance && riderDist < it.endDistance }
+        if (activeClimb != null) {
+            val currentBlockIdx = (strat.riderProgress * strat.subBlocks.size).toInt()
+            var steepDist: Double? = null
+            var steepGrade: Float? = null
+            
+            for (i in currentBlockIdx until strat.subBlocks.size) {
+                val grade = strat.subBlocks[i]
+                if (grade >= 12f) {
+                    val distToBlock = strat.windowStartMeters + (i * strat.subBlockSizeMeters) - riderDist
+                    if (distToBlock > 0 && distToBlock < activeClimb.endDistance - riderDist) {
+                        steepDist = distToBlock
+                        steepGrade = grade
+                        break
+                    }
+                }
+            }
+            
+            if (steepDist != null && steepGrade != null && steepDist < 5000) {
+                alertText = "Muro ${steepGrade.toInt()}% a ${formatDist(steepDist)}"
+                alertColor = Color.parseColor("#FF5252") // Red
+            } else {
+                val distToTop = activeClimb.endDistance - riderDist
+                alertText = "Coronar a ${formatDist(distToTop)}"
+                alertColor = Color.parseColor("#4CAF50") // Green
+            }
+        } else {
+            val nextClimb = strat.activeClimbs.filter { it.startDistance > riderDist }.minByOrNull { it.startDistance }
+            if (nextClimb != null) {
+                val distToStart = nextClimb.startDistance - riderDist
+                alertText = "Puerto a ${formatDist(distToStart)}"
+                alertColor = Color.parseColor("#FFC107") // Amber
+            }
+        }
+
+        if (alertText.isNotEmpty()) {
+            val alertPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = alertColor
+                textSize = 28f
+                textAlign = Paint.Align.LEFT
+                setShadowLayer(4f, 0f, 2f, Color.BLACK)
+                FontHelper.applyFontToPaint(this, AppPreferences.getInstance(context).fontFamilyKey, android.graphics.Typeface.BOLD)
+            }
+            
+            val alertWidth = alertPaint.measureText(alertText)
+            val padding = 12f
+            
+            val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.argb(200, 0, 0, 0)
+                style = Paint.Style.FILL
+            }
+
+            if (isHorizontal) {
+                val rightEdge = w - 10f
+                val bottomEdge = h - 10f
+                val topEdge = bottomEdge - alertPaint.textSize - padding * 2
+                val leftEdge = rightEdge - alertWidth - padding * 2
+                
+                val rect = android.graphics.RectF(leftEdge, topEdge, rightEdge, bottomEdge)
+                canvas.drawRoundRect(rect, 8f, 8f, bgPaint)
+                canvas.drawText(alertText, leftEdge + padding, bottomEdge - padding - 4f, alertPaint)
+            } else {
+                val rightEdge = w - 10f
+                val topEdge = 10f
+                val bottomEdge = topEdge + alertPaint.textSize + padding * 2
+                val leftEdge = rightEdge - alertWidth - padding * 2
+                
+                val rect = android.graphics.RectF(leftEdge, topEdge, rightEdge, bottomEdge)
+                canvas.drawRoundRect(rect, 8f, 8f, bgPaint)
+                canvas.drawText(alertText, leftEdge + padding, bottomEdge - padding - 4f, alertPaint)
+            }
         }
     }
 }
