@@ -733,10 +733,11 @@ class AltimetriaStrategyCalculator {
         
         // MAP ZOOM OVERRIDE
         if (mapZoomLevel != null) {
-            // Calculated for Karoo 480px width at ~40 degrees latitude
-            // mapWidthMeters = 57557280 / (2^zoom)
+            // Calculated for Karoo (logical width ~240dp at ~40 degrees latitude)
+            // Due to xhdpi screen density, logical pixels are half of physical 480px width
             val zoom = mapZoomLevel!!
-            lookaheadDist = 57557280.0 / Math.pow(2.0, zoom)
+            lookaheadDist = (57557280.0 / Math.pow(2.0, zoom)) / 2.0
+            
             // Clamp lookahead to sensible min/max values
             lookaheadDist = lookaheadDist.coerceIn(50.0, 200000.0)
         } else if (smartZoomEnabled && baseLookahead < 100000.0) {
