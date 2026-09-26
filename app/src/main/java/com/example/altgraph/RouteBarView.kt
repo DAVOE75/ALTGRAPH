@@ -104,30 +104,32 @@ class RouteBarView(context: Context) : View(context) {
             }
         }
 
+        val ruleBackgroundPaint = Paint().apply { color = Color.parseColor("#151515"); style = Paint.Style.FILL }
+
         if (isHorizontal) {
             // HORIZONTAL MODE
-            val blockWidth = w / numBlocks.toFloat()
             val radarH = h * 0.60f
-            val headerHeight = radarH * 0.45f
+            val headerHeight = radarH * 0.50f
             
-            // 1. Dibujar franjas de color (Fondo completo)
+            // 1. Dibujar franjas de color SOLAMENTE en la franja superior (Top Band)
+            val blockWidth = w / numBlocks.toFloat()
             for (band in bands) {
                 val left = band.startIndex * blockWidth
                 val right = (band.endIndex + 1) * blockWidth
                 segmentPaint.color = Color.parseColor(band.colorHex)
-                canvas.drawRect(left, 0f, right + 1f, radarH, segmentPaint) // +1f para evitar huecos
+                canvas.drawRect(left, 0f, right + 1f, headerHeight, segmentPaint) // +1f para evitar huecos
             }
 
-            // 2. Dibujar overlay oscuro superior
-            canvas.drawRect(0f, 0f, w, headerHeight, headerOverlayPaint)
+            // 2. Dibujar overlay oscuro (pasado) a la izquierda de la flecha
+            val cWidth = 30f
+            val riderX = (w * strat.riderProgress).coerceAtLeast(cWidth / 2f).coerceAtMost(w - (cWidth / 2f))
+            if (riderX > cWidth / 2f) {
+                // Oscurecer lo que queda atrás (solo en la franja superior donde hay colores)
+                canvas.drawRect(0f, 0f, riderX, headerHeight, pastOverlayPaint)
+            }
 
-            // 3. Dibujar línea divisoria
-            canvas.drawLine(0f, headerHeight, w, headerHeight, dividerPaint)
-
-            // 4. Dibujar marcadores kilométricos y textos de %
-            val blocksPerKm = (1000.0 / strat.subBlockSizeMeters).toInt()
-            
-            // Textos de porcentaje medio en el header oscuro
+            // 3. Textos de porcentaje medio en la franja superior (sin el fondo oscurecido general)
+            percentTextPaint.setShadowLayer(4f, 0f, 2f, Color.BLACK) // Sombra fuerte para legibilidad sin fondo oscuro
             val cyPercent = (headerHeight / 2f) + (percentTextPaint.textSize / 3f)
             for (band in bands) {
                 val left = band.startIndex * blockWidth
@@ -136,39 +138,46 @@ class RouteBarView(context: Context) : View(context) {
                 
                 if (bandWidth > 50f) {
                     val count = band.endIndex - band.startIndex + 1
-                    val avgGrade = (band.sumGrade / count).roundToInt()
-                    canvas.drawText("$avgGrade%", left + (bandWidth / 2f), cyPercent, percentTextPaint)
-                }
-            }
-            
-            // 4.5 Posición actual del ciclista y sombreado del pasado
-            val cWidth = 30f
-            val riderX = (w * strat.riderProgress).coerceAtLeast(cWidth / 2f).coerceAtMost(w - (cWidth / 2f))
-            if (riderX > cWidth / 2f) {
-                // Oscurecer lo que queda atrás
-                canvas.drawRect(0f, 0f, riderX, radarH, pastOverlayPaint)
-            }
-
-            // Ticks de distancia colgando de la divisoria
-            if (blocksPerKm > 0) {
-                tickTextPaint.textAlign = Paint.Align.CENTER
-                for (i in blocksPerKm until numBlocks step blocksPerKm) {
-                    val px = i * blockWidth
-                    // Línea de marca hacia abajo
-                    canvas.drawLine(px, headerHeight, px, headerHeight + 15f, dividerPaint)
-                    // Texto debajo de la marca (en la zona de color, pero con sombra)
-                    val kmLabel = "${i / blocksPerKm}k"
-                    val cyTick = headerHeight + 20f + tickTextPaint.textSize
-                    canvas.drawText(kmLabel, px, cyTick, tickTextPaint)
+                    val avgGrade = (Math.round(band.sumGrade / count)).toInt()
+                    canvas.drawText("${avgGrade}%", left + (bandWidth / 2f), cyPercent, percentTextPaint)
                 }
             }
 
-            // 5. Indicador de posición (Ciclista) en la parte superior, apuntando hacia abajo
+            // 4. Franja Intermedia (Regla / Ruler)
+            canvas.drawRect(0f, headerHeight, w, radarH, ruleBackgroundPaint)
+            // Línea divisoria blanca
+            canvas.drawLine(0f, headerHeight, w, headerHeight, dividerPaint)
+
+            // Ticks de distancia (Escala dinámica)
+            val lookahead = strat.subBlockSizeMeters * strat.subBlocks.size
+            val tickInterval = when {
+                lookahead <= 500 -> 100.0
+                lookahead <= 1000 -> 250.0
+                lookahead <= 2000 -> 500.0
+                lookahead <= 5000 -> 1000.0
+                else -> 2000.0
+            }
+            val startTick = Math.ceil(strat.windowStartMeters / tickInterval) * tickInterval
+            var tickDist = startTick
+            tickTextPaint.textAlign = Paint.Align.CENTER
+            while (tickDist < strat.windowStartMeters + lookahead) {
+                val progress = (tickDist - strat.windowStartMeters) / lookahead
+                val px = (w * progress).toFloat()
+                // Línea de marca hacia abajo
+                canvas.drawLine(px, headerHeight, px, headerHeight + 15f, dividerPaint)
+                // Texto
+                val kmLabel = if (tickDist >= 1000) "${(tickDist / 1000).toInt()}km" else "${tickDist.toInt()}m"
+                val cyTick = headerHeight + 20f + tickTextPaint.textSize
+                canvas.drawText(kmLabel, px, cyTick, tickTextPaint)
+                tickDist += tickInterval
+            }
+
+            // 5. Indicador de posición (Ciclista)
             val path = Path()
             val cHeight = headerHeight * 0.8f
             path.moveTo(riderX, headerHeight) // Punta abajo (tocando la divisoria)
             path.lineTo(riderX - (cWidth / 2f), 0f) // Esquina superior izq
-            path.lineTo(riderX, 10f) // Centro arriba (muesca interior para que parezca una flecha/nave)
+            path.lineTo(riderX, 10f) // Centro arriba
             path.lineTo(riderX + (cWidth / 2f), 0f) // Esquina superior der
             path.close()
             canvas.drawPath(path, cyclistPaint)
@@ -179,25 +188,27 @@ class RouteBarView(context: Context) : View(context) {
             
         } else {
             // VERTICAL MODE
-            val blockHeight = h / numBlocks.toFloat()
             val radarW = w * 0.60f
-            val headerWidth = radarW * 0.45f
+            val headerWidth = radarW * 0.50f
+            val blockHeight = h / numBlocks.toFloat()
             
-            // 1. Dibujar franjas de color
+            // 1. Dibujar franjas de color SOLAMENTE en la franja izquierda
             for (band in bands) {
                 val top = h - ((band.endIndex + 1) * blockHeight)
                 val bottom = h - (band.startIndex * blockHeight)
                 segmentPaint.color = Color.parseColor(band.colorHex)
-                canvas.drawRect(0f, top - 1f, radarW, bottom, segmentPaint)
+                canvas.drawRect(0f, top - 1f, headerWidth, bottom, segmentPaint)
             }
 
-            // 2. Dibujar overlay oscuro izquierdo
-            canvas.drawRect(0f, 0f, headerWidth, h, headerOverlayPaint)
+            // 2. Oscurecer lo que queda atrás (abajo)
+            val cHeight = 30f
+            val riderY = (h - (h * strat.riderProgress)).coerceAtLeast(cHeight / 2f).coerceAtMost(h - (cHeight / 2f))
+            if (riderY < h - (cHeight / 2f)) {
+                canvas.drawRect(0f, riderY, headerWidth, h, pastOverlayPaint)
+            }
 
-            // 3. Línea divisoria
-            canvas.drawLine(headerWidth, 0f, headerWidth, h, dividerPaint)
-
-            // 4. Textos de % en el panel oscuro
+            // 3. Textos de %
+            percentTextPaint.setShadowLayer(4f, 0f, 2f, Color.BLACK)
             val cxPercent = headerWidth / 2f
             for (band in bands) {
                 val top = h - ((band.endIndex + 1) * blockHeight)
@@ -206,40 +217,45 @@ class RouteBarView(context: Context) : View(context) {
                 
                 if (bandHeight > 40f) {
                     val count = band.endIndex - band.startIndex + 1
-                    val avgGrade = (band.sumGrade / count).roundToInt()
+                    val avgGrade = (Math.round(band.sumGrade / count)).toInt()
                     val cyPercent = top + (bandHeight / 2f) + (percentTextPaint.textSize / 3f)
-                    canvas.drawText("$avgGrade%", cxPercent, cyPercent, percentTextPaint)
+                    canvas.drawText("${avgGrade}%", cxPercent, cyPercent, percentTextPaint)
                 }
             }
-            
-            // 4.5 Posición actual del ciclista y sombreado
-            val cHeight = 30f
-            val riderY = (h - (h * strat.riderProgress)).coerceAtLeast(cHeight / 2f).coerceAtMost(h - (cHeight / 2f))
-            if (riderY < h - (cHeight / 2f)) {
-                // Oscurecer lo que queda abajo (ya recorrido)
-                canvas.drawRect(0f, riderY, radarW, h, pastOverlayPaint)
-            }
+
+            // 4. Franja Intermedia (Regla)
+            canvas.drawRect(headerWidth, 0f, radarW, h, ruleBackgroundPaint)
+            canvas.drawLine(headerWidth, 0f, headerWidth, h, dividerPaint)
 
             // Ticks de distancia
-            val blocksPerKm = (1000.0 / strat.subBlockSizeMeters).toInt()
-            if (blocksPerKm > 0) {
-                tickTextPaint.textAlign = Paint.Align.LEFT
-                for (i in blocksPerKm until numBlocks step blocksPerKm) {
-                    val py = h - (i * blockHeight)
-                    canvas.drawLine(headerWidth, py, headerWidth + 15f, py, dividerPaint)
-                    val kmLabel = "${i / blocksPerKm}k"
-                    val cyTick = py + (tickTextPaint.textSize / 3f)
-                    canvas.drawText(kmLabel, headerWidth + 20f, cyTick, tickTextPaint)
-                }
+            val lookahead = strat.subBlockSizeMeters * strat.subBlocks.size
+            val tickInterval = when {
+                lookahead <= 500 -> 100.0
+                lookahead <= 1000 -> 250.0
+                lookahead <= 2000 -> 500.0
+                lookahead <= 5000 -> 1000.0
+                else -> 2000.0
+            }
+            val startTick = Math.ceil(strat.windowStartMeters / tickInterval) * tickInterval
+            var tickDist = startTick
+            tickTextPaint.textAlign = Paint.Align.LEFT
+            while (tickDist < strat.windowStartMeters + lookahead) {
+                val progress = (tickDist - strat.windowStartMeters) / lookahead
+                val py = h - (h * progress).toFloat()
+                canvas.drawLine(headerWidth, py, headerWidth + 15f, py, dividerPaint)
+                val kmLabel = if (tickDist >= 1000) "${(tickDist / 1000).toInt()}km" else "${tickDist.toInt()}m"
+                val cyTick = py + (tickTextPaint.textSize / 3f)
+                canvas.drawText(kmLabel, headerWidth + 20f, cyTick, tickTextPaint)
+                tickDist += tickInterval
             }
 
-            // 5. Indicador de posición (Ciclista) en la derecha apuntando a la izquierda
+            // 5. Indicador de posición (Ciclista)
             val path = Path()
-            val cWidth = (radarW - headerWidth) * 0.8f
+            val cWidth = headerWidth * 0.8f
             path.moveTo(headerWidth, riderY) // Punta izq (tocando la divisoria)
-            path.lineTo(radarW, riderY + (cHeight / 2f)) // Esquina abajo
-            path.lineTo(radarW - 10f, riderY) // Centro izq (muesca)
-            path.lineTo(radarW, riderY - (cHeight / 2f)) // Esquina arriba
+            path.lineTo(headerWidth - cWidth, riderY + (cHeight / 2f)) // Esquina abajo
+            path.lineTo(headerWidth - cWidth + 10f, riderY) // Centro izq (muesca)
+            path.lineTo(headerWidth - cWidth, riderY - (cHeight / 2f)) // Esquina arriba
             path.close()
             canvas.drawPath(path, cyclistPaint)
             canvas.drawPath(path, cyclistOutline)
@@ -248,7 +264,7 @@ class RouteBarView(context: Context) : View(context) {
             drawAlerts(canvas, strat, isHorizontal = false, w, h)
         }
     }
-    
+
     private fun formatDist(m: Double): String {
         return if (m < 1000) "${m.roundToInt()}m" else String.format("%.1fkm", m / 1000.0)
     }
