@@ -21,6 +21,11 @@ class RouteBarView(context: Context) : View(context) {
         color = Color.argb(160, 0, 0, 0)
         style = Paint.Style.FILL
     }
+    
+    private val pastOverlayPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.argb(180, 0, 0, 0) // Oscurece el tramo ya recorrido
+        style = Paint.Style.FILL
+    }
 
     private val dividerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
@@ -134,6 +139,13 @@ class RouteBarView(context: Context) : View(context) {
                     canvas.drawText("$avgGrade%", left + (bandWidth / 2f), cyPercent, percentTextPaint)
                 }
             }
+            
+            // 4.5 Posición actual del ciclista y sombreado del pasado
+            val riderX = w * strat.riderProgress
+            if (riderX > 0f) {
+                // Oscurecer lo que queda atrás
+                canvas.drawRect(0f, 0f, riderX, h, pastOverlayPaint)
+            }
 
             // Ticks de distancia colgando de la divisoria
             if (blocksPerKm > 0) {
@@ -149,15 +161,14 @@ class RouteBarView(context: Context) : View(context) {
                 }
             }
 
-            // 5. Indicador de posición (Ciclista) a la izquierda del todo
+            // 5. Indicador de posición (Ciclista) en la parte superior, apuntando hacia abajo
             val path = Path()
-            val cWidth = 35f
-            val cHeight = h * 0.4f
-            val cyCyc = headerHeight + (h - headerHeight) / 2f
-            path.moveTo(cWidth, cyCyc) // Punta
-            path.lineTo(5f, cyCyc - (cHeight / 2f)) // Arriba
-            path.lineTo(15f, cyCyc) // Centro interno
-            path.lineTo(5f, cyCyc + (cHeight / 2f)) // Abajo
+            val cWidth = 30f
+            val cHeight = headerHeight * 0.8f
+            path.moveTo(riderX, headerHeight) // Punta abajo (tocando la divisoria)
+            path.lineTo(riderX - (cWidth / 2f), 0f) // Esquina superior izq
+            path.lineTo(riderX, 10f) // Centro arriba (muesca interior para que parezca una flecha/nave)
+            path.lineTo(riderX + (cWidth / 2f), 0f) // Esquina superior der
             path.close()
             canvas.drawPath(path, cyclistPaint)
             canvas.drawPath(path, cyclistOutline)
@@ -195,6 +206,13 @@ class RouteBarView(context: Context) : View(context) {
                     canvas.drawText("$avgGrade%", cxPercent, cyPercent, percentTextPaint)
                 }
             }
+            
+            // 4.5 Posición actual del ciclista y sombreado
+            val riderY = h - (h * strat.riderProgress)
+            if (riderY < h) {
+                // Oscurecer lo que queda abajo (ya recorrido)
+                canvas.drawRect(0f, riderY, w, h, pastOverlayPaint)
+            }
 
             // Ticks de distancia
             val blocksPerKm = (1000.0 / strat.subBlockSizeMeters).toInt()
@@ -209,16 +227,14 @@ class RouteBarView(context: Context) : View(context) {
                 }
             }
 
-            // 5. Ciclista en la base
+            // 5. Indicador de posición (Ciclista) en la derecha apuntando a la izquierda
             val path = Path()
-            val cxCyc = headerWidth + (w - headerWidth) / 2f
-            val cyCycBase = h - 5f
-            val cWidth = (w - headerWidth) * 0.7f
-            val cHeight = 35f
-            path.moveTo(cxCyc, cyCycBase - cHeight) // Punta
-            path.lineTo(cxCyc + (cWidth / 2f), cyCycBase) // Derecha
-            path.lineTo(cxCyc, cyCycBase - 10f) // Centro interno
-            path.lineTo(cxCyc - (cWidth / 2f), cyCycBase) // Izquierda
+            val cWidth = (w - headerWidth) * 0.8f
+            val cHeight = 30f
+            path.moveTo(headerWidth, riderY) // Punta izq (tocando la divisoria)
+            path.lineTo(w, riderY + (cHeight / 2f)) // Esquina abajo
+            path.lineTo(w - 10f, riderY) // Centro izq (muesca)
+            path.lineTo(w, riderY - (cHeight / 2f)) // Esquina arriba
             path.close()
             canvas.drawPath(path, cyclistPaint)
             canvas.drawPath(path, cyclistOutline)
