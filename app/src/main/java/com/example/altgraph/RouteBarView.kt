@@ -32,7 +32,6 @@ class RouteBarView(context: Context) : View(context) {
     private val percentTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         textSize = 42f
-        typeface = Typeface.DEFAULT_BOLD
         textAlign = Paint.Align.CENTER
         setShadowLayer(4f, 0f, 2f, Color.BLACK)
     }
@@ -40,7 +39,6 @@ class RouteBarView(context: Context) : View(context) {
     private val tickTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         textSize = 24f
-        typeface = Typeface.DEFAULT_BOLD
         textAlign = Paint.Align.CENTER
         setShadowLayer(3f, 0f, 2f, Color.BLACK)
     }
@@ -66,6 +64,12 @@ class RouteBarView(context: Context) : View(context) {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+        
+        // Aplicar fuente del usuario a los textos
+        val fontFamilyKey = AppPreferences.getInstance(context).fontFamilyKey
+        FontHelper.applyFontToPaint(percentTextPaint, fontFamilyKey, Typeface.BOLD)
+        FontHelper.applyFontToPaint(tickTextPaint, fontFamilyKey, Typeface.NORMAL)
+        
         val strat = strategyData ?: return
         
         val w = width.toFloat()
