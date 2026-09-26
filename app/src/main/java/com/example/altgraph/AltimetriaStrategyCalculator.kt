@@ -774,11 +774,12 @@ class AltimetriaStrategyCalculator {
             val riderDistInWindow = (liveDistanceAccumulated - windowStartDist).coerceAtLeast(0.0)
             val riderProgress = (riderDistInWindow / lookaheadDist).toFloat().coerceIn(0f, 1f)
 
-            val idealSubBlockSize = getSubBlockSize(lookaheadDist)
-            val idealMajorBlockSize = getMajorBlockSize(lookaheadDist)
-            val numSubBlocks = (lookaheadDist / idealSubBlockSize).roundToInt().coerceIn(2, 60)
-            val subBlockSize = lookaheadDist / numSubBlocks.toDouble()
-            val majorBlockSize = lookaheadDist / ((lookaheadDist / idealMajorBlockSize).roundToInt().coerceIn(1, 10)).toDouble()
+            val subBlockSize = getSubBlockSize(lookaheadDist)
+            val majorBlockSize = getMajorBlockSize(lookaheadDist)
+            val numSubBlocks = (lookaheadDist / subBlockSize).roundToInt().coerceIn(2, 60)
+            val actualLookahead = numSubBlocks * subBlockSize
+            
+            val finalRiderProgress = (riderDistInWindow / actualLookahead).toFloat().coerceIn(0f, 1f)
 
             val freeSubBlocks = mutableListOf<Float>()
             val freeElevations = mutableListOf<Float>()
@@ -834,7 +835,7 @@ class AltimetriaStrategyCalculator {
                 hairpins = liveHairpins,
                 pois = livePois,
                 curvatureOffsets = liveCurvatures,
-                riderProgress = riderProgress,
+                riderProgress = finalRiderProgress,
                 windowStartMeters = windowStartDist,
                 windowStartElevation = windowStartElevation,
                 subBlocks = freeSubBlocks,
@@ -906,12 +907,15 @@ class AltimetriaStrategyCalculator {
         val secondsRemaining = if (currentSpeed > 0.1) (totalDistanceRemaining / currentSpeed).toLong() else 0L
 
         // 5. Cálculo de resolución adaptativa según escala (Lookahead)
-        val idealSubBlockSize = getSubBlockSize(actualLookahead)
-        val idealMajorBlockSize = getMajorBlockSize(actualLookahead)
+        val subBlockSize = getSubBlockSize(lookaheadDist)
+        val majorBlockSize = getMajorBlockSize(lookaheadDist)
 
-        val numSubBlocks = (actualLookahead / idealSubBlockSize).roundToInt().coerceIn(2, 2000)
-        val subBlockSize = actualLookahead / numSubBlocks.toDouble()
+        val numSubBlocks = (lookaheadDist / subBlockSize).roundToInt().coerceIn(2, 2000)
+        actualLookahead = numSubBlocks * subBlockSize
         
+        // Re-calculate riderProgress now that actualLookahead has snapped to the grid
+        val finalRiderProgress = (riderOffsetInWindow / actualLookahead).toFloat().coerceIn(0f, 1f)
+
         val routeSubBlocks = mutableListOf<Float>()
         val routeElevations = mutableListOf<Float>()
         routeElevations.add(windowStartElevation.toFloat())
@@ -975,8 +979,7 @@ class AltimetriaStrategyCalculator {
         }
 
         // Construcción de bloques mayores para telemetría y rótulos
-        val numMajorBlocks = (actualLookahead / idealMajorBlockSize).roundToInt().coerceIn(1, 200)
-        val majorBlockSize = actualLookahead / numMajorBlocks.toDouble()
+        val numMajorBlocks = (lookaheadDist / majorBlockSize).roundToInt().coerceIn(1, 200)
         val routeMajorBlocks = mutableListOf<Float>()
         for (m in 0 until numMajorBlocks) {
             val mDistStart = windowStartDist + (m * majorBlockSize)
@@ -1241,7 +1244,7 @@ class AltimetriaStrategyCalculator {
             hairpins = visibleHairpins,
             pois = visiblePois,
             curvatureOffsets = curvatureOffsets,
-            riderProgress = riderProgress,
+            riderProgress = finalRiderProgress,
             windowStartMeters = windowStartDist,
             windowStartElevation = windowStartElevation,
             subBlocks = routeSubBlocks,
