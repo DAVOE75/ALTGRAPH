@@ -137,6 +137,8 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                 val currentBmp = cachedBitmap!!
                 val currentCanvas = cachedCanvas!!
                 
+                calculator.viewWidth = w
+                
                 // Clear the canvas with transparent background so map shows through
                 currentCanvas.drawColor(Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR)
                 

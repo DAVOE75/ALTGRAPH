@@ -92,6 +92,7 @@ class AltimetriaStrategyCalculator {
     var currentLongitude = 0.0
     var currentSpeed = 0.0
     var currentElevation = 350.0
+    var viewWidth = 480
 
     var nearestIndex = 0
     var isNavigatingRoute = false
@@ -733,22 +734,14 @@ class AltimetriaStrategyCalculator {
         
         // MAP ZOOM OVERRIDE
         if (mapZoomLevel != null) {
-            lookaheadDist = when {
-                mapZoomLevel!! >= 18.0 -> 120.0
-                mapZoomLevel!! >= 17.5 -> 160.0
-                mapZoomLevel!! >= 17.0 -> 240.0
-                mapZoomLevel!! >= 16.5 -> 400.0
-                mapZoomLevel!! >= 16.0 -> 640.0
-                mapZoomLevel!! >= 15.5 -> 960.0
-                mapZoomLevel!! >= 15.0 -> 1440.0
-                mapZoomLevel!! >= 14.5 -> 2000.0
-                mapZoomLevel!! >= 14.0 -> 3200.0
-                mapZoomLevel!! >= 13.5 -> 4800.0
-                mapZoomLevel!! >= 13.0 -> 8000.0
-                mapZoomLevel!! >= 12.0 -> 16000.0
-                mapZoomLevel!! >= 10.0 -> 40000.0
-                else -> 80000.0
-            }
+            // El mapa dibuja 480 píxeles a pantalla completa con esta resolución.
+            // Para que la escala encaje en nuestro view (que puede ser 480, 240, etc.),
+            // calculamos los metros por píxel y los multiplicamos por el ancho real del view.
+            val mapMetersPerPixel = 119911.96 / Math.pow(2.0, mapZoomLevel!!)
+            val actualViewWidth = if (viewWidth > 0) viewWidth.toDouble() else 480.0
+            // Usamos un factor de calibración fina (empíricamente 1.66 * 0.5) 
+            val calibrationFactor = 0.833
+            lookaheadDist = (actualViewWidth * mapMetersPerPixel * calibrationFactor).coerceIn(50.0, 100000.0)
         } else if (smartZoomEnabled && baseLookahead < 100000.0) {
             val targetLookahead = when {
                 instantBarometricGrade >= 8.0 -> baseLookahead.coerceAtMost(350.0) // Crucible
