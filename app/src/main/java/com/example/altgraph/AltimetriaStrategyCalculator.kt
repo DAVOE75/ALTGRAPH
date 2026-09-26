@@ -841,9 +841,9 @@ class AltimetriaStrategyCalculator {
 
         // 2. Ventana deslizante en bloques cuánticos de 50 metros (avance gradual y continuo)
         val quantumMeters = 50.0
-        // Desplazamos la ventana 1/3 hacia atrás para que el ciclista aparezca a 1/3 de la pantalla
+        // Desplazamos la ventana 1/4 hacia atrás para que el ciclista aparezca a 1/4 de la pantalla
         val targetStart = currentRiderDistance - (lookaheadDist / 4.0)
-        var windowStartDist = (targetStart.coerceAtLeast(0.0) / quantumMeters).toLong() * quantumMeters
+        var windowStartDist = kotlin.math.floor(targetStart / quantumMeters).toLong() * quantumMeters
         var actualLookahead = lookaheadDist
         
         // PANORAMIC FIX: Si el zoom es de 100km o más (ultra panorámico), forzamos
@@ -933,6 +933,12 @@ class AltimetriaStrategyCalculator {
             val sDistStart = windowStartDist + (j * subBlockSize)
             val sDistEnd = windowStartDist + ((j + 1) * subBlockSize)
 
+            if (sDistEnd <= 0.0) {
+                routeSubBlocks.add(-999f)
+                routeElevations.add(windowStartElevation.toFloat())
+                continue
+            }
+
             val sElevStart: Double
             val sElevEnd: Double
 
@@ -973,6 +979,12 @@ class AltimetriaStrategyCalculator {
         for (m in 0 until numMajorBlocks) {
             val mDistStart = windowStartDist + (m * majorBlockSize)
             val mDistEnd = windowStartDist + ((m + 1) * majorBlockSize)
+
+            if (mDistEnd <= 0.0) {
+                routeMajorBlocks.add(-999f)
+                continue
+            }
+
             val mElevStart = getElevationAtDistance(mDistStart)
             val mElevEnd = getElevationAtDistance(mDistEnd)
             val mElevDiff = mElevEnd - mElevStart

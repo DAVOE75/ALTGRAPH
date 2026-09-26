@@ -136,7 +136,7 @@ class RouteBarView(context: Context) : View(context) {
                 val right = (band.endIndex + 1) * blockWidth
                 val bandWidth = right - left
                 
-                if (bandWidth > 50f) {
+                if (bandWidth > 50f && band.colorHex != "#111111") {
                     val count = band.endIndex - band.startIndex + 1
                     val avgGrade = (Math.round(band.sumGrade / count)).toInt()
                     canvas.drawText("${avgGrade}%", left + (bandWidth / 2f), cyPercent, percentTextPaint)
@@ -216,7 +216,7 @@ class RouteBarView(context: Context) : View(context) {
                 val bottom = h - (band.startIndex * blockHeight)
                 val bandHeight = bottom - top
                 
-                if (bandHeight > 40f) {
+                if (bandHeight > 40f && band.colorHex != "#111111") {
                     val count = band.endIndex - band.startIndex + 1
                     val avgGrade = (Math.round(band.sumGrade / count)).toInt()
                     val cyPercent = top + (bandHeight / 2f) + (percentTextPaint.textSize / 3f)
