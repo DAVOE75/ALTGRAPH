@@ -768,8 +768,9 @@ class AltimetriaStrategyCalculator {
             }
 
             // MODO LIBRE: Igual que con ruta, flecha al 25% (para ver un poco hacia atrás)
+            val quantumMeters = getSubBlockSize(lookaheadDist)
             val targetStart = liveDistanceAccumulated - (lookaheadDist / 4.0)
-            val windowStartDist = targetStart
+            val windowStartDist = kotlin.math.floor(targetStart / quantumMeters).toLong() * quantumMeters
 
             val riderDistInWindow = (liveDistanceAccumulated - windowStartDist).coerceAtLeast(0.0)
             val riderProgress = (riderDistInWindow / lookaheadDist).toFloat().coerceIn(0f, 1f)
@@ -852,8 +853,8 @@ class AltimetriaStrategyCalculator {
         // 1. Usar la distancia reportada y suavizada
         val currentRiderDistance = currentRouteDistance
 
-        // 2. Ventana deslizante en bloques cuánticos de 50 metros (avance gradual y continuo)
-        val quantumMeters = 50.0
+        // 2. Ventana deslizante en bloques cuánticos adaptados a la escala
+        val quantumMeters = getSubBlockSize(lookaheadDist)
         // Desplazamos la ventana 1/4 hacia atrás para que el ciclista aparezca a 1/4 de la pantalla
         val targetStart = currentRiderDistance - (lookaheadDist / 4.0)
         var windowStartDist = kotlin.math.floor(targetStart / quantumMeters).toLong() * quantumMeters
