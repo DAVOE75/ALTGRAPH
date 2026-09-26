@@ -107,14 +107,15 @@ class RouteBarView(context: Context) : View(context) {
         if (isHorizontal) {
             // HORIZONTAL MODE
             val blockWidth = w / numBlocks.toFloat()
-            val headerHeight = h * 0.45f
+            val radarH = h * 0.75f
+            val headerHeight = radarH * 0.45f
             
             // 1. Dibujar franjas de color (Fondo completo)
             for (band in bands) {
                 val left = band.startIndex * blockWidth
                 val right = (band.endIndex + 1) * blockWidth
                 segmentPaint.color = Color.parseColor(band.colorHex)
-                canvas.drawRect(left, 0f, right + 1f, h, segmentPaint) // +1f para evitar huecos
+                canvas.drawRect(left, 0f, right + 1f, radarH, segmentPaint) // +1f para evitar huecos
             }
 
             // 2. Dibujar overlay oscuro superior
@@ -145,7 +146,7 @@ class RouteBarView(context: Context) : View(context) {
             val riderX = (w * strat.riderProgress).coerceAtLeast(cWidth / 2f).coerceAtMost(w - (cWidth / 2f))
             if (riderX > cWidth / 2f) {
                 // Oscurecer lo que queda atrás
-                canvas.drawRect(0f, 0f, riderX, h, pastOverlayPaint)
+                canvas.drawRect(0f, 0f, riderX, radarH, pastOverlayPaint)
             }
 
             // Ticks de distancia colgando de la divisoria
@@ -179,14 +180,15 @@ class RouteBarView(context: Context) : View(context) {
         } else {
             // VERTICAL MODE
             val blockHeight = h / numBlocks.toFloat()
-            val headerWidth = w * 0.45f
+            val radarW = w * 0.75f
+            val headerWidth = radarW * 0.45f
             
             // 1. Dibujar franjas de color
             for (band in bands) {
                 val top = h - ((band.endIndex + 1) * blockHeight)
                 val bottom = h - (band.startIndex * blockHeight)
                 segmentPaint.color = Color.parseColor(band.colorHex)
-                canvas.drawRect(0f, top - 1f, w, bottom, segmentPaint)
+                canvas.drawRect(0f, top - 1f, radarW, bottom, segmentPaint)
             }
 
             // 2. Dibujar overlay oscuro izquierdo
@@ -215,7 +217,7 @@ class RouteBarView(context: Context) : View(context) {
             val riderY = (h - (h * strat.riderProgress)).coerceAtLeast(cHeight / 2f).coerceAtMost(h - (cHeight / 2f))
             if (riderY < h - (cHeight / 2f)) {
                 // Oscurecer lo que queda abajo (ya recorrido)
-                canvas.drawRect(0f, riderY, w, h, pastOverlayPaint)
+                canvas.drawRect(0f, riderY, radarW, h, pastOverlayPaint)
             }
 
             // Ticks de distancia
@@ -233,11 +235,11 @@ class RouteBarView(context: Context) : View(context) {
 
             // 5. Indicador de posición (Ciclista) en la derecha apuntando a la izquierda
             val path = Path()
-            val cWidth = (w - headerWidth) * 0.8f
+            val cWidth = (radarW - headerWidth) * 0.8f
             path.moveTo(headerWidth, riderY) // Punta izq (tocando la divisoria)
-            path.lineTo(w, riderY + (cHeight / 2f)) // Esquina abajo
-            path.lineTo(w - 10f, riderY) // Centro izq (muesca)
-            path.lineTo(w, riderY - (cHeight / 2f)) // Esquina arriba
+            path.lineTo(radarW, riderY + (cHeight / 2f)) // Esquina abajo
+            path.lineTo(radarW - 10f, riderY) // Centro izq (muesca)
+            path.lineTo(radarW, riderY - (cHeight / 2f)) // Esquina arriba
             path.close()
             canvas.drawPath(path, cyclistPaint)
             canvas.drawPath(path, cyclistOutline)
@@ -255,7 +257,7 @@ class RouteBarView(context: Context) : View(context) {
         val riderDist = strat.windowStartMeters + strat.riderProgress * (strat.subBlockSizeMeters * strat.subBlocks.size)
         
         var alertText = ""
-        var alertColor = Color.WHITE
+        var alertColorHex = "#212121" // Default dark gray
         
         val activeClimb = strat.activeClimbs.find { riderDist >= it.startDistance && riderDist < it.endDistance }
         if (activeClimb != null) {
@@ -277,56 +279,66 @@ class RouteBarView(context: Context) : View(context) {
             
             if (steepDist != null && steepGrade != null && steepDist < 5000) {
                 alertText = "Muro ${steepGrade.toInt()}% a ${formatDist(steepDist)}"
-                alertColor = Color.parseColor("#FF5252") // Red
+                alertColorHex = GradeColorScale.getColorHex(steepGrade.toDouble())
             } else {
                 val distToTop = activeClimb.endDistance - riderDist
                 alertText = "Coronar a ${formatDist(distToTop)}"
-                alertColor = Color.parseColor("#4CAF50") // Green
+                alertColorHex = "#4CAF50" // Green
             }
         } else {
             val nextClimb = strat.activeClimbs.filter { it.startDistance > riderDist }.minByOrNull { it.startDistance }
             if (nextClimb != null) {
                 val distToStart = nextClimb.startDistance - riderDist
                 alertText = "Puerto a ${formatDist(distToStart)}"
-                alertColor = Color.parseColor("#FFC107") // Amber
+                alertColorHex = "#FFC107" // Amber
             }
         }
 
         if (alertText.isNotEmpty()) {
-            val alertPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = alertColor
-                textSize = 28f
-                textAlign = Paint.Align.LEFT
-                setShadowLayer(4f, 0f, 2f, Color.BLACK)
-                FontHelper.applyFontToPaint(this, AppPreferences.getInstance(context).fontFamilyKey, android.graphics.Typeface.BOLD)
+            // Fondo de la franja: mezclamos el color de alerta con un poco de transparencia/blanco para que sea "más claro" (pero legible)
+            val baseColor = Color.parseColor(alertColorHex)
+            val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                // Hacemos el color algo translúcido o más suave
+                val r = Color.red(baseColor)
+                val g = Color.green(baseColor)
+                val b = Color.blue(baseColor)
+                val mix = 0.4f
+                color = Color.rgb(
+                    (r + (255 - r) * mix).toInt(),
+                    (g + (255 - g) * mix).toInt(),
+                    (b + (255 - b) * mix).toInt()
+                )
+                style = Paint.Style.FILL
             }
             
-            val alertWidth = alertPaint.measureText(alertText)
-            val padding = 12f
-            
-            val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.argb(200, 0, 0, 0)
-                style = Paint.Style.FILL
+            val alertPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.BLACK // Texto negro sobre fondo claro
+                textSize = 32f
+                textAlign = Paint.Align.CENTER
+                setShadowLayer(0f, 0f, 0f, Color.TRANSPARENT)
+                FontHelper.applyFontToPaint(this, AppPreferences.getInstance(context).fontFamilyKey, android.graphics.Typeface.BOLD)
             }
 
             if (isHorizontal) {
-                val rightEdge = w - 10f
-                val bottomEdge = h - 10f
-                val topEdge = bottomEdge - alertPaint.textSize - padding * 2
-                val leftEdge = rightEdge - alertWidth - padding * 2
+                // Franja inferior completa
+                val radarH = h * 0.75f
+                val rect = android.graphics.RectF(0f, radarH, w, h)
+                canvas.drawRect(rect, bgPaint)
                 
-                val rect = android.graphics.RectF(leftEdge, topEdge, rightEdge, bottomEdge)
-                canvas.drawRoundRect(rect, 8f, 8f, bgPaint)
-                canvas.drawText(alertText, leftEdge + padding, bottomEdge - padding - 4f, alertPaint)
+                // Texto centrado vertical y horizontalmente en la franja
+                val cy = radarH + (h - radarH) / 2f + (alertPaint.textSize / 3f)
+                canvas.drawText(alertText, w / 2f, cy, alertPaint)
             } else {
-                val rightEdge = w - 10f
-                val topEdge = 10f
-                val bottomEdge = topEdge + alertPaint.textSize + padding * 2
-                val leftEdge = rightEdge - alertWidth - padding * 2
+                // Franja derecha completa (vertical mode)
+                val radarW = w * 0.75f
+                val rect = android.graphics.RectF(radarW, 0f, w, h)
+                canvas.drawRect(rect, bgPaint)
                 
-                val rect = android.graphics.RectF(leftEdge, topEdge, rightEdge, bottomEdge)
-                canvas.drawRoundRect(rect, 8f, 8f, bgPaint)
-                canvas.drawText(alertText, leftEdge + padding, bottomEdge - padding - 4f, alertPaint)
+                // Texto centrado rotado o vertical
+                // Para no complicarlo con rotación, lo centramos normal en la zona superior
+                alertPaint.textAlign = Paint.Align.CENTER
+                alertPaint.textSize = 24f
+                canvas.drawText(alertText, radarW + (w - radarW) / 2f, 40f, alertPaint)
             }
         }
     }
