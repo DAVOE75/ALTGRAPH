@@ -733,19 +733,23 @@ class AltimetriaStrategyCalculator {
         
         // MAP ZOOM OVERRIDE
         if (mapZoomLevel != null) {
+            // Calculated for Karoo 480px width at ~40 degrees latitude
+            // mapWidthMeters = 57557280 / (2^zoom)
             lookaheadDist = when {
-                mapZoomLevel!! >= 18.0 -> 350.0    // ~350m screen width
-                mapZoomLevel!! >= 17.5 -> 500.0
-                mapZoomLevel!! >= 17.0 -> 700.0    // ~700m screen width
-                mapZoomLevel!! >= 16.5 -> 1000.0
-                mapZoomLevel!! >= 16.0 -> 1400.0   // ~1.4km screen width
-                mapZoomLevel!! >= 15.0 -> 3000.0   // ~3.0km
-                mapZoomLevel!! >= 14.0 -> 6000.0   // ~6km
-                mapZoomLevel!! >= 13.0 -> 12000.0  // ~12km
-                mapZoomLevel!! >= 12.0 -> 25000.0  // ~25km
-                mapZoomLevel!! >= 11.0 -> 50000.0
-                mapZoomLevel!! >= 10.0 -> 100000.0
-                else -> 200000.0
+                mapZoomLevel!! >= 18.0 -> 220.0
+                mapZoomLevel!! >= 17.5 -> 310.0
+                mapZoomLevel!! >= 17.0 -> 440.0
+                mapZoomLevel!! >= 16.5 -> 620.0
+                mapZoomLevel!! >= 16.0 -> 880.0
+                mapZoomLevel!! >= 15.5 -> 1240.0
+                mapZoomLevel!! >= 15.0 -> 1750.0
+                mapZoomLevel!! >= 14.5 -> 2480.0
+                mapZoomLevel!! >= 14.0 -> 3500.0
+                mapZoomLevel!! >= 13.0 -> 7000.0
+                mapZoomLevel!! >= 12.0 -> 14000.0
+                mapZoomLevel!! >= 11.0 -> 28000.0
+                mapZoomLevel!! >= 10.0 -> 56000.0
+                else -> 100000.0
             }
         } else if (smartZoomEnabled && baseLookahead < 100000.0) {
             val targetLookahead = when {

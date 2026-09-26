@@ -151,7 +151,8 @@ class RouteBarView(context: Context) : View(context) {
             // Ticks de distancia (Escala dinámica)
             val lookahead = strat.subBlockSizeMeters * strat.subBlocks.size
             val tickInterval = when {
-                lookahead <= 500 -> 100.0
+                lookahead <= 350 -> 50.0
+                lookahead <= 700 -> 100.0
                 lookahead <= 1000 -> 250.0
                 lookahead <= 2000 -> 500.0
                 lookahead <= 5000 -> 1000.0
@@ -230,7 +231,8 @@ class RouteBarView(context: Context) : View(context) {
             // Ticks de distancia
             val lookahead = strat.subBlockSizeMeters * strat.subBlocks.size
             val tickInterval = when {
-                lookahead <= 500 -> 100.0
+                lookahead <= 350 -> 50.0
+                lookahead <= 700 -> 100.0
                 lookahead <= 1000 -> 250.0
                 lookahead <= 2000 -> 500.0
                 lookahead <= 5000 -> 1000.0
