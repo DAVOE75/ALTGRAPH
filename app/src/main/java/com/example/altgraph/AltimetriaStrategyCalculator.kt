@@ -1237,7 +1237,7 @@ class AltimetriaStrategyCalculator {
             subBlockSizeMeters = subBlockSize,
             majorBlockSizeMeters = majorBlockSize,
             profileElevations = routeElevations,
-            activeClimbs = visibleClimbs,
+            activeClimbs = routeClimbs,
             visibleAvgGrade = visibleAvgGrade,
             visibleMaxGrade = trueMaxGrade,
             routeName = activeRouteName,

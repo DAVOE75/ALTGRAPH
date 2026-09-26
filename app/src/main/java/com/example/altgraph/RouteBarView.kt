@@ -312,46 +312,54 @@ class RouteBarView(context: Context) : View(context) {
             }
         }
 
-        if (alertText.isNotEmpty()) {
-            // Fondo de la franja: mezclamos el color de alerta con un poco de transparencia/blanco para que sea "más claro" (pero legible)
-            val baseColor = Color.parseColor(alertColorHex)
-            val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                // Hacemos el color algo translúcido o más suave
-                val r = Color.red(baseColor)
-                val g = Color.green(baseColor)
-                val b = Color.blue(baseColor)
-                val mix = 0.4f
-                color = Color.rgb(
-                    (r + (255 - r) * mix).toInt(),
-                    (g + (255 - g) * mix).toInt(),
-                    (b + (255 - b) * mix).toInt()
-                )
-                style = Paint.Style.FILL
-            }
-            
-            val alertPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.BLACK // Texto negro sobre fondo claro
-                textSize = 45f
-                textAlign = Paint.Align.CENTER
-                setShadowLayer(0f, 0f, 0f, Color.TRANSPARENT)
-                FontHelper.applyFontToPaint(this, AppPreferences.getInstance(context).fontFamilyKey, android.graphics.Typeface.BOLD)
-            }
+        if (alertText.isEmpty()) {
+            // Si no hay alerta, el color de la franja debe coincidir con la pendiente actual del ciclista
+            val currentBlockIdx = (strat.riderProgress * strat.subBlocks.size).toInt().coerceIn(0, strat.subBlocks.size - 1)
+            val currentGrade = if (strat.subBlocks.isNotEmpty()) strat.subBlocks[currentBlockIdx].toDouble() else 0.0
+            alertColorHex = GradeColorScale.getColorHex(currentGrade)
+        }
 
-            if (isHorizontal) {
-                // Franja inferior completa
-                val radarH = h * 0.60f
-                val rect = android.graphics.RectF(0f, radarH, w, h)
-                canvas.drawRect(rect, bgPaint)
-                
+        // Fondo de la franja: mezclamos el color de alerta con un poco de transparencia/blanco para que sea "más claro"
+        val baseColor = Color.parseColor(alertColorHex)
+        val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            val r = Color.red(baseColor)
+            val g = Color.green(baseColor)
+            val b = Color.blue(baseColor)
+            val mix = 0.4f
+            color = Color.rgb(
+                (r + (255 - r) * mix).toInt(),
+                (g + (255 - g) * mix).toInt(),
+                (b + (255 - b) * mix).toInt()
+            )
+            style = Paint.Style.FILL
+        }
+        
+        val alertPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.BLACK // Texto negro sobre fondo claro
+            textSize = 45f
+            textAlign = Paint.Align.CENTER
+            setShadowLayer(0f, 0f, 0f, Color.TRANSPARENT)
+            FontHelper.applyFontToPaint(this, AppPreferences.getInstance(context).fontFamilyKey, android.graphics.Typeface.BOLD)
+        }
+
+        if (isHorizontal) {
+            // Franja inferior completa
+            val radarH = h * 0.60f
+            val rect = android.graphics.RectF(0f, radarH, w, h)
+            canvas.drawRect(rect, bgPaint)
+            
+            if (alertText.isNotEmpty()) {
                 // Texto centrado vertical y horizontalmente en la franja
                 val cy = radarH + (h - radarH) / 2f + (alertPaint.textSize / 3f)
                 canvas.drawText(alertText, w / 2f, cy, alertPaint)
-            } else {
-                // Franja derecha completa (vertical mode)
-                val radarW = w * 0.60f
-                val rect = android.graphics.RectF(radarW, 0f, w, h)
-                canvas.drawRect(rect, bgPaint)
-                
+            }
+        } else {
+            // Franja derecha completa (vertical mode)
+            val radarW = w * 0.60f
+            val rect = android.graphics.RectF(radarW, 0f, w, h)
+            canvas.drawRect(rect, bgPaint)
+            
+            if (alertText.isNotEmpty()) {
                 // Texto centrado rotado o vertical
                 // Para no complicarlo con rotación, lo centramos normal en la zona superior
                 alertPaint.textAlign = Paint.Align.CENTER
