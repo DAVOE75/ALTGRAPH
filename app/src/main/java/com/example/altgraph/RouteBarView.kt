@@ -139,6 +139,15 @@ class RouteBarView(context: Context) : View(context) {
             if (startX > 0f) {
                 canvas.drawRect(0f, 0f, startX, headerHeight, checkeredPaint)
             }
+            
+            // Draw checkered end pattern if the route finishes within the window
+            var endX = w.toFloat()
+            if (strat.routeTotalLength > 0.0) {
+                endX = w * (strat.routeTotalLength - strat.windowStartMeters).toFloat() / totalLookahead.toFloat()
+                if (endX < w) {
+                    canvas.drawRect(endX, 0f, w.toFloat(), headerHeight, checkeredPaint)
+                }
+            }
 
             // 2. Dibujar overlay oscuro (pasado) a la izquierda de la flecha
             val cWidth = 30f
@@ -169,13 +178,16 @@ class RouteBarView(context: Context) : View(context) {
                 
                 // Si la banda está en el área previa al inicio de la ruta, no dibujamos su %
                 if (right <= startX) continue
+                // Si la banda está en el área de meta, tampoco dibujamos
+                if (left >= endX) continue
                 
                 if (bandWidth > 50f) {
                     val count = band.endIndex - band.startIndex + 1
                     val avgGrade = (Math.round(band.sumGrade / count)).toInt()
-                    // Adjust drawing to not overlap with checkered start if it crosses it
+                    // Adjust drawing to not overlap with checkered start/end if it crosses them
                     val actualLeft = Math.max(left, startX)
-                    val drawCenter = actualLeft + (right - actualLeft) / 2f
+                    val actualRight = Math.min(right, endX)
+                    val drawCenter = actualLeft + (actualRight - actualLeft) / 2f
                     canvas.drawText("${avgGrade}%", drawCenter, cyPercent, percentTextPaint)
                 }
             }
@@ -244,6 +256,15 @@ class RouteBarView(context: Context) : View(context) {
             if (startY < h) {
                 canvas.drawRect(0f, startY, headerWidth, h, checkeredPaint)
             }
+            
+            // Draw checkered end pattern if route finishes within window
+            var endY = 0f
+            if (strat.routeTotalLength > 0.0) {
+                endY = h - (h * (strat.routeTotalLength - strat.windowStartMeters).toFloat() / totalLookahead.toFloat())
+                if (endY > 0f) {
+                    canvas.drawRect(0f, 0f, headerWidth, endY, checkeredPaint)
+                }
+            }
 
             // 2. Oscurecer lo que queda atrás (abajo)
             val cHeight = 30f
@@ -272,12 +293,16 @@ class RouteBarView(context: Context) : View(context) {
                 
                 // Si la banda está debajo de startY (pre-ruta), no dibujar
                 if (top >= startY) continue
+                // Si la banda está arriba de endY (meta), tampoco dibujar
+                if (bottom <= endY) continue
                 
                 if (bandHeight > 40f) {
                     val count = band.endIndex - band.startIndex + 1
                     val avgGrade = (Math.round(band.sumGrade / count)).toInt()
+                    // Adjust drawing to not overlap with checkered start/end
                     val actualBottom = Math.min(bottom, startY)
-                    val cyPercent = top + ((actualBottom - top) / 2f) + (percentTextPaint.textSize / 3f)
+                    val actualTop = Math.max(top, endY)
+                    val cyPercent = actualTop + ((actualBottom - actualTop) / 2f) + (percentTextPaint.textSize / 3f)
                     canvas.drawText("${avgGrade}%", cxPercent, cyPercent, percentTextPaint)
                 }
             }

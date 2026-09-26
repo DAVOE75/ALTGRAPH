@@ -53,6 +53,7 @@ data class StrategyData(
     val visibleAvgGrade: Double = 0.0,
     val visibleMaxGrade: Double = 0.0,
     val routeName: String? = null,
+    val routeTotalLength: Double = 0.0,
     // PRO Features
     val oasisDistanceToNextCrucible: Double? = null,
     val virtualPacerRelativeDistance: Double? = null,
@@ -833,7 +834,8 @@ class AltimetriaStrategyCalculator {
                 majorBlockSizeMeters = majorBlockSize,
                 profileElevations = freeElevations,
                 activeClimbs = emptyList(),
-                routeName = activeRouteName
+                routeName = activeRouteName,
+                routeTotalLength = 0.0
             )
         }
 
@@ -1245,6 +1247,7 @@ class AltimetriaStrategyCalculator {
             visibleAvgGrade = visibleAvgGrade,
             visibleMaxGrade = trueMaxGrade,
             routeName = activeRouteName,
+            routeTotalLength = if (routePoints.isNotEmpty()) routePoints.last().distance else 0.0,
             oasisDistanceToNextCrucible = oasisDistance,
             virtualPacerRelativeDistance = if (virtualPacerEnabled) virtualPacerDistance - currentRiderDistance else null,
             energyBatteryLevel = energyBatteryLevel,
@@ -1379,6 +1382,7 @@ class AltimetriaStrategyCalculator {
             visibleAvgGrade = avgGrade,
             visibleMaxGrade = trueMaxGrade,
             routeName = climb.category, // Passing category as routeName to display in the header
+            routeTotalLength = climb.endDistance,
             routeCoords = getVisibleRouteCoords(routePoints.indexOfFirst { it.distance >= startDist }.coerceAtLeast(0), routePoints, (endDist - startDist).toInt())
         )
     }
