@@ -858,19 +858,6 @@ class AltimetriaStrategyCalculator {
         var windowStartDist = kotlin.math.floor(targetStart / quantumMeters).toLong() * quantumMeters
         var actualLookahead = lookaheadDist
         
-        // PANORAMIC FIX: Si el zoom es de 100km o más (ultra panorámico), forzamos
-        // el inicio de la ventana al kilómetro 0 para mostrar la ruta completa, 
-        // tal y como se ve en el Hammerhead Dashboard.
-        if (lookaheadDist >= 100000.0) {
-            windowStartDist = 0.0
-            // Si estamos en zoom panorámico, escalar la gráfica a la longitud total de la ruta
-            // para que no quede aplastada con una línea plana si la ruta es más corta que el zoom.
-            val totalLength = routeElevationProfile.lastOrNull()?.distance ?: (routePoints.lastOrNull()?.distance ?: 0.0)
-            if (totalLength > 0 && totalLength < lookaheadDist) {
-                actualLookahead = totalLength
-            }
-        }
-        
         val windowEndDist = windowStartDist + actualLookahead
 
         val riderOffsetInWindow = (currentRiderDistance - windowStartDist).coerceAtLeast(0.0)
