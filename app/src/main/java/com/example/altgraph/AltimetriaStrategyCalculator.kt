@@ -46,6 +46,7 @@ data class StrategyData(
     val windowStartMeters: Double = 0.0,
     val windowStartElevation: Double = 0.0,
     val subBlocks: List<Float> = emptyList(),
+    val subBlocksMax: List<Float> = emptyList(),
     val subBlockSizeMeters: Double = 50.0,
     val majorBlockSizeMeters: Double = 100.0,
     val profileElevations: List<Float> = emptyList(),
@@ -783,6 +784,7 @@ class AltimetriaStrategyCalculator {
             val numSubBlocks = (lookaheadDist / subBlockSize).toInt().coerceIn(2, 60)
 
             val freeSubBlocks = mutableListOf<Float>()
+            val freeSubBlocksMax = mutableListOf<Float>()
             val freeElevations = mutableListOf<Float>()
 
             // Remuestrear el historial en los sub-bloques de la ventana
@@ -797,6 +799,11 @@ class AltimetriaStrategyCalculator {
                     val dD = subBlockSize
                     val grade = if (dD > 0) (dE / dD) * 100.0 else 0.0
                     freeSubBlocks.add(grade.toFloat())
+                    
+                    // In free ride, we don't have finer data than the history array.
+                    // We'll just set max grade equal to average grade for now, or sample it if we had finer resolution.
+                    // Since history is recorded at 1Hz, we could sample it, but it's simpler to approximate.
+                    freeSubBlocksMax.add(grade.toFloat())
                 }
             }
 
@@ -830,6 +837,7 @@ class AltimetriaStrategyCalculator {
                 windowStartMeters = windowStartDist,
                 windowStartElevation = windowStartElevation,
                 subBlocks = freeSubBlocks,
+                subBlocksMax = freeSubBlocksMax,
                 subBlockSizeMeters = subBlockSize,
                 majorBlockSizeMeters = majorBlockSize,
                 profileElevations = freeElevations,
@@ -921,6 +929,7 @@ class AltimetriaStrategyCalculator {
 
         val numSubBlocks = (actualLookahead / subBlockSize).roundToInt().coerceIn(2, 2000)
         val routeSubBlocks = mutableListOf<Float>()
+        val routeSubBlocksMax = mutableListOf<Float>()
         val routeElevations = mutableListOf<Float>()
         routeElevations.add(windowStartElevation.toFloat())
 
@@ -971,8 +980,27 @@ class AltimetriaStrategyCalculator {
             } else {
                 (sElevDiff / sDist) * 100.0
             }
+            
+            // Calculate max inner grade by sampling every 10 meters (if we have true profile)
+            var maxInnerGrade = grade
+            if (hasTrueProfile) {
+                var innerDist = sDistStart
+                val step = 10.0
+                while (innerDist < sDistEnd) {
+                    val nextDist = (innerDist + step).coerceAtMost(sDistEnd)
+                    val e1 = getElevationAtDistance(innerDist)
+                    val e2 = getElevationAtDistance(nextDist)
+                    val dD = nextDist - innerDist
+                    if (dD > 0) {
+                        val innerG = ((e2 - e1) / dD) * 100.0
+                        if (innerG > maxInnerGrade) maxInnerGrade = innerG
+                    }
+                    innerDist += step
+                }
+            }
 
             routeSubBlocks.add(grade.toFloat())
+            routeSubBlocksMax.add(maxInnerGrade.toFloat())
             routeElevations.add(sElevEnd.toFloat())
         }
 
@@ -1240,6 +1268,7 @@ class AltimetriaStrategyCalculator {
             windowStartMeters = windowStartDist,
             windowStartElevation = windowStartElevation,
             subBlocks = routeSubBlocks,
+            subBlocksMax = routeSubBlocksMax,
             subBlockSizeMeters = subBlockSize,
             majorBlockSizeMeters = majorBlockSize,
             profileElevations = routeElevations,

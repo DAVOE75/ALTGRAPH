@@ -60,6 +60,14 @@ class RouteBarView(context: Context) : View(context) {
         textAlign = Paint.Align.CENTER
         setShadowLayer(3f, 0f, 2f, Color.BLACK)
     }
+
+    // Paint for max-grade-per-block label (top-left of each band, only at 50m scale)
+    private val maxGradeBlockPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#FF8C00") // Dark orange, clearly different from white avg%
+        textSize = 24f
+        textAlign = Paint.Align.LEFT
+        setShadowLayer(3f, 0f, 2f, Color.BLACK)
+    }
     
     private val cyclistPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#FBC02D")
@@ -170,7 +178,9 @@ class RouteBarView(context: Context) : View(context) {
 
             // 3. Textos de porcentaje medio en la franja superior (sin el fondo oscurecido general)
             percentTextPaint.setShadowLayer(4f, 0f, 2f, Color.BLACK) // Sombra fuerte para legibilidad sin fondo oscuro
+            FontHelper.applyFontToPaint(maxGradeBlockPaint, fontFamilyKey, Typeface.BOLD)
             val cyPercent = (headerHeight / 2f) + (percentTextPaint.textSize / 3f)
+            val show50mMax = strat.subBlockSizeMeters == 50.0 && strat.subBlocksMax.isNotEmpty()
             for (band in bands) {
                 val left = band.startIndex * blockWidth
                 val right = (band.endIndex + 1) * blockWidth
@@ -189,6 +199,17 @@ class RouteBarView(context: Context) : View(context) {
                     val actualRight = Math.min(right, endX)
                     val drawCenter = actualLeft + (actualRight - actualLeft) / 2f
                     canvas.drawText("${avgGrade}%", drawCenter, cyPercent, percentTextPaint)
+                    
+                    // Max grade label (top-left of band) — only at 50m scale and if the band is a single subBlock
+                    if (show50mMax && count == 1) {
+                        val maxG = strat.subBlocksMax.getOrNull(band.startIndex)
+                        if (maxG != null && maxG > avgGrade + 1) { // Only show if meaningfully higher than avg
+                            val maxLabel = "▲${Math.round(maxG)}%"
+                            val labelX = actualLeft + 4f
+                            val labelY = maxGradeBlockPaint.textSize + 4f
+                            canvas.drawText(maxLabel, labelX, labelY, maxGradeBlockPaint)
+                        }
+                    }
                 }
             }
 
