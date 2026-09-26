@@ -162,6 +162,22 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_ELITE_RADAR_ENABLED, true) && isEliteUnlocked
         set(value) = prefs.edit().putBoolean(KEY_ELITE_RADAR_ENABLED, value).apply()
 
+    // --- ELITE RADAR FEATURES ---
+    var eliteGhostEnabled: Boolean
+        get() = prefs.getBoolean(KEY_ELITE_GHOST_ENABLED, true) && isEliteUnlocked
+        set(value) = prefs.edit().putBoolean(KEY_ELITE_GHOST_ENABLED, value).apply()
+
+    var eliteEnergyBarEnabled: Boolean
+        get() = prefs.getBoolean(KEY_ELITE_ENERGY_BAR_ENABLED, true) && isEliteUnlocked
+        set(value) = prefs.edit().putBoolean(KEY_ELITE_ENERGY_BAR_ENABLED, value).apply()
+
+    var elitePoiRulerEnabled: Boolean
+        get() = prefs.getBoolean(KEY_ELITE_POI_RULER_ENABLED, true) && isEliteUnlocked
+        set(value) = prefs.edit().putBoolean(KEY_ELITE_POI_RULER_ENABLED, value).apply()
+
+    var eliteHistogramEnabled: Boolean
+        get() = prefs.getBoolean(KEY_ELITE_HISTOGRAM_ENABLED, false) && isEliteUnlocked
+        set(value) = prefs.edit().putBoolean(KEY_ELITE_HISTOGRAM_ENABLED, value).apply()
 
     var climbRotate90Clockwise: Boolean
         get() = prefs.getBoolean(KEY_CLIMB_ROTATE_90_CW, false)
@@ -213,6 +229,10 @@ class AppPreferences(context: Context) {
         private const val KEY_WEATHER_OVERLAY_ENABLED = "weather_overlay_enabled"
         private const val KEY_STRAVA_SEGMENTS_ENABLED = "strava_segments_enabled"
         private const val KEY_ELITE_RADAR_ENABLED = "elite_radar_enabled"
+        private const val KEY_ELITE_GHOST_ENABLED = "elite_ghost_enabled"
+        private const val KEY_ELITE_ENERGY_BAR_ENABLED = "elite_energy_bar_enabled"
+        private const val KEY_ELITE_POI_RULER_ENABLED = "elite_poi_ruler_enabled"
+        private const val KEY_ELITE_HISTOGRAM_ENABLED = "elite_histogram_enabled"
 
         @Volatile
         private var INSTANCE: AppPreferences? = null

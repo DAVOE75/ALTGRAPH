@@ -952,6 +952,62 @@ class MainActivity : Activity() {
         radarCard.addView(switchRadar)
         tabEliteContainer.addView(radarCard)
 
+        // ── Radar ELITE sub-features ─────────────────────────────────────────
+        val eliteSubLabel = createSectionLabel("🎯 Radar ELITE Features")
+        tabEliteContainer.addView(eliteSubLabel)
+
+        // Ghost / Virtual Pacer
+        val ghostCard = createCardContainer()
+        val switchGhost = Switch(this).apply {
+            text = "👻 Ghost — Mejor marca anterior\n(Grabado al terminar la ruta)"
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.eliteGhostEnabled
+            isEnabled = prefs.isEliteUnlocked
+            setOnCheckedChangeListener { _, v -> prefs.eliteGhostEnabled = v }
+        }
+        ghostCard.addView(switchGhost)
+        tabEliteContainer.addView(ghostCard)
+
+        // Energy Bar
+        val energyBarCard = createCardContainer()
+        val switchEnergyBar = Switch(this).apply {
+            text = "🔋 Barra de energía restante"
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.eliteEnergyBarEnabled
+            isEnabled = prefs.isEliteUnlocked
+            setOnCheckedChangeListener { _, v -> prefs.eliteEnergyBarEnabled = v }
+        }
+        energyBarCard.addView(switchEnergyBar)
+        tabEliteContainer.addView(energyBarCard)
+
+        // POI Ruler
+        val poiRulerCard = createCardContainer()
+        val switchPoiRuler = Switch(this).apply {
+            text = "📍 Iconos POI en la regla"
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.elitePoiRulerEnabled
+            isEnabled = prefs.isEliteUnlocked
+            setOnCheckedChangeListener { _, v -> prefs.elitePoiRulerEnabled = v }
+        }
+        poiRulerCard.addView(switchPoiRuler)
+        tabEliteContainer.addView(poiRulerCard)
+
+        // Histogram
+        val histCard = createCardContainer()
+        val switchHist = Switch(this).apply {
+            text = "📊 Histograma de pendientes"
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.eliteHistogramEnabled
+            isEnabled = prefs.isEliteUnlocked
+            setOnCheckedChangeListener { _, v -> prefs.eliteHistogramEnabled = v }
+        }
+        histCard.addView(switchHist)
+        tabEliteContainer.addView(histCard)
+
         activateBtn.setOnClickListener {
             val key = licenseInput.text.toString().trim()
             prefs.licenseKey = key

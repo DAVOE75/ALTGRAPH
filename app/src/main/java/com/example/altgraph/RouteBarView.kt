@@ -88,8 +88,49 @@ class RouteBarView(context: Context) : View(context) {
         var sumGrade: Double
     )
 
+    // ── ELITE feature state (set by RouteBarDataField each frame) ────────────
+    var ghostRelativeMeters: Double? = null   // +ahead / -behind in metres
+    var showEnergyBar: Boolean = false
+    var showPoiRuler: Boolean = false
+    var showHistogram: Boolean = false
+
+    // Ghost marker paint (semi-transparent rider arrow)
+    private val ghostPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.argb(180, 180, 180, 255)  // ghostly blue-white
+        style = Paint.Style.FILL
+        setShadowLayer(3f, 0f, 1f, Color.BLACK)
+    }
+    private val ghostOutlinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.argb(160, 100, 100, 200)
+        style = Paint.Style.STROKE
+        strokeWidth = 2f
+    }
+
+    // POI icon paint
+    private val poiTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        textSize = 22f
+        textAlign = Paint.Align.CENTER
+        setShadowLayer(3f, 0f, 2f, Color.BLACK)
+    }
+
+    // Energy bar paints
+    private val energyBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#1A1A1A")
+        style = Paint.Style.FILL
+    }
+
+    // Histogram text paint
+    private val histPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        textSize = 20f
+        textAlign = Paint.Align.CENTER
+        setShadowLayer(2f, 0f, 1f, Color.BLACK)
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+
         
         // Aplicar fuente del usuario a los textos
         val fontFamilyKey = AppPreferences.getInstance(context).fontFamilyKey
@@ -256,9 +297,63 @@ class RouteBarView(context: Context) : View(context) {
             path.close()
             canvas.drawPath(path, cyclistPaint)
             canvas.drawPath(path, cyclistOutline)
+
+            // 5b. Ghost marker (ELITE) — semi-transparent arrow offset by ghostRelativeMeters
+            val ghostRel = ghostRelativeMeters
+            if (ghostRel != null) {
+                val ghostX = (riderX + (ghostRel * w / lookahead).toFloat()).coerceIn(cWidth / 2f, w - cWidth / 2f)
+                val ghostPath = Path()
+                ghostPath.moveTo(ghostX, headerHeight)
+                ghostPath.lineTo(ghostX - (cWidth / 2f), 0f)
+                ghostPath.lineTo(ghostX, 10f)
+                ghostPath.lineTo(ghostX + (cWidth / 2f), 0f)
+                ghostPath.close()
+                canvas.drawPath(ghostPath, ghostPaint)
+                canvas.drawPath(ghostPath, ghostOutlinePaint)
+            }
+
+            // 5c. POI icons on ruler (ELITE)
+            if (showPoiRuler && strat.pois.isNotEmpty()) {
+                for (poi in strat.pois) {
+                    val poiProgress = poi.relativeDistance / lookahead
+                    val poiX = (w * poiProgress).toFloat().coerceIn(0f, w)
+                    if (poiX < startX || poiX > endX) continue
+                    val icon = poi.icon.ifEmpty {
+                        when (poi.type) {
+                            PoiType.WATER -> "💧"
+                            PoiType.TOWN -> "🏘"
+                            PoiType.SUMMIT -> "🔺"
+                            PoiType.VIEWPOINT -> "📷"
+                        }
+                    }
+                    // Draw a small vertical tick at ruler level and the icon above
+                    canvas.drawLine(poiX, headerHeight, poiX, headerHeight + 22f, dividerPaint)
+                    canvas.drawText(icon, poiX, headerHeight + 42f, poiTextPaint)
+                }
+            }
             
             // 6. Alertas dinámicas
             drawAlerts(canvas, strat, isHorizontal = true, w, h)
+
+            // 7. Energy Bar (ELITE) — thin horizontal bar below the alert strip
+            if (showEnergyBar) {
+                val barTop = h - 12f
+                val barHeight = 12f
+                val energyLevel = strat.energyBatteryLevel.coerceIn(0.0, 100.0).toFloat() / 100f
+                canvas.drawRect(0f, barTop, w, barTop + barHeight, energyBgPaint)
+                val barColor = when {
+                    energyLevel > 0.6f -> Color.parseColor("#4CAF50")
+                    energyLevel > 0.3f -> Color.parseColor("#FFC107")
+                    else -> Color.parseColor("#F44336")
+                }
+                val barPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = barColor; style = Paint.Style.FILL }
+                canvas.drawRect(0f, barTop, w * energyLevel, barTop + barHeight, barPaint)
+            }
+
+            // 8. Grade Histogram (ELITE) — mini panel on the right side of the ruler strip
+            if (showHistogram && strat.subBlocks.isNotEmpty()) {
+                drawGradeHistogram(canvas, strat, headerHeight, radarH, w)
+            }
             
         } else {
             // VERTICAL MODE
@@ -475,5 +570,60 @@ class RouteBarView(context: Context) : View(context) {
                 canvas.drawText(alertText, radarW + (w - radarW) / 2f, 40f, alertPaint)
             }
         }
+    }
+
+    /**
+     * Draws a compact grade histogram on the right side of the ruler strip.
+     * Buckets: 0-2%, 2-4%, 4-6%, 6-8%, 8-10%, >10%
+     */
+    private fun drawGradeHistogram(canvas: Canvas, strat: StrategyData, top: Float, bottom: Float, w: Float) {
+        val buckets = intArrayOf(0, 0, 0, 0, 0, 0)
+        val bucketColors = arrayOf("#43A047", "#7CB342", "#FDD835", "#FB8C00", "#E53935", "#B71C1C")
+        val labels = arrayOf("<2", "2-4", "4-6", "6-8", "8-10", ">10")
+
+        for (g in strat.subBlocks) {
+            val gi = g.toInt()
+            when {
+                gi < 2  -> buckets[0]++
+                gi < 4  -> buckets[1]++
+                gi < 6  -> buckets[2]++
+                gi < 8  -> buckets[3]++
+                gi < 10 -> buckets[4]++
+                else    -> buckets[5]++
+            }
+        }
+
+        val total = strat.subBlocks.size.coerceAtLeast(1)
+        val panelW = w * 0.30f // right 30% of width
+        val panelLeft = w - panelW
+        val panelHeight = bottom - top
+        val bucketW = panelW / buckets.size
+
+        // Background
+        canvas.drawRect(panelLeft, top, w, bottom, energyBgPaint)
+
+        for (i in buckets.indices) {
+            val fraction = buckets[i].toFloat() / total
+            val barH = fraction * panelHeight * 0.85f
+            val barLeft = panelLeft + i * bucketW + 2f
+            val barRight = barLeft + bucketW - 4f
+            val barBottom = bottom - 16f
+            val barTop = barBottom - barH
+
+            val barPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.parseColor(bucketColors[i])
+                style = Paint.Style.FILL
+            }
+            canvas.drawRect(barLeft, barTop.coerceAtMost(barBottom), barRight, barBottom, barPaint)
+
+            // Label under bar
+            histPaint.textSize = 16f
+            canvas.drawText(labels[i], barLeft + bucketW / 2f - 2f, bottom - 2f, histPaint)
+        }
+
+        // Title
+        histPaint.textSize = 17f
+        histPaint.textAlign = Paint.Align.CENTER
+        canvas.drawText("% distr.", panelLeft + panelW / 2f, top + 16f, histPaint)
     }
 }

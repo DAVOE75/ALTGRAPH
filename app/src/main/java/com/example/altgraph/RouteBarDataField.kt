@@ -33,6 +33,8 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
     private var viewJob: Job? = null
     private val calculator = AltimetriaStrategyCalculator()
     private var karooSystem: KarooSystemService? = null
+    private var ghostRecorder: GhostRecorder? = null
+    private var lastRouteName: String? = null
 
     override fun startStream(emitter: Emitter<StreamState>) {
         streamJob = scope.launch {
@@ -59,6 +61,7 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
 
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
         emitter.onNext(UpdateGraphicConfig(showHeader = false))
+        if (ghostRecorder == null) ghostRecorder = GhostRecorder(context)
 
         if (karooSystem == null) {
             val system = KarooSystemService(context)
@@ -76,6 +79,15 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                                 elevPoly = (state.javaClass.methods.find { it.name == "getElevationPolyline" }?.invoke(state) as? String)
                             }
                             calculator.setRouteElevationProfile(elevPoly)
+
+                            // Ghost recording — key route by first 30 chars of polyline
+                            val routeKey = state.routePolyline.take(30)
+                            if (routeKey != lastRouteName) {
+                                lastRouteName = routeKey
+                                ghostRecorder?.startRoute(routeKey)
+                            }
+                            ghostRecorder?.update(state.routeDistance)
+
                         } else if (state is OnNavigationState.NavigationState.NavigatingToDestination) {
                             val dist = (state.javaClass.methods.find { it.name == "getDestinationDistance" || it.name == "getDistance" }?.invoke(state) as? Double) ?: 0.0
                             calculator.isNavigatingRoute = true
@@ -83,6 +95,9 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                             calculator.syncRouteDistance(dist)
                         } else {
                             if (state.javaClass.simpleName == "Idle") {
+                                ghostRecorder?.finishRoute()
+                                ghostRecorder?.clearRoute()
+                                lastRouteName = null
                                 calculator.clearRoute()
                             }
                         }
@@ -142,11 +157,17 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                 // Clear the canvas with transparent background so map shows through
                 currentCanvas.drawColor(Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR)
                 
-                val isElite = AppPreferences.getInstance(context).eliteRadarEnabled
+                val prefs = AppPreferences.getInstance(context)
+                val isElite = prefs.eliteRadarEnabled
                 
                 if (isElite) {
                     val strategy = calculator.calculateStrategy(context)
                     routeBarView.strategyData = strategy
+                    routeBarView.ghostRelativeMeters = if (prefs.eliteGhostEnabled)
+                        ghostRecorder?.ghostRelativeToRider(calculator.currentRouteDistance) else null
+                    routeBarView.showEnergyBar = prefs.eliteEnergyBarEnabled
+                    routeBarView.showPoiRuler = prefs.elitePoiRulerEnabled
+                    routeBarView.showHistogram = prefs.eliteHistogramEnabled
                     routeBarView.draw(currentCanvas)
                 } else {
                     val p = Paint(Paint.ANTI_ALIAS_FLAG).apply {
