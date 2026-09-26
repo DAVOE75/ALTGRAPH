@@ -180,7 +180,8 @@ class RouteBarView(context: Context) : View(context) {
             percentTextPaint.setShadowLayer(4f, 0f, 2f, Color.BLACK) // Sombra fuerte para legibilidad sin fondo oscuro
             FontHelper.applyFontToPaint(maxGradeBlockPaint, fontFamilyKey, Typeface.BOLD)
             val cyPercent = (headerHeight / 2f) + (percentTextPaint.textSize / 3f)
-            val show50mMax = strat.subBlockSizeMeters in setOf(50.0, 100.0, 150.0, 200.0) && strat.subBlocksMax.isNotEmpty()
+            // getSubBlockSize only returns 50.0 or 100.0 for typical route lookaheads
+            val showMaxGrade = strat.subBlockSizeMeters <= 100.0 && strat.subBlocksMax.isNotEmpty()
             for (band in bands) {
                 val left = band.startIndex * blockWidth
                 val right = (band.endIndex + 1) * blockWidth
@@ -200,10 +201,12 @@ class RouteBarView(context: Context) : View(context) {
                     val drawCenter = actualLeft + (actualRight - actualLeft) / 2f
                     canvas.drawText("${avgGrade}%", drawCenter, cyPercent, percentTextPaint)
                     
-                    // Max grade label (top-left of band) — only at 50m scale and if the band is a single subBlock
-                    if (show50mMax && count == 1) {
-                        val maxG = strat.subBlocksMax.getOrNull(band.startIndex)
-                        if (maxG != null && maxG > avgGrade + 1) { // Only show if meaningfully higher than avg
+                    // Max grade label (top-left corner) — computed as max across all subBlocks in the band
+                    if (showMaxGrade) {
+                        val maxG = (band.startIndex..band.endIndex)
+                            .mapNotNull { strat.subBlocksMax.getOrNull(it) }
+                            .maxOrNull()
+                        if (maxG != null && maxG > avgGrade + 1f) { // Only if meaningfully above avg
                             val maxLabel = "▲${Math.round(maxG)}%"
                             val labelX = actualLeft + 4f
                             val labelY = maxGradeBlockPaint.textSize + 4f
