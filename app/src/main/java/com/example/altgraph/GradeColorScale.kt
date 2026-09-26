@@ -17,7 +17,6 @@ object GradeColorScale {
      */
     fun getColorHex(grade: Double): String {
         return when {
-            grade <= -99.0 -> "#111111" // Fuera de ruta (Negro)
             grade <= -10.0 -> "#041E42" // Descenso pronunciado (Azul marino muy oscuro)
             grade <= -5.0 -> "#004B87" // Descenso medio (Azul oscuro)
             grade <= -2.0 -> "#0072CE" // Descenso suave (Azul medio)
@@ -38,7 +37,6 @@ object GradeColorScale {
      */
     fun getClimbColorHex(grade: Double): String {
         return when {
-            grade <= -99.0 -> "#111111" // Fuera de ruta (Negro)
             grade <= -10.0 -> "#041E42" // Descenso pronunciado
             grade <= -5.0 -> "#004B87" // Descenso medio
             grade <= -2.0 -> "#0072CE" // Descenso suave

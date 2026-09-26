@@ -733,13 +733,12 @@ class AltimetriaStrategyCalculator {
         
         // MAP ZOOM OVERRIDE
         if (mapZoomLevel != null) {
-            // Calculated for Karoo (logical width ~240dp at ~40 degrees latitude)
-            // Due to xhdpi screen density, logical pixels are half of physical 480px width
-            val zoom = mapZoomLevel!!
-            lookaheadDist = (57557280.0 / Math.pow(2.0, zoom)) / 2.0
-            
-            // Clamp lookahead to sensible min/max values
-            lookaheadDist = lookaheadDist.coerceIn(50.0, 200000.0)
+            // Cálculo exacto del ancho del mapa basado en el motor Mapbox de Karoo.
+            // Asumiendo un ancho de ~260 píxeles lógicos (CSS) y latitud media de España (~40º)
+            // Esto ajusta la barra milimétricamente sin saltos bruscos
+            val mapWidthPixels = 260.0
+            val metersPerPixel = (156543.03 * 0.766) / Math.pow(2.0, mapZoomLevel!!)
+            lookaheadDist = (mapWidthPixels * metersPerPixel).coerceIn(100.0, 100000.0)
         } else if (smartZoomEnabled && baseLookahead < 100000.0) {
             val targetLookahead = when {
                 instantBarometricGrade >= 8.0 -> baseLookahead.coerceAtMost(350.0) // Crucible
@@ -767,47 +766,33 @@ class AltimetriaStrategyCalculator {
                 freeRideHistory.add(Pair(liveDistanceAccumulated, currentElevation))
             }
 
-            // MODO LIBRE: Igual que con ruta, flecha al 25% (para ver un poco hacia atrás)
-            val quantumMeters = getSubBlockSize(lookaheadDist)
-            val targetStart = liveDistanceAccumulated - (lookaheadDist / 4.0)
-            val windowStartDist = kotlin.math.floor(targetStart / quantumMeters).toLong() * quantumMeters
-
+            // La ventana ahora mira hacia atrás desde la posición actual
+            val windowStartDist = (liveDistanceAccumulated - lookaheadDist).coerceAtLeast(0.0)
+            
+            // El ciclista avanza hacia la derecha al empezar, y luego se queda en el borde derecho
             val riderDistInWindow = (liveDistanceAccumulated - windowStartDist).coerceAtLeast(0.0)
             val riderProgress = (riderDistInWindow / lookaheadDist).toFloat().coerceIn(0f, 1f)
 
             val subBlockSize = getSubBlockSize(lookaheadDist)
             val majorBlockSize = getMajorBlockSize(lookaheadDist)
-            val numSubBlocks = (lookaheadDist / subBlockSize).roundToInt().coerceIn(2, 60)
-            val actualLookahead = numSubBlocks * subBlockSize
-            
-            val finalRiderProgress = (riderDistInWindow / actualLookahead).toFloat().coerceIn(0f, 1f)
+            val numSubBlocks = (lookaheadDist / subBlockSize).toInt().coerceIn(2, 60)
 
             val freeSubBlocks = mutableListOf<Float>()
             val freeElevations = mutableListOf<Float>()
 
             // Remuestrear el historial en los sub-bloques de la ventana
-            for (idx in 0 until numSubBlocks) {
-                val ptDistStart = windowStartDist + (idx * subBlockSize)
-                val ptDistEnd = windowStartDist + ((idx + 1) * subBlockSize)
-
-                if (ptDistEnd <= 0.0) {
-                    freeSubBlocks.add(-999f)
-                    freeElevations.add(currentElevation.toFloat())
-                    continue
-                }
-
-                val ptElevStart = getFreeRideElevationAt(ptDistStart)
-                val ptElevEnd = getFreeRideElevationAt(ptDistEnd)
+            for (idx in 0..numSubBlocks) {
+                val ptDist = windowStartDist + (idx * subBlockSize)
+                val ptElev = getFreeRideElevationAt(ptDist)
+                freeElevations.add(ptElev.toFloat())
                 
-                if (idx == 0) {
-                    freeElevations.add(ptElevStart.toFloat())
+                if (idx > 0) {
+                    val prevElev = freeElevations[idx - 1]
+                    val dE = ptElev - prevElev
+                    val dD = subBlockSize
+                    val grade = if (dD > 0) (dE / dD) * 100.0 else 0.0
+                    freeSubBlocks.add(grade.toFloat())
                 }
-                freeElevations.add(ptElevEnd.toFloat())
-                
-                val dE = ptElevEnd - ptElevStart
-                val dD = subBlockSize
-                val grade = if (dD > 0) (dE / dD) * 100.0 else 0.0
-                freeSubBlocks.add(grade.toFloat())
             }
 
             val windowStartElevation = freeElevations.first().toDouble()
@@ -836,7 +821,7 @@ class AltimetriaStrategyCalculator {
                 hairpins = liveHairpins,
                 pois = livePois,
                 curvatureOffsets = liveCurvatures,
-                riderProgress = finalRiderProgress,
+                riderProgress = riderProgress,
                 windowStartMeters = windowStartDist,
                 windowStartElevation = windowStartElevation,
                 subBlocks = freeSubBlocks,
@@ -853,12 +838,25 @@ class AltimetriaStrategyCalculator {
         // 1. Usar la distancia reportada y suavizada
         val currentRiderDistance = currentRouteDistance
 
-        // 2. Ventana deslizante en bloques cuánticos adaptados a la escala
-        val quantumMeters = getSubBlockSize(lookaheadDist)
-        // Desplazamos la ventana 1/4 hacia atrás para que el ciclista aparezca a 1/4 de la pantalla
+        // 2. Ventana deslizante en bloques cuánticos de 50 metros (avance gradual y continuo)
+        val quantumMeters = 50.0
+        // Desplazamos la ventana 1/3 hacia atrás para que el ciclista aparezca a 1/3 de la pantalla
         val targetStart = currentRiderDistance - (lookaheadDist / 4.0)
-        var windowStartDist = kotlin.math.floor(targetStart / quantumMeters).toLong() * quantumMeters
+        var windowStartDist = (targetStart.coerceAtLeast(0.0) / quantumMeters).toLong() * quantumMeters
         var actualLookahead = lookaheadDist
+        
+        // PANORAMIC FIX: Si el zoom es de 100km o más (ultra panorámico), forzamos
+        // el inicio de la ventana al kilómetro 0 para mostrar la ruta completa, 
+        // tal y como se ve en el Hammerhead Dashboard.
+        if (lookaheadDist >= 100000.0) {
+            windowStartDist = 0.0
+            // Si estamos en zoom panorámico, escalar la gráfica a la longitud total de la ruta
+            // para que no quede aplastada con una línea plana si la ruta es más corta que el zoom.
+            val totalLength = routeElevationProfile.lastOrNull()?.distance ?: (routePoints.lastOrNull()?.distance ?: 0.0)
+            if (totalLength > 0 && totalLength < lookaheadDist) {
+                actualLookahead = totalLength
+            }
+        }
         
         val windowEndDist = windowStartDist + actualLookahead
 
@@ -908,15 +906,10 @@ class AltimetriaStrategyCalculator {
         val secondsRemaining = if (currentSpeed > 0.1) (totalDistanceRemaining / currentSpeed).toLong() else 0L
 
         // 5. Cálculo de resolución adaptativa según escala (Lookahead)
-        val subBlockSize = getSubBlockSize(lookaheadDist)
-        val majorBlockSize = getMajorBlockSize(lookaheadDist)
+        val subBlockSize = getSubBlockSize(actualLookahead)
+        val majorBlockSize = getMajorBlockSize(actualLookahead)
 
-        val numSubBlocks = (lookaheadDist / subBlockSize).roundToInt().coerceIn(2, 2000)
-        actualLookahead = numSubBlocks * subBlockSize
-        
-        // Re-calculate riderProgress now that actualLookahead has snapped to the grid
-        val finalRiderProgress = (riderOffsetInWindow / actualLookahead).toFloat().coerceIn(0f, 1f)
-
+        val numSubBlocks = (actualLookahead / subBlockSize).roundToInt().coerceIn(2, 2000)
         val routeSubBlocks = mutableListOf<Float>()
         val routeElevations = mutableListOf<Float>()
         routeElevations.add(windowStartElevation.toFloat())
@@ -938,12 +931,6 @@ class AltimetriaStrategyCalculator {
         for (j in 0 until numSubBlocks) {
             val sDistStart = windowStartDist + (j * subBlockSize)
             val sDistEnd = windowStartDist + ((j + 1) * subBlockSize)
-
-            if (sDistEnd <= 0.0) {
-                routeSubBlocks.add(-999f)
-                routeElevations.add(windowStartElevation.toFloat())
-                continue
-            }
 
             val sElevStart: Double
             val sElevEnd: Double
@@ -980,17 +967,11 @@ class AltimetriaStrategyCalculator {
         }
 
         // Construcción de bloques mayores para telemetría y rótulos
-        val numMajorBlocks = (lookaheadDist / majorBlockSize).roundToInt().coerceIn(1, 200)
+        val numMajorBlocks = (actualLookahead / majorBlockSize).roundToInt().coerceIn(1, 200)
         val routeMajorBlocks = mutableListOf<Float>()
         for (m in 0 until numMajorBlocks) {
             val mDistStart = windowStartDist + (m * majorBlockSize)
             val mDistEnd = windowStartDist + ((m + 1) * majorBlockSize)
-
-            if (mDistEnd <= 0.0) {
-                routeMajorBlocks.add(-999f)
-                continue
-            }
-
             val mElevStart = getElevationAtDistance(mDistStart)
             val mElevEnd = getElevationAtDistance(mDistEnd)
             val mElevDiff = mElevEnd - mElevStart
@@ -1245,7 +1226,7 @@ class AltimetriaStrategyCalculator {
             hairpins = visibleHairpins,
             pois = visiblePois,
             curvatureOffsets = curvatureOffsets,
-            riderProgress = finalRiderProgress,
+            riderProgress = riderProgress,
             windowStartMeters = windowStartDist,
             windowStartElevation = windowStartElevation,
             subBlocks = routeSubBlocks,

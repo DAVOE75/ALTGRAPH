@@ -136,7 +136,7 @@ class RouteBarView(context: Context) : View(context) {
                 val right = (band.endIndex + 1) * blockWidth
                 val bandWidth = right - left
                 
-                if (bandWidth > 50f && band.colorHex != "#111111") {
+                if (bandWidth > 50f) {
                     val count = band.endIndex - band.startIndex + 1
                     val avgGrade = (Math.round(band.sumGrade / count)).toInt()
                     canvas.drawText("${avgGrade}%", left + (bandWidth / 2f), cyPercent, percentTextPaint)
@@ -167,11 +167,9 @@ class RouteBarView(context: Context) : View(context) {
                 // Línea de marca hacia abajo
                 canvas.drawLine(px, headerHeight, px, headerHeight + 15f, dividerPaint)
                 // Texto
-                if (tickDist >= 0) {
-                    val kmLabel = if (tickDist >= 1000) "${(tickDist / 1000).toInt()}km" else "${tickDist.toInt()}m"
-                    val cyTick = headerHeight + 20f + tickTextPaint.textSize
-                    canvas.drawText(kmLabel, px, cyTick, tickTextPaint)
-                }
+                val kmLabel = if (tickDist >= 1000) "${(tickDist / 1000).toInt()}km" else "${tickDist.toInt()}m"
+                val cyTick = headerHeight + 20f + tickTextPaint.textSize
+                canvas.drawText(kmLabel, px, cyTick, tickTextPaint)
                 tickDist += tickInterval
             }
 
@@ -218,7 +216,7 @@ class RouteBarView(context: Context) : View(context) {
                 val bottom = h - (band.startIndex * blockHeight)
                 val bandHeight = bottom - top
                 
-                if (bandHeight > 40f && band.colorHex != "#111111") {
+                if (bandHeight > 40f) {
                     val count = band.endIndex - band.startIndex + 1
                     val avgGrade = (Math.round(band.sumGrade / count)).toInt()
                     val cyPercent = top + (bandHeight / 2f) + (percentTextPaint.textSize / 3f)
@@ -247,11 +245,9 @@ class RouteBarView(context: Context) : View(context) {
                 val progress = (tickDist - strat.windowStartMeters) / lookahead
                 val py = h - (h * progress).toFloat()
                 canvas.drawLine(headerWidth, py, headerWidth + 15f, py, dividerPaint)
-                if (tickDist >= 0) {
-                    val kmLabel = if (tickDist >= 1000) "${(tickDist / 1000).toInt()}km" else "${tickDist.toInt()}m"
-                    val cyTick = py + (tickTextPaint.textSize / 3f)
-                    canvas.drawText(kmLabel, headerWidth + 20f, cyTick, tickTextPaint)
-                }
+                val kmLabel = if (tickDist >= 1000) "${(tickDist / 1000).toInt()}km" else "${tickDist.toInt()}m"
+                val cyTick = py + (tickTextPaint.textSize / 3f)
+                canvas.drawText(kmLabel, headerWidth + 20f, cyTick, tickTextPaint)
                 tickDist += tickInterval
             }
 
