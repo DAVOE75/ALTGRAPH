@@ -733,12 +733,22 @@ class AltimetriaStrategyCalculator {
         
         // MAP ZOOM OVERRIDE
         if (mapZoomLevel != null) {
-            // Cálculo exacto del ancho del mapa basado en el motor Mapbox de Karoo.
-            // Asumiendo un ancho de ~260 píxeles lógicos (CSS) y latitud media de España (~40º)
-            // Esto ajusta la barra milimétricamente sin saltos bruscos
-            val mapWidthPixels = 260.0
-            val metersPerPixel = (156543.03 * 0.766) / Math.pow(2.0, mapZoomLevel!!)
-            lookaheadDist = (mapWidthPixels * metersPerPixel).coerceIn(100.0, 100000.0)
+            lookaheadDist = when {
+                mapZoomLevel!! >= 18.0 -> 150.0
+                mapZoomLevel!! >= 17.5 -> 200.0
+                mapZoomLevel!! >= 17.0 -> 300.0
+                mapZoomLevel!! >= 16.5 -> 500.0
+                mapZoomLevel!! >= 16.0 -> 800.0
+                mapZoomLevel!! >= 15.5 -> 1200.0
+                mapZoomLevel!! >= 15.0 -> 1800.0
+                mapZoomLevel!! >= 14.5 -> 2500.0
+                mapZoomLevel!! >= 14.0 -> 4000.0
+                mapZoomLevel!! >= 13.5 -> 6000.0
+                mapZoomLevel!! >= 13.0 -> 10000.0
+                mapZoomLevel!! >= 12.0 -> 20000.0
+                mapZoomLevel!! >= 10.0 -> 50000.0
+                else -> 100000.0
+            }
         } else if (smartZoomEnabled && baseLookahead < 100000.0) {
             val targetLookahead = when {
                 instantBarometricGrade >= 8.0 -> baseLookahead.coerceAtMost(350.0) // Crucible
