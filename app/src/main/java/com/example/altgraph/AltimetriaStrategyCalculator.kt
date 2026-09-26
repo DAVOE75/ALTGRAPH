@@ -739,8 +739,9 @@ class AltimetriaStrategyCalculator {
             // calculamos los metros por píxel y los multiplicamos por el ancho real del view.
             val mapMetersPerPixel = 119911.96 / Math.pow(2.0, mapZoomLevel!!)
             val actualViewWidth = if (viewWidth > 0) viewWidth.toDouble() else 480.0
-            // Usamos un factor de calibración fina (empíricamente 1.66 * 0.5) 
-            val calibrationFactor = 0.833
+            // La pantalla de Karoo tiene doble densidad de píxeles (2x), por lo que 1 píxel físico
+            // equivale a medio píxel lógico de Mapbox. Por tanto, dividimos entre 2 el factor.
+            val calibrationFactor = 0.416
             lookaheadDist = (actualViewWidth * mapMetersPerPixel * calibrationFactor).coerceIn(50.0, 100000.0)
         } else if (smartZoomEnabled && baseLookahead < 100000.0) {
             val targetLookahead = when {
