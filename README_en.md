@@ -6,6 +6,25 @@
 **ALTGRAPH** is a next-generation professional altimetry and performance extension for **Hammerhead Karoo** cycling computers (Karoo 2 and Karoo 3), developed by **David García Pascual** using the official `karoo-ext` SDK.
 It revolutionizes the traditional concept of cycling altimetry by incorporating a **Suite of 5 Altimetry Visualization Models** with a live dynamic selector, a 15-stage continuous monochromatic scale, a 50-meter rolling window quantum advance, adaptive multiscale resolution, mountain pass analysis, optional topographic calculation (pure horizontal projection), mathematical detection of hairpin turns (tornanti), filtering by POI categories (Towns, Fountains, Viewpoints, Summits), a tap-to-zoom scale switcher, Google Sans / Condensed typography, a 90° rotated full-screen landscape mode, dual **VAM** pace with recommended speed, and scientific calculation of the **Fatigue Grade (GF)**.
 
+
+## 🚀 WHATS NEW IN VERSION 1.0.0: ALTIMETRY RADAR & PRO EXPERIENCE 🚀
+
+We have reached version **1.0.0**! This update brings a complete redesign of the experience, making control and visualization more precise and professional than ever.
+
+### 🌟 Altimetry Radar (New 3D View Mode)
+The new **Altimetry Radar** mode overlays your Karoo map, allowing you to see both pure navigation and the upcoming terrain relief, all exquisitely integrated into the same screen.
+<p align="center">
+  <img src="art/screenshot_radar_altimetrico.png" width="400" />
+</p>
+
+### 🔧 New Features and Improvements:
+- **Training Zones Bar**: Full integration of the bottom colored bar (7 zones) based on your power meter or heart rate data in the Altimetry Radar mode.
+- **Fine Zoom Control (+ / -)**: Replaced the old magnifying glass with dedicated **[+]** and **[-]** buttons. You can now zoom down to **50-meter blocks**, overriding the "Smart Zoom" algorithm if you want absolute manual control.
+- **Horizontal Panning (< / >)**: New interactive buttons in the profile view that allow you to freely drag (pan) the graph left and right without altering the scale. Anticipate the climb!
+- **Native Landscape Mode**: Full support for Karoo mounted horizontally. Now touch buttons and the profile perfectly re-orient according to your visual field, placing touch controls ergonomically at the edges of the screen.
+- **Real-Time Cyclist Icon**: The ball (current cyclist position) now moves fluidly across the graphical profile and elevation colors, giving you immediate feedback on where you are on the route.
+- **Dynamic Compass**: Smart hiding of the compass in views other than the Global Isometric Map, cleaning up the interface to show only what is relevant.
+
 ## 📸 Capturas en Pantalla Real de Karoo 3
 
 | 🎨 Style Tab | 🎛️ Selection Menu | 📊 Full Dashboard |

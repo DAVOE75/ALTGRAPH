@@ -7,6 +7,25 @@
 Elle révolutionne le concept traditionnel de l'altimétrie cycliste en intégrant une **Suite de 6 Modèles de Visualisation Altimétrique** avec sélecteur dynamique en direct, une échelle monochromatique continue de 15 niveaux, une avancée quantique en fenêtre glissante de 50 mètres, une résolution adaptative multi-échelle, l'analyse des cols de montagne, le calcul topographique (projection horizontale pure), la détection mathématique des virages en épingle (tornanti), le filtrage par catégories de POI, le commutateur d'échelle tactile, le mode paysage pivoté à 90°, l'allure **VAM** et le calcul scientifique du **Degré de Fatigue (GF)**.
 ---
 
+
+## 🚀 NOUVEAUTÉS DE LA VERSION 1.0.0: RADAR ALTIMÉTRIQUE ET EXPÉRIENCE PRO 🚀
+
+Nous avons atteint la version **1.0.0** ! Cette mise à jour apporte une refonte complète de l'expérience, rendant le contrôle et la visualisation plus précis et professionnels que jamais.
+
+### 🌟 Radar Altimétrique (Nouveau Mode de Vue 3D)
+Le nouveau mode **Radar Altimétrique** se superpose à votre carte Karoo, vous permettant de voir à la fois la navigation pure et le relief à venir, le tout magnifiquement intégré sur le même écran.
+<p align="center">
+  <img src="art/screenshot_radar_altimetrico.png" width="400" />
+</p>
+
+### 🔧 Nouvelles Fonctionnalités et Améliorations :
+- **Barre des Zones d'Entraînement** : Intégration complète de la barre de couleur inférieure (7 zones) basée sur les données de votre capteur de puissance ou de votre fréquence cardiaque dans le mode Radar Altimétrique.
+- **Contrôle Précis du Zoom (+ / -)** : Remplacement de l'ancienne loupe par des boutons dédiés **[+]** et **[-]**. Vous pouvez désormais zoomer jusqu'à des **blocs de 50 mètres**, en contournant l'algorithme "Smart Zoom" si vous souhaitez un contrôle manuel absolu.
+- **Défilement Horizontal (< / >)** : Nouveaux boutons interactifs dans la vue de profil qui vous permettent de faire glisser librement le graphique de gauche à droite sans modifier l'échelle. Anticipez la montée !
+- **Mode Paysage (Landscape) Natif** : Prise en charge complète du Karoo monté horizontalement. Désormais, les boutons tactiles et le profil se réorientent parfaitement en fonction de votre champ visuel, plaçant les commandes de manière ergonomique.
+- **Icône du Cycliste en Temps Réel** : La balle (position actuelle du cycliste) se déplace désormais de manière fluide à travers le profil graphique et les couleurs d'élévation, vous donnant un retour immédiat sur votre position.
+- **Boussole Dynamique** : Masquage intelligent de la boussole dans les vues autres que la carte isométrique globale, épurant l'interface.
+
 ## 📸 Capturas en Pantalla Real de Karoo 3
 
 | 🎨 Onglet Style | 🎛️ Menu Sélection | 📊 Tableau de Bord |

@@ -16,6 +16,7 @@ import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.Switch
 import android.widget.TextView
+import android.widget.EditText
 import android.widget.Toast
 import java.util.Locale
 import kotlin.math.abs
@@ -1008,6 +1009,68 @@ class MainActivity : Activity() {
         histCard.addView(switchHist)
         tabEliteContainer.addView(histCard)
 
+        // Radar 3D
+        val radar3dCard = createCardContainer()
+        val switchRadar3d = Switch(this).apply {
+            text = "🏔️ Radar 3D con perspectiva isométrica"
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.eliteRadar3dEnabled
+            isEnabled = prefs.isEliteUnlocked
+            setOnCheckedChangeListener { _, v -> prefs.eliteRadar3dEnabled = v }
+        }
+        radar3dCard.addView(switchRadar3d)
+        tabEliteContainer.addView(radar3dCard)
+
+        // Power Zone Bar
+        val powerBarCard = createCardContainer()
+        powerBarCard.orientation = LinearLayout.VERTICAL
+
+        val switchPowerBar = Switch(this).apply {
+            text = "⚡ Barra de Zona de Entrenamiento"
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.elitePowerBarEnabled
+            isEnabled = prefs.isEliteUnlocked
+            setOnCheckedChangeListener { _, v -> prefs.elitePowerBarEnabled = v }
+        }
+        powerBarCard.addView(switchPowerBar)
+
+        val ftpLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, 10, 0, 0)
+        }
+        
+        val ftpLabel = TextView(this).apply {
+            text = "Tu FTP (W): "
+            setTextColor(Color.LTGRAY)
+            textSize = 14f
+        }
+        ftpLayout.addView(ftpLabel)
+
+        val ftpInput = EditText(this).apply {
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            setTextColor(Color.WHITE)
+            setHintTextColor(Color.DKGRAY)
+            setText(prefs.userFtp.toString())
+            isEnabled = prefs.isEliteUnlocked
+            layoutParams = LinearLayout.LayoutParams(150, LinearLayout.LayoutParams.WRAP_CONTENT)
+            addTextChangedListener(object : android.text.TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: android.text.Editable?) {
+                    s?.toString()?.toIntOrNull()?.let {
+                        if (it > 0) prefs.userFtp = it
+                    }
+                }
+            })
+        }
+        ftpLayout.addView(ftpInput)
+        
+        powerBarCard.addView(ftpLayout)
+        tabEliteContainer.addView(powerBarCard)
+
         activateBtn.setOnClickListener {
             val key = licenseInput.text.toString().trim()
             prefs.licenseKey = key
@@ -1019,6 +1082,13 @@ class MainActivity : Activity() {
             switchStrava.isEnabled = unlocked
             switchWeather.isEnabled = unlocked
             switchRadar.isEnabled = unlocked
+            switchGhost.isEnabled = unlocked
+            switchEnergyBar.isEnabled = unlocked
+            switchPoiRuler.isEnabled = unlocked
+            switchHist.isEnabled = unlocked
+            switchRadar3d.isEnabled = unlocked
+            switchPowerBar.isEnabled = unlocked
+            ftpInput.isEnabled = unlocked
             
             if (unlocked) {
                 Toast.makeText(this, getString(R.string.elite_toast_unlocked), Toast.LENGTH_LONG).show()

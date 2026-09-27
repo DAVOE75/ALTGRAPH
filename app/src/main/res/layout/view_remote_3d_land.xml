@@ -15,8 +15,8 @@
         android:id="@+id/btn_toggle_compass"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:layout_gravity="top|end"
-        android:layout_marginTop="30dp"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="30dp"
         android:layout_marginEnd="15dp"
         android:background="#00000000" />
 
@@ -24,46 +24,38 @@
         android:id="@+id/btn_toggle_compass_land"
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:layout_gravity="bottom|end"
-        android:layout_marginBottom="15dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="15dp"
         android:background="#00000000" />
 
+    <!-- Pan Left (<) at visual bottom-left -> physical top-start -->
     <Button
         android:id="@+id/btn_pan_left"
-        android:layout_width="120dp"
-        android:layout_height="80dp"
-        android:layout_gravity="bottom|start"
-        android:layout_marginBottom="5dp"
+        android:layout_width="80dp"
+        android:layout_height="120dp"
+        android:layout_gravity="top|start"
+        android:layout_marginStart="5dp"
         android:background="#01000000" />
 
+    <!-- Pan Right (>) at visual bottom-right -> physical bottom-start -->
     <Button
         android:id="@+id/btn_pan_right"
-        android:layout_width="120dp"
-        android:layout_height="80dp"
-        android:layout_gravity="bottom|end"
-        android:layout_marginBottom="5dp"
+        android:layout_width="80dp"
+        android:layout_height="120dp"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="5dp"
         android:background="#01000000" />
 
+    <!-- Zoom buttons at visual right -> physical bottom -->
     <LinearLayout
-        android:layout_width="64dp"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:layout_gravity="start"
-        android:gravity="center_vertical|start"
-        android:layout_marginStart="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom"
+        android:gravity="center_horizontal|bottom"
+        android:layout_marginBottom="16dp"
         android:padding="8dp">
-
-        <Button
-            android:id="@+id/btn_zoom_in"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:text="+"
-            android:textColor="#FFFFFF"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:background="#88333333"
-            android:layout_marginBottom="16dp" />
 
         <Button
             android:id="@+id/btn_zoom_out"
@@ -73,6 +65,19 @@
             android:textColor="#FFFFFF"
             android:textSize="24sp"
             android:textStyle="bold"
+            android:rotation="90"
+            android:background="#88333333"
+            android:layout_marginEnd="16dp" />
+
+        <Button
+            android:id="@+id/btn_zoom_in"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:text="+"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:rotation="90"
             android:background="#88333333" />
     </LinearLayout>
 

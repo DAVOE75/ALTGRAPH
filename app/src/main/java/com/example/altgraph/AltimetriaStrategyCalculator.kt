@@ -59,6 +59,7 @@ data class StrategyData(
     val oasisDistanceToNextCrucible: Double? = null,
     val virtualPacerRelativeDistance: Double? = null,
     val energyBatteryLevel: Double = 100.0,
+    val currentPower: Double = 0.0,
     // ELITE Features
     val stravaSegmentDistance: Double? = null,
     val stravaPrGhostDistance: Double? = null,
@@ -112,6 +113,7 @@ class AltimetriaStrategyCalculator {
     private var smartLookahead: Double = 350.0
     private var virtualPacerDistance: Double = 0.0
     private var energyBatteryLevel: Double = 100.0
+    private var currentPower: Double = 0.0
     
     // ELITE Feature States
     private var isStravaSegmentActive = false
@@ -137,6 +139,10 @@ class AltimetriaStrategyCalculator {
         val p2 = freeRideHistory[low]
         val t = (dist - p1.first) / (p2.first - p1.first).coerceAtLeast(0.01)
         return p1.second + t * (p2.second - p1.second)
+    }
+
+    fun setPower(power: Double) {
+        currentPower = power
     }
 
     // ── Datos del Climber nativo de Karoo (DISTANCE_TO_TOP, ELEVATION_TO_TOP, …) ──
@@ -172,6 +178,7 @@ class AltimetriaStrategyCalculator {
     
     var currentHeading: Double = 0.0
     var mapZoomLevel: Double? = null
+    var manualPanOffsetMeters: Double = 0.0
 
     fun updateLiveGrade(grade: Double) {
         this.instantBarometricGrade = grade
@@ -855,19 +862,21 @@ class AltimetriaStrategyCalculator {
         // 2. Ventana deslizante en bloques cuánticos de 50 metros (avance gradual y continuo)
         val quantumMeters = 50.0
         // Desplazamos la ventana 1/4 hacia atrás para que el ciclista aparezca al 25% de la pantalla SIEMPRE
-        val targetStart = currentRiderDistance - (lookaheadDist / 4.0)
+        val autoStart = currentRiderDistance - (lookaheadDist / 4.0)
         
-        // Eliminamos el coerceAtLeast(0.0) para permitir que la ventana empiece en negativo
-        // Esto asegura que la flecha siempre esté desplazada hacia la derecha (al 25%) incluso en el km 0.
-        // Math.floor para redondear negativos correctamente hacia abajo
-        var windowStartDist = Math.floor(targetStart / quantumMeters).toLong() * quantumMeters
+        // Restauramos el coerceAtLeast(0.0) a petición del usuario para que la ruta empiece en 0m y no en negativo.
+        var windowStartDist = (Math.floor(autoStart / quantumMeters).toLong() * quantumMeters).toDouble().coerceAtLeast(0.0)
+        
+        // Aplicamos el pan manual DESPUÉS del cálculo base para que funcione instantáneamente
+        windowStartDist = (windowStartDist + manualPanOffsetMeters).coerceAtLeast(0.0)
+        
         var actualLookahead = lookaheadDist
         
         // PANORAMIC FIX: Si el zoom es de 100km o más (ultra panorámico), forzamos
         // el inicio de la ventana al kilómetro 0 para mostrar la ruta completa, 
         // tal y como se ve en el Hammerhead Dashboard.
         if (lookaheadDist >= 100000.0) {
-            windowStartDist = 0.0
+            windowStartDist = 0.0 + manualPanOffsetMeters.coerceAtLeast(0.0)
             // Si estamos en zoom panorámico, escalar la gráfica a la longitud total de la ruta
             // para que no quede aplastada con una línea plana si la ruta es más corta que el zoom.
             val totalLength = routeElevationProfile.lastOrNull()?.distance ?: (routePoints.lastOrNull()?.distance ?: 0.0)
@@ -1280,6 +1289,7 @@ class AltimetriaStrategyCalculator {
             oasisDistanceToNextCrucible = oasisDistance,
             virtualPacerRelativeDistance = if (virtualPacerEnabled) virtualPacerDistance - currentRiderDistance else null,
             energyBatteryLevel = energyBatteryLevel,
+            currentPower = currentPower,
             stravaSegmentDistance = stravaRelDist,
             stravaPrGhostDistance = stravaGhostRelDist,
             windEffectIntensity = windEffect,
@@ -1389,6 +1399,9 @@ class AltimetriaStrategyCalculator {
         
         val avgGrade = if (ascentDistance > 0) (totalAscent / ascentDistance) * 100.0 else climb.avgGrade
         
+        val actualRiderDist = currentRouteDistance
+        val progress = if (windowLength > 0.0) ((actualRiderDist - startDist) / windowLength).toFloat().coerceIn(0f, 1f) else 0f
+
         return StrategyData(
             remainingDistance = climb.length,
             timeToSummit = 0L,
@@ -1400,7 +1413,7 @@ class AltimetriaStrategyCalculator {
             hairpins = emptyList(), // Can be added later if needed
             pois = emptyList(),
             curvatureOffsets = emptyList(),
-            riderProgress = 0f,
+            riderProgress = progress,
             windowStartMeters = startDist,
             windowStartElevation = minElev,
             subBlocks = subBlocks,

@@ -708,9 +708,7 @@ class Altimetria3DView @JvmOverloads constructor(
         } // Fin de if (showHeaderStats)
 
         // 3. Botones Minimalistas de Zoom [ - | + ]
-        if (showZoomControls) {
-            drawZoomOverlay(canvas, w, h)
-        }
+        // Desactivado en canvas porque ahora se usan botones XML
 
         // 4. Perfil Altimétrico
         if (altimetriaStyle == AltimetriaStyle.GLOBAL_ISOMETRIC) {
@@ -1230,6 +1228,36 @@ class Altimetria3DView @JvmOverloads constructor(
 
         canvas.drawText(scaleLegendText, w / 2f, h - 20f, scaleLegendPaint)
         canvas.drawText(subScaleLegendText, w / 2f, h - 2f, subScaleLegendPaint)
+        
+        // Dibujar círculos redondeados para pan left/right
+        val btnPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#44FFFFFF")
+            style = Paint.Style.FILL
+        }
+        val btnStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor("#88FFFFFF")
+            style = Paint.Style.STROKE
+            strokeWidth = 2f
+        }
+        val arrowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+            textSize = 24f * fontScale
+            textAlign = Paint.Align.CENTER
+            typeface = Typeface.DEFAULT_BOLD
+        }
+        
+        val radius = 22f
+        val cy = h - 25f
+        val cxLeft = 60f
+        val cxRight = w - 60f
+        
+        canvas.drawCircle(cxLeft, cy, radius, btnPaint)
+        canvas.drawCircle(cxLeft, cy, radius, btnStrokePaint)
+        canvas.drawText("<", cxLeft, cy + (arrowPaint.textSize/3f), arrowPaint)
+        
+        canvas.drawCircle(cxRight, cy, radius, btnPaint)
+        canvas.drawCircle(cxRight, cy, radius, btnStrokePaint)
+        canvas.drawText(">", cxRight, cy + (arrowPaint.textSize/3f), arrowPaint)
 
         // 10. Baliza del ciclista en 3D: avanza limpiamente por la cresta frontal de la pendiente
         if (riderProgress >= 0f && riderProgress <= 1f) {

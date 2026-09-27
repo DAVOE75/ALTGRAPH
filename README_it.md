@@ -7,6 +7,25 @@
 Rivoluziona il concetto tradizionale di altimetria ciclistica integrando una **Suite di 6 Modelli di Visualizzazione Altimetrica** con selettore dinamico in tempo reale, risoluzione adattiva multiscala, calcolo topografico, rilevamento matematico dei tornanti, filtraggio POI, layout a schermo intero ruotato a 90°, passo **VAM** e calcolo scientifico del **Grado di Fatica (GF)**.
 ---
 
+
+## 🚀 NOVITÀ NELLA VERSIONE 1.0.0: RADAR ALTIMETRICO E ESPERIENZA PRO 🚀
+
+Siamo arrivati alla versione **1.0.0**! Questo aggiornamento porta una riprogettazione completa dell'esperienza, rendendo il controllo e la visualizzazione più precisi e professionali che mai.
+
+### 🌟 Radar Altimetrico (Nuova Modalità di Visualizzazione 3D)
+La nuova modalità **Radar Altimetrico** si sovrappone alla mappa del Karoo, consentendoti di vedere sia la navigazione pura che il rilievo del terreno in arrivo, tutto splendidamente integrato nella stessa schermata.
+<p align="center">
+  <img src="art/screenshot_radar_altimetrico.png" width="400" />
+</p>
+
+### 🔧 Nuove Funzionalità e Miglioramenti:
+- **Barra delle Zone di Allenamento**: Integrazione completa della barra colorata inferiore (7 zone) basata sui dati del misuratore di potenza o della frequenza cardiaca nella modalità Radar Altimetrico.
+- **Controllo Preciso dello Zoom (+ / -)**: Sostituzione della vecchia lente d'ingrandimento con i pulsanti dedicati **[+]** e **[-]**. Ora puoi ingrandire fino a **blocchi da 50 metri**, bypassando l'algoritmo "Smart Zoom" se desideri il controllo manuale assoluto.
+- **Scorrimento Orizzontale (< / >)**: Nuovi pulsanti interattivi nella vista del profilo che ti consentono di trascinare liberamente il grafico a sinistra e a destra senza alterare la scala. Anticipa la salita!
+- **Modalità Paesaggio (Landscape) Nativa**: Pieno supporto per Karoo montato orizzontalmente. Ora i pulsanti touch e il profilo si riorientano perfettamente in base al tuo campo visivo, posizionando i controlli in modo ergonomico.
+- **Icona del Ciclista in Tempo Reale**: La pallina (posizione attuale del ciclista) ora si sposta fluidamente attraverso il profilo grafico e i colori di elevazione, fornendoti un feedback immediato su dove ti trovi lungo il percorso.
+- **Bussola Dinamica**: Nascondimento intelligente della bussola in visualizzazioni diverse dalla mappa isometrica globale, ripulendo l'interfaccia.
+
 ## 📸 Capturas en Pantalla Real de Karoo 3
 
 | 🎨 Scheda Stile | 🎛️ Menu Selezione | 📊 Dashboard Completo |

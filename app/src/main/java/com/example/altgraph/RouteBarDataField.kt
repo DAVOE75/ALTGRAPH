@@ -120,6 +120,13 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                             calculator.updateLiveGrade(grade)
                         }
                     }
+                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.POWER)) { state: OnStreamState ->
+                        val streamState = state.state
+                        if (streamState is StreamState.Streaming) {
+                            val power = streamState.dataPoint.values[DataType.Field.SINGLE] as? Double ?: 0.0
+                            calculator.setPower(power)
+                        }
+                    }
                 }
             }
             karooSystem = system
@@ -168,6 +175,9 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                     routeBarView.showEnergyBar = prefs.eliteEnergyBarEnabled
                     routeBarView.showPoiRuler = prefs.elitePoiRulerEnabled
                     routeBarView.showHistogram = prefs.eliteHistogramEnabled
+                    routeBarView.showRadar3d = prefs.eliteRadar3dEnabled
+                    routeBarView.showPowerBar = prefs.elitePowerBarEnabled
+                    routeBarView.userFtp = prefs.userFtp
                     routeBarView.draw(currentCanvas)
                 } else {
                     val p = Paint(Paint.ANTI_ALIAS_FLAG).apply {

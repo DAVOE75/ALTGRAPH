@@ -41,7 +41,11 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
 
     companion object {
         const val ACTION_CYCLE_3D_ZOOM = "com.example.altgraph.ACTION_CYCLE_3D_ZOOM"
+        const val ACTION_ZOOM_IN = "com.example.altgraph.ACTION_ZOOM_IN"
+        const val ACTION_ZOOM_OUT = "com.example.altgraph.ACTION_ZOOM_OUT"
         const val ACTION_TOGGLE_COMPASS = "com.example.altgraph.ACTION_TOGGLE_COMPASS"
+        const val ACTION_PAN_LEFT = "com.example.altgraph.ACTION_PAN_LEFT"
+        const val ACTION_PAN_RIGHT = "com.example.altgraph.ACTION_PAN_RIGHT"
     }
 
     override fun startStream(emitter: Emitter<StreamState>) {
@@ -75,33 +79,58 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
         if (zoomReceiver == null) {
             zoomReceiver = object : BroadcastReceiver() {
                 override fun onReceive(ctx: Context?, intent: Intent?) {
-                    if (intent?.action == ACTION_CYCLE_3D_ZOOM && ctx != null) {
+                    if (intent?.action == ACTION_ZOOM_IN && ctx != null) {
                         val prefs = AppPreferences.getInstance(ctx)
                         val curr = prefs.lookaheadMeters3d
                         val nextVal = when {
-                            curr < 350 -> 350
-                            curr < 500 -> 500
-                            curr < 1000 -> 1000
-                            curr < 2000 -> 2000
-                            curr < 5000 -> 5000
-                            curr < 10000 -> 10000
-                            curr < 20000 -> 20000
-                            curr < 50000 -> 50000
-                            curr < 100000 -> 100000
-                            curr < 150000 -> 150000
-                            curr < 200000 -> 200000
-                            else -> 200
+                            curr <= 50 -> 50
+                            curr <= 500 -> curr - 50
+                            curr <= 1000 -> curr - 100
+                            curr <= 5000 -> curr - 500
+                            curr <= 20000 -> curr - 1000
+                            curr <= 50000 -> curr - 5000
+                            curr <= 100000 -> curr - 10000
+                            curr <= 200000 -> curr - 50000
+                            else -> 200000
                         }
                         prefs.lookaheadMeters3d = nextVal
+                        prefs.smartZoomEnabled = false
+                    } else if (intent?.action == ACTION_ZOOM_OUT && ctx != null) {
+                        val prefs = AppPreferences.getInstance(ctx)
+                        val curr = prefs.lookaheadMeters3d
+                        val nextVal = when {
+                            curr >= 200000 -> 200000
+                            curr >= 100000 -> curr + 50000
+                            curr >= 50000 -> curr + 10000
+                            curr >= 20000 -> curr + 5000
+                            curr >= 5000 -> curr + 1000
+                            curr >= 1000 -> curr + 500
+                            curr >= 500 -> curr + 100
+                            curr >= 50 -> curr + 50
+                            else -> 50
+                        }
+                        prefs.lookaheadMeters3d = nextVal
+                        prefs.smartZoomEnabled = false
                     } else if (intent?.action == ACTION_TOGGLE_COMPASS && ctx != null) {
                         val prefs = AppPreferences.getInstance(ctx)
                         prefs.routeMapHeadingUp = !prefs.routeMapHeadingUp
+                    } else if (intent?.action == ACTION_PAN_LEFT && ctx != null) {
+                        val prefs = AppPreferences.getInstance(ctx)
+                        val step = prefs.lookaheadMeters3d / 3.0
+                        calculator.manualPanOffsetMeters -= step
+                    } else if (intent?.action == ACTION_PAN_RIGHT && ctx != null) {
+                        val prefs = AppPreferences.getInstance(ctx)
+                        val step = prefs.lookaheadMeters3d / 3.0
+                        calculator.manualPanOffsetMeters += step
                     }
                 }
             }
             val filter = IntentFilter().apply {
-                addAction(ACTION_CYCLE_3D_ZOOM)
+                addAction(ACTION_ZOOM_IN)
+                addAction(ACTION_ZOOM_OUT)
                 addAction(ACTION_TOGGLE_COMPASS)
+                addAction(ACTION_PAN_LEFT)
+                addAction(ACTION_PAN_RIGHT)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 context.applicationContext.registerReceiver(zoomReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
@@ -358,7 +387,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                 altimetria3DView.draw(currentCanvas)
 
                   // --- DRAW COMPASS ---
-                  if (prefs.showRouteCompass && strategy.routeCoords.isNotEmpty()) {
+                  if (prefs.showRouteCompass && strategy.routeCoords.isNotEmpty() && prefs.altimetriaStyle == AltimetriaStyle.GLOBAL_ISOMETRIC) {
                       val rotate90 = prefs.rotate90Clockwise
                       val vw = if (rotate90) h.toFloat() else w.toFloat()
                       val vh = if (rotate90) w.toFloat() else h.toFloat()
@@ -438,22 +467,26 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                       currentCanvas.restore()
                   }
 
-                val remoteViews = RemoteViews(context.packageName, R.layout.view_remote_3d)
+                val layoutId = if (prefs.rotate90Clockwise) R.layout.view_remote_3d_land else R.layout.view_remote_3d
+                val remoteViews = RemoteViews(context.packageName, layoutId)
                 remoteViews.setImageViewBitmap(R.id.img_graphic, currentBmp)
 
                 if (prefs.show3dZoomControls) {
-                    val intent = Intent(ACTION_CYCLE_3D_ZOOM).apply {
-                        setPackage(context.packageName)
-                    }
-                    val pendingIntent = PendingIntent.getBroadcast(
-                        context,
-                        0,
-                        intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                    )
-                    remoteViews.setOnClickPendingIntent(R.id.img_graphic, pendingIntent)
+                    val intentZoomIn = Intent(ACTION_ZOOM_IN).apply { setPackage(context.packageName) }
+                    val pendingZoomIn = PendingIntent.getBroadcast(context, 4, intentZoomIn, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                    remoteViews.setOnClickPendingIntent(R.id.btn_zoom_in, pendingZoomIn)
+
+                    val intentZoomOut = Intent(ACTION_ZOOM_OUT).apply { setPackage(context.packageName) }
+                    val pendingZoomOut = PendingIntent.getBroadcast(context, 5, intentZoomOut, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                    remoteViews.setOnClickPendingIntent(R.id.btn_zoom_out, pendingZoomOut)
+                    
+                    remoteViews.setViewVisibility(R.id.btn_zoom_in, android.view.View.VISIBLE)
+                    remoteViews.setViewVisibility(R.id.btn_zoom_out, android.view.View.VISIBLE)
+                } else {
+                    remoteViews.setViewVisibility(R.id.btn_zoom_in, android.view.View.GONE)
+                    remoteViews.setViewVisibility(R.id.btn_zoom_out, android.view.View.GONE)
                 }
-                                if (prefs.showRouteCompass && strategy.routeCoords.isNotEmpty()) {
+                                if (prefs.showRouteCompass && strategy.routeCoords.isNotEmpty() && prefs.altimetriaStyle == AltimetriaStyle.GLOBAL_ISOMETRIC) {
                       val intentCompass = Intent(ACTION_TOGGLE_COMPASS).apply {
                           setPackage(context.packageName)
                       }
@@ -471,6 +504,14 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                       remoteViews.setViewVisibility(R.id.btn_toggle_compass, android.view.View.GONE)
                       remoteViews.setViewVisibility(R.id.btn_toggle_compass_land, android.view.View.GONE)
                   }
+
+                  val intentPanLeft = Intent(ACTION_PAN_LEFT).apply { setPackage(context.packageName) }
+                  val pendingPanLeft = PendingIntent.getBroadcast(context, 2, intentPanLeft, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                  remoteViews.setOnClickPendingIntent(R.id.btn_pan_left, pendingPanLeft)
+
+                  val intentPanRight = Intent(ACTION_PAN_RIGHT).apply { setPackage(context.packageName) }
+                  val pendingPanRight = PendingIntent.getBroadcast(context, 3, intentPanRight, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                  remoteViews.setOnClickPendingIntent(R.id.btn_pan_right, pendingPanRight)
 
                 emitter.updateView(remoteViews)
 

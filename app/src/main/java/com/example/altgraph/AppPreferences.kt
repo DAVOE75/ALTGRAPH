@@ -179,6 +179,18 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_ELITE_HISTOGRAM_ENABLED, false) && isEliteUnlocked
         set(value) = prefs.edit().putBoolean(KEY_ELITE_HISTOGRAM_ENABLED, value).apply()
 
+    var eliteRadar3dEnabled: Boolean
+        get() = prefs.getBoolean(KEY_ELITE_RADAR_3D_ENABLED, true) && isEliteUnlocked
+        set(value) = prefs.edit().putBoolean(KEY_ELITE_RADAR_3D_ENABLED, value).apply()
+
+    var elitePowerBarEnabled: Boolean
+        get() = prefs.getBoolean(KEY_ELITE_POWER_BAR_ENABLED, true) && isEliteUnlocked
+        set(value) = prefs.edit().putBoolean(KEY_ELITE_POWER_BAR_ENABLED, value).apply()
+
+    var userFtp: Int
+        get() = prefs.getInt(KEY_USER_FTP, 250)
+        set(value) = prefs.edit().putInt(KEY_USER_FTP, value).apply()
+
     var climbRotate90Clockwise: Boolean
         get() = prefs.getBoolean(KEY_CLIMB_ROTATE_90_CW, false)
         set(value) = prefs.edit().putBoolean(KEY_CLIMB_ROTATE_90_CW, value).apply()
@@ -233,6 +245,9 @@ class AppPreferences(context: Context) {
         private const val KEY_ELITE_ENERGY_BAR_ENABLED = "elite_energy_bar_enabled"
         private const val KEY_ELITE_POI_RULER_ENABLED = "elite_poi_ruler_enabled"
         private const val KEY_ELITE_HISTOGRAM_ENABLED = "elite_histogram_enabled"
+        private const val KEY_ELITE_RADAR_3D_ENABLED = "elite_radar_3d_enabled"
+        private const val KEY_ELITE_POWER_BAR_ENABLED = "elite_power_bar_enabled"
+        private const val KEY_USER_FTP = "user_ftp"
 
         @Volatile
         private var INSTANCE: AppPreferences? = null

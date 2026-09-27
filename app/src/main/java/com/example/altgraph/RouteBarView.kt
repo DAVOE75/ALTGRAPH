@@ -91,8 +91,11 @@ class RouteBarView(context: Context) : View(context) {
     // ── ELITE feature state (set by RouteBarDataField each frame) ────────────
     var ghostRelativeMeters: Double? = null   // +ahead / -behind in metres
     var showEnergyBar: Boolean = false
+    var showPowerBar: Boolean = false
+    var userFtp: Int = 250
     var showPoiRuler: Boolean = false
     var showHistogram: Boolean = false
+    var showRadar3d: Boolean = true
 
     // Ghost marker paint (semi-transparent rider arrow)
     private val ghostPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -174,51 +177,47 @@ class RouteBarView(context: Context) : View(context) {
             val headerHeight = radarH * 0.50f
             
             // 1. Dibujar franjas de color con ligera perspectiva isométrica
-            canvas.save()
-            val skewFactor = -0.25f // controla la inclinación para efecto 3D
-            canvas.skew(skewFactor, 0f)
-            val blockWidth = w / numBlocks.toFloat()
-            for (band in bands) {
-                val left = band.startIndex * blockWidth
-                val right = (band.endIndex + 1) * blockWidth
-                segmentPaint.color = Color.parseColor(band.colorHex)
-                canvas.drawRect(left, 0f, right + 1f, headerHeight, segmentPaint)
+            if (showRadar3d) {
+                canvas.save()
+                val skewFactor = -0.35f // controla la inclinación para efecto 3D
+                canvas.skew(skewFactor, 0f)
             }
-            canvas.restore()
+            val blockWidth = w / numBlocks.toFloat()
+            val cWidth = 30f
+            val arrowX = (w * 0.25f).coerceAtLeast(cWidth / 2f)
+            val progressOffset = (w * strat.riderProgress) - arrowX
+
+            for (band in bands) {
+                val left = band.startIndex * blockWidth - progressOffset
+                val right = (band.endIndex + 1) * blockWidth - progressOffset
+                segmentPaint.color = Color.parseColor(band.colorHex)
+                canvas.drawRect(left, 0f, right + 1f, headerHeight, segmentPaint) // +1f para evitar huecos
+            }
+            if (showRadar3d) {
+                canvas.restore()
+            }
             
             // Draw checkered start pattern if we are before the actual route starts
             val totalLookahead = strat.subBlockSizeMeters * strat.subBlocks.size
-            val startX = w * (0.0 - strat.windowStartMeters).toFloat() / totalLookahead.toFloat()
+            val startX = w * (0.0 - strat.windowStartMeters).toFloat() / totalLookahead.toFloat() - progressOffset
             if (startX > 0f) {
                 canvas.drawRect(0f, 0f, startX, headerHeight, checkeredPaint)
             }
             
             // Draw checkered end pattern if the route finishes within the window
-            var endX = w.toFloat()
+            var endX = w.toFloat() + Math.abs(progressOffset)
             if (strat.routeTotalLength > 0.0) {
-                endX = w * (strat.routeTotalLength - strat.windowStartMeters).toFloat() / totalLookahead.toFloat()
+                endX = w * (strat.routeTotalLength - strat.windowStartMeters).toFloat() / totalLookahead.toFloat() - progressOffset
                 if (endX < w) {
                     canvas.drawRect(endX, 0f, w.toFloat(), headerHeight, checkeredPaint)
                 }
             }
 
-            // 2. Dibujar overlay oscuro (pasado) a la izquierda de la flecha
-            val cWidth = 30f
-            var riderX = (w * strat.riderProgress).coerceAtLeast(cWidth / 2f).coerceAtMost(w - (cWidth / 2f))
-            
-            // Si la ruta está empezando (startX visible) y el ciclista está muy cerca del inicio (a menos de 25m),
-            // clavamos la flecha exactamente en la línea de meta (0m) para que visualmente cuadre perfecto.
-            if (startX > 0f) {
-                val distMeters = (riderX - startX) * totalLookahead / w
-                if (distMeters in 0f..25f) {
-                    riderX = startX
-                }
-            }
-
-            if (riderX > cWidth / 2f) {
+            // 2. Dibujar overlay oscuro (pasado) a la izquierda de la flecha estática
+            if (arrowX > startX) {
                 // Oscurecer lo que queda atrás (solo en la franja superior donde hay colores)
                 // Hacemos que el overlay empiece desde startX para no oscurecer la bandera de cuadros
-                canvas.drawRect(Math.max(0f, startX), 0f, riderX, headerHeight, pastOverlayPaint)
+                canvas.drawRect(Math.max(0f, startX), 0f, arrowX, headerHeight, pastOverlayPaint)
             }
 
             // 3. Textos de porcentaje medio en la franja superior (sin el fondo oscurecido general)
@@ -228,14 +227,12 @@ class RouteBarView(context: Context) : View(context) {
             // getSubBlockSize only returns 50.0 or 100.0 for typical route lookaheads
             val showMaxGrade = strat.subBlockSizeMeters <= 100.0 && strat.subBlocksMax.isNotEmpty()
             for (band in bands) {
-                val left = band.startIndex * blockWidth
-                val right = (band.endIndex + 1) * blockWidth
+                val left = band.startIndex * blockWidth - progressOffset
+                val right = (band.endIndex + 1) * blockWidth - progressOffset
                 val bandWidth = right - left
                 
-                // Si la banda está en el área previa al inicio de la ruta, no dibujamos su %
-                if (right <= startX) continue
-                // Si la banda está en el área de meta, tampoco dibujamos
-                if (left >= endX) continue
+                // Si la banda está fuera de la pantalla no dibujar su %
+                if (right <= 0f || left >= w) continue
                 
                 if (bandWidth > 50f) {
                     val count = band.endIndex - band.startIndex + 1
@@ -268,9 +265,15 @@ class RouteBarView(context: Context) : View(context) {
             }
 
             // 4. Franja Intermedia (Regla / Ruler)
-            canvas.drawRect(0f, headerHeight, w, radarH, ruleBackgroundPaint)
+            if (showRadar3d) {
+                canvas.save()
+                canvas.skew(-0.35f, 0f)
+                canvas.drawRect(-w, headerHeight, w * 2, radarH, ruleBackgroundPaint)
+            } else {
+                canvas.drawRect(0f, headerHeight, w, radarH, ruleBackgroundPaint)
+            }
             // Línea divisoria blanca
-            canvas.drawLine(0f, headerHeight, w, headerHeight, dividerPaint)
+            canvas.drawLine(-w, headerHeight, w * 2, headerHeight, dividerPaint)
 
             // Ticks de distancia (Escala dinámica)
             val lookahead = strat.subBlockSizeMeters * strat.subBlocks.size
@@ -282,28 +285,41 @@ class RouteBarView(context: Context) : View(context) {
                 lookahead <= 5000 -> 1000.0
                 else -> 2000.0
             }
-            val startTick = Math.ceil(strat.windowStartMeters / tickInterval) * tickInterval
+            val startTick = Math.ceil((strat.windowStartMeters - lookahead) / tickInterval) * tickInterval
             var tickDist = startTick
             tickTextPaint.textAlign = Paint.Align.CENTER
-            while (tickDist < strat.windowStartMeters + lookahead) {
+            while (tickDist < strat.windowStartMeters + lookahead * 2) {
                 val progress = (tickDist - strat.windowStartMeters) / lookahead
-                val px = (w * progress).toFloat()
-                // Línea de marca hacia abajo
-                canvas.drawLine(px, headerHeight, px, headerHeight + 15f, dividerPaint)
-                // Texto
-                val kmLabel = if (tickDist >= 1000) "${(tickDist / 1000).toInt()}km" else "${tickDist.toInt()}m"
-                val cyTick = headerHeight + 20f + tickTextPaint.textSize
-                canvas.drawText(kmLabel, px, cyTick, tickTextPaint)
+                val px = (w * progress).toFloat() - progressOffset
+                if (px in -50f..(w + 50f)) {
+                    // Línea de marca hacia abajo
+                    canvas.drawLine(px, headerHeight, px, headerHeight + 15f, dividerPaint)
+                    // Texto (un-skew if 3D)
+                    val kmLabel = if (tickDist >= 1000) "${(tickDist / 1000).toInt()}km" else "${tickDist.toInt()}m"
+                    val cyTick = headerHeight + 20f + tickTextPaint.textSize
+                    if (showRadar3d) {
+                        canvas.save()
+                        canvas.translate(px, cyTick)
+                        canvas.skew(0.35f, 0f) // unskew
+                        canvas.drawText(kmLabel, 0f, 0f, tickTextPaint)
+                        canvas.restore()
+                    } else {
+                        canvas.drawText(kmLabel, px, cyTick, tickTextPaint)
+                    }
+                }
                 tickDist += tickInterval
+            }
+            if (showRadar3d) {
+                canvas.restore()
             }
 
             // 5. Indicador de posición (Ciclista)
             val path = Path()
             val cHeight = headerHeight * 0.8f
-            path.moveTo(riderX, headerHeight) // Punta abajo (tocando la divisoria)
-            path.lineTo(riderX - (cWidth / 2f), 0f) // Esquina superior izq
-            path.lineTo(riderX, 10f) // Centro arriba
-            path.lineTo(riderX + (cWidth / 2f), 0f) // Esquina superior der
+            path.moveTo(arrowX, headerHeight) // Punta abajo (tocando la divisoria)
+            path.lineTo(arrowX - (cWidth / 2f), 0f) // Esquina superior izq
+            path.lineTo(arrowX, 10f) // Centro arriba
+            path.lineTo(arrowX + (cWidth / 2f), 0f) // Esquina superior der
             path.close()
             canvas.drawPath(path, cyclistPaint)
             canvas.drawPath(path, cyclistOutline)
@@ -311,7 +327,8 @@ class RouteBarView(context: Context) : View(context) {
             // 5b. Ghost marker (ELITE) — semi-transparent arrow offset by ghostRelativeMeters
             val ghostRel = ghostRelativeMeters
             if (ghostRel != null) {
-                val ghostX = (riderX + (ghostRel * w / lookahead).toFloat()).coerceIn(cWidth / 2f, w - cWidth / 2f)
+                val ghostProgress = strat.riderProgress + (ghostRel / lookahead).toFloat()
+                val ghostX = ((w * ghostProgress).toFloat() - progressOffset).coerceIn(cWidth / 2f, w - cWidth / 2f)
                 val ghostPath = Path()
                 ghostPath.moveTo(ghostX, headerHeight)
                 ghostPath.lineTo(ghostX - (cWidth / 2f), 0f)
@@ -324,30 +341,50 @@ class RouteBarView(context: Context) : View(context) {
 
             // 5c. POI icons on ruler (ELITE)
             if (showPoiRuler && strat.pois.isNotEmpty()) {
+                if (showRadar3d) {
+                    canvas.save()
+                    canvas.skew(-0.35f, 0f)
+                }
                 for (poi in strat.pois) {
                     val poiProgress = poi.relativeDistance / lookahead
-                    val poiX = (w * poiProgress).toFloat().coerceIn(0f, w)
+                    val poiX = (w * poiProgress).toFloat() - progressOffset
                     if (poiX < startX || poiX > endX) continue
-                    val icon = poi.icon.ifEmpty {
-                        when (poi.type) {
-                            PoiType.WATER -> "💧"
-                            PoiType.TOWN -> "🏘"
-                            PoiType.SUMMIT -> "🔺"
-                            PoiType.VIEWPOINT -> "📷"
+                    if (poiX in -50f..(w + 50f)) {
+                        val icon = poi.icon.ifEmpty {
+                            when (poi.type) {
+                                PoiType.WATER -> "💧"
+                                PoiType.TOWN -> "🏘"
+                                PoiType.SUMMIT -> "🔺"
+                                PoiType.VIEWPOINT -> "📷"
+                            }
+                        }
+                        // Draw a small vertical tick at ruler level and the icon above
+                        canvas.drawLine(poiX, headerHeight, poiX, headerHeight + 22f, dividerPaint)
+                        
+                        // Draw unskewed icon
+                        if (showRadar3d) {
+                            canvas.save()
+                            canvas.translate(poiX, headerHeight + 42f)
+                            canvas.skew(0.35f, 0f)
+                            canvas.drawText(icon, 0f, 0f, poiTextPaint)
+                            canvas.restore()
+                        } else {
+                            canvas.drawText(icon, poiX, headerHeight + 42f, poiTextPaint)
                         }
                     }
-                    // Draw a small vertical tick at ruler level and the icon above
-                    canvas.drawLine(poiX, headerHeight, poiX, headerHeight + 22f, dividerPaint)
-                    canvas.drawText(icon, poiX, headerHeight + 42f, poiTextPaint)
+                }
+                if (showRadar3d) {
+                    canvas.restore()
                 }
             }
             
             // 6. Alertas dinámicas
             drawAlerts(canvas, strat, isHorizontal = true, w, h)
 
-            // 7. Energy Bar (ELITE) — thin horizontal bar below the alert strip
+            // 7. Energy / Power Bars (ELITE) — thin horizontal bars below the alert strip
+            var bottomOffset = 0f
             if (showEnergyBar) {
-                val barTop = h - 12f
+                val barTop = h - bottomOffset - 12f
                 val barHeight = 12f
                 val energyLevel = strat.energyBatteryLevel.coerceIn(0.0, 100.0).toFloat() / 100f
                 canvas.drawRect(0f, barTop, w, barTop + barHeight, energyBgPaint)
@@ -358,6 +395,37 @@ class RouteBarView(context: Context) : View(context) {
                 }
                 val barPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = barColor; style = Paint.Style.FILL }
                 canvas.drawRect(0f, barTop, w * energyLevel, barTop + barHeight, barPaint)
+                bottomOffset += 12f
+            }
+
+            if (showPowerBar) {
+                val barTop = h - bottomOffset - 12f
+                val barHeight = 12f
+                canvas.drawRect(0f, barTop, w, barTop + barHeight, energyBgPaint)
+                
+                val currentPwr = strat.currentPower.toFloat()
+                val ftp = userFtp.toFloat().coerceAtLeast(1f)
+                val percentFtp = currentPwr / ftp
+                
+                val barColor = when {
+                    percentFtp < 0.55f -> Color.parseColor("#808080") // Z1: Active Recovery (Gray)
+                    percentFtp < 0.75f -> Color.parseColor("#4CAF50") // Z2: Endurance (Green)
+                    percentFtp < 0.90f -> Color.parseColor("#FFEB3B") // Z3: Tempo (Yellow)
+                    percentFtp < 1.05f -> Color.parseColor("#FF9800") // Z4: Threshold (Orange)
+                    percentFtp < 1.20f -> Color.parseColor("#F44336") // Z5: VO2 Max (Red)
+                    percentFtp < 1.50f -> Color.parseColor("#9C27B0") // Z6: Anaerobic Capacity (Purple)
+                    else -> Color.parseColor("#FFEB3B") // Z7: Neuromuscular (Yellow/White - let's use White or bright yellow) 
+                }
+                if (percentFtp >= 1.50f) {
+                    val p2 = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE; style = Paint.Style.FILL }
+                    canvas.drawRect(0f, barTop, w, barTop + barHeight, p2)
+                } else {
+                    val p2 = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = barColor; style = Paint.Style.FILL }
+                    // Scale it so that Z1-Z6 covers the width linearly, capping at 1.5x FTP
+                    val widthScale = (percentFtp / 1.5f).coerceIn(0f, 1f)
+                    canvas.drawRect(0f, barTop, w * widthScale, barTop + barHeight, p2)
+                }
+                bottomOffset += 12f
             }
 
             // 8. Grade Histogram (ELITE) — mini panel on the right side of the ruler strip
@@ -372,16 +440,20 @@ class RouteBarView(context: Context) : View(context) {
             val blockHeight = h / numBlocks.toFloat()
             
             // 1. Dibujar franjas de color con ligera perspectiva isométrica (vertical mode)
-            canvas.save()
-            val skewFactorV = -0.25f // inclinación vertical para efecto 3D
-            canvas.skew(0f, skewFactorV)
+            if (showRadar3d) {
+                canvas.save()
+                val skewFactorV = -0.35f // inclinación vertical para efecto 3D
+                canvas.skew(0f, skewFactorV)
+            }
             for (band in bands) {
                 val top = h - ((band.endIndex + 1) * blockHeight)
                 val bottom = h - (band.startIndex * blockHeight)
                 segmentPaint.color = Color.parseColor(band.colorHex)
                 canvas.drawRect(0f, top - 1f, headerWidth, bottom, segmentPaint)
             }
-            canvas.restore()
+            if (showRadar3d) {
+                canvas.restore()
+            }
 
             // Draw checkered start pattern if before actual route starts
             val totalLookahead = strat.subBlockSizeMeters * strat.subBlocks.size
@@ -441,8 +513,14 @@ class RouteBarView(context: Context) : View(context) {
             }
 
             // 4. Franja Intermedia (Regla)
-            canvas.drawRect(headerWidth, 0f, radarW, h, ruleBackgroundPaint)
-            canvas.drawLine(headerWidth, 0f, headerWidth, h, dividerPaint)
+            if (showRadar3d) {
+                canvas.save()
+                canvas.skew(0f, -0.35f)
+                canvas.drawRect(headerWidth, -h, radarW, h * 2, ruleBackgroundPaint)
+            } else {
+                canvas.drawRect(headerWidth, 0f, radarW, h, ruleBackgroundPaint)
+            }
+            canvas.drawLine(headerWidth, -h, headerWidth, h * 2, dividerPaint)
 
             // Ticks de distancia
             val lookahead = strat.subBlockSizeMeters * strat.subBlocks.size
@@ -463,8 +541,19 @@ class RouteBarView(context: Context) : View(context) {
                 canvas.drawLine(headerWidth, py, headerWidth + 15f, py, dividerPaint)
                 val kmLabel = if (tickDist >= 1000) "${(tickDist / 1000).toInt()}km" else "${tickDist.toInt()}m"
                 val cyTick = py + (tickTextPaint.textSize / 3f)
-                canvas.drawText(kmLabel, headerWidth + 20f, cyTick, tickTextPaint)
+                if (showRadar3d) {
+                    canvas.save()
+                    canvas.translate(headerWidth + 20f, cyTick)
+                    canvas.skew(0f, 0.35f)
+                    canvas.drawText(kmLabel, 0f, 0f, tickTextPaint)
+                    canvas.restore()
+                } else {
+                    canvas.drawText(kmLabel, headerWidth + 20f, cyTick, tickTextPaint)
+                }
                 tickDist += tickInterval
+            }
+            if (showRadar3d) {
+                canvas.restore()
             }
 
             // 5. Indicador de posición (Ciclista)
@@ -484,16 +573,21 @@ class RouteBarView(context: Context) : View(context) {
     }
 
     private fun formatDist(m: Double): String {
-        return if (m < 1000) "${m.roundToInt()}m" else String.format("%.1fkm", m / 1000.0)
+        return when {
+            m < 1000 -> "${Math.round(m)}m"
+            m < 10000 -> String.format(java.util.Locale.getDefault(), "%.2fkm", m / 1000.0)
+            else -> String.format(java.util.Locale.getDefault(), "%.1fkm", m / 1000.0)
+        }
     }
 
     private fun drawAlerts(canvas: Canvas, strat: StrategyData, isHorizontal: Boolean, w: Float, h: Float) {
-        val riderDist = strat.windowStartMeters + strat.riderProgress * (strat.subBlockSizeMeters * strat.subBlocks.size)
+        // Usar la distancia exacta del ciclista en lugar de la relativa a la ventana
+        val trueRiderDist = strat.routeTotalLength - strat.remainingDistance
         
         var alertText = ""
         var alertColorHex = "#212121" // Default dark gray
         
-        val activeClimb = strat.activeClimbs.find { riderDist >= it.startDistance && riderDist < it.endDistance }
+        val activeClimb = strat.activeClimbs.find { trueRiderDist >= it.startDistance && trueRiderDist < it.endDistance }
         if (activeClimb != null) {
             val currentBlockIdx = (strat.riderProgress * strat.subBlocks.size).toInt()
             var steepDist: Double? = null
@@ -502,8 +596,8 @@ class RouteBarView(context: Context) : View(context) {
             for (i in currentBlockIdx until strat.subBlocks.size) {
                 val grade = strat.subBlocks[i]
                 if (grade >= 12f) {
-                    val distToBlock = strat.windowStartMeters + (i * strat.subBlockSizeMeters) - riderDist
-                    if (distToBlock > 0 && distToBlock < activeClimb.endDistance - riderDist) {
+                    val distToBlock = strat.windowStartMeters + (i * strat.subBlockSizeMeters) - trueRiderDist
+                    if (distToBlock > 0 && distToBlock < activeClimb.endDistance - trueRiderDist) {
                         steepDist = distToBlock
                         steepGrade = grade
                         break
@@ -515,15 +609,15 @@ class RouteBarView(context: Context) : View(context) {
                 alertText = "Muro ${steepGrade.toInt()}% a ${formatDist(steepDist)}"
                 alertColorHex = GradeColorScale.getColorHex(steepGrade.toDouble())
             } else {
-                val distToTop = activeClimb.endDistance - riderDist
+                val distToTop = activeClimb.endDistance - trueRiderDist
                 alertText = "Coronar a ${formatDist(distToTop)}"
                 alertColorHex = "#4CAF50" // Green
             }
         } else {
-            val nextClimb = strat.activeClimbs.filter { it.startDistance > riderDist }.minByOrNull { it.startDistance }
+            val nextClimb = strat.activeClimbs.filter { it.startDistance > trueRiderDist }.minByOrNull { it.startDistance }
             if (nextClimb != null) {
-                val distToStart = nextClimb.startDistance - riderDist
-                val gradeStr = String.format("%.1f", nextClimb.avgGrade)
+                val distToStart = nextClimb.startDistance - trueRiderDist
+                val gradeStr = String.format(java.util.Locale.getDefault(), "%.1f", nextClimb.avgGrade)
                 alertText = "Puerto a ${formatDist(distToStart)} - ${formatDist(nextClimb.length)} al $gradeStr%"
                 alertColorHex = GradeColorScale.getColorHex(nextClimb.avgGrade)
             }

@@ -7,6 +7,25 @@
 **ALTGRAPH** é uma extensão profissional de altimetria e desempenho de última geração para os ciclocomputadores **Hammerhead Karoo** (Karoo 2 e Karoo 3), desenvolvida por **David García Pascual** utilizando o SDK oficial `karoo-ext`.
 Revoluciona o conceito tradicional de altimetria de ciclismo incorporando um **Conjunto de 6 Modelos de Visualização Altimétrica** com seletor dinâmico ao vivo, escala monocromática contínua de 15 níveis, avanço quântico com janela deslizante de 50 metros, resolução multiescala adaptável, análise de passagens de montanha, cálculo topográfico opcional, detecção matemática de curvas fechadas (tornanti), filtragem de Pontos de Interesse (POIs) e muito mais.
 
+
+## 🚀 NOVIDADES NA VERSÃO 1.0.0: RADAR ALTIMÉTRICO E EXPERIÊNCIA PRO 🚀
+
+Chegamos à versão **1.0.0**! Esta atualização traz um redesenho completo da experiência, tornando o controle e a visualização mais precisos e profissionais do que nunca.
+
+### 🌟 Radar Altimétrico (Novo Modo de Visualização 3D)
+O novo modo **Radar Altimétrico** se sobrepõe ao mapa do seu Karoo, permitindo que você veja tanto a navegação pura quanto o relevo do terreno que está por vir, tudo de forma primorosa e integrada na mesma tela.
+<p align="center">
+  <img src="art/screenshot_radar_altimetrico.png" width="400" />
+</p>
+
+### 🔧 Novas Funcionalidades e Melhorias:
+- **Barra de Zonas de Treinamento**: Integração completa da barra colorida inferior (7 zonas) com base nos dados do seu medidor de potência ou frequência cardíaca no modo Radar Altimétrico.
+- **Controle de Zoom Preciso (+ / -)**: A antiga lupa foi substituída por botões dedicados **[+]** e **[-]**. Agora você pode aumentar o zoom para blocos de até **50 metros**, ignorando o algoritmo "Smart Zoom" se desejar um controle manual absoluto.
+- **Deslocamento Horizontal (< / >)**: Novos botões interativos na visualização do perfil que permitem arrastar livremente o gráfico para a esquerda e direita sem alterar a escala. Antecipe a subida!
+- **Modo Paisagem (Landscape) Nativo**: Suporte total para Karoo montado horizontalmente. Agora os botões de toque e o perfil se reorientam perfeitamente de acordo com o seu campo de visão, colocando os controles de toque de forma ergonômica nas bordas da tela.
+- **Ícone de Ciclista em Tempo Real**: A bola (posição atual do ciclista) agora avança fluidamente pelo perfil gráfico e pelas cores de elevação, dando-lhe feedback imediato sobre onde você está na rota.
+- **Bússola Dinâmica**: Ocultação inteligente da bússola em visualizações fora do mapa isométrico global, simplificando a interface para mostrar apenas o que é relevante.
+
 ## 📸 Capturas de Tela no Karoo 3
 
 | 🎨 Aba Estilo | ⚙️ Menu de Seleção | 📊 Dashboard Completo |

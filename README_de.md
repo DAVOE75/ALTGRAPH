@@ -7,6 +7,25 @@
 Es revolutioniert das traditionelle Konzept der Radsport-Höhenmessung durch die Integration einer **Suite von 6 Höhenvisualisierungsmodellen** mit dynamischer Live-Auswahl, einer 15-stufigen kontinuierlichen monochromatischen Skala, einem gleitenden 50-Meter-Fenster, adaptiver Multiskalen-Auflösung, topografischer Berechnung, mathematischer Erkennung von Haarnadelkurven (Tornanti), einem dynamischen Zoom, **VAM**-Tempo und der wissenschaftlichen Berechnung des **Ermüdungsgrades (GF)**.
 ---
 
+
+## 🚀 NEUIGKEITEN IN VERSION 1.0.0: ALTIMETRIE-RADAR & PRO-ERLEBNIS 🚀
+
+Wir haben die Version **1.0.0** erreicht! Dieses Update bringt ein komplettes Redesign der Erfahrung, wodurch Steuerung und Visualisierung präziser und professioneller denn je werden.
+
+### 🌟 Altimetrie-Radar (Neuer 3D-Ansichtsmodus)
+Der neue Modus **Altimetrie-Radar** legt sich über Ihre Karoo-Karte, sodass Sie sowohl die reine Navigation als auch das kommende Geländerelief sehen können, alles wunderbar auf demselben Bildschirm integriert.
+<p align="center">
+  <img src="art/screenshot_radar_altimetrico.png" width="400" />
+</p>
+
+### 🔧 Neue Funktionen und Verbesserungen:
+- **Trainingszonen-Leiste**: Vollständige Integration der unteren farbigen Leiste (7 Zonen) basierend auf Ihren Powermeter- oder Herzfrequenzdaten im Modus Altimetrie-Radar.
+- **Feine Zoom-Steuerung (+ / -)**: Die alte Lupe wurde durch dedizierte **[+]** und **[-]** Tasten ersetzt. Sie können nun auf bis zu **50-Meter-Blöcke** hineinzoomen, wobei der "Smart Zoom"-Algorithmus überschrieben wird, wenn Sie die absolute manuelle Kontrolle wünschen.
+- **Horizontales Scrollen (< / >)**: Neue interaktive Schaltflächen in der Profilansicht, mit denen Sie das Diagramm frei nach links und rechts ziehen können, ohne den Maßstab zu verändern. Nehmen Sie den Anstieg vorweg!
+- **Nativer Querformatmodus (Landscape)**: Volle Unterstützung für horizontal montierte Karoos. Jetzt richten sich Touch-Buttons und das Profil perfekt nach Ihrem Sichtfeld aus und platzieren die Touch-Steuerung ergonomisch an den Bildschirmrändern.
+- **Echtzeit-Radfahrer-Symbol**: Die Kugel (aktuelle Position des Radfahrers) bewegt sich nun flüssig über das grafische Profil und die Höhenfarben, was Ihnen ein sofortiges Feedback darüber gibt, wo Sie sich auf der Route befinden.
+- **Dynamischer Kompass**: Intelligentes Ausblenden des Kompasses in Ansichten außerhalb der globalen Isometriekarte, um die Benutzeroberfläche übersichtlicher zu gestalten.
+
 ## 📸 Capturas en Pantalla Real de Karoo 3
 
 | 🎨 Stil-Tab | 🎛️ Auswahlmenü | 📊 Vollständiges Dashboard |
