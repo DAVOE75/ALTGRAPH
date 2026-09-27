@@ -371,13 +371,17 @@ class RouteBarView(context: Context) : View(context) {
             val headerWidth = radarW * 0.50f
             val blockHeight = h / numBlocks.toFloat()
             
-            // 1. Dibujar franjas de color SOLAMENTE en la franja izquierda
+            // 1. Dibujar franjas de color con ligera perspectiva isométrica (vertical mode)
+            canvas.save()
+            val skewFactorV = -0.25f // inclinación vertical para efecto 3D
+            canvas.skew(0f, skewFactorV)
             for (band in bands) {
                 val top = h - ((band.endIndex + 1) * blockHeight)
                 val bottom = h - (band.startIndex * blockHeight)
                 segmentPaint.color = Color.parseColor(band.colorHex)
                 canvas.drawRect(0f, top - 1f, headerWidth, bottom, segmentPaint)
             }
+            canvas.restore()
 
             // Draw checkered start pattern if before actual route starts
             val totalLookahead = strat.subBlockSizeMeters * strat.subBlocks.size
