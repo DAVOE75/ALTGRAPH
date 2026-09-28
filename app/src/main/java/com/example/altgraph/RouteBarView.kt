@@ -312,7 +312,13 @@ class RouteBarView(context: Context) : View(context) {
                     // Línea de marca hacia abajo
                     canvas.drawLine(px, headerHeight, px, headerHeight + 15f, dividerPaint)
                     // Texto (un-skew if 3D)
-                    val kmLabel = if (tickDist >= 1000) "${(tickDist / 1000).toInt()}km" else "${tickDist.toInt()}m"
+                    val kmLabel = if (tickDist >= 1000) {
+                        val km = tickDist / 1000.0
+                        val kmStr = String.format(java.util.Locale.US, "%.2f", km).trimEnd('0').trimEnd('.')
+                        "${kmStr}km"
+                    } else {
+                        "${tickDist.toInt()}m"
+                    }
                     val cyTick = headerHeight + 20f + tickTextPaint.textSize
                     if (showRadar3d) {
                         canvas.save()
