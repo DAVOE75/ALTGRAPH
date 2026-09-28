@@ -299,7 +299,7 @@ class AltimetriaStrategyCalculator {
         this.currentLongitude = lng
         
         if (routePoints.isNotEmpty()) {
-            var minDistance = Double.MAX_VALUE
+            var minEffectiveDist = Double.MAX_VALUE
             var realMinDistance = Double.MAX_VALUE
             val dists = FloatArray(1)
             
@@ -312,18 +312,17 @@ class AltimetriaStrategyCalculator {
                 android.location.Location.distanceBetween(lat, lng, pt.latitude, pt.longitude, dists)
                 val dist = dists[0].toDouble()
                 
-                // Evitar saltos al final de la ruta (ej. rutas circulares) si ya tenemos un buen punto inicial
-                val isFarJump = Math.abs(i - nearestIndex) > 1000
-                val distanceImprovement = minDistance - dist
+                // Penalizar saltos largos en el índice para evitar que en rutas circulares 
+                // salte al final de la ruta por un metro de diferencia en el GPS.
+                val indexDiff = Math.abs(i - nearestIndex)
+                val penalty = if (indexDiff > 500) 500.0 else (indexDiff * 0.1)
                 
-                if (dist < minDistance) {
-                    if (nearestIndex == 0 && isFarJump && minDistance < 50.0 && distanceImprovement < 20.0) {
-                        // Ignorar este punto: estamos en el inicio y el salto al final no mejora casi nada.
-                    } else {
-                        minDistance = dist
-                        realMinDistance = dist
-                        newNearestIdx = i
-                    }
+                val effectiveDist = dist + penalty
+                
+                if (effectiveDist < minEffectiveDist) {
+                    minEffectiveDist = effectiveDist
+                    realMinDistance = dist
+                    newNearestIdx = i
                 }
             }
             nearestIndex = newNearestIdx
