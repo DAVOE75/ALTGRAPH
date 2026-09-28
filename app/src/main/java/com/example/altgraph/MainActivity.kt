@@ -156,42 +156,32 @@ class MainActivity : Activity() {
             setPadding(8, 0, 8, 12)
         }
 
-        val styleButtons = mutableListOf<Button>()
         val styleOptions = AltimetriaStyle.entries
 
-        val styleCol = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        }
-
-        styleOptions.forEachIndexed { idx, styleOpt ->
-            val isSelected = styleOpt == initialStyle
-            val btn = Button(this).apply {
-                text = "${styleOpt.icon} ${styleOpt.title}"
-                textSize = 12f
-                typeface = Typeface.DEFAULT_BOLD
-                setPadding(10, 10, 10, 10)
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                    topMargin = 3
-                    bottomMargin = 3
+        val styleSpinner = Spinner(this).apply {
+            val adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, styleOptions.map { "${it.icon} ${it.title}" })
+            this.adapter = adapter
+            setSelection(styleOptions.indexOf(initialStyle))
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val selected = styleOptions[position]
+                    prefs.altimetriaStyle = selected
+                    styleValueText.text = "${selected.icon} ${selected.title}"
+                    styleDescText.text = selected.description
+                    Toast.makeText(this@MainActivity, "Vista: ${selected.title}", Toast.LENGTH_SHORT).show()
                 }
-                applyButtonStyle(this, isSelected)
-                setOnClickListener {
-                    prefs.altimetriaStyle = styleOpt
-                    styleValueText.text = "${styleOpt.icon} ${styleOpt.title}"
-                    styleDescText.text = styleOpt.description
-                    updateSegmentActiveStates(styleButtons, idx)
-                    Toast.makeText(this@MainActivity, "Vista: ${styleOpt.title}", Toast.LENGTH_SHORT).show()
-                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
-            styleButtons.add(btn)
-            styleCol.addView(btn)
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                topMargin = 8
+                bottomMargin = 8
+            }
         }
 
         styleCard.addView(styleLabel)
         styleCard.addView(styleValueText)
         styleCard.addView(styleDescText)
-        styleCard.addView(styleCol)
+        styleCard.addView(styleSpinner)
 
         // Opción: Modelo de Altimetría (Visor de Puertos)
         val climbStyleCard = createCardContainer()
@@ -206,40 +196,30 @@ class MainActivity : Activity() {
             setPadding(8, 0, 8, 12)
         }
 
-        val climbStyleButtons = mutableListOf<Button>()
-        val climbStyleCol = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-        }
-
-        styleOptions.forEachIndexed { idx, styleOpt ->
-            val isSelected = styleOpt == climbInitialStyle
-            val btn = Button(this).apply {
-                text = "${styleOpt.icon} ${styleOpt.title}"
-                textSize = 12f
-                typeface = Typeface.DEFAULT_BOLD
-                setPadding(10, 10, 10, 10)
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                    topMargin = 3
-                    bottomMargin = 3
+        val climbStyleSpinner = Spinner(this).apply {
+            val adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, styleOptions.map { "${it.icon} ${it.title}" })
+            this.adapter = adapter
+            setSelection(styleOptions.indexOf(climbInitialStyle))
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val selected = styleOptions[position]
+                    prefs.climbAltimetriaStyle = selected
+                    climbStyleValueText.text = "${selected.icon} ${selected.title}"
+                    climbStyleDescText.text = selected.description
+                    Toast.makeText(this@MainActivity, "Visor Puertos: ${selected.title}", Toast.LENGTH_SHORT).show()
                 }
-                applyButtonStyle(this, isSelected)
-                setOnClickListener {
-                    prefs.climbAltimetriaStyle = styleOpt
-                    climbStyleValueText.text = "${styleOpt.icon} ${styleOpt.title}"
-                    climbStyleDescText.text = styleOpt.description
-                    updateSegmentActiveStates(climbStyleButtons, idx)
-                    Toast.makeText(this@MainActivity, "Visor Puertos: ${styleOpt.title}", Toast.LENGTH_SHORT).show()
-                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
-            climbStyleButtons.add(btn)
-            climbStyleCol.addView(btn)
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                topMargin = 8
+                bottomMargin = 8
+            }
         }
 
         climbStyleCard.addView(climbStyleLabel)
         climbStyleCard.addView(climbStyleValueText)
         climbStyleCard.addView(climbStyleDescText)
-        climbStyleCard.addView(climbStyleCol)
+        climbStyleCard.addView(climbStyleSpinner)
 
         // Opción: Tipografía (Dropdown Spinner)
         val fontCard = createCardContainer()
