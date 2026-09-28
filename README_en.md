@@ -7,6 +7,12 @@
 It revolutionizes the traditional concept of cycling altimetry by incorporating a **Suite of 5 Altimetry Visualization Models** with a live dynamic selector, a 15-stage continuous monochromatic scale, a 50-meter rolling window quantum advance, adaptive multiscale resolution, mountain pass analysis, optional topographic calculation (pure horizontal projection), mathematical detection of hairpin turns (tornanti), filtering by POI categories (Towns, Fountains, Viewpoints, Summits), a tap-to-zoom scale switcher, Google Sans / Condensed typography, a 90° rotated full-screen landscape mode, dual **VAM** pace with recommended speed, and scientific calculation of the **Fatigue Grade (GF)**.
 
 
+
+## 🐛 VERSION 1.0.1: CRITICAL FIXES 🐛
+
+- **Circular/Out-and-Back Routes Bug Fix**: Resolved an issue where the GPS incorrectly snapped to the end of the route right at the start, causing the graph to track backwards ("snap-to-end bug").
+- **UI Improvement (Radar)**: The maximum grade indicator now displays a colored arrow (Red for ascent, Dark Blue for descent) above the grade percentage, significantly improving visibility and style.
+
 ## 🚀 WHATS NEW IN VERSION 1.0.0: ALTIMETRY RADAR & PRO EXPERIENCE 🚀
 
 We have reached version **1.0.0**! This update brings a complete redesign of the experience, making control and visualization more precise and professional than ever.

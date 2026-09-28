@@ -8,6 +8,12 @@ Es revolutioniert das traditionelle Konzept der Radsport-Höhenmessung durch die
 ---
 
 
+
+## 🐛 VERSION 1.0.1: KRITISCHE KORREKTUREN 🐛
+
+- **Bugfix für Rundkurse/Hin- und Rückwege**: Ein Problem wurde behoben, bei dem das GPS am Start fälschlicherweise an das Ende der Route sprang, wodurch der Graph rückwärts lief ("snap-to-end bug").
+- **UI-Verbesserung (Radar)**: Die Anzeige der maximalen Steigung zeigt nun einen farbigen Pfeil (Rot für Anstieg, Dunkelblau für Abstieg) über dem Prozentwert, was Sichtbarkeit und Design erheblich verbessert.
+
 ## 🚀 NEUIGKEITEN IN VERSION 1.0.0: ALTIMETRIE-RADAR & PRO-ERLEBNIS 🚀
 
 Wir haben die Version **1.0.0** erreicht! Dieses Update bringt ein komplettes Redesign der Erfahrung, wodurch Steuerung und Visualisierung präziser und professioneller denn je werden.

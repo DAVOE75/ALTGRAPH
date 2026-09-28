@@ -63,10 +63,16 @@ class RouteBarView(context: Context) : View(context) {
 
     // Paint for max-grade-per-block label (top-left of each band, only at 50m scale)
     private val maxGradeBlockPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.BLACK
+        color = Color.WHITE
         textSize = 24f
-        textAlign = Paint.Align.LEFT
-        setShadowLayer(4f, 0f, 2f, Color.WHITE) // White shadow so it pops on any color band
+        textAlign = Paint.Align.CENTER
+        setShadowLayer(4f, 0f, 2f, Color.BLACK)
+    }
+
+    private val maxGradeArrowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        textSize = 24f
+        textAlign = Paint.Align.CENTER
+        setShadowLayer(3f, 0f, 2f, Color.BLACK)
     }
     
     private val cyclistPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -255,10 +261,16 @@ class RouteBarView(context: Context) : View(context) {
                                        else null
                         if (extremeG != null) {
                             val arrow = if (extremeG < 0) "▼" else "▲"
-                            val maxLabel = "$arrow${Math.abs(Math.round(extremeG))}%"
-                            val labelX = actualLeft + 4f
-                            val labelY = maxGradeBlockPaint.textSize + 4f
-                            canvas.drawText(maxLabel, labelX, labelY, maxGradeBlockPaint)
+                            val maxLabel = "${Math.abs(Math.round(extremeG))}%"
+                            
+                            val labelX = actualLeft + 24f // Center relative to text
+                            val arrowY = maxGradeArrowPaint.textSize + 4f
+                            val textY = arrowY + maxGradeBlockPaint.textSize + 2f
+                            
+                            maxGradeArrowPaint.color = if (extremeG < 0) Color.parseColor("#1E3A8A") else Color.parseColor("#DC2626") // Dark blue or Red
+                            
+                            canvas.drawText(arrow, labelX, arrowY, maxGradeArrowPaint)
+                            canvas.drawText(maxLabel, labelX, textY, maxGradeBlockPaint)
                         }
                     }
                 }

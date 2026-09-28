@@ -1,12 +1,18 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png" alt="Logotipo ALTGRAPH" width="160" />
 </p>
-# ALTGRAPH (v0.7.0 ELITE)
+# ALTGRAPH (v1.0.1 ELITE)
 <p>Ler em: <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README.md">🇪🇸 Español</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_en.md">🇬🇧 English</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_fr.md">🇫🇷 Français</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_it.md">🇮🇹 Italiano</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_de.md">🇩🇪 Deutsch</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_pt.md">🇵🇹 Português</a></p>
 
 **ALTGRAPH** é uma extensão profissional de altimetria e desempenho de última geração para os ciclocomputadores **Hammerhead Karoo** (Karoo 2 e Karoo 3), desenvolvida por **David García Pascual** utilizando o SDK oficial `karoo-ext`.
 Revoluciona o conceito tradicional de altimetria de ciclismo incorporando um **Conjunto de 6 Modelos de Visualização Altimétrica** com seletor dinâmico ao vivo, escala monocromática contínua de 15 níveis, avanço quântico com janela deslizante de 50 metros, resolução multiescala adaptável, análise de passagens de montanha, cálculo topográfico opcional, detecção matemática de curvas fechadas (tornanti), filtragem de Pontos de Interesse (POIs) e muito mais.
 
+
+
+## 🐛 VERSÃO 1.0.1: CORREÇÕES CRÍTICAS 🐛
+
+- **Correção de Bug em Rotas Circulares/Ida e Volta**: Resolvido um problema em que o GPS saltava incorretamente para o final da rota logo no início, fazendo com que o gráfico avançasse para trás ("bug snap-to-end").
+- **Melhoria de Interface (Radar)**: O indicador de inclinação máxima agora exibe uma seta colorida (Vermelha para subida, Azul Escuro para descida) acima da porcentagem, melhorando bastante a visibilidade e o estilo.
 
 ## 🚀 NOVIDADES NA VERSÃO 1.0.0: RADAR ALTIMÉTRICO E EXPERIÊNCIA PRO 🚀
 
