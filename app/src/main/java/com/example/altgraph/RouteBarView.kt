@@ -267,7 +267,12 @@ class RouteBarView(context: Context) : View(context) {
                             val arrowY = maxGradeArrowPaint.textSize + 4f
                             val textY = arrowY + maxGradeBlockPaint.textSize + 2f
                             
-                            maxGradeArrowPaint.color = if (extremeG < 0) Color.parseColor("#1E3A8A") else Color.parseColor("#DC2626") // Dark blue or Red
+                            val baseColor = Color.parseColor(band.colorHex)
+                            val hsv = FloatArray(3)
+                            Color.colorToHSV(baseColor, hsv)
+                            hsv[1] = Math.min(1.0f, hsv[1] * 1.2f) // Increase saturation a bit
+                            hsv[2] *= 0.5f // Decrease brightness for a darker tone
+                            maxGradeArrowPaint.color = Color.HSVToColor(hsv)
                             
                             canvas.drawText(arrow, labelX, arrowY, maxGradeArrowPaint)
                             canvas.drawText(maxLabel, labelX, textY, maxGradeBlockPaint)
