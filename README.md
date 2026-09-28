@@ -186,8 +186,8 @@ Este proyecto de código abierto se distribuye bajo la licencia **MIT** - Copyri
 Si esta extensión te ha resultado útil y quieres apoyar su continuo desarrollo:
 
 <div align="center">
-  <a href="https://www.paypal.me/latiendadeajedrez" target="_blank">
-    <img src="https://img.shields.io/badge/☕_Invítame_a_un_café-0070BA?style=for-the-badge&logo=paypal&logoColor=white" alt="Invítame a un café" />
+  <a href="https://buymeacoffee.com/hesiox" target="_blank">
+    <img src="https://img.shields.io/badge/☕_Invítame_a_un_café-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Invítame a un café" />
   </a>
 </div>
 
