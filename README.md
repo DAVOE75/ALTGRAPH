@@ -184,6 +184,7 @@ Si esta extensión te ha resultado útil y quieres apoyar su continuo desarrollo
     <img src="https://img.shields.io/badge/☕_Invítame_a_un_café-0070BA?style=for-the-badge&logo=paypal&logoColor=white" alt="Invítame a un café" />
   </a>
 </div>
+
 ## 🆕 What's new in v0.4.62 / Novedades v0.4.62
 ### 🇪🇸 ESPAÑOL
 - **🏔️ Visor de Puertos de Montaña (Campo de datos a pantalla completa)**: Nuevo campo dedicado que muestra el perfil altimétrico 3D completo de cada puerto detectado en la ruta. Navegación `< >` entre puertos, longitud, desnivel, kilómetros restantes, pendiente media, pendiente máxima y categoría (3ª, 2ª, 1ª, Especial C.E.) al estilo La Vuelta a España.
