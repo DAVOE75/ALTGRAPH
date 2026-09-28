@@ -8,7 +8,7 @@ It revolutionizes the traditional concept of cycling altimetry by incorporating 
 
 
 
-## 🐛 VERSION 1.0.1: CRITICAL FIXES 🐛
+## 🐛 VERSION 1.0.2: CRITICAL FIXES 🐛
 
 - **Circular/Out-and-Back Routes Bug Fix**: Resolved an issue where the GPS incorrectly snapped to the end of the route right at the start, causing the graph to track backwards ("snap-to-end bug").
 - **UI Improvement (Radar)**: The maximum grade indicator now displays a colored arrow (Red for ascent, Dark Blue for descent) above the grade percentage, significantly improving visibility and style.

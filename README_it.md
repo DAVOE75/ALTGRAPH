@@ -9,7 +9,7 @@ Rivoluziona il concetto tradizionale di altimetria ciclistica integrando una **S
 
 
 
-## 🐛 VERSIONE 1.0.1: CORREZIONI CRITICHE 🐛
+## 🐛 VERSIONE 1.0.2: CORREZIONI CRITICHE 🐛
 
 - **Correzione Bug su Percorsi Circolari/Andata e Ritorno**: Risolto un problema in cui il GPS si agganciava erroneamente alla fine del percorso fin dall'inizio, facendo sì che il grafico procedesse a ritroso ("bug snap-to-end").
 - **Miglioramento dell'Interfaccia (Radar)**: L'indicatore di pendenza massima ora mostra una freccia colorata (Rossa per salita, Blu Scuro per discesa) sopra la percentuale, migliorandone visibilità e stile.

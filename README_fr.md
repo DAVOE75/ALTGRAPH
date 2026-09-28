@@ -9,7 +9,7 @@ Elle révolutionne le concept traditionnel de l'altimétrie cycliste en intégra
 
 
 
-## 🐛 VERSION 1.0.1: CORRECTIONS CRITIQUES 🐛
+## 🐛 VERSION 1.0.2: CORRECTIONS CRITIQUES 🐛
 
 - **Correction de Bug sur les Itinéraires Circulaires/Aller-Retour**: Résolution d'un problème où le GPS s'accrochait de manière incorrecte à la fin de l'itinéraire dès le départ, provoquant le suivi à l'envers du graphique ("bug snap-to-end").
 - **Amélioration de l'Interface (Radar)**: L'indicateur de pente maximale affiche désormais une flèche de couleur (Rouge pour la montée, Bleu Foncé pour la descente) au-dessus du pourcentage, améliorant considérablement la lisibilité et le style.
