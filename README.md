@@ -173,6 +173,17 @@ El proyecto utiliza Gradle y Kotlin. Requiere JDK 17 y Android SDK (Plataforma 3
 Este proyecto de código abierto se distribuye bajo la licencia **MIT** - Copyright 2026 David García Pascual.
 *Descargo de responsabilidad: Esta extensión no está afiliada, respaldada, patrocinada ni soportada por Hammerhead o SRAM. Úsala bajo tu propio riesgo y, por favor, mantén siempre los ojos en la carretera y las manos en el manillar.*
 
+---
+
+## ☕ Apoya el proyecto
+
+Si esta extensión te ha resultado útil y quieres apoyar su continuo desarrollo:
+
+<div align="center">
+  <a href="https://www.paypal.me/latiendadeajedrez" target="_blank">
+    <img src="https://img.shields.io/badge/☕_Invítame_a_un_café-0070BA?style=for-the-badge&logo=paypal&logoColor=white" alt="Invítame a un café" />
+  </a>
+</div>
 ## 🆕 What's new in v0.4.62 / Novedades v0.4.62
 ### 🇪🇸 ESPAÑOL
 - **🏔️ Visor de Puertos de Montaña (Campo de datos a pantalla completa)**: Nuevo campo dedicado que muestra el perfil altimétrico 3D completo de cada puerto detectado en la ruta. Navegación `< >` entre puertos, longitud, desnivel, kilómetros restantes, pendiente media, pendiente máxima y categoría (3ª, 2ª, 1ª, Especial C.E.) al estilo La Vuelta a España.
