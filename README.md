@@ -1,12 +1,17 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png" alt="ALTGRAPH Logo" width="160" />
 </p>
-# ALTGRAPH (v1.0.2 ELITE)
+# ALTGRAPH (v1.0.3 ELITE)
 <p>Leer en: <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README.md">🇪🇸 Español</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_en.md">🇬🇧 English</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_fr.md">🇫🇷 Français</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_it.md">🇮🇹 Italiano</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_de.md">🇩🇪 Deutsch</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_pt.md">🇵🇹 Português</a></p>
 **ALTGRAPH** es una extensión de rendimiento y altimetría profesional de última generación para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3) desarrollada por **David García Pascual** utilizando el SDK oficial `karoo-ext`.
 Revoluciona el concepto tradicional de altimetría ciclista incorporando una **Suite de 6 Modelos de Visualización Altimétrica** con selector dinámico en vivo, escala monocromática continua de 15 tramos, avance cuántico en ventana rodante de 50 metros, resolución adaptativa multiescala, análisis de puertos de montaña, cálculo topográfico opcional (proyección horizontal pura), detección matemática de curvas de herradura (tornanti), filtrado por categorías de Hitos (Pueblos, Fuentes, Miradores, Cimas), conmutador de escala de zoom al tocar la pantalla, tipografías Google Sans / Condensed, modo apaisado rotado a 90° a pantalla completa, ritmo **VAM** dual con velocidad recomendada y cálculo científico del **Grado de Fatiga (GF)**.
 
 
+
+## 🐛 VERSIÓN 1.0.3: CORRECCIÓN DE DISTANCIA Y RUTA 🐛
+
+- **Corrección del Radar Altimétrico:** Se ha solucionado un error crítico que provocaba que el radar y el marcador de progreso del ciclista volvieran erróneamente al kilómetro 0 (km 0) al iniciar un puerto o tras recorrer varios kilómetros.
+- **Progreso de ruta continuo:** Ahora la aplicación compensa correctamente los recortes internos de la ruta (polyline) que hace el GPS Karoo. La distancia recorrida, la barra inferior y los avisos mantendrán su progreso global continuo a lo largo de todo tu recorrido.
 
 ## 🐛 VERSIÓN 1.0.2: CORRECCIONES CRÍTICAS 🐛
 

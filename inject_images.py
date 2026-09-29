@@ -1,0 +1,19 @@
+import base64, glob, os
+html_path = 'c:/ALTGRAPH/promo.html'
+with open(html_path, 'r', encoding='utf-8') as f:
+    html = f.read()
+
+files = sorted(glob.glob(r'C:\Users\davoe\.gemini\antigravity-ide\brain\*\.user_uploaded\*.*'), key=os.path.getmtime, reverse=True)
+imgs = files[:3]
+
+for i, img_path in enumerate(imgs):
+    with open(img_path, 'rb') as img_f:
+        b64 = base64.b64encode(img_f.read()).decode('utf-8')
+    ext = img_path.split('.')[-1]
+    mime = 'image/png' if ext.lower() == 'png' else 'image/jpeg'
+    data_uri = f'data:{mime};base64,{b64}'
+    html = html.replace(f'id="img{i+1}" class="screenshot sc-{i+1}" src=""', f'id="img{i+1}" class="screenshot sc-{i+1}" src="{data_uri}"')
+
+with open(html_path, 'w', encoding='utf-8') as f:
+    f.write(html)
+print('Injected base64 images')

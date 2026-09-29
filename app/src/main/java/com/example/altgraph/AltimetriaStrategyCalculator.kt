@@ -160,6 +160,7 @@ class AltimetriaStrategyCalculator {
     // Distancia exacta restante reportada por Karoo en la ruta (útil si no hay puntos GPS)
     var fallbackRemainingDistance: Double = 0.0
     var routeDistanceOffset: Double = 0.0
+    var maxRouteLengthSeen: Double = 0.0
 
     // GPX Elevation Profile Completo (SDK 1.1.7+)
     var routeElevationProfile: List<ElevationPolylineDecoder.ElevationPoint> = emptyList()
@@ -339,9 +340,15 @@ class AltimetriaStrategyCalculator {
 
     fun syncRouteDistance(karooRemainingDistance: Double) {
         this.fallbackRemainingDistance = karooRemainingDistance
-        val totalLength = routePoints.lastOrNull()?.distance ?: (routeElevationProfile.lastOrNull()?.distance ?: 0.0)
-        if (totalLength > 0.0 && routePoints.isNotEmpty() && nearestIndex < routePoints.size) {
-            val karooRidden = totalLength - karooRemainingDistance
+        val currentPolylineLength = routePoints.lastOrNull()?.distance ?: (routeElevationProfile.lastOrNull()?.distance ?: 0.0)
+        
+        // Mantener la longitud máxima vista para evitar reseteos a 0 si el Karoo recorta el polyline (ej. al inicio de un puerto)
+        if (currentPolylineLength > maxRouteLengthSeen) {
+            maxRouteLengthSeen = currentPolylineLength
+        }
+        
+        if (maxRouteLengthSeen > 0.0 && routePoints.isNotEmpty() && nearestIndex < routePoints.size) {
+            val karooRidden = maxRouteLengthSeen - karooRemainingDistance
             val polylineRidden = routePoints[nearestIndex].distance
             routeDistanceOffset = karooRidden - polylineRidden
         }
@@ -726,6 +733,7 @@ class AltimetriaStrategyCalculator {
         this.elevationFromBottom = 0.0
         this.elevationRemaining = 0.0
         this.routeDistanceOffset = 0.0
+        this.maxRouteLengthSeen = 0.0
         this.lastRoutePolyline = ""
         this.lastElevationPolyline = ""
     }
@@ -909,19 +917,18 @@ class AltimetriaStrategyCalculator {
         val windowStartElevation = getElevationAtDistance(windowStartDist)
 
         // 4. Distancia y desnivel restantes
-        // Preferimos los datos nativos del SDK (distanceToTop / elevationRemaining) sobre la
-        // interpolación polilineal, porque los nativos vienen del archivo GPX/FIT real.
-        val totalDistanceRemaining: Double
+        val totalDistanceRemaining: Double = if (routePoints.isNotEmpty()) {
+            (routePoints.last().distance + routeDistanceOffset - currentRiderDistance).coerceAtLeast(0.0)
+        } else {
+            fallbackRemainingDistance
+        }
+        
         val elevationGainRemaining: Double
         if (distanceToTop > 0.0 && elevationToTop > 0.0) {
-            // ✅ Modo Climber real: usamos los datos exactos del SDK
-            totalDistanceRemaining = distanceToTop
+            // ✅ Usar elevación real del SDK si estamos en un climb, pero NO machacar totalDistanceRemaining
             elevationGainRemaining = elevationToTop
         } else {
-            totalDistanceRemaining = if (routePoints.isNotEmpty()) {
-                (routePoints.last().distance - currentRiderDistance).coerceAtLeast(0.0)
-            } else 0.0
-            val endElevation = routePoints.last().elevation
+            val endElevation = if (routePoints.isNotEmpty()) routePoints.last().elevation else currentElevation
             elevationGainRemaining = (endElevation - currentElevation).coerceAtLeast(0.0)
         }
 
@@ -1293,7 +1300,7 @@ class AltimetriaStrategyCalculator {
             visibleAvgGrade = visibleAvgGrade,
             visibleMaxGrade = trueMaxGrade,
             routeName = activeRouteName,
-            routeTotalLength = if (routePoints.isNotEmpty()) routePoints.last().distance else 0.0,
+            routeTotalLength = if (routePoints.isNotEmpty()) routePoints.last().distance + routeDistanceOffset else 0.0,
             oasisDistanceToNextCrucible = oasisDistance,
             virtualPacerRelativeDistance = if (virtualPacerEnabled) virtualPacerDistance - currentRiderDistance else null,
             energyBatteryLevel = energyBatteryLevel,
