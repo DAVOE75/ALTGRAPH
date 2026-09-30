@@ -1002,6 +1002,19 @@ class MainActivity : Activity() {
         radar3dCard.addView(switchRadar3d)
         tabEliteContainer.addView(radar3dCard)
 
+        // Radar Alerts (Avisos Dinámicos)
+        val radarAlertsCard = createCardContainer()
+        val switchRadarAlerts = Switch(this).apply {
+            text = "⚠️ Avisos (Muros, Próx. Puerto...)"
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.eliteRadarAlertsEnabled
+            isEnabled = prefs.isEliteUnlocked
+            setOnCheckedChangeListener { _, v -> prefs.eliteRadarAlertsEnabled = v }
+        }
+        radarAlertsCard.addView(switchRadarAlerts)
+        tabEliteContainer.addView(radarAlertsCard)
+
         // Power Zone Bar
         val powerBarCard = createCardContainer()
         powerBarCard.orientation = LinearLayout.VERTICAL
@@ -1068,6 +1081,7 @@ class MainActivity : Activity() {
             switchHist.isEnabled = unlocked
             switchRadar3d.isEnabled = unlocked
             switchPowerBar.isEnabled = unlocked
+            switchRadarAlerts.isEnabled = unlocked
             ftpInput.isEnabled = unlocked
             
             if (unlocked) {

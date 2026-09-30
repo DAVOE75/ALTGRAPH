@@ -98,6 +98,7 @@ class RouteBarView(context: Context) : View(context) {
     var ghostRelativeMeters: Double? = null   // +ahead / -behind in metres
     var showEnergyBar: Boolean = false
     var showPowerBar: Boolean = false
+    var showRadarAlerts: Boolean = true
     var userFtp: Int = 250
     var showPoiRuler: Boolean = false
     var showHistogram: Boolean = false
@@ -179,7 +180,7 @@ class RouteBarView(context: Context) : View(context) {
 
         if (isHorizontal) {
             // HORIZONTAL MODE
-            val radarH = h * 0.60f
+            val radarH = if (showRadarAlerts) h * 0.60f else h.toFloat()
             val headerHeight = radarH * 0.50f
             
             // 1. Dibujar franjas de color con ligera perspectiva isométrica
@@ -466,7 +467,7 @@ class RouteBarView(context: Context) : View(context) {
             
         } else {
             // VERTICAL MODE
-            val radarW = w * 0.60f
+            val radarW = if (showRadarAlerts) w * 0.60f else w.toFloat()
             val headerWidth = radarW * 0.50f
             val blockHeight = h / numBlocks.toFloat()
             
@@ -613,7 +614,9 @@ class RouteBarView(context: Context) : View(context) {
             canvas.drawPath(path, cyclistOutline)
             
             // 6. Alertas dinámicas
-            drawAlerts(canvas, strat, isHorizontal = false, w, h)
+            if (showRadarAlerts) {
+                drawAlerts(canvas, strat, isHorizontal = false, w, h)
+            }
         }
     }
 

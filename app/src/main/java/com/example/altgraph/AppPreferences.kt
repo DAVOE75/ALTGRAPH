@@ -187,6 +187,10 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_ELITE_POWER_BAR_ENABLED, true) && isEliteUnlocked
         set(value) = prefs.edit().putBoolean(KEY_ELITE_POWER_BAR_ENABLED, value).apply()
 
+    var eliteRadarAlertsEnabled: Boolean
+        get() = prefs.getBoolean(KEY_ELITE_RADAR_ALERTS_ENABLED, true) && isEliteUnlocked
+        set(value) = prefs.edit().putBoolean(KEY_ELITE_RADAR_ALERTS_ENABLED, value).apply()
+
     var userFtp: Int
         get() = prefs.getInt(KEY_USER_FTP, 250)
         set(value) = prefs.edit().putInt(KEY_USER_FTP, value).apply()
@@ -247,6 +251,7 @@ class AppPreferences(context: Context) {
         private const val KEY_ELITE_HISTOGRAM_ENABLED = "elite_histogram_enabled"
         private const val KEY_ELITE_RADAR_3D_ENABLED = "elite_radar_3d_enabled"
         private const val KEY_ELITE_POWER_BAR_ENABLED = "elite_power_bar_enabled"
+        private const val KEY_ELITE_RADAR_ALERTS_ENABLED = "elite_radar_alerts_enabled"
         private const val KEY_USER_FTP = "user_ftp"
 
         @Volatile
