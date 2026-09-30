@@ -411,7 +411,9 @@ class RouteBarView(context: Context) : View(context) {
             }
             
             // 6. Alertas dinámicas
-            drawAlerts(canvas, strat, isHorizontal = true, w, h)
+            if (showRadarAlerts) {
+                drawAlerts(canvas, strat, isHorizontal = true, w, h)
+            }
 
             // 7. Energy / Power Bars (ELITE) — thin horizontal bars below the alert strip
             var bottomOffset = 0f
