@@ -161,6 +161,7 @@ class AltimetriaStrategyCalculator {
     var fallbackRemainingDistance: Double = 0.0
     var routeDistanceOffset: Double = 0.0
     var maxRouteLengthSeen: Double = 0.0
+    var globalRouteOffset: Double = 0.0
 
     // GPX Elevation Profile Completo (SDK 1.1.7+)
     var routeElevationProfile: List<ElevationPolylineDecoder.ElevationPoint> = emptyList()
@@ -373,7 +374,15 @@ class AltimetriaStrategyCalculator {
         if (maxRouteLengthSeen > 0.0 && routePoints.isNotEmpty() && nearestIndex < routePoints.size) {
             val karooRidden = maxRouteLengthSeen - karooRemainingDistance
             val polylineRidden = routePoints[nearestIndex].distance
-            routeDistanceOffset = karooRidden - polylineRidden
+            
+            // BUGFIX: Prevent routeDistanceOffset from dropping when a climb starts (Climb Detect cuts polyline)
+            val newOffset = karooRidden - polylineRidden
+            if (newOffset > routeDistanceOffset) {
+                routeDistanceOffset = newOffset
+            } else if (routeDistanceOffset - newOffset > 5000.0) {
+                // Si cae más de 5km, es un reinicio legítimo (nueva ruta o loop completo)
+                routeDistanceOffset = newOffset
+            }
         }
     }
 
@@ -472,12 +481,15 @@ class AltimetriaStrategyCalculator {
         lastElevationPolyline = safeEncoded
         
         Log.e("AltiCalc", "setRouteElevationProfile called, encoded length=${encoded?.length}")
-        val expectedLength = routePoints.lastOrNull()?.distance ?: 0.0
-        val result = ElevationPolylineDecoder.decodeSafe(encoded, expectedLength)
+        val expectedLength = (routePoints.lastOrNull()?.distance ?: 0.0) - globalRouteOffset
+        val result = ElevationPolylineDecoder.decodeSafe(encoded, expectedLength.coerceAtLeast(0.0))
         if (result is ElevationPolylineDecoder.DecodeResult.Success) {
             var pts = ElevationPolylineDecoder.smooth(result.points)
             if (polylineScaleFactor != 1.0) {
                 pts = pts.map { it.copy(distance = it.distance * polylineScaleFactor) }
+            }
+            if (globalRouteOffset > 0.0) {
+                pts = pts.map { it.copy(distance = it.distance + globalRouteOffset) }
             }
             this.routeElevationProfile = pts
             Log.e("AltiCalc", "Route elevation decoded successfully, points=${routeElevationProfile.size}")
@@ -634,7 +646,15 @@ class AltimetriaStrategyCalculator {
         // The Karoo polyline encodes ONLY lat/lng — no altitude. We anchor the profile on the
         // current barometric elevation and accumulate vertical gain from the live grade stream.
         // Any subsequent live elevation update will correct currentElevation in real time.
-        var accumulatedDist = 0.0
+        // BUGFIX: Si es una nueva ruta (ej. Climb Detect), preservamos la distancia real recorrida
+        // para que la gráfica no vuelva a empezar desde 0m, sino desde la distancia actual.
+        var shiftOffset = 0.0
+        if (routePoints.isEmpty()) {
+            shiftOffset = if (currentRouteDistance > 0.0) currentRouteDistance else liveDistanceAccumulated
+        }
+        this.globalRouteOffset = shiftOffset
+        
+        var accumulatedDist = shiftOffset
         val result = mutableListOf<RoutePoint>()
 
         // First pass: compute accumulated distances using accurate Haversine/Android Location

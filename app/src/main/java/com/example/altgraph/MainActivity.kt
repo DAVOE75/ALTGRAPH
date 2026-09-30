@@ -1000,6 +1000,42 @@ class MainActivity : Activity() {
             setOnCheckedChangeListener { _, v -> prefs.eliteRadar3dEnabled = v }
         }
         radar3dCard.addView(switchRadar3d)
+        
+        // --- THEME SELECTOR ---
+        val themeLabel = TextView(this).apply {
+            text = "Tema del Radar:"
+            textSize = 14f
+            setTextColor(Color.WHITE)
+            setPadding(0, 16, 0, 8)
+        }
+        radar3dCard.addView(themeLabel)
+        
+        val themes = arrayOf("Estándar", "Oasis", "Crisoles", "Bruma", "Campo de Fuerza")
+        val themeRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { setMargins(0, 8, 0, 8) }
+        }
+        val themeButtons = mutableListOf<android.widget.Button>()
+        themes.forEach { theme ->
+            val shortName = when (theme) {
+                "Estándar" -> "Clásico"
+                "Crisoles" -> "Crisol"
+                "Campo de Fuerza" -> "Campo"
+                else -> theme
+            }
+            val btn = createSegmentButton(shortName, prefs.eliteRadarTheme == theme) {
+                prefs.eliteRadarTheme = theme
+                updateSegmentActiveStates(themeButtons, themes.indexOf(theme))
+            }
+            themeButtons.add(btn)
+            themeRow.addView(btn)
+        }
+        radar3dCard.addView(themeRow)
+
         tabEliteContainer.addView(radar3dCard)
 
         // Radar Alerts (Avisos Dinámicos)

@@ -176,6 +176,7 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                     routeBarView.showPoiRuler = prefs.elitePoiRulerEnabled
                     routeBarView.showHistogram = prefs.eliteHistogramEnabled
                     routeBarView.showRadar3d = prefs.eliteRadar3dEnabled
+                    routeBarView.radarTheme = prefs.eliteRadarTheme
                     routeBarView.showPowerBar = prefs.elitePowerBarEnabled
                     routeBarView.showRadarAlerts = prefs.eliteRadarAlertsEnabled
                     routeBarView.userFtp = prefs.userFtp

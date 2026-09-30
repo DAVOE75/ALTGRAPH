@@ -103,6 +103,7 @@ class RouteBarView(context: Context) : View(context) {
     var showPoiRuler: Boolean = false
     var showHistogram: Boolean = false
     var showRadar3d: Boolean = true
+    var radarTheme: String = "Estándar"
 
     // Ghost marker paint (semi-transparent rider arrow)
     private val ghostPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -130,12 +131,148 @@ class RouteBarView(context: Context) : View(context) {
         style = Paint.Style.FILL
     }
 
-    // Histogram text paint
     private val histPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         textSize = 20f
         textAlign = Paint.Align.CENTER
         setShadowLayer(2f, 0f, 1f, Color.BLACK)
+    }
+
+    private fun drawThemedBand(
+        canvas: Canvas,
+        left: Float,
+        top: Float,
+        right: Float,
+        bottom: Float,
+        colorHex: String,
+        theme: String,
+        isHorizontal: Boolean
+    ) {
+        val baseColor = Color.parseColor(colorHex)
+        val w = right - left
+        val h = bottom - top
+
+        when (theme.lowercase(java.util.Locale.getDefault())) {
+            "oasis" -> {
+                // Smooth gradient + shiny top
+                val hsv = FloatArray(3)
+                Color.colorToHSV(baseColor, hsv)
+                hsv[2] = Math.min(1.0f, hsv[2] * 1.3f)
+                val lightColor = Color.HSVToColor(hsv)
+                hsv[2] = Math.max(0.0f, hsv[2] * 0.5f) // darken from original (1.3 * 0.5 = 0.65)
+                val darkColor = Color.HSVToColor(hsv)
+                
+                val grad = android.graphics.LinearGradient(
+                    0f, top, 0f, bottom,
+                    intArrayOf(lightColor, baseColor, darkColor),
+                    floatArrayOf(0f, 0.4f, 1f),
+                    android.graphics.Shader.TileMode.CLAMP
+                )
+                segmentPaint.shader = grad
+                canvas.drawRect(left, top, right + 1f, bottom, segmentPaint)
+                segmentPaint.shader = null
+                
+                // Shiny highlight
+                val shinePaint = Paint().apply {
+                    color = Color.argb(40, 255, 255, 255)
+                    style = Paint.Style.FILL
+                }
+                if (isHorizontal) {
+                    canvas.drawRect(left, top, right + 1f, top + h * 0.2f, shinePaint)
+                }
+            }
+            "crisoles" -> {
+                // Inner dark glow, bright center
+                val hsv = FloatArray(3)
+                Color.colorToHSV(baseColor, hsv)
+                hsv[2] = Math.max(0.0f, hsv[2] * 0.5f)
+                val darkColor = Color.HSVToColor(hsv)
+                hsv[2] = Math.min(1.0f, hsv[2] * 2.4f)
+                val lightColor = Color.HSVToColor(hsv)
+                
+                val grad = android.graphics.LinearGradient(
+                    0f, top, 0f, bottom,
+                    intArrayOf(darkColor, lightColor, darkColor),
+                    null,
+                    android.graphics.Shader.TileMode.CLAMP
+                )
+                segmentPaint.shader = grad
+                canvas.drawRect(left, top, right + 1f, bottom, segmentPaint)
+                segmentPaint.shader = null
+                
+                // Add inner shadow
+                val innerShadow = Paint().apply {
+                    color = Color.argb(100, 0, 0, 0)
+                    style = Paint.Style.STROKE
+                    strokeWidth = 4f
+                }
+                canvas.drawRect(left, top, right, bottom, innerShadow)
+            }
+            "bruma" -> {
+                // Glassmorphism: Desaturated color with high transparency and white borders
+                val glassColor = Color.argb(
+                    180,
+                    Color.red(baseColor),
+                    Color.green(baseColor),
+                    Color.blue(baseColor)
+                )
+                segmentPaint.color = glassColor
+                canvas.drawRect(left, top, right + 1f, bottom, segmentPaint)
+                
+                val glassGlow = android.graphics.LinearGradient(
+                    left, top, right, bottom,
+                    intArrayOf(Color.argb(80, 255, 255, 255), Color.TRANSPARENT),
+                    null,
+                    android.graphics.Shader.TileMode.CLAMP
+                )
+                val glowPaint = Paint().apply {
+                    shader = glassGlow
+                }
+                canvas.drawRect(left, top, right + 1f, bottom, glowPaint)
+                
+                // Glass border
+                val borderPaint = Paint().apply {
+                    color = Color.argb(60, 255, 255, 255)
+                    style = Paint.Style.STROKE
+                    strokeWidth = 2f
+                }
+                canvas.drawRect(left, top, right, bottom, borderPaint)
+            }
+            "campo de fuerza" -> {
+                // Neon Grid
+                val hsv = FloatArray(3)
+                Color.colorToHSV(baseColor, hsv)
+                hsv[2] = Math.max(0.0f, hsv[2] * 0.8f)
+                val darkColor = Color.HSVToColor(hsv)
+                hsv[2] = Math.min(1.0f, hsv[2] * 1.8f)
+                val neonColor = Color.HSVToColor(hsv)
+                
+                segmentPaint.color = darkColor
+                canvas.drawRect(left, top, right + 1f, bottom, segmentPaint)
+                
+                val neonBorder = Paint().apply {
+                    color = neonColor
+                    style = Paint.Style.STROKE
+                    strokeWidth = 3f
+                    setShadowLayer(8f, 0f, 0f, color)
+                }
+                canvas.drawRect(left, top, right, bottom, neonBorder)
+                
+                // Draw some grid lines
+                val gridPaint = Paint().apply {
+                    color = Color.argb(50, 255, 255, 255)
+                    style = Paint.Style.STROKE
+                    strokeWidth = 1f
+                }
+                if (isHorizontal && w > 10f) {
+                    canvas.drawLine(left + w / 2, top, left + w / 2, bottom, gridPaint)
+                }
+            }
+            else -> { // Estándar
+                segmentPaint.color = baseColor
+                canvas.drawRect(left, top, right + 1f, bottom, segmentPaint)
+            }
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -197,8 +334,7 @@ class RouteBarView(context: Context) : View(context) {
             for (band in bands) {
                 val left = band.startIndex * blockWidth - progressOffset
                 val right = (band.endIndex + 1) * blockWidth - progressOffset
-                segmentPaint.color = Color.parseColor(band.colorHex)
-                canvas.drawRect(left, 0f, right + 1f, headerHeight, segmentPaint) // +1f para evitar huecos
+                drawThemedBand(canvas, left, 0f, right, headerHeight, band.colorHex, radarTheme, true)
             }
             if (showRadar3d) {
                 canvas.restore()
@@ -482,8 +618,7 @@ class RouteBarView(context: Context) : View(context) {
             for (band in bands) {
                 val top = h - ((band.endIndex + 1) * blockHeight)
                 val bottom = h - (band.startIndex * blockHeight)
-                segmentPaint.color = Color.parseColor(band.colorHex)
-                canvas.drawRect(0f, top - 1f, headerWidth, bottom, segmentPaint)
+                drawThemedBand(canvas, 0f, top - 1f, headerWidth, bottom, band.colorHex, radarTheme, false)
             }
             if (showRadar3d) {
                 canvas.restore()

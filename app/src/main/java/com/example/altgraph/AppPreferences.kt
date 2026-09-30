@@ -183,6 +183,10 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_ELITE_RADAR_3D_ENABLED, true) && isEliteUnlocked
         set(value) = prefs.edit().putBoolean(KEY_ELITE_RADAR_3D_ENABLED, value).apply()
 
+    var eliteRadarTheme: String
+        get() = prefs.getString(KEY_ELITE_RADAR_THEME, "Estándar") ?: "Estándar"
+        set(value) = prefs.edit().putString(KEY_ELITE_RADAR_THEME, value).apply()
+
     var elitePowerBarEnabled: Boolean
         get() = prefs.getBoolean(KEY_ELITE_POWER_BAR_ENABLED, true) && isEliteUnlocked
         set(value) = prefs.edit().putBoolean(KEY_ELITE_POWER_BAR_ENABLED, value).apply()
@@ -250,6 +254,7 @@ class AppPreferences(context: Context) {
         private const val KEY_ELITE_POI_RULER_ENABLED = "elite_poi_ruler_enabled"
         private const val KEY_ELITE_HISTOGRAM_ENABLED = "elite_histogram_enabled"
         private const val KEY_ELITE_RADAR_3D_ENABLED = "elite_radar_3d_enabled"
+        private const val KEY_ELITE_RADAR_THEME = "elite_radar_theme"
         private const val KEY_ELITE_POWER_BAR_ENABLED = "elite_power_bar_enabled"
         private const val KEY_ELITE_RADAR_ALERTS_ENABLED = "elite_radar_alerts_enabled"
         private const val KEY_USER_FTP = "user_ftp"
