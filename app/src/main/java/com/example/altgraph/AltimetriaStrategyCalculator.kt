@@ -373,7 +373,7 @@ class AltimetriaStrategyCalculator {
         
         if (maxRouteLengthSeen > 0.0 && routePoints.isNotEmpty() && nearestIndex < routePoints.size) {
             val karooRidden = maxRouteLengthSeen - karooRemainingDistance
-            val polylineRidden = routePoints[nearestIndex].distance
+            val polylineRidden = routePoints[nearestIndex].distance - globalRouteOffset
             
             // BUGFIX: Prevent routeDistanceOffset from dropping when a climb starts (Climb Detect cuts polyline)
             val newOffset = karooRidden - polylineRidden
@@ -633,6 +633,7 @@ class AltimetriaStrategyCalculator {
         if (polyline == lastRoutePolyline) return
         lastRoutePolyline = polyline
         polylineScaleFactor = 1.0
+        maxRouteLengthSeen = 0.0
         
         val points = decodePolyline(polyline)
         if (points.isEmpty()) {
@@ -648,10 +649,7 @@ class AltimetriaStrategyCalculator {
         // Any subsequent live elevation update will correct currentElevation in real time.
         // BUGFIX: Si es una nueva ruta (ej. Climb Detect), preservamos la distancia real recorrida
         // para que la gráfica no vuelva a empezar desde 0m, sino desde la distancia actual.
-        var shiftOffset = 0.0
-        if (routePoints.isEmpty()) {
-            shiftOffset = if (currentRouteDistance > 0.0) currentRouteDistance else liveDistanceAccumulated
-        }
+        val shiftOffset = if (currentRouteDistance > 0.0) currentRouteDistance else liveDistanceAccumulated
         this.globalRouteOffset = shiftOffset
         
         var accumulatedDist = shiftOffset
