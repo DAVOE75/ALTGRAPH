@@ -168,13 +168,14 @@ class AltimetriaStrategyCalculator {
     // Caches para evitar decodificación intensiva en cada emisión del SDK
     private var lastRoutePolyline: String = ""
     private var lastElevationPolyline: String = ""
+    private var polylineScaleFactor: Double = 1.0
 
     // Lista de puertos (climbs) de la ruta para marcar Mountain Gates en el 3D
     var routeClimbs: List<RouteClimb> = emptyList()
     private var routeKeyForClimbs: String? = null
 
     // Curvas de herradura (distancias absolutas detectadas)
-    private val absoluteHairpins = mutableListOf<Double>()
+    private var absoluteHairpins = mutableListOf<Double>()
     private val routePois = mutableListOf<Poi>()
     
     var currentHeading: Double = 0.0
@@ -340,6 +341,28 @@ class AltimetriaStrategyCalculator {
 
     fun syncRouteDistance(karooRemainingDistance: Double) {
         this.fallbackRemainingDistance = karooRemainingDistance
+
+        if (routePoints.isEmpty()) return
+
+        // [BUGFIX] Calibrate compressed WGS84 polyline distances to real Karoo distances
+        if (polylineScaleFactor == 1.0 && currentLatitude != 0.0 && currentLongitude != 0.0 && karooRemainingDistance > 500.0 && nearestIndex < routePoints.size) {
+            val rawPolylineTotal = routePoints.last().distance
+            val currentPolylineDist = routePoints[nearestIndex].distance
+            val polylineRemaining = rawPolylineTotal - currentPolylineDist
+            
+            if (polylineRemaining > 500.0) {
+                polylineScaleFactor = karooRemainingDistance / polylineRemaining
+                // Scale all distance arrays to match reality
+                routePoints = routePoints.map { it.copy(distance = it.distance * polylineScaleFactor) }
+                if (routeElevationProfile.isNotEmpty()) {
+                    routeElevationProfile = routeElevationProfile.map { it.copy(distance = it.distance * polylineScaleFactor) }
+                }
+                if (absoluteHairpins.isNotEmpty()) {
+                    absoluteHairpins = absoluteHairpins.map { it * polylineScaleFactor }.toMutableList()
+                }
+                android.util.Log.d("AltiCalc", "Calibrated distances. Factor: $polylineScaleFactor")
+            }
+        }
         val currentPolylineLength = routePoints.lastOrNull()?.distance ?: (routeElevationProfile.lastOrNull()?.distance ?: 0.0)
         
         // Mantener la longitud máxima vista para evitar reseteos a 0 si el Karoo recorta el polyline (ej. al inicio de un puerto)
@@ -452,7 +475,11 @@ class AltimetriaStrategyCalculator {
         val expectedLength = routePoints.lastOrNull()?.distance ?: 0.0
         val result = ElevationPolylineDecoder.decodeSafe(encoded, expectedLength)
         if (result is ElevationPolylineDecoder.DecodeResult.Success) {
-            this.routeElevationProfile = ElevationPolylineDecoder.smooth(result.points)
+            var pts = ElevationPolylineDecoder.smooth(result.points)
+            if (polylineScaleFactor != 1.0) {
+                pts = pts.map { it.copy(distance = it.distance * polylineScaleFactor) }
+            }
+            this.routeElevationProfile = pts
             Log.e("AltiCalc", "Route elevation decoded successfully, points=${routeElevationProfile.size}")
             applyTrueElevationsToRoutePoints()
             detectCustomClimbsFromProfile()
@@ -593,6 +620,7 @@ class AltimetriaStrategyCalculator {
     fun setRouteFromPolyline(polyline: String) {
         if (polyline == lastRoutePolyline) return
         lastRoutePolyline = polyline
+        polylineScaleFactor = 1.0
         
         val points = decodePolyline(polyline)
         if (points.isEmpty()) {
@@ -736,6 +764,7 @@ class AltimetriaStrategyCalculator {
         this.maxRouteLengthSeen = 0.0
         this.lastRoutePolyline = ""
         this.lastElevationPolyline = ""
+        this.polylineScaleFactor = 1.0
     }
 
     fun calculateStrategy(context: Context? = null): StrategyData {

@@ -1,1089 +1,15 @@
-<!DOCTYPE html>
-<html lang="es">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">ALTGRAPH v1.0.4 ELITE - Extensión de Altimetría 3D y Rendimiento por hesiOX</title>
-    <meta name="description"
-        content="Extensión avanzada para ciclocomputadores Hammerhead Karoo 2 y 3 desarrollada por David García Pascual. Suite de 6 modelos de altimetría 3D en relieve, degradado monocromático suave de 15 tramos, ventana rodante de 50m, cálculo topográfico, detección de herraduras, fuentes Google Sans Condensed, modo apaisado 90°, alertas de ataque, ritmo VAM e Índice Grado de Fatiga (GF).">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-dark: #09090b;
-            --card-bg: #18181b;
-            --card-border: #27272a;
-            --accent-blue: #38bdf8;
-            --accent-green: #22c55e;
-            --accent-yellow: #eab308;
-            --accent-red: #ef4444;
-            --accent-purple: #a855f7;
-            --text-main: #fafafa;
-            --text-muted: #a1a1aa;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            line-height: 1.6;
-            padding-bottom: 60px;
-        }
-
-        header {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logo-container img {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-        }
-
-        .logo-container h1 {
-            font-size: 1.8rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .nav-links a {
-            color: var(--text-muted);
-            text-decoration: none;
-            font-weight: 600;
-            margin-left: 15px;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: var(--accent-blue);
-        }
-
-        .lang-switch {
-            display: flex;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 2px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .lang-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            padding: 4px 12px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .lang-btn.active {
-            background-color: var(--accent-blue);
-            color: #000;
-        }
-
-        .hero {
-            max-width: 1100px;
-            margin: 40px auto 60px auto;
-            padding: 0 20px;
-            text-align: center;
-        }
-
-        .hero img.main-logo {
-            width: 160px;
-            height: 160px;
-            margin-bottom: 25px;
-            border-radius: 32px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-        }
-
-        .hero h2 {
-            font-size: 3rem;
-            font-weight: 800;
-            margin-bottom: 20px;
-            line-height: 1.2;
-        }
-
-        .hero h2 span {
-            color: var(--accent-blue);
-        }
-
-        .hero p {
-            font-size: 1.25rem;
-            color: var(--text-muted);
-            max-width: 780px;
-            margin: 0 auto 35px auto;
-        }
-
-        .badges {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 40px;
-        }
-
-        .badge {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        .cta-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 14px 28px;
-            border-radius: 12px;
-            font-weight: 700;
-            text-decoration: none;
-            transition: transform 0.2s, opacity 0.2s;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            opacity: 0.9;
-        }
-
-        .btn-primary {
-            background-color: var(--accent-blue);
-            color: #000;
-        }
-
-        .btn-secondary {
-            background-color: var(--card-bg);
-            color: var(--text-main);
-            border: 1px solid var(--card-border);
-        }
-
-        /* VIDEO DEMO SECTION */
-        .video-section {
-            max-width: 1100px;
-            margin: 0 auto 50px auto;
-            padding: 0 20px;
-            text-align: center;
-        }
-
-        .video-container {
-            background: var(--card-bg);
-            border: 2px solid var(--accent-blue);
-            border-radius: 24px;
-            padding: 20px;
-            max-width: 420px;
-            margin: 0 auto;
-            box-shadow: 0 15px 35px rgba(56, 189, 248, 0.2);
-        }
-
-        .video-container video {
-            width: 100%;
-            border-radius: 16px;
-            display: block;
-        }
-
-        .video-container p {
-            margin-top: 12px;
-            font-weight: 700;
-            color: var(--accent-blue);
-            font-size: 0.95rem;
-        }
-
-        /* GALLERY SECTION */
-        .gallery-section {
-            max-width: 1100px;
-            margin: 0 auto 60px auto;
-            padding: 0 20px;
-        }
-
-        .gallery-title {
-            text-align: center;
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 30px;
-        }
-
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .gallery-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            padding: 12px;
-            text-align: center;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-
-        .gallery-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--accent-blue);
-        }
-
-        .gallery-card img {
-            width: 100%;
-            height: auto;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-            background-color: #000;
-        }
-
-        .gallery-card p {
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: var(--accent-blue);
-        }
-
-        /* FLAGSHIP ALMA MATER SECTION */
-        .flagship-section {
-            max-width: 1100px;
-            margin: 0 auto 60px auto;
-            padding: 0 20px;
-        }
-
-        .flagship-card {
-            background: linear-gradient(145deg, #18181b 0%, #09090b 100%);
-            border: 2px solid var(--accent-blue);
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: 0 20px 50px rgba(56, 189, 248, 0.15);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .flagship-badge {
-            display: inline-block;
-            background-color: var(--accent-blue);
-            color: #000;
-            font-size: 0.85rem;
-            font-weight: 800;
-            padding: 6px 16px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 20px;
-        }
-
-        .flagship-card h3 {
-            font-size: 2.2rem;
-            font-weight: 800;
-            margin-bottom: 15px;
-            color: #ffffff;
-        }
-
-        .flagship-card p.lead {
-            font-size: 1.15rem;
-            color: var(--text-muted);
-            margin-bottom: 25px;
-        }
-
-        .flagship-features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-top: 25px;
-        }
-
-        .feature-item {
-            background: rgba(39, 39, 42, 0.6);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 20px;
-        }
-
-        .feature-item h4 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--accent-blue);
-            margin-bottom: 8px;
-        }
-
-        .feature-item p {
-            font-size: 0.92rem;
-            color: var(--text-muted);
-        }
-
-        .features {
-            max-width: 1100px;
-            margin: 0 auto 80px auto;
-            padding: 0 20px;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 40px;
-        }
-
-        .detailed-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
-            gap: 25px;
-        }
-
-        @media (max-width: 600px) {
-            .detailed-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .detailed-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 32px;
-            transition: border-color 0.2s, transform 0.2s;
-        }
-
-        .detailed-card:hover {
-            border-color: var(--accent-blue);
-            transform: translateY(-3px);
-        }
-
-        .detailed-card-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 18px;
-        }
-
-        .detailed-card-icon {
-            font-size: 2.2rem;
-            background: rgba(56, 189, 248, 0.1);
-            padding: 12px;
-            border-radius: 16px;
-        }
-
-        .detailed-card h3 {
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: #ffffff;
-        }
-
-        .detailed-card p.desc {
-            color: var(--text-muted);
-            font-size: 0.98rem;
-            margin-bottom: 20px;
-        }
-
-        .feature-bullets {
-            list-style: none;
-        }
-
-        .feature-bullets li {
-            position: relative;
-            padding-left: 24px;
-            margin-bottom: 10px;
-            font-size: 0.92rem;
-            color: var(--text-main);
-        }
-
-        .feature-bullets li::before {
-            content: "▹";
-            position: absolute;
-            left: 0;
-            color: var(--accent-blue);
-            font-weight: bold;
-        }
-
-        .code-box {
-            background: #09090b;
-            border: 1px solid var(--card-border);
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-family: monospace;
-            font-size: 0.88rem;
-            color: var(--accent-yellow);
-            margin-top: 12px;
-        }
-
-        .install-section {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 40px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-        }
-
-        .install-section h3 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-        }
-
-        .install-steps {
-            list-style: decimal inside;
-            color: var(--text-muted);
-            line-height: 1.8;
-        }
-
-        footer {
-            max-width: 1100px;
-            margin: 60px auto 0 auto;
-            padding: 20px;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            border-top: 1px solid var(--card-border);
-        }
-
-        footer a {
-            color: var(--accent-blue);
-            text-decoration: none;
-        }
-    
-        /* FUTURISTIC ENHANCEMENTS */
-        body {
-            background: radial-gradient(circle at top center, #111 0%, #000 100%);
-        }
-        
-        .hero h2 span {
-            text-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
-            background: linear-gradient(135deg, #38bdf8 0%, #a855f7 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .badge {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            transition: all 0.3s ease;
-        }
-        
-        .badge:hover {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .btn-primary {
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
-            background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
-            color: #fff;
-            border: none;
-        }
-        
-        .btn-primary:hover {
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.8);
-            transform: translateY(-3px);
-        }
-        
-        .flagship-card {
-            background: linear-gradient(145deg, rgba(24,24,27,0.8) 0%, rgba(9,9,11,0.95) 100%);
-            backdrop-filter: blur(20px);
-            box-shadow: 0 20px 60px rgba(56, 189, 248, 0.2), inset 0 1px 0 rgba(255,255,255,0.1);
-        }
-        
-        .gallery-card {
-            background: rgba(24, 24, 27, 0.5);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        
-        .detailed-card {
-            background: rgba(24, 24, 27, 0.5);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.05);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .detailed-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-        }
-        
-        .video-container {
-            box-shadow: 0 0 40px rgba(56, 189, 248, 0.3);
-            border: 1px solid rgba(56, 189, 248, 0.5);
-        }
-        
-        header {
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            backdrop-filter: blur(20px);
-            background: rgba(9, 9, 11, 0.8);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-    </style>
-</head>
-
-<body>
-
-    <header>
-        <div class="logo-container">
-            <img src="../art/logo.png" onerror="this.onerror=null; this.src='art/logo.png';" alt="ALTGRAPH Logo">
-            <h1>ALTGRAPH</h1>
-        </div>
-        <div class="nav-right">
-            <nav class="nav-links">
-
-                <a href="#gallery" id="nav-gallery">Capturas</a>
-                <a href="#models" id="nav-models">Modelos 3D</a>
-                <a href="#features" id="nav-fields">Campos</a>
-                <a href="#install" id="nav-install">Instalación</a>
-                <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">GitHub</a>
-                <a href="https://www.instagram.com/altgraph.app/" target="_blank" style="color: #eab308; font-weight: 800;">Instagram</a>
-            </nav>
-            <div class="lang-switch">
-                <button onclick="setLanguage('es')" id="btn-es" class="lang-btn active">ES</button>
-                <button onclick="setLanguage('en')" id="btn-en" class="lang-btn">EN</button>
-                <button onclick="setLanguage('fr')" id="btn-fr" class="lang-btn">FR</button>
-                <button onclick="setLanguage('it')" id="btn-it" class="lang-btn">IT</button>
-                <button onclick="setLanguage('de')" id="btn-de" class="lang-btn">DE</button>
-                <button onclick="setLanguage('pt')" id="btn-pt" class="lang-btn">PT</button>
-            </div>
-        </div>
-    </header>
-
-    <section class="hero">
-        <img src="../art/logo.png" onerror="this.onerror=null; this.src='art/logo.png';" alt="ALTGRAPH Logo"
-            class="main-logo">
-        <h2 id="hero-title">Domina la montaña con <span>ALTGRAPH v1.0.4 ELITE</span></h2>
-        <p id="hero-desc">Extensión avanzada desarrollada por <strong>David García Pascual</strong>. Suite de <strong>5
-                Modelos de Altimetría 3D</strong> conmutables al vuelo, degradado monocromático suave de 15 tramos del 0
-            al 15%, ventana rodante cuántica de 50 metros, cálculo topográfico, fuentes Google Sans Condensed, modo
-            apaisado rotado a 90°, lectura triple de pendiente (Actual, Media y Máx), herraduras GPS e <strong>Índice
-                Grado de Fatiga (GF)</strong> para <strong>Hammerhead Karoo 2 y Karoo 3</strong>.</p>
-
-        <div class="badges">
-            <span class="badge">v1.0.4 Pro Release</span>
-            <span class="badge">David García Pascual</span>
-            <span class="badge">Hammerhead Karoo 2 & 3</span>
-            <span class="badge">Karoo Extension SDK 1.1.4</span>
-            <span class="badge" id="badge-lang">5 Idiomas (i18n)</span>
-        </div>
-
-        <div class="cta-buttons">
-            <a href="https://github.com/DAVOE75/ALTGRAPH/releases/tag/v1.0.4" target="_blank" class="btn btn-primary"
-                id="btn-download">Descargar APK (v1.0.4)</a>
-            <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/USER_MANUAL.md" target="_blank"
-                class="btn btn-secondary" id="btn-manual">Ver Manual de Usuario</a>
-        </div>
-    </section>
-
-
-
-    <!-- GALERIA DE CAPTURAS REALES -->
-    <section class="gallery-section" id="gallery">
-        <h3 class="gallery-title" id="gallery-main-title">📸 Galería de Capturas en Karoo 3 Real</h3>
-        <div class="gallery-grid">
-            <div class="gallery-card">
-                <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_settings_estilo.png"
-                    alt="Pestaña Estilo">
-                <p id="g2-label">🎨 Panel Pestaña Estilo</p>
-            </div>
-            <div class="gallery-card">
-                <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_data_selection.png"
-                    alt="Menú de Selección de Datos">
-                <p id="g10-label">🎛️ Menú de Selección de Datos</p>
-            </div>
-            <div class="gallery-card">
-                <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_dashboard_completo.png"
-                    alt="Dashboard Completo">
-                <p id="g11-label">📊 Dashboard de Datos Completo</p>
-            </div>
-            <div class="gallery-card">
-                <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile.png"
-                    alt="Perfil Altimetría 3D 200m">
-                <p id="g1-label">🏔️ Altimetría 3D (Escala 200m)</p>
-            </div>
-            <div class="gallery-card">
-                <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_1km.png"
-                    alt="Perfil Altimetría 3D 1km">
-                <p id="g6-label">🏔️ Altimetría 3D (Escala 1km)</p>
-            </div>
-            <div class="gallery-card">
-                <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_10km.png"
-                    alt="Perfil Altimetría 3D 10km">
-                <p id="g7-label">🏔️ Altimetría 3D (Escala 10km)</p>
-            </div>
-            <div class="gallery-card">
-                <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_20km.png"
-                    alt="Perfil Altimetría 3D 20km">
-                <p id="g8-label">🏔️ Altimetría 3D (Escala 20km)</p>
-            </div>
-            <div class="gallery-card">
-                <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_200km.png"
-                    alt="Perfil Altimetría 3D 200km">
-                <p id="g9-label">🏔️ Altimetría 3D (Escala 200km)</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- FLAGSHIP SECTION: ALTIMETRIA 3D (EL ALMA MATER DE ALTGRAPH) -->
-    <section class="flagship-section" id="flagship">
-        <div class="flagship-card">
-            <span class="flagship-badge" id="flagship-badge">🌟 El Alma Mater de ALTGRAPH</span>
-            <h3 id="flagship-title">🏔️ Altimetría 3D e Itinerario en Relieve</h3>
-            <p class="lead" id="flagship-lead">Inspirado en los libros de ruta de las grandes vueltas profesionales, el
-                gráfico de **Altimetría 3D** recrea el perfil completo del puerto en perspectiva isométrica con volumen
-                de montaña, sub-seccionado de 50m dentro de cada km, sombreado degradado y máxima claridad de datos.</p>
-
-            <div class="flagship-features-grid">
-                <div class="feature-item">
-                    <h4 id="f1-title">🔤 Fuentes Google Sans Condensed</h4>
-                    <p id="f1-desc">Carga directa de tipografías condensadas para números altos, estilizados y
-                        ultra-legibles en pantallas Karoo.</p>
-                </div>
-                <div class="feature-item">
-                    <h4 id="f2-title">🔄 Modo Apaisado Rotado 90°</h4>
-                    <p id="f2-desc">Expande la gráfica a un ancho gigante de 800px a pantalla completa liberando la
-                        compresión de píxeles.</p>
-                </div>
-                <div class="feature-item">
-                    <h4 id="f3-title">📊 Lectura Triple en Encabezado</h4>
-                    <p id="f3-desc">Lectura simultánea en vivo de <strong>PENDIENTE ACTUAL</strong>, <strong>PENDIENTE
-                            MEDIA</strong> de la sección y <strong>PENDIENTE MÁXIMA</strong>.</p>
-                </div>
-                <div class="feature-item">
-                    <h4 id="f4-title">🏎️ Curvas de Herradura (Tornanti)</h4>
-                    <p id="f4-desc">Cálculo matemático vectorial GPS de giros cerrados (>120°) con marcas de herradura
-                        del 20% en el relief.</p>
-                </div>
-                <div class="feature-item">
-                    <h4 id="f5-title">📍 Filtro de Puntos de Interés (POIs)</h4>
-                    <p id="f5-desc">Conmutadores independientes para filtrar Pueblos, Fuentes de Agua, Miradores y
-                        Cimas/Puertos.</p>
-                </div>
-                <div class="feature-item">
-                    <h4 id="f6-title">📐 Método Topográfico Exacto</h4>
-                    <p id="f6-desc">Opción para calcular la pendiente % sobre la proyección horizontal del mapa,
-                        eliminando el sesgo de la hipotenusa en rampas extremas.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- VISOR DE PUERTOS DE MONTAÑA / MOUNTAIN PASS VIEWER -->
-    
-    <!-- RADAR ALTIMETRICO SECTION -->
-    <section class="flagship-section" id="radar" style="margin-top: -40px;">
-        <div class="flagship-card" style="border-color: #eab308;">
-            <span class="flagship-badge" style="background-color: #eab308; color: #000;">🚀 NUEVO EN v1.0.4</span>
-            <h3>🛰️ Radar Altimétrico (Vista 3D)</h3>
-            <p class="lead">El nuevo modo <strong>Radar Altimétrico</strong> se superpone a tu mapa de Karoo permitiendo ver tanto la navegación pura como el relieve de lo que tienes por delante, todo integrado de manera exquisita en la misma pantalla.</p>
-
-            <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_radar_altimetrico.png" alt="Radar Altimetrico" style="max-width: 100%; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin: 20px 0 40px 0; border: 1px solid rgba(255,255,255,0.1);" />
-
-            <div class="flagship-features-grid">
-                <div class="feature-item">
-                    <h4 style="color: #eab308;">📡 Relieve sobre el Mapa</h4>
-                    <p>Permite seguir tu ruta GPX mientras observas el perfil 3D del terreno venidero en una cinta superpuesta.</p>
-                </div>
-                <div class="feature-item">
-                    <h4 style="color: #eab308;">🌈 Barra de Zonas Integrada</h4>
-                    <p>Integra una barra inferior dinámica (7 colores) basada en tus vatios de potencia o pulsaciones en tiempo real.</p>
-                </div>
-                <div class="feature-item">
-                    <h4 style="color: #eab308;">🎯 Indicador de Pendiente</h4>
-                    <p>Muestra flechas de colores (Roja para ascenso, Azul para descenso) para anticipar rápidamente la pendiente máxima.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="features" id="climb-viewer"
-        style="background: linear-gradient(160deg, rgba(56,189,248,0.06) 0%, transparent 60%);">
-        <h2 class="section-title" id="sec-climb-viewer-title">🏔️ Visor de Puertos de Montaña (v1.0.4)</h2>
-        <p style="text-align: center; color: var(--text-muted); max-width: 820px; margin: -25px auto 40px auto; font-size: 1.05rem;"
-            id="sec-climb-viewer-desc">
-            Campo de datos a pantalla completa que muestra el perfil 3D completo de cada puerto detectado en la ruta,
-            con toda la información táctica esencial para afrontarlo con confianza.
-        </p>
-
-        <div class="detailed-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-            <div class="detailed-card" style="border-color: #38bdf8;">
-                <div class="detailed-card-header">
-                    <div class="detailed-card-icon">🗺️</div>
-                    <div>
-                        <h3 id="cv-nav-title">Navegación entre Puertos</h3>
-                        <span style="color: var(--accent-blue); font-size: 0.85rem; font-weight: 700;">
-                            < /> Navigation
-                        </span>
-                    </div>
-                </div>
-                <p id="cv-nav-desc">Flechas táctiles para explorar todos los puertos de la ruta cargada antes de salir o
-                    durante la marcha. Cada puerto muestra su nombre, longitud, desnivel y categoría.</p>
-            </div>
-
-            <div class="detailed-card" style="border-color: #a855f7;">
-                <div class="detailed-card-header">
-                    <div class="detailed-card-icon">🏆</div>
-                    <div>
-                        <h3 id="cv-cat-title">Categorización La Vuelta</h3>
-                        <span style="color: var(--accent-purple); font-size: 0.85rem; font-weight: 700;">APM
-                            Motor</span>
-                    </div>
-                </div>
-                <p id="cv-cat-desc">Motor APM propio que asigna categoría <strong>3ª, 2ª, 1ª Cat o Especial
-                        C.E.</strong> con la misma filosofía que los organizadores de La Vuelta a España. Por ejemplo:
-                    5,6km al 6,6% = 3ª Categoría.</p>
-            </div>
-
-            <div class="detailed-card" style="border-color: #22c55e;">
-                <div class="detailed-card-header">
-                    <div class="detailed-card-icon">⛰️</div>
-                    <div>
-                        <h3 id="cv-peaks-title">Cotas de los 3 Picos Más Altos</h3>
-                        <span style="color: var(--accent-green); font-size: 0.85rem; font-weight: 700;">Topographic
-                            Peaks</span>
-                    </div>
-                </div>
-                <p id="cv-peaks-desc">Detección automática de los tres puntos más elevados del perfil. Marcados con
-                    triángulo y cota en metros. Texto light, tamaño reducido para máxima legibilidad sin saturar.</p>
-            </div>
-
-            <div class="detailed-card" style="border-color: #eab308;">
-                <div class="detailed-card-header">
-                    <div class="detailed-card-icon">📏</div>
-                    <div>
-                        <h3 id="cv-scale-title">Leyenda de Escala Dinámica</h3>
-                        <span style="color: var(--accent-yellow); font-size: 0.85rem; font-weight: 700;">Scale
-                            Legend</span>
-                    </div>
-                </div>
-                <p id="cv-scale-desc">Dos líneas de leyenda bajo la gráfica: <strong>"Cada bloque = Xkm"</strong> y
-                    <strong>"Cada sub-bloque = Xm"</strong>. Adapta automáticamente las unidades al zoom seleccionado.
-                </p>
-            </div>
-
-            <div class="detailed-card" style="border-color: #ef4444;">
-                <div class="detailed-card-header">
-                    <div class="detailed-card-icon">🚴</div>
-                    <div>
-                        <h3 id="cv-beacon-title">Baliza del Ciclista Inteligente</h3>
-                        <span style="color: var(--accent-red); font-size: 0.85rem; font-weight: 700;">Smart Rider
-                            Beacon</span>
-                    </div>
-                </div>
-                <p id="cv-beacon-desc">La bola luminosa del ciclista solo aparece cuando estás físicamente dentro del
-                    tramo del puerto. Antes de llegar al inicio, la gráfica muestra el perfil limpio completo sin
-                    marcador.</p>
-            </div>
-
-            <div class="detailed-card" style="border-color: #38bdf8;">
-                <div class="detailed-card-header">
-                    <div class="detailed-card-icon">📐</div>
-                    <div>
-                        <h3 id="cv-lines-title">Líneas Verticales por Km</h3>
-                        <span style="color: var(--accent-blue); font-size: 0.85rem; font-weight: 700;">X-Axis
-                            Markers</span>
-                    </div>
-                </div>
-                <p id="cv-lines-desc">Solo las líneas de kilómetros enteros aparecen más gruesas (3px) y oscuras
-                    (<code>#0F172A</code>). Las divisiones de sub-bloque mantienen su línea fina (1.2px) para no saturar
-                    la gráfica.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- SUITE DE 5 MODELOS DE ALTIMETRÍA REVOLUCIONARIOS -->
-    <section class="features" id="models">
-        <h2 class="section-title" id="sec-models-title">🌟 Suite de 6 Modelos de Altimetría (v1.0.4)</h2>
-        <p style="text-align: center; color: var(--text-muted); max-width: 820px; margin: -25px auto 40px auto; font-size: 1.05rem;"
-            id="sec-models-desc">Revolucionando la visualización clásica de puertos con 6 modelos únicos seleccionables
-            al vuelo desde el panel de ajustes de tu Karoo:</p>
-
-        <div class="detailed-grid">
-            <div class="detailed-card">
-                <div class="detailed-card-header">
-                    <div class="detailed-card-icon">🏔️</div>
-                    <div>
-                        <h3 id="m1-title">Clásica 3D (Por defecto)</h3>
-                        <span style="color: var(--accent-blue); font-size: 0.85rem; font-weight: 700;"
-                            id="m1-tag">Classic 3D Profile</span>
-                    </div>
-                </div>
-                <p class="desc" id="m1-desc">Perfil profesional con bisel 3D sutil y estilizado, degradado monocromático
-                    suave de 15 tramos del 0 al 15% (blanco a rojo), rojo intenso para 15-20%, negro para >20% y azul
-                    para descensos.</p>
-                <ul class="feature-bullets" id="m1-bullets">
-                    <li><strong>Degradado Monocromático</strong>: 15 escalones continuos de 1 en 1 sin saltos cromáticos
-                        estridentes.</li>
-                    <li><strong>Cápsulas de Alto Contraste</strong>: Números de pendiente grandes y horizontales en
-                        cápsulas oscuras legibles bajo el sol.</li>
-                    <li><strong>Cotas Verticales</strong>: Altitudes precisas en metros rotadas a 90° en los divisores
-                        de escala.</li>
-                </ul>
-            </div>
-
-            <div class="detailed-card">
-                <div class="detailed-card-header">
-                    <div class="detailed-card-icon">🌅</div>
-                    <div>
-                        <h3 id="m2-title">Horizonte Isométrico</h3>
-                        <span style="color: var(--accent-blue); font-size: 0.85rem; font-weight: 700;"
-                            id="m2-tag">Cockpit 3D Horizon</span>
-                    </div>
-                </div>
-                <p class="desc" id="m2-desc">Perspectiva de cabina proyectada hacia el horizonte infinito con carril
-                    central discontinuo tipo pista de despegue y haz de luz frontal interactivo.</p>
-                <ul class="feature-bullets" id="m2-bullets">
-                    <li><strong>Haz de Luz Frontal Inclinado</strong>: La baliza proyecta un cono de luz que detecta la
-                        inclinación inminente e ilumina la rampa que vas a escalar.</li>
-                    <li><strong>Convergencia Isométrica</strong>: Profundidad visual 3D que estrecha progresivamente la
-                        calzada hacia la distancia.</li>
-                    <li><strong>Cresta Azul Hielo</strong>: Línea de horizonte de alta definición que recorta la montaña
-                        contra el fondo.</li>
-                </ul>
-            </div>
-
-            <div class="detailed-card">
-                <div class="detailed-card-header">
-                    <div class="detailed-card-icon">❄️</div>
-                    <div>
-                        <h3 id="m3-title">Oasis y Crisoles Tácticos</h3>
-                        <span style="color: var(--accent-green); font-size: 0.85rem; font-weight: 700;"
-                            id="m3-tag">Tactical Recovery & Fire</span>
-                    </div>
-                </div>
-                <p class="desc" id="m3-desc">Visualización táctica de carrera que resalta zonas de oxigenación y recuperación frente a los muros más severos de la ascensión.</p>
-                <ul class="feature-bullets" id="m3-bullets">
-                    <li><strong>Oasis de Oxígeno</strong>: Tramos de descanso (≤3%) iluminados en cian glacial con distintivo dinámico ❄️ OASIS [dist]m.</li>
-                    <li><strong>Crisoles de Fuego</strong>: Rampas duras (≥12%) coloreadas en lava térmica con insignia de alerta 🔥 MURO [dist]m.</li>
-                    <li><strong>Bruma de Hipoxia</strong>: Gradiente atmosférico brumoso en la cumbre a altitudes superiores a 1.400 metros.</li>
-                </ul>
-            </div>
-
-            <div class="detailed-card">
-                <div class="detailed-card-header">
-                    <div class="detailed-card-icon">⚡</div>
-                    <div>
-                        <h3 id="m4-title">Campo de Fuerza y Fatiga</h3>
-                        <span style="color: var(--accent-yellow); font-size: 0.85rem; font-weight: 700;"
-                            id="m4-tag">Kinetic Gravitational Field</span>
-                    </div>
-                </div>
-                <p class="desc" id="m4-desc">Panel de telemetría dinámica donde la gravedad, la inercia cinética y la cadencia se visualizan en un campo de energía continuo.</p>
-                <ul class="feature-bullets" id="m4-bullets">
-                    <li><strong>Tensión Gravitatoria</strong>: Líneas de fuerza verticales ancladas milimétricamente al relieve en rampas ≥8%.</li>
-                    <li><strong>Onda Cinética de Inercia</strong>: Onda senoidal a lo largo de la base (cian en avance fluido, carmesí rápido cuando la pendiente frena la inercia).</li>
-                    <li><strong>Línea Guía VAM Flotante</strong>: Trazo dorado de ritmo objetivo que acompaña la ascensión 12 px sobre el perfil.</li>
-                </ul>
-            </div>
-
-            <div class="detailed-card">
-                <div class="detailed-card-header">
-                    <div class="detailed-card-icon">💎</div>
-                    <div>
-                        <h3 id="m5-title">Monolito de Obsidiana y Plasma</h3>
-                        <span style="color: var(--accent-purple); font-size: 0.85rem; font-weight: 700;"
-                            id="m5-tag">Monolithic Obsidian & Radiant Plasma</span>
-                    </div>
-                </div>
-                <p class="desc" id="m5-desc">Escultura geométrica de montaña en cristal de obsidiana facetado ahumado con un núcleo de plasma radiante interior y aristas láser neón.</p>
-                <ul class="feature-bullets" id="m5-bullets">
-                    <li><strong>Cristal de Obsidiana Facetado</strong>: Bloque sólido oscuro de montaña con cortes de diamante a 45° y faceta 3D pulida.</li>
-                    <li><strong>Núcleo Radiante de Plasma</strong>: Franja interior incandescente que emite el gradiente térmico de pendiente estrictamente acotada.</li>
-                    <li><strong>Haz Láser Neón y Cápsulas Holográficas</strong>: Arista superior con doble línea (resplandor celeste difuso de 6 px + núcleo blanco puro de 2.2 px).</li>
-                </ul>
-            </div>
-
-            <div class="detailed-card">
-                <div class="detailed-card-header">
-                    <div class="detailed-card-icon">🗺️</div>
-                    <div>
-                        <h3 id="m6-title">GPS Isométrico Global</h3>
-                        <span style="color: var(--accent-red); font-size: 0.85rem; font-weight: 700;"
-                            id="m6-tag">Isometric GPS Map</span>
-                    </div>
-                </div>
-                <p class="desc" id="m6-desc">Navegación espacial interactiva que proyecta la ruta completa como un mapa 3D con colores de altimetría.</p>
-                <ul class="feature-bullets" id="m6-bullets">
-                    <li><strong>Proyección Topográfica Real</strong>: Escala y ángulos GPS reales del mundo proyectados en una cuadrícula isométrica 3D.</li>
-                    <li><strong>Baliza de Navegación 3D</strong>: Indicador dinámico que se mueve y rota a lo largo de la ruta marcando la posición exacta del ciclista.</li>
-                    <li><strong>Gradiente Multiescala</strong>: Bloques de color integrados en la estructura 3D que delatan las ascensiones.</li>
-                </ul>
-            </div>
-        </div>
-    </section>
-
-    <!-- DETAILED DATA FIELDS SECTION -->
-    <section class="features" id="features">
-        <h2 class="section-title" id="sec-fields-title">Análisis Detallado de los 4 Campos Restantes</h2>
-
-        <div class="detailed-grid">
-
-            <!-- 2. ESTRATEGA DE ALTIMETRIA -->
-            <div class="detailed-card">
-                <div class="detailed-card-header">
-                    <div class="detailed-card-icon">📊</div>
-                    <div>
-                        <h3 id="c2-title">Estratega de Altimetría</h3>
-                        <span style="color: var(--accent-green); font-size: 0.85rem; font-weight: 700;" id="c2-tag">2D
-                            Profile & Strategy</span>
-                    </div>
-                </div>
-                <p class="desc" id="c2-desc">Perfil de bloques de distancia con código de colores según pendiente y
-                    alertas emergentes de ataque en rampas duras.</p>
-                <ul class="feature-bullets" id="c2-bullets">
-                    <li><strong>Tramos Configurables</strong>: Selecciona de 1 a 10 bloques visibles (5 por defecto).
-                    </li>
-                    <li><strong>Distancia por Bloque</strong>: Ajustable a 50m, 100m, 250m, 500m o 1km.</li>
-                    <li><strong>Serigrafiado de %</strong>: Porcentaje de inclinación impreso dentro de cada bloque.
-                    </li>
-                    <li><strong>Alertas ¡ATACA!</strong>: Aviso destacado en pantalla al detectar rampas >10%.</li>
-                    <li><strong>Métricas de Puerto</strong>: Distancia restante a la cima, tiempo estimado y pendiente
-                        media.</li>
-                </ul>
-            </div>
-
-            <!-- 3. INDICE GRADO DE FATIGA -->
-            <div class="detailed-card">
-                <div class="detailed-card-header">
-                    <div class="detailed-card-icon">⛰️</div>
-                    <div>
-                        <h3 id="c3-title">Índice Grado de Fatiga (GF)</h3>
-                        <span style="color: var(--accent-yellow); font-size: 0.85rem; font-weight: 700;"
-                            id="c3-tag">Scientific Climb Hardness</span>
-                    </div>
-                </div>
-                <p class="desc" id="c3-desc">Índice científico de dureza acumulada que evalúa la dificultad real del
-                    puerto restante considerando pendiente, asfalto y rampa máxima.</p>
-                <ul class="feature-bullets" id="c3-bullets">
-                    <li><strong>Modelo Ponderado por Tramos</strong>: DU* ponderada según tramos de pendiente (0-3%,
-                        3-9%, 9-20%, >20%).</li>
-                    <li><strong>Factor de Asfalto (TA)</strong>: Configurable a Muy Bueno (0.1), Bueno (0.5), Regular
-                        (1.2), Malo (1.7).</li>
-                    <li><strong>Penalización por Rampa Máxima</strong>: Suma el factor PMx / 5 a la dureza del puerto.
-                    </li>
-                    <li><strong>Clasificación Oficial</strong>: Categoriza el puerto automáticamente (5ª Cat a Especial
-                        HC).</li>
-                </ul>
-                <div class="code-box">Fórmula: GF = SUM(DU*) + TA + (PMx / 5)</div>
-            </div>
-
-            <!-- 4. RITMO VAM OBJETIVO -->
-            <div class="detailed-card">
-                <div class="detailed-card-header">
-                    <div class="detailed-card-icon">🚴</div>
-                    <div>
-                        <h3 id="c4-title">Ritmo VAM Objetivo (Opción C)</h3>
-                        <span style="color: var(--accent-red); font-size: 0.85rem; font-weight: 700;" id="c4-tag">Dual
-                            Pacing Assistant</span>
-                    </div>
-                </div>
-                <p class="desc" id="c4-desc">Asistente de ritmo para dosificar el esfuerzo en puerto calculando la
-                    velocidad recomendada en km/h según la pendiente actual.</p>
-                <ul class="feature-bullets" id="c4-bullets">
-                    <li><strong>Lectura VAM Principal</strong>: VAM instantánea en m/h (ej. 850 m/h) + VAM Objetivo.
-                    </li>
-                    <li><strong>Velocidad Recomendada</strong>: Indica a qué velocidad exacta en km/h debes subir (ej.
-                        12.5 km/h).</li>
-                    <li><strong>Insignia de Estado</strong>: Píldora de color indicando 🟢 EN RITMO, 🔴 SOBREESFUERZO o
-                        🔵 POR DEBAJO.</li>
-                    <li><strong>Ajuste Personalizado</strong>: VAM objetivo regulable desde 500 m/h a 2000 m/h en el
-                        panel.</li>
-                </ul>
-            </div>
-
-            <!-- 5. TENDENCIA 3D Y RAMPA MAXIMA -->
-            <div class="detailed-card">
-                <div class="detailed-card-header">
-                    <div class="detailed-card-icon">📈</div>
-                    <div>
-                        <h3 id="c5-title">Tendencia 3D y Rampa Máxima</h3>
-                        <span style="color: var(--accent-purple); font-size: 0.85rem; font-weight: 700;"
-                            id="c5-tag">Gradient Trend Tracker</span>
-                    </div>
-                </div>
-                <p class="desc" id="c5-desc">Sensor de tendencia inmediata de pendiente que elimina el retraso del
-                    altímetro barométrico y registra el pico de rampa máxima.</p>
-                <ul class="feature-bullets" id="c5-bullets">
-                    <li><strong>Filtro Estocástico Corto/Largo Plazo</strong>: Anticipa si la pendiente está
-                        endureciendo o suavizando.</li>
-                    <li><strong>Indicadores Visuales</strong>: Flechas vectoriales (↗️ ENDURECIENDO, ➔ ESTABLE, ↘️
-                        SUAVIZANDO).</li>
-                    <li><strong>Pico de Rampa Máxima</strong>: Registra y mantiene el % de rampa más dura alcanzado en
-                        el tramo.</li>
-                </ul>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- INSTALLATION SECTION -->
-    <section class="install-section" id="install">
-        <h3 id="install-title">🚀 Instalación Rápida en tu Hammerhead Karoo</h3>
-        <ol class="install-steps" id="install-steps">
-            <li>Conecta tu Hammerhead Karoo 2 o Karoo 3 al ordenador por cable USB con la <strong>Depuración
-                    USB</strong> activada.</li>
-            <li>Descarga la versión más reciente del archivo <code>ALTGRAPH-v1.0.4.apk</code> desde nuestro repositorio
-                en GitHub.</li>
-            <li>Ejecuta el comando en tu consola de comandos: <code>adb install -r ALTGRAPH-v1.0.4.apk</code></li>
-            <li>En tu Karoo, entra en <strong>Ajustes &gt; Perfiles de Carrera</strong>, edita una pantalla de datos y
-                añade los campos de la categoría <strong>ALTGRAPH</strong>.</li>
-            <li>Abre el <strong>Panel de Configuración de ALTGRAPH</strong> organizado por pestañas en el menú de apps
-                para personalizar tus ajustes.</li>
-        </ol>
-    </section>
-
-    <footer>
-        <p id="footer-text">ALTGRAPH v1.0.4 ELITE &bull; Desarrollado por David García Pascual &bull; <a
-                href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Código Fuente en GitHub</a> &bull; <a href="https://www.instagram.com/altgraph.app/" target="_blank">Instagram</a></p>
-    </footer>
-
-    <script>
         const translations = {
             es: {
-                pageTitle: "ALTGRAPH v1.0.4 ELITE - Extensión de Altimetría 3D y Rendimiento por David García Pascual",
+                pageTitle: "ALTGRAPH v1.0.3 ELITE - Extensión de Altimetría 3D y Rendimiento por David García Pascual",
                 navVideo: "Vídeo Demo",
                 navGallery: "Capturas",
                 navModels: "Modelos 3D",
                 navFields: "Campos",
                 navInstall: "Instalación",
-                heroTitle: "Domina la montaña con <span>ALTGRAPH v1.0.4 ELITE</span>",
+                heroTitle: "Domina la montaña con <span>ALTGRAPH v1.0.3 ELITE</span>",
                 heroDesc: "Extensión avanzada desarrollada por <strong>David García Pascual</strong>. Suite de <strong>5 Modelos de Altimetría 3D</strong> conmutables al vuelo, degradado monocromático suave de 15 tramos del 0 al 15%, ventana rodante cuántica de 50 metros, cálculo topográfico, fuentes Google Sans Condensed, modo apaisado rotado a 90°, lectura triple de pendiente (Actual, Media y Máx), herraduras GPS e <strong>Índice Grado de Fatiga (GF)</strong> para <strong>Hammerhead Karoo 2 y Karoo 3</strong>.",
-                btnDownload: "Descargar APK (v1.0.4)",
+                btnDownload: "Descargar APK (v1.0.3)",
                 btnManual: "Ver Manual de Usuario",
                 videoLabel: "🎥 Grabación en Pantalla Real de Karoo 3",
                 galleryMainTitle: "📸 Galería de Capturas en Karoo 3 Real",
@@ -1107,7 +33,7 @@
                 f5Desc: "Conmutadores independientes para filtrar Pueblos, Fuentes de Agua, Miradores y Cimas/Puertos.",
                 f6Title: "📐 Método Topográfico Exacto",
                 f6Desc: "Opción para calcular la pendiente % sobre la proyección horizontal del mapa, eliminando el sesgo de la hipotenusa en rampas extremas.",
-                secModelsTitle: "🌟 Suite de 6 Modelos de Altimetría (v1.0.4)",
+                secModelsTitle: "🌟 Suite de 6 Modelos de Altimetría (v1.0.3)",
                 secModelsDesc: "Revolucionando la visualización clásica de puertos con 6 modelos únicos seleccionables al vuelo desde el panel de ajustes de tu Karoo:",
                 m1Title: "Clásica 3D (Por defecto)",
                 m1Tag: "Classic 3D Profile",
@@ -1152,19 +78,19 @@
                 c5Desc: "Sensor de tendencia inmediata de pendiente que elimina el retraso del altímetro barométrico y registra el pico de rampa máxima.",
                 c5Bullets: `<li><strong>Filtro Estocástico Corto/Largo Plazo</strong>: Anticipa si la pendiente está endureciendo o suavizando.</li><li><strong>Indicadores Visuales</strong>: Flechas vectoriales (↗️ ENDURECIENDO, ➔ ESTABLE, ↘️ SUAVIZANDO).</li><li><strong>Pico de Rampa Máxima</strong>: Registra y mantiene el % de rampa más dura alcanzado en el tramo.</li>`,
                 installTitle: "🚀 Instalación Rápida en tu Hammerhead Karoo",
-                installSteps: `<li>Conecta tu Hammerhead Karoo 2 o Karoo 3 al ordenador por cable USB con la <strong>Depuración USB</strong> activada.</li><li>Descarga la versión más reciente del archivo <code>ALTGRAPH-v1.0.4.apk</code> desde nuestro repositorio en GitHub.</li><li>Ejecuta el comando en tu consola de comandos: <code>adb install -r ALTGRAPH-v1.0.4.apk</code></li><li>En tu Karoo, entra en <strong>Ajustes &gt; Perfiles de Carrera</strong>, edita una pantalla de datos y añade los campos de la categoría <strong>ALTGRAPH</strong>.</li><li>Abre el <strong>Panel de Configuración de ALTGRAPH</strong> organizado por pestañas en el menú de apps para personalizar tus ajustes.</li>`,
-                footerText: `ALTGRAPH v1.0.4 ELITE &bull; Desarrollado por David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Código Fuente en GitHub</a> &bull; <a href="https://www.instagram.com/altgraph.app/" target="_blank">Instagram</a>`
+                installSteps: `<li>Conecta tu Hammerhead Karoo 2 o Karoo 3 al ordenador por cable USB con la <strong>Depuración USB</strong> activada.</li><li>Descarga la versión más reciente del archivo <code>ALTGRAPH-v1.0.3.apk</code> desde nuestro repositorio en GitHub.</li><li>Ejecuta el comando en tu consola de comandos: <code>adb install -r ALTGRAPH-v1.0.3.apk</code></li><li>En tu Karoo, entra en <strong>Ajustes &gt; Perfiles de Carrera</strong>, edita una pantalla de datos y añade los campos de la categoría <strong>ALTGRAPH</strong>.</li><li>Abre el <strong>Panel de Configuración de ALTGRAPH</strong> organizado por pestañas en el menú de apps para personalizar tus ajustes.</li>`,
+                footerText: `ALTGRAPH v1.0.3 ELITE &bull; Desarrollado por David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Código Fuente en GitHub</a> &bull; <a href="https://www.instagram.com/altgraph.app/" target="_blank">Instagram</a>`
             },
             en: {
-                pageTitle: "ALTGRAPH v1.0.4 ELITE - 3D Altimetry & Performance Extension by David García Pascual",
+                pageTitle: "ALTGRAPH v1.0.3 ELITE - 3D Altimetry & Performance Extension by David García Pascual",
                 navVideo: "Demo Video",
                 navGallery: "Screenshots",
                 navModels: "3D Models",
                 navFields: "Fields",
                 navInstall: "Installation",
-                heroTitle: "Conquer climbs with <span>ALTGRAPH v1.0.4 ELITE</span>",
+                heroTitle: "Conquer climbs with <span>ALTGRAPH v1.0.3 ELITE</span>",
                 heroDesc: "Advanced extension developed by <strong>David García Pascual</strong>. Suite of <strong>5 3D Altimetry Models</strong> switchable on the fly, smooth 15-step gradient scale from 0 to 15%, 50m rolling window, topographic calculation, Google Sans Condensed fonts, 90° landscape mode, triple header readout, GPS hairpins, and <strong>Fatigue Grade (GF) Index</strong> for <strong>Hammerhead Karoo 2 and Karoo 3</strong>.",
-                btnDownload: "Download APK (v1.0.4)",
+                btnDownload: "Download APK (v1.0.3)",
                 btnManual: "View User Manual",
                 videoLabel: "🎥 Real Karoo 3 Screen Recording",
                 galleryMainTitle: "📸 Real Karoo 3 Screenshots Gallery",
@@ -1188,7 +114,7 @@
                 f5Desc: "Independent toggles to filter Towns, Water Springs, Viewpoints, and Summits/Passes.",
                 f6Title: "📐 Exact Topographic Method",
                 f6Desc: "Option to calculate slope % over horizontal map projection, eliminating hypotenuse bias on extreme ramps.",
-                secModelsTitle: "🌟 5 Altimetry Models Suite (v1.0.4)",
+                secModelsTitle: "🌟 5 Altimetry Models Suite (v1.0.3)",
                 secModelsDesc: "Revolutionizing classic climb visualization with 6 unique models selectable on the fly from your Karoo settings panel:",
                 m1Title: "Classic 3D (Default)",
                 m1Tag: "Classic 3D Profile",
@@ -1233,19 +159,19 @@
                 c5Desc: "Immediate gradient trend sensor that eliminates barometric altimeter lag and tracks peak ramp gradient.",
                 c5Bullets: `<li><strong>Short/Long Term EMA Filter</strong>: Predicts whether slope is steepening or easing.</li><li><strong>Visual Arrows</strong>: Vector trend arrows (↗️ STEEPENING, ➔ STEADY, ↘️ EASING).</li><li><strong>Max Ramp Peak</strong>: Tracks and holds the steepest % ramp hit in the segment.</li>`,
                 installTitle: "🚀 Quick Installation on your Hammerhead Karoo",
-                installSteps: `<li>Connect your Hammerhead Karoo 2 or Karoo 3 to your computer via USB cable with <strong>USB Debugging</strong> enabled.</li><li>Download the latest <code>ALTGRAPH-v1.0.4.apk</code> file from our GitHub repository.</li><li>Run the command in your terminal: <code>adb install -r ALTGRAPH-v1.0.4.apk</code></li><li>On your Karoo, go to <strong>Settings &gt; Ride Profiles</strong>, edit a data page, and add fields from the <strong>ALTGRAPH</strong> category.</li><li>Open the <strong>ALTGRAPH Settings Panel</strong> organized by tabs from your Karoo app launcher to customize all settings.</li>`,
-                footerText: `ALTGRAPH v1.0.4 ELITE &bull; Developed by David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Source Code on GitHub</a> &bull; <a href="https://www.instagram.com/altgraph.app/" target="_blank">Instagram</a>`
+                installSteps: `<li>Connect your Hammerhead Karoo 2 or Karoo 3 to your computer via USB cable with <strong>USB Debugging</strong> enabled.</li><li>Download the latest <code>ALTGRAPH-v1.0.3.apk</code> file from our GitHub repository.</li><li>Run the command in your terminal: <code>adb install -r ALTGRAPH-v1.0.3.apk</code></li><li>On your Karoo, go to <strong>Settings &gt; Ride Profiles</strong>, edit a data page, and add fields from the <strong>ALTGRAPH</strong> category.</li><li>Open the <strong>ALTGRAPH Settings Panel</strong> organized by tabs from your Karoo app launcher to customize all settings.</li>`,
+                footerText: `ALTGRAPH v1.0.3 ELITE &bull; Developed by David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Source Code on GitHub</a> &bull; <a href="https://www.instagram.com/altgraph.app/" target="_blank">Instagram</a>`
             },
             fr: {
-                pageTitle: "ALTGRAPH v1.0.4 ELITE - Extension d'Altimétrie 3D et Performance par David García Pascual",
+                pageTitle: "ALTGRAPH v1.0.3 ELITE - Extension d'Altimétrie 3D et Performance par David García Pascual",
                 navVideo: "Vidéo Démo",
                 navGallery: "Captures",
                 navModels: "Modèles 3D",
                 navFields: "Champs",
                 navInstall: "Installation",
-                heroTitle: "Dominez la montagne avec <span>ALTGRAPH v1.0.4 ELITE</span>",
+                heroTitle: "Dominez la montagne avec <span>ALTGRAPH v1.0.3 ELITE</span>",
                 heroDesc: "Extension avancée développée par <strong>David García Pascual</strong>. Suite de <strong>5 Modèles d'Altimétrie 3D</strong> commutables en direct, dégradé monochromatique doux de 15 paliers de 0 à 15%, fenêtre glissante de 50m, calcul topographique, polices Google Sans Condensed, mode paysage 90°, affichage triple de pente, épingles GPS et <strong>Indice de Fatigue (GF)</strong> pour <strong>Hammerhead Karoo 2 et Karoo 3</strong>.",
-                btnDownload: "Télécharger APK (v1.0.4)",
+                btnDownload: "Télécharger APK (v1.0.3)",
                 btnManual: "Voir Manuel Utilisateur",
                 videoLabel: "🎥 Enregistrement d'Écran sur Karoo 3 Réel",
                 galleryMainTitle: "📸 Galerie de Captures sur Karoo 3 Réel",
@@ -1269,7 +195,7 @@
                 f5Desc: "Commutateurs indépendants pour filtrer Villes, Points d'Eau, Points de Vue et Sommets/Cols.",
                 f6Title: "📐 Méthode Topographique Exacte",
                 f6Desc: "Option pour calculer le % de pente sur la projection horizontale de la carte, éliminant le biais de l'hypoténuse sur les rampes extrêmes.",
-                secModelsTitle: "🌟 Suite de 6 Modèles d'Altimétrie (v1.0.4)",
+                secModelsTitle: "🌟 Suite de 6 Modèles d'Altimétrie (v1.0.3)",
                 secModelsDesc: "Révolutionnez la visualisation classique des cols grâce à 6 modèles uniques sélectionnables directement dans les réglages du Karoo :",
                 m1Title: "Classique 3D (Par défaut)",
                 m1Tag: "Classic 3D Profile",
@@ -1314,19 +240,19 @@
                 c5Desc: "Capteur de tendance immédiate de la pente qui élimine le retard de l'altimètre barométrique et enregistre le pic de rampe maximale.",
                 c5Bullets: `<li><strong>Filtre Stochastique Court/Long Terme</strong>: Anticipe si la pente se durcit ou s'adoucit.</li><li><strong>Indicateurs Visuels</strong>: Flèches vectorielles (↗️ SE DURCIT, ➔ STABLE, ↘️ S'ADOUCIT).</li><li><strong>Pic de Rampe Maximale</strong>: Enregistre et conserve le % de la rampe la plus dure atteinte dans le tronçon.</li>`,
                 installTitle: "🚀 Installation Rapide sur votre Hammerhead Karoo",
-                installSteps: `<li>Connectez votre Hammerhead Karoo 2 ou Karoo 3 à l'ordinateur par câble USB avec le <strong>Débogage USB</strong> activé.</li><li>Téléchargez la dernière version du fichier <code>ALTGRAPH-v1.0.4.apk</code> depuis notre répertoire GitHub.</li><li>Exécutez la commande dans votre console : <code>adb install -r ALTGRAPH-v1.0.4.apk</code></li><li>Sur votre Karoo, allez dans <strong>Paramètres &gt; Profils de Parcours</strong>, éditez une page de données et ajoutez les champs de la catégorie <strong>ALTGRAPH</strong>.</li><li>Ouvrez le <strong>Panneau de Configuration d'ALTGRAPH</strong> organisé par onglets dans le menu des applications de votre Karoo pour personnaliser vos paramètres.</li>`,
-                footerText: `ALTGRAPH v1.0.4 ELITE &bull; Développé par David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Code Source sur GitHub</a> &bull; <a href="https://www.instagram.com/altgraph.app/" target="_blank">Instagram</a>`
+                installSteps: `<li>Connectez votre Hammerhead Karoo 2 ou Karoo 3 à l'ordinateur par câble USB avec le <strong>Débogage USB</strong> activé.</li><li>Téléchargez la dernière version du fichier <code>ALTGRAPH-v1.0.3.apk</code> depuis notre répertoire GitHub.</li><li>Exécutez la commande dans votre console : <code>adb install -r ALTGRAPH-v1.0.3.apk</code></li><li>Sur votre Karoo, allez dans <strong>Paramètres &gt; Profils de Parcours</strong>, éditez une page de données et ajoutez les champs de la catégorie <strong>ALTGRAPH</strong>.</li><li>Ouvrez le <strong>Panneau de Configuration d'ALTGRAPH</strong> organisé par onglets dans le menu des applications de votre Karoo pour personnaliser vos paramètres.</li>`,
+                footerText: `ALTGRAPH v1.0.3 ELITE &bull; Développé par David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Code Source sur GitHub</a> &bull; <a href="https://www.instagram.com/altgraph.app/" target="_blank">Instagram</a>`
             },
             it: {
-                pageTitle: "ALTGRAPH v1.0.4 ELITE - Estensione di Altimetria 3D e Prestazioni di David García Pascual",
+                pageTitle: "ALTGRAPH v1.0.3 ELITE - Estensione di Altimetria 3D e Prestazioni di David García Pascual",
                 navVideo: "Video Demo",
                 navGallery: "Screenshot",
                 navModels: "Modelli 3D",
                 navFields: "Campi",
                 navInstall: "Installazione",
-                heroTitle: "Domina le salite con <span>ALTGRAPH v1.0.4 ELITE</span>",
+                heroTitle: "Domina le salite con <span>ALTGRAPH v1.0.3 ELITE</span>",
                 heroDesc: "Estensione avanzata sviluppata da <strong>David García Pascual</strong>. Suite di <strong>5 Modelli di Altimetria 3D</strong> selezionabili al volo, gradiente monocromatico fluido di 15 livelli da 0 a 15%, finestra mobile di 50m, calcolo topografico, font Google Sans Condensed, modalità orizzontale 90°, tripla lettura pendenza, tornanti GPS e <strong>Indice Grado di Fatica (GF)</strong> per <strong>Hammerhead Karoo 2 e Karoo 3</strong>.",
-                btnDownload: "Scarica APK (v1.0.4)",
+                btnDownload: "Scarica APK (v1.0.3)",
                 btnManual: "Vedi Manuale Utente",
                 videoLabel: "🎥 Registrazione Schermo su Karoo 3 Reale",
                 galleryMainTitle: "📸 Galleria di Screenshot su Karoo 3 Reale",
@@ -1350,7 +276,7 @@
                 f5Desc: "Interruttori indipendenti per filtrare Paesi, Fontane d'Acqua, Punti Panoramici e Vette/Passi.",
                 f6Title: "📐 Metodo Topografico Esatto",
                 f6Desc: "Opzione per calcolare la pendenza % sulla proiezione orizzontale della mappa, eliminando l'errore dell'ipotenusa su rampe estreme.",
-                secModelsTitle: "🌟 Suite di 6 Modelli di Altimetria (v1.0.4)",
+                secModelsTitle: "🌟 Suite di 6 Modelli di Altimetria (v1.0.3)",
                 secModelsDesc: "Rivoluziona la visualizzazione classica delle salite con 6 modelli unici selezionabili istantaneamente dal pannello Karoo:",
                 m1Title: "Classica 3D (Predefinito)",
                 m1Tag: "Classic 3D Profile",
@@ -1395,19 +321,19 @@
                 c5Desc: "Sensore di tendenza immediata della pendenza che elimina il ritardo dell'altimetro barometrico e registra il picco di rampa massima.",
                 c5Bullets: `<li><strong>Filtro Stocastico a Breve/Lungo Termine</strong>: Anticipa se la pendenza sta aumentando o diminuendo.</li><li><strong>Indicatori Visivi</strong>: Frecce vettoriali (↗️ IN AUMENTO, ➔ STABILE, ↘️ IN DIMINUZIONE).</li><li><strong>Picco Rampa Massima</strong>: Registra e mantiene la pendenza % più dura raggiunta nel tratto.</li>`,
                 installTitle: "🚀 Installazione Rapida sul tuo Hammerhead Karoo",
-                installSteps: `<li>Collega il tuo Hammerhead Karoo 2 o Karoo 3 al computer tramite cavo USB con il <strong>Debug USB</strong> abilitato.</li><li>Scarica l'ultima versione del file <code>ALTGRAPH-v1.0.4.apk</code> dalla nostra repository GitHub.</li><li>Esegui il comando nel terminale: <code>adb install -r ALTGRAPH-v1.0.4.apk</code></li><li>Sul tuo Karoo, vai su <strong>Impostazioni &gt; Profili di Corsa</strong>, modifica una pagina dati e aggiungi i campi della categoria <strong>ALTGRAPH</strong>.</li><li>Apri il <strong>Pannello delle Impostazioni di ALTGRAPH</strong> organizzato a schede nel launcher delle app del Karoo per personalizzare le impostazioni.</li>`,
-                footerText: `ALTGRAPH v1.0.4 ELITE &bull; Sviluppato da David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Codice Sorgente su GitHub</a> &bull; <a href="https://www.instagram.com/altgraph.app/" target="_blank">Instagram</a>`
+                installSteps: `<li>Collega il tuo Hammerhead Karoo 2 o Karoo 3 al computer tramite cavo USB con il <strong>Debug USB</strong> abilitato.</li><li>Scarica l'ultima versione del file <code>ALTGRAPH-v1.0.3.apk</code> dalla nostra repository GitHub.</li><li>Esegui il comando nel terminale: <code>adb install -r ALTGRAPH-v1.0.3.apk</code></li><li>Sul tuo Karoo, vai su <strong>Impostazioni &gt; Profili di Corsa</strong>, modifica una pagina dati e aggiungi i campi della categoria <strong>ALTGRAPH</strong>.</li><li>Apri il <strong>Pannello delle Impostazioni di ALTGRAPH</strong> organizzato a schede nel launcher delle app del Karoo per personalizzare le impostazioni.</li>`,
+                footerText: `ALTGRAPH v1.0.3 ELITE &bull; Sviluppato da David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Codice Sorgente su GitHub</a> &bull; <a href="https://www.instagram.com/altgraph.app/" target="_blank">Instagram</a>`
             },
             de: {
-                pageTitle: "ALTGRAPH v1.0.4 ELITE - 3D Altimetrie & Leistungs-Erweiterung von David García Pascual",
+                pageTitle: "ALTGRAPH v1.0.3 ELITE - 3D Altimetrie & Leistungs-Erweiterung von David García Pascual",
                 navVideo: "Demo-Video",
                 navGallery: "Screenshots",
                 navModels: "3D-Modelle",
                 navFields: "Felder",
                 navInstall: "Installation",
-                heroTitle: "Meistere Anstiege mit <span>ALTGRAPH v1.0.4 ELITE</span>",
+                heroTitle: "Meistere Anstiege mit <span>ALTGRAPH v1.0.3 ELITE</span>",
                 heroDesc: "Fortschrittliche Erweiterung, entwickelt von <strong>David García Pascual</strong>. Suite von <strong>5 3D-Altimetrie-Modellen</strong>, sanfter 15-stufiger monochromatischer Verlauf von 0 bis 15%, 50m Gleitfenster, topografische Berechnung, Google Sans Condensed Schriftarten, 90° Querformat, dreifache Steigungsanzeige, GPS-Haarnadelkurven und <strong>Ermüdungsgrad (GF) Index</strong> für <strong>Hammerhead Karoo 2 und Karoo 3</strong>.",
-                btnDownload: "APK Herunterladen (v1.0.4)",
+                btnDownload: "APK Herunterladen (v1.0.3)",
                 btnManual: "Benutzerhandbuch ansehen",
                 videoLabel: "🎥 Bildschirmaufnahme auf echtem Karoo 3",
                 galleryMainTitle: "📸 Echte Karoo 3 Screenshots Galerie",
@@ -1431,7 +357,7 @@
                 f5Desc: "Unabhängige Schalter zum Filtern von Städten, Wasserquellen, Aussichtspunkten und Gipfeln/Pässen.",
                 f6Title: "📐 Exakte topografische Methode",
                 f6Desc: "Option zur Berechnung der Steigung in % auf der horizontalen Kartenprojektion, um Hypotenusenfehler bei extremen Rampen zu eliminieren.",
-                secModelsTitle: "🌟 Suite von 5 Altimetrie-Modellen (v1.0.4)",
+                secModelsTitle: "🌟 Suite von 5 Altimetrie-Modellen (v1.0.3)",
                 secModelsDesc: "Revolutioniert die klassische Anstiegsanzeige mit 6 einzigartigen Modellen, die direkt im Karoo-Einstellungspanel gewählt werden können:",
                 m1Title: "Klassisch 3D (Standard)",
                 m1Tag: "Classic 3D Profile",
@@ -1476,21 +402,21 @@
                 c5Desc: "Unmittelbarer Steigungstrend-Sensor, der die Verzögerung des barometrischen Höhenmessers eliminiert und die maximale Rampensteilheit aufzeichnet.",
                 c5Bullets: `<li><strong>Kurz-/Langzeit-Stochastikfilter</strong>: Antizipiert, ob die Steigung steiler oder flacher wird.</li><li><strong>Visuelle Indikatoren</strong>: Vektorpfeile (↗️ WIRD STEILER, ➔ KONSTANT, ↘️ WIRD FLACHER).</li><li><strong>Maximaler Rampen-Peak</strong>: Zeichnet den steilsten erreichten %-Wert im Abschnitt auf und behält ihn bei.</li>`,
                 installTitle: "🚀 Schnelle Installation auf Ihrem Hammerhead Karoo",
-                installSteps: `<li>Verbinden Sie Ihren Hammerhead Karoo 2 oder Karoo 3 über ein USB-Kabel mit aktiviertem <strong>USB-Debugging</strong> mit dem Computer.</li><li>Laden Sie die neueste Datei <code>ALTGRAPH-v1.0.4.apk</code> aus unserem GitHub-Repository herunter.</li><li>Führen Sie den Befehl in Ihrem Terminal aus: <code>adb install -r ALTGRAPH-v1.0.4.apk</code></li><li>Gehen Sie auf Ihrem Karoo zu <strong>Einstellungen &gt; Fahrprofile</strong>, bearbeiten Sie eine Datenseite und fügen Sie Felder aus der Kategorie <strong>ALTGRAPH</strong> hinzu.</li><li>Öffnen Sie das <strong>ALTGRAPH-Einstellungspanel</strong> (in Tabs organisiert) aus Ihrem Karoo-App-Launcher, um alle Einstellungen anzupassen.</li>`,
-                footerText: `ALTGRAPH v1.0.4 ELITE &bull; Entwickelt von David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Quellcode auf GitHub</a> &bull; <a href="https://www.instagram.com/altgraph.app/" target="_blank">Instagram</a>`
+                installSteps: `<li>Verbinden Sie Ihren Hammerhead Karoo 2 oder Karoo 3 über ein USB-Kabel mit aktiviertem <strong>USB-Debugging</strong> mit dem Computer.</li><li>Laden Sie die neueste Datei <code>ALTGRAPH-v1.0.3.apk</code> aus unserem GitHub-Repository herunter.</li><li>Führen Sie den Befehl in Ihrem Terminal aus: <code>adb install -r ALTGRAPH-v1.0.3.apk</code></li><li>Gehen Sie auf Ihrem Karoo zu <strong>Einstellungen &gt; Fahrprofile</strong>, bearbeiten Sie eine Datenseite und fügen Sie Felder aus der Kategorie <strong>ALTGRAPH</strong> hinzu.</li><li>Öffnen Sie das <strong>ALTGRAPH-Einstellungspanel</strong> (in Tabs organisiert) aus Ihrem Karoo-App-Launcher, um alle Einstellungen anzupassen.</li>`,
+                footerText: `ALTGRAPH v1.0.3 ELITE &bull; Entwickelt von David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Quellcode auf GitHub</a> &bull; <a href="https://www.instagram.com/altgraph.app/" target="_blank">Instagram</a>`
             }
             ,
 
             pt: {
-                pageTitle: "ALTGRAPH v1.0.4 ELITE - Extensão de Altimetria 3D e Desempenho por David García Pascual",
+                pageTitle: "ALTGRAPH v1.0.3 ELITE - Extensão de Altimetria 3D e Desempenho por David García Pascual",
                 navVideo: "Demonstração",
                 navGallery: "Capturas",
                 navModels: "Modelos 3D",
                 navFields: "Campos",
                 navInstall: "Instalação",
-                heroTitle: "Domine a montanha com <span>ALTGRAPH v1.0.4 ELITE</span>",
+                heroTitle: "Domine a montanha com <span>ALTGRAPH v1.0.3 ELITE</span>",
                 heroDesc: "Extensão avançada desenvolvida por <strong>David García Pascual</strong>. Suite de <strong>6 Modelos de Altimetria 3D</strong> alternáveis em tempo real, gradiente monocromático suave de 15 níveis, avanço quântico com janela rolante de 50 metros, cálculo topográfico, fontes Google Sans Condensed, modo paisagem girado a 90°, alertas de ataque, <strong>Ritmo VAM</strong> e cálculo científico do <strong>Grau de Fadiga (GF)</strong>.",
-                btnDownload: "Baixar APK (v1.0.4)",
+                btnDownload: "Baixar APK (v1.0.3)",
                 btnManual: "Manual do Usuário",
                 videoLabel: "🎥 VÍDEO DEMO 4K: Interface e Navegação Híbrida 3D em tempo real",
                 galleryMainTitle: "📱 Capturas em Tela Real no Karoo",
@@ -1558,8 +484,8 @@
                 c5Desc: "Sistema reativo imediato construído ignorando atrasos barométricos capturando instantâneos da vida real e previsões do que sua corrente sofrerá a seguir.",
                 c5Bullets: `<li><strong>Sistema Vetorial Previsor</strong>: Adição micro-radar estocástico prevendo matematicamente as rampas com antecedência usando cálculo visual do mapa interno 3D.</li><li><strong>Faróis Direcionais HUD</strong>: Ícones de visualização apontam setas ativas se o terreno ↗️ ENDURECE mais fundo, bloqueia cruzamento plano ➔ CONSTANTE ou relaxa alivio ↘️ ALIVIA no topo.</li><li><strong>Monitor Pmx de Registro Permanente</strong>: Bloqueia na tela o pico mais feio registrado em Kmh/Mph sem desaparecer mesmo após você girar fora dele. O Karoo nativo se esquece rápido.</li>`,
                 installTitle: "🚀 Implantação e Instalação Tática Rápida (Karoo 2/3)",
-                installSteps: `<li>Vincule fisicamente sua arma de plataforma de ciclismo Hammerhead a qualquer unidade cibernética PC através do cabo USB com alternância inteligente avançada <strong>Depuração USB</strong> ativada.</li><li>Puxe o lançamento da carga do arquivo principal <code>ALTGRAPH-v1.0.4.apk</code> do cofre do nosso repositório no GitHub.</li><li>Execute comandos vitais simples do prompt shell do sistema: <code>adb install -r ALTGRAPH-v1.0.4.apk</code></li><li>Dirija o painel em voo do seu dispositivo real Karoo local e monte o campo cibernético atômico de Altimetria ou VAM da categoria listada dedicada <strong>ALTGRAPH</strong> usando <strong>Perfis de Ciclismo -> Modificar Páginas de Dados</strong>.</li><li>Implante totalmente suas cargas modificadas nas <strong>Configurações do aplicativo Karoo App Launcher</strong>. Todas as engrenagens são operacionais sob demanda de tela sem toques sem fio na rede.</li>`,
-                footerText: `ALTGRAPH v1.0.4 ELITE &bull; Desenvolvido por David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Repositório Oficial do GitHub Open Source</a> &bull; <a href="https://www.instagram.com/altgraph.app/" target="_blank">Instagram</a>`
+                installSteps: `<li>Vincule fisicamente sua arma de plataforma de ciclismo Hammerhead a qualquer unidade cibernética PC através do cabo USB com alternância inteligente avançada <strong>Depuração USB</strong> ativada.</li><li>Puxe o lançamento da carga do arquivo principal <code>ALTGRAPH-v1.0.3.apk</code> do cofre do nosso repositório no GitHub.</li><li>Execute comandos vitais simples do prompt shell do sistema: <code>adb install -r ALTGRAPH-v1.0.3.apk</code></li><li>Dirija o painel em voo do seu dispositivo real Karoo local e monte o campo cibernético atômico de Altimetria ou VAM da categoria listada dedicada <strong>ALTGRAPH</strong> usando <strong>Perfis de Ciclismo -> Modificar Páginas de Dados</strong>.</li><li>Implante totalmente suas cargas modificadas nas <strong>Configurações do aplicativo Karoo App Launcher</strong>. Todas as engrenagens são operacionais sob demanda de tela sem toques sem fio na rede.</li>`,
+                footerText: `ALTGRAPH v1.0.3 ELITE &bull; Desenvolvido por David García Pascual &bull; <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Repositório Oficial do GitHub Open Source</a> &bull; <a href="https://www.instagram.com/altgraph.app/" target="_blank">Instagram</a>`
             },
         };
 
@@ -1567,42 +493,42 @@
             const t = translations[lang];
             if (!t) return;
 
-            if (document.getElementById('page-title')) document.getElementById('page-title').innerText = t.pageTitle;
+            document.getElementById('page-title').innerText = t.pageTitle;
             if (document.getElementById('nav-video')) document.getElementById('nav-video').innerText = t.navVideo;
-            if (document.getElementById('nav-gallery')) document.getElementById('nav-gallery').innerText = t.navGallery;
+            document.getElementById('nav-gallery').innerText = t.navGallery;
             if (document.getElementById('nav-models')) document.getElementById('nav-models').innerText = t.navModels;
-            if (document.getElementById('nav-fields')) document.getElementById('nav-fields').innerText = t.navFields;
-            if (document.getElementById('nav-install')) document.getElementById('nav-install').innerText = t.navInstall;
+            document.getElementById('nav-fields').innerText = t.navFields;
+            document.getElementById('nav-install').innerText = t.navInstall;
 
-            if (document.getElementById('hero-title')) document.getElementById('hero-title').innerHTML = t.heroTitle;
-            if (document.getElementById('hero-desc')) document.getElementById('hero-desc').innerHTML = t.heroDesc;
-            if (document.getElementById('btn-download')) document.getElementById('btn-download').innerText = t.btnDownload;
-            if (document.getElementById('btn-manual')) document.getElementById('btn-manual').innerText = t.btnManual;
+            document.getElementById('hero-title').innerHTML = t.heroTitle;
+            document.getElementById('hero-desc').innerHTML = t.heroDesc;
+            document.getElementById('btn-download').innerText = t.btnDownload;
+            document.getElementById('btn-manual').innerText = t.btnManual;
 
             if (document.getElementById('video-label')) document.getElementById('video-label').innerText = t.videoLabel;
-            if (document.getElementById('gallery-main-title')) document.getElementById('gallery-main-title').innerText = t.galleryMainTitle;
-            if (document.getElementById('g1-label')) document.getElementById('g1-label').innerText = t.g1Label;
-            if (document.getElementById('g2-label')) document.getElementById('g2-label').innerText = t.g2Label;
-            if (document.getElementById('g3-label')) document.getElementById('g3-label').innerText = t.g3Label;
-            if (document.getElementById('g4-label')) document.getElementById('g4-label').innerText = t.g4Label;
-            if (document.getElementById('g5-label')) document.getElementById('g5-label').innerText = t.g5Label;
+            document.getElementById('gallery-main-title').innerText = t.galleryMainTitle;
+            document.getElementById('g1-label').innerText = t.g1Label;
+            document.getElementById('g2-label').innerText = t.g2Label;
+            document.getElementById('g3-label').innerText = t.g3Label;
+            document.getElementById('g4-label').innerText = t.g4Label;
+            document.getElementById('g5-label').innerText = t.g5Label;
 
-            if (document.getElementById('flagship-badge')) document.getElementById('flagship-badge').innerText = t.flagshipBadge;
-            if (document.getElementById('flagship-title')) document.getElementById('flagship-title').innerText = t.flagshipTitle;
-            if (document.getElementById('flagship-lead')) document.getElementById('flagship-lead').innerText = t.flagshipLead;
+            document.getElementById('flagship-badge').innerText = t.flagshipBadge;
+            document.getElementById('flagship-title').innerText = t.flagshipTitle;
+            document.getElementById('flagship-lead').innerText = t.flagshipLead;
 
-            if (document.getElementById('f1-title')) document.getElementById('f1-title').innerText = t.f1Title;
-            if (document.getElementById('f1-desc')) document.getElementById('f1-desc').innerHTML = t.f1Desc;
-            if (document.getElementById('f2-title')) document.getElementById('f2-title').innerText = t.f2Title;
-            if (document.getElementById('f2-desc')) document.getElementById('f2-desc').innerHTML = t.f2Desc;
-            if (document.getElementById('f3-title')) document.getElementById('f3-title').innerText = t.f3Title;
-            if (document.getElementById('f3-desc')) document.getElementById('f3-desc').innerHTML = t.f3Desc;
-            if (document.getElementById('f4-title')) document.getElementById('f4-title').innerText = t.f4Title;
-            if (document.getElementById('f4-desc')) document.getElementById('f4-desc').innerHTML = t.f4Desc;
-            if (document.getElementById('f5-title')) document.getElementById('f5-title').innerText = t.f5Title;
-            if (document.getElementById('f5-desc')) document.getElementById('f5-desc').innerHTML = t.f5Desc;
-            if (document.getElementById('f6-title')) document.getElementById('f6-title').innerText = t.f6Title;
-            if (document.getElementById('f6-desc')) document.getElementById('f6-desc').innerHTML = t.f6Desc;
+            document.getElementById('f1-title').innerText = t.f1Title;
+            document.getElementById('f1-desc').innerHTML = t.f1Desc;
+            document.getElementById('f2-title').innerText = t.f2Title;
+            document.getElementById('f2-desc').innerHTML = t.f2Desc;
+            document.getElementById('f3-title').innerText = t.f3Title;
+            document.getElementById('f3-desc').innerHTML = t.f3Desc;
+            document.getElementById('f4-title').innerText = t.f4Title;
+            document.getElementById('f4-desc').innerHTML = t.f4Desc;
+            document.getElementById('f5-title').innerText = t.f5Title;
+            document.getElementById('f5-desc').innerHTML = t.f5Desc;
+            document.getElementById('f6-title').innerText = t.f6Title;
+            document.getElementById('f6-desc').innerHTML = t.f6Desc;
 
             if (document.getElementById('sec-models-title')) document.getElementById('sec-models-title').innerText = t.secModelsTitle;
             if (document.getElementById('sec-models-desc')) document.getElementById('sec-models-desc').innerText = t.secModelsDesc;
@@ -1640,43 +566,38 @@
             if (document.getElementById('m6-bullets')) document.getElementById('m6-bullets').innerHTML = t.m6Bullets;
 
 
-            if (document.getElementById('sec-fields-title')) document.getElementById('sec-fields-title').innerText = t.secFieldsTitle;
+            document.getElementById('sec-fields-title').innerText = t.secFieldsTitle;
 
-            if (document.getElementById('c2-title')) document.getElementById('c2-title').innerText = t.c2Title;
-            if (document.getElementById('c2-tag')) document.getElementById('c2-tag').innerText = t.c2Tag;
-            if (document.getElementById('c2-desc')) document.getElementById('c2-desc').innerText = t.c2Desc;
-            if (document.getElementById('c2-bullets')) document.getElementById('c2-bullets').innerHTML = t.c2Bullets;
+            document.getElementById('c2-title').innerText = t.c2Title;
+            document.getElementById('c2-tag').innerText = t.c2Tag;
+            document.getElementById('c2-desc').innerText = t.c2Desc;
+            document.getElementById('c2-bullets').innerHTML = t.c2Bullets;
 
-            if (document.getElementById('c3-title')) document.getElementById('c3-title').innerText = t.c3Title;
-            if (document.getElementById('c3-tag')) document.getElementById('c3-tag').innerText = t.c3Tag;
-            if (document.getElementById('c3-desc')) document.getElementById('c3-desc').innerText = t.c3Desc;
-            if (document.getElementById('c3-bullets')) document.getElementById('c3-bullets').innerHTML = t.c3Bullets;
+            document.getElementById('c3-title').innerText = t.c3Title;
+            document.getElementById('c3-tag').innerText = t.c3Tag;
+            document.getElementById('c3-desc').innerText = t.c3Desc;
+            document.getElementById('c3-bullets').innerHTML = t.c3Bullets;
 
-            if (document.getElementById('c4-title')) document.getElementById('c4-title').innerText = t.c4Title;
-            if (document.getElementById('c4-tag')) document.getElementById('c4-tag').innerText = t.c4Tag;
-            if (document.getElementById('c4-desc')) document.getElementById('c4-desc').innerText = t.c4Desc;
-            if (document.getElementById('c4-bullets')) document.getElementById('c4-bullets').innerHTML = t.c4Bullets;
+            document.getElementById('c4-title').innerText = t.c4Title;
+            document.getElementById('c4-tag').innerText = t.c4Tag;
+            document.getElementById('c4-desc').innerText = t.c4Desc;
+            document.getElementById('c4-bullets').innerHTML = t.c4Bullets;
 
-            if (document.getElementById('c5-title')) document.getElementById('c5-title').innerText = t.c5Title;
-            if (document.getElementById('c5-tag')) document.getElementById('c5-tag').innerText = t.c5Tag;
-            if (document.getElementById('c5-desc')) document.getElementById('c5-desc').innerText = t.c5Desc;
-            if (document.getElementById('c5-bullets')) document.getElementById('c5-bullets').innerHTML = t.c5Bullets;
+            document.getElementById('c5-title').innerText = t.c5Title;
+            document.getElementById('c5-tag').innerText = t.c5Tag;
+            document.getElementById('c5-desc').innerText = t.c5Desc;
+            document.getElementById('c5-bullets').innerHTML = t.c5Bullets;
 
-            if (document.getElementById('install-title')) document.getElementById('install-title').innerText = t.installTitle;
-            if (document.getElementById('install-steps')) document.getElementById('install-steps').innerHTML = t.installSteps;
-            if (document.getElementById('footer-text')) document.getElementById('footer-text').innerHTML = t.footerText;
+            document.getElementById('install-title').innerText = t.installTitle;
+            document.getElementById('install-steps').innerHTML = t.installSteps;
+            document.getElementById('footer-text').innerHTML = t.footerText;
 
             // Toggle Active Button
-            if (document.getElementById('btn-es')) document.getElementById('btn-es').classList.toggle('active', lang === 'es');
-            if (document.getElementById('btn-en')) document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-            if (document.getElementById('btn-fr')) document.getElementById('btn-fr').classList.toggle('active', lang === 'fr');
-            if (document.getElementById('btn-it')) document.getElementById('btn-it').classList.toggle('active', lang === 'it');
-            if (document.getElementById('btn-de')) document.getElementById('btn-de').classList.toggle('active', lang === 'de');
+            document.getElementById('btn-es').classList.toggle('active', lang === 'es');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            document.getElementById('btn-fr').classList.toggle('active', lang === 'fr');
+            document.getElementById('btn-it').classList.toggle('active', lang === 'it');
+            document.getElementById('btn-de').classList.toggle('active', lang === 'de');
             if (document.getElementById('btn-pt')) document.getElementById('btn-pt').classList.toggle('active', lang === 'pt');
         }
-    </script>
-
-</body>
-
-</html>
-
+    

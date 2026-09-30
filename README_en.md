@@ -1,12 +1,24 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png" alt="ALTGRAPH Logo" width="160" />
 </p>
-# ALTGRAPH (v0.4.1 STABLE)
+# ALTGRAPH (v1.0.4 ELITE)
 <p>Read in: <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README.md">🇪🇸 Español</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_en.md">🇬🇧 English</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_fr.md">🇫🇷 Français</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_it.md">🇮🇹 Italiano</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_de.md">🇩🇪 Deutsch</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_pt.md">🇵🇹 Português</a></p>
 **ALTGRAPH** is a next-generation professional altimetry and performance extension for **Hammerhead Karoo** cycling computers (Karoo 2 and Karoo 3), developed by **David García Pascual** using the official `karoo-ext` SDK.
-It revolutionizes the traditional concept of cycling altimetry by incorporating a **Suite of 5 Altimetry Visualization Models** with a live dynamic selector, a 15-stage continuous monochromatic scale, a 50-meter rolling window quantum advance, adaptive multiscale resolution, mountain pass analysis, optional topographic calculation (pure horizontal projection), mathematical detection of hairpin turns (tornanti), filtering by POI categories (Towns, Fountains, Viewpoints, Summits), a tap-to-zoom scale switcher, Google Sans / Condensed typography, a 90° rotated full-screen landscape mode, dual **VAM** pace with recommended speed, and scientific calculation of the **Fatigue Grade (GF)**.
+It revolutionizes the traditional concept of cycling altimetry by incorporating a **Suite of 6 Altimetry Visualization Models** with a live dynamic selector, a 15-stage continuous monochromatic scale, a 50-meter rolling window quantum advance, adaptive multiscale resolution, mountain pass analysis, optional topographic calculation (pure horizontal projection), mathematical detection of hairpin turns (tornanti), filtering by POI categories (Towns, Fountains, Viewpoints, Summits), a tap-to-zoom scale switcher, Google Sans / Condensed typography, a 90° rotated full-screen landscape mode, dual **VAM** pace with recommended speed, and scientific calculation of the **Fatigue Grade (GF)**.
 
 
+
+
+## 🐛 VERSION 1.0.4: MILLIMETRIC GPS ACCURACY 🐛
+
+- **Critical GPS Synchronization Fix (Corner Cutting Fix)**: We have completely rewritten the distance calculation mathematical engine to include a *Dynamic Scalar Calibrator*. From now on, simplified projected distances (polylines) are stretched and adapted to match the real physical distances tracked by your Karoo unit on the road. The radar distance tracking now perfectly matches the telemetry, showing true slope percentages exactly under your front wheel, from kilometer zero to the end of your route.
+- **Continuous Pointer Offset Fix (X-Axis)**: Resolved all X-Axis compression issues that caused the display to warn you of steep ramps or descents at the wrong time due to delayed pointer tracking.
+- **Rendering Engine Update**: Optimized real-time dynamic Hairpin curve generation.
+
+## 🐛 VERSION 1.0.3: DISTANCE & ROUTE CORRECTION 🐛
+
+- **Altimetry Radar Fix:** Resolved a critical bug that caused the radar and the rider progress marker to erroneously jump back to kilometer 0 (km 0) at the start of a climb or after riding several kilometers.
+- **Continuous route progress:** The application now properly compensates for the internal route (polyline) simplifications made by the Karoo GPS. Ridden distance, the bottom bar, and notifications will maintain their continuous global progress throughout your ride.
 
 ## 🐛 VERSION 1.0.2: CRITICAL FIXES 🐛
 

@@ -94,7 +94,11 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                             }
                         }
                         ACTION_ZOOM_IN -> {
-                            if (currentZoomQuarter < 4) currentZoomQuarter++
+                            if (currentZoomQuarter < 4) {
+                                currentZoomQuarter++
+                            } else {
+                                currentZoomQuarter = 0
+                            }
                         }
                         ACTION_ZOOM_OUT -> {
                             if (currentZoomQuarter > 0) currentZoomQuarter--

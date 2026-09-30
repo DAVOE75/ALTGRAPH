@@ -43,8 +43,8 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private val cotaTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#94A3B8")
-        typeface = Typeface.DEFAULT_BOLD
+        color = Color.parseColor("#CBD5E1")
+        typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
     }
 
     // --- PAINTS DE LA CINTA 3D ESTILO LA FLAMME ROUGE ---
@@ -69,25 +69,25 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private val sliceSeparatorPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#334155")
-        strokeWidth = 1.2f
+        color = Color.parseColor("#15FFFFFF")
+        strokeWidth = 1.0f
         style = Paint.Style.STROKE
     }
 
     private val majorSliceSeparatorPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#0F172A") // Near black
-        strokeWidth = 3.0f
+        color = Color.parseColor("#25FFFFFF")
+        strokeWidth = 1.5f
         style = Paint.Style.STROKE
     }
 
     private val pctBadgeBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#CC070C18") // Fondo cápsula oscuro para máximo contraste sobre cualquier color
+        color = Color.parseColor("#E6000000") // Very dark translucent
         style = Paint.Style.FILL
     }
 
     private val pctBadgeBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#55FFFFFF") // Borde sutil nítido
-        strokeWidth = 1.2f
+        color = Color.TRANSPARENT
+        strokeWidth = 0f
         style = Paint.Style.STROKE
     }
 
@@ -163,7 +163,7 @@ class Altimetria3DView @JvmOverloads constructor(
 
     // 4. Monolito Obsidiana y Plasma
     private val obsidianFacetPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#1E293B")
+        color = Color.parseColor("#0CFFFFFF")
         strokeWidth = 1.0f
         style = Paint.Style.STROKE
     }
@@ -171,10 +171,11 @@ class Altimetria3DView @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
     private val neonGlowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#5038BDF8")
-        strokeWidth = 6.0f
+        color = Color.parseColor("#8038BDF8")
+        strokeWidth = 8.0f
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
+        maskFilter = android.graphics.BlurMaskFilter(16f, android.graphics.BlurMaskFilter.Blur.NORMAL)
     }
     private val neonCorePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
@@ -194,9 +195,9 @@ class Altimetria3DView @JvmOverloads constructor(
 
     private val subBlockPctTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        typeface = Typeface.DEFAULT_BOLD
+        typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
         textAlign = Paint.Align.CENTER
-        setShadowLayer(4f, 0f, 0f, Color.BLACK)
+        setShadowLayer(6f, 0f, 3f, Color.BLACK)
     }
 
     // Pared frontal y lateral 3D
@@ -229,19 +230,19 @@ class Altimetria3DView @JvmOverloads constructor(
 
     private val baseDistTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        typeface = Typeface.DEFAULT_BOLD
+        typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
         textAlign = Paint.Align.CENTER
     }
 
     // Encabezados y telemetría
     private val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        typeface = Typeface.DEFAULT_BOLD
+        typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
     }
 
     private val subTitleLabelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#38BDF8")
-        typeface = Typeface.DEFAULT_BOLD
+        typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
     }
     private val oasisHoloPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#38BDF8")
