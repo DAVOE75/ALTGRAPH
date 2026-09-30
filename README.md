@@ -8,6 +8,13 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
 
 
 
+## 🌟 VERSIÓN 1.0.5: ESCALA DINÁMICA Y AVISOS OPCIONALES 🌟
+
+- **NUEVA FUNCIÓN ELITE - Avisos Dinámicos Opcionales**: Ahora puedes activar o desactivar los avisos dinámicos de ("Muro", "Próximo Puerto", "Metros para Coronar") desde la pestaña ELITE en la configuración de la app. Al desactivarlos, el radar altimétrico 3D se expandirá automáticamente para ocupar todo el espacio disponible, ¡ofreciendo un área de visión mucho mayor!
+- **Ajuste de Escala Dinámica en Campos Múltiples**: Hemos reprogramado la lógica visual de la escala kilométrica inferior. Los textos (0m, 50m, 1km...) ahora calculan el espacio de forma inteligente. Esto arregla un problema visual donde los números se cortaban al usar el radar en pantallas con múltiples campos de datos divididos.
+- **Calibración Genuina de GPS**: El progreso del radar de Altimetría ahora está matemáticamente anclado al avance real del GPS de tu Karoo (y no únicamente a la línea de ruta teórica), solucionando problemas de desfase en rutas muy largas.
+- **Lógica de renderizado**: Solucionado un solapamiento gráfico que ocurría al ocultar la barra de avisos dinámicos en vistas apaisadas.
+
 ## 🐛 VERSIÓN 1.0.4: PRECISIÓN GPS MILIMÉTRICA 🐛
 
 - **Corrección Crítica de Sincronización GPS (Corner Cutting Fix)**: Se ha reescrito por completo el motor matemático de cálculo de distancias para incorporar un *Calibrador Escalar Dinámico*. A partir de ahora, las distancias matemáticas simplificadas de la ruta se estiran y adaptan milimétricamente a las distancias reales reportadas por la telemetría del Karoo sobre el asfalto. Tu avance en el radar y el perfil coinciden a la perfección con la realidad, mostrando los porcentajes verdaderos justo bajo tu rueda desde el kilómetro cero hasta el final de la ruta.

@@ -9,6 +9,13 @@ It revolutionizes the traditional concept of cycling altimetry by incorporating 
 
 
 
+## 🌟 VERSION 1.0.5: DYNAMIC SCALE & OPTIONAL ALERTS 🌟
+
+- **NEW ELITE FEATURE - Optional Dynamic Alerts**: You can now toggle the popup alerts ("Steep Wall", "Upcoming Climb", "Meters to Summit") on/off from the ELITE tab in the app's settings. If you disable them, the 3D altimetry radar will dynamically expand to fill the entire data field, providing a much larger map area!
+- **Dynamic Scaling in Multi-Field Layouts**: We've rewritten the rendering logic for the bottom distance ruler. The text marks (0m, 50m, 1km...) now resize dynamically based on the exact available screen estate. This solves a visual bug where numbers were cut in half when inserting the radar into tighter data page layouts.
+- **Genuine GPS Calibration**: The progress of the Altimetry radar is now mathematically locked to the real GPS polling from your Karoo device (and not solely bounded to raw route polyline calculations). This prevents elevation progression mismatch after riding long distances.
+- **Rendering logic**: Fixed a graphical overlapping bug that occurred when hiding the dynamic alerts bar on horizontal views.
+
 ## 🐛 VERSION 1.0.4: MILLIMETRIC GPS ACCURACY 🐛
 
 - **Critical GPS Synchronization Fix (Corner Cutting Fix)**: We have completely rewritten the distance calculation mathematical engine to include a *Dynamic Scalar Calibrator*. From now on, simplified projected distances (polylines) are stretched and adapted to match the real physical distances tracked by your Karoo unit on the road. The radar distance tracking now perfectly matches the telemetry, showing true slope percentages exactly under your front wheel, from kilometer zero to the end of your route.
