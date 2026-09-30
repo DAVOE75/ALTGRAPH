@@ -309,8 +309,15 @@ class RouteBarView(context: Context) : View(context) {
                 val progress = (tickDist - strat.windowStartMeters) / lookahead
                 val px = (w * progress).toFloat() - progressOffset
                 if (px in -50f..(w + 50f)) {
+                    // Dynamic scaling for horizontal ruler
+                    val rulerSpace = radarH - headerHeight
+                    val dynamicTickLen = Math.min(15f, rulerSpace * 0.25f)
+                    val maxTextHeight = rulerSpace - dynamicTickLen - 2f
+                    val currentTextSize = Math.min(28f, maxTextHeight * 0.85f).coerceAtLeast(10f)
+                    tickTextPaint.textSize = currentTextSize
+                    
                     // Línea de marca hacia abajo
-                    canvas.drawLine(px, headerHeight, px, headerHeight + 15f, dividerPaint)
+                    canvas.drawLine(px, headerHeight, px, headerHeight + dynamicTickLen, dividerPaint)
                     // Texto (un-skew if 3D)
                     val kmLabel = if (tickDist >= 1000) {
                         val km = tickDist / 1000.0
@@ -319,7 +326,8 @@ class RouteBarView(context: Context) : View(context) {
                     } else {
                         "${tickDist.toInt()}m"
                     }
-                    val cyTick = headerHeight + 20f + tickTextPaint.textSize
+                    // Baseline alignment avoiding overlap with alert bar
+                    val cyTick = headerHeight + dynamicTickLen + 2f + tickTextPaint.textSize * 0.8f
                     if (showRadar3d) {
                         canvas.save()
                         canvas.translate(px, cyTick)
@@ -561,17 +569,31 @@ class RouteBarView(context: Context) : View(context) {
             while (tickDist < strat.windowStartMeters + lookahead) {
                 val progress = (tickDist - strat.windowStartMeters) / lookahead
                 val py = h - (h * progress).toFloat()
-                canvas.drawLine(headerWidth, py, headerWidth + 15f, py, dividerPaint)
+                // Dynamic scaling for vertical ruler
+                val rulerSpace = radarW - headerWidth
+                val dynamicTickLen = Math.min(15f, rulerSpace * 0.25f)
+                
+                canvas.drawLine(headerWidth, py, headerWidth + dynamicTickLen, py, dividerPaint)
                 val kmLabel = if (tickDist >= 1000) "${(tickDist / 1000).toInt()}km" else "${tickDist.toInt()}m"
+                
+                // Scale down if it's too wide
+                tickTextPaint.textSize = 28f
+                var currentTextSize = 28f
+                val maxTextWidth = rulerSpace - dynamicTickLen - 4f
+                if (tickTextPaint.measureText(kmLabel) > maxTextWidth) {
+                    currentTextSize = currentTextSize * (maxTextWidth / tickTextPaint.measureText(kmLabel))
+                    tickTextPaint.textSize = currentTextSize.coerceAtLeast(10f)
+                }
+
                 val cyTick = py + (tickTextPaint.textSize / 3f)
                 if (showRadar3d) {
                     canvas.save()
-                    canvas.translate(headerWidth + 20f, cyTick)
+                    canvas.translate(headerWidth + dynamicTickLen + 2f, cyTick)
                     canvas.skew(0f, 0.35f)
                     canvas.drawText(kmLabel, 0f, 0f, tickTextPaint)
                     canvas.restore()
                 } else {
-                    canvas.drawText(kmLabel, headerWidth + 20f, cyTick, tickTextPaint)
+                    canvas.drawText(kmLabel, headerWidth + dynamicTickLen + 2f, cyTick, tickTextPaint)
                 }
                 tickDist += tickInterval
             }
