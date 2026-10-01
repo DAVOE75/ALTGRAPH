@@ -71,7 +71,6 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                         val state = navEvent.state
                         if (state is OnNavigationState.NavigationState.NavigatingRoute) {
                             calculator.isNavigatingRoute = true
-                            calculator.syncRouteDistance(state.routeDistance)
                             calculator.setRouteFromPolyline(state.routePolyline)
                             
                             var elevPoly = state.routeElevationPolyline
@@ -79,6 +78,7 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                                 elevPoly = (state.javaClass.methods.find { it.name == "getElevationPolyline" }?.invoke(state) as? String)
                             }
                             calculator.setRouteElevationProfile(elevPoly)
+                            calculator.syncRouteDistance(state.routeDistance)
 
                             // Ghost recording — key route by first 30 chars of polyline
                             val routeKey = state.routePolyline.take(30)

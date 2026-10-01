@@ -373,7 +373,7 @@ class AltimetriaStrategyCalculator {
         
         if (maxRouteLengthSeen > 0.0 && routePoints.isNotEmpty() && nearestIndex < routePoints.size) {
             val karooRidden = maxRouteLengthSeen - karooRemainingDistance
-            val polylineRidden = routePoints[nearestIndex].distance - globalRouteOffset
+            val polylineRidden = routePoints[nearestIndex].distance
             
             // BUGFIX: Prevent routeDistanceOffset from dropping when a climb starts (Climb Detect cuts polyline)
             val newOffset = karooRidden - polylineRidden
