@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="page-title">ALTGRAPH v1.0.5 ELITE - Extensión de Altimetría 3D y Rendimiento por hesiOX</title>
     <meta name="description"
-        content="Extensión avanzada para ciclocomputadores Hammerhead Karoo 2 y 3 desarrollada por David García Pascual. Suite de 6 modelos de altimetría 3D en relieve, degradado monocromático suave de 15 tramos, ventana rodante de 50m, cálculo topográfico, detección de herraduras, fuentes Google Sans Condensed, modo apaisado 90°, alertas de ataque, ritmo VAM e Índice Grado de Fatiga (GF).">
+        content="Extensión avanzada para ciclocomputadores Hammerhead Karoo 2 y 3 desarrollada por hesiOX. Suite de 6 modelos de altimetría 3D en relieve, degradado monocromático suave de 15 tramos, ventana rodante de 50m, cálculo topográfico, detección de herraduras, fuentes Google Sans Condensed, modo apaisado 90°, alertas de ataque, ritmo VAM e Índice Grado de Fatiga (GF).">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -473,19 +473,19 @@
             color: var(--accent-blue);
             text-decoration: none;
         }
-    
+
         /* FUTURISTIC ENHANCEMENTS */
         body {
             background: radial-gradient(circle at top center, #111 0%, #000 100%);
         }
-        
+
         .hero h2 span {
             text-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
             background: linear-gradient(135deg, #38bdf8 0%, #a855f7 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        
+
         .badge {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -493,7 +493,7 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             transition: all 0.3s ease;
         }
-        
+
         .badge:hover {
             border-color: var(--accent-blue);
             box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
@@ -506,53 +506,55 @@
             color: #fff;
             border: none;
         }
-        
+
         .btn-primary:hover {
             box-shadow: 0 0 30px rgba(56, 189, 248, 0.8);
             transform: translateY(-3px);
         }
-        
+
         .flagship-card {
-            background: linear-gradient(145deg, rgba(24,24,27,0.8) 0%, rgba(9,9,11,0.95) 100%);
+            background: linear-gradient(145deg, rgba(24, 24, 27, 0.8) 0%, rgba(9, 9, 11, 0.95) 100%);
             backdrop-filter: blur(20px);
-            box-shadow: 0 20px 60px rgba(56, 189, 248, 0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+            box-shadow: 0 20px 60px rgba(56, 189, 248, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
-        
+
         .gallery-card {
             background: rgba(24, 24, 27, 0.5);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
-        
+
         .detailed-card {
             background: rgba(24, 24, 27, 0.5);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             position: relative;
             overflow: hidden;
         }
-        
+
         .detailed-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
         }
-        
+
         .video-container {
             box-shadow: 0 0 40px rgba(56, 189, 248, 0.3);
             border: 1px solid rgba(56, 189, 248, 0.5);
         }
-        
+
         header {
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(20px);
             background: rgba(9, 9, 11, 0.8);
             position: sticky;
             top: 0;
             z-index: 1000;
         }
-
     </style>
 </head>
 
@@ -571,7 +573,8 @@
                 <a href="#features" id="nav-fields">Campos</a>
                 <a href="#install" id="nav-install">Instalación</a>
                 <a href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">GitHub</a>
-                <a href="https://www.instagram.com/altgraph.app/" target="_blank" style="color: #eab308; font-weight: 800;">Instagram</a>
+                <a href="https://www.instagram.com/altgraph.app/" target="_blank"
+                    style="color: #eab308; font-weight: 800;">Instagram</a>
             </nav>
             <div class="lang-switch">
                 <button onclick="setLanguage('es')" id="btn-es" class="lang-btn active">ES</button>
@@ -704,28 +707,35 @@
     </section>
 
     <!-- VISOR DE PUERTOS DE MONTAÑA / MOUNTAIN PASS VIEWER -->
-    
+
     <!-- RADAR ALTIMETRICO SECTION -->
     <section class="flagship-section" id="radar" style="margin-top: -40px;">
         <div class="flagship-card" style="border-color: #eab308;">
-            <span class="flagship-badge" style="background-color: #eab308; color: #000;">🚀 NUEVO EN v1.0.5</span>
-            <h3>🛰️ Radar Altimétrico (Vista 3D)</h3>
-            <p class="lead">El nuevo modo <strong>Radar Altimétrico</strong> se superpone a tu mapa de Karoo permitiendo ver tanto la navegación pura como el relieve de lo que tienes por delante, todo integrado de manera exquisita en la misma pantalla.</p>
+            <span class="flagship-badge" id="radar-badge" style="background-color: #eab308; color: #000;">🚀 NUEVO EN v1.0.5</span>
+            <h3 id="radar-title">🛰️ Radar Altimétrico (Vista 3D)</h3>
+            <p class="lead" id="radar-desc">El nuevo modo <strong>Radar Altimétrico</strong> se superpone a tu mapa de Karoo permitiendo
+                ver tanto la navegación pura como el relieve de lo que tienes por delante, todo integrado de manera
+                exquisita en la misma pantalla.</p>
 
-            <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_radar_altimetrico.png" alt="Radar Altimetrico" style="max-width: 100%; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: block; margin: 20px auto 40px auto; border: 1px solid rgba(255,255,255,0.1);" />
+            <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_radar_altimetrico.png"
+                alt="Radar Altimetrico"
+                style="max-width: 100%; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: block; margin: 20px auto 40px auto; border: 1px solid rgba(255,255,255,0.1);" />
 
             <div class="flagship-features-grid">
                 <div class="feature-item">
-                    <h4 style="color: #eab308;">📡 Relieve sobre el Mapa</h4>
-                    <p>Permite seguir tu ruta GPX mientras observas el perfil 3D del terreno venidero en una cinta superpuesta.</p>
+                    <h4 id="radar-ft1-title" style="color: #eab308;">📡 Relieve sobre el Mapa</h4>
+                    <p id="radar-ft1-desc">Permite seguir tu ruta GPX mientras observas el perfil 3D del terreno venidero en una cinta
+                        superpuesta.</p>
                 </div>
                 <div class="feature-item">
-                    <h4 style="color: #eab308;">🌈 Barra de Zonas Integrada</h4>
-                    <p>Integra una barra inferior dinámica (7 colores) basada en tus vatios de potencia o pulsaciones en tiempo real.</p>
+                    <h4 id="radar-ft2-title" style="color: #eab308;">🌈 Barra de Zonas Integrada</h4>
+                    <p id="radar-ft2-desc">Integra una barra inferior dinámica (7 colores) basada en tus vatios de potencia o pulsaciones en
+                        tiempo real.</p>
                 </div>
                 <div class="feature-item">
-                    <h4 style="color: #eab308;">🎯 Indicador de Pendiente</h4>
-                    <p>Muestra flechas de colores (Roja para ascenso, Azul para descenso) para anticipar rápidamente la pendiente máxima.</p>
+                    <h4 id="radar-ft3-title" style="color: #eab308;">🎯 Indicador de Pendiente</h4>
+                    <p id="radar-ft3-desc">Muestra flechas de colores (Roja para ascenso, Azul para descenso) para anticipar rápidamente la
+                        pendiente máxima.</p>
                 </div>
             </div>
         </div>
@@ -886,11 +896,15 @@
                             id="m3-tag">Tactical Recovery & Fire</span>
                     </div>
                 </div>
-                <p class="desc" id="m3-desc">Visualización táctica de carrera que resalta zonas de oxigenación y recuperación frente a los muros más severos de la ascensión.</p>
+                <p class="desc" id="m3-desc">Visualización táctica de carrera que resalta zonas de oxigenación y
+                    recuperación frente a los muros más severos de la ascensión.</p>
                 <ul class="feature-bullets" id="m3-bullets">
-                    <li><strong>Oasis de Oxígeno</strong>: Tramos de descanso (≤3%) iluminados en cian glacial con distintivo dinámico ❄️ OASIS [dist]m.</li>
-                    <li><strong>Crisoles de Fuego</strong>: Rampas duras (≥12%) coloreadas en lava térmica con insignia de alerta 🔥 MURO [dist]m.</li>
-                    <li><strong>Bruma de Hipoxia</strong>: Gradiente atmosférico brumoso en la cumbre a altitudes superiores a 1.400 metros.</li>
+                    <li><strong>Oasis de Oxígeno</strong>: Tramos de descanso (≤3%) iluminados en cian glacial con
+                        distintivo dinámico ❄️ OASIS [dist]m.</li>
+                    <li><strong>Crisoles de Fuego</strong>: Rampas duras (≥12%) coloreadas en lava térmica con insignia
+                        de alerta 🔥 MURO [dist]m.</li>
+                    <li><strong>Bruma de Hipoxia</strong>: Gradiente atmosférico brumoso en la cumbre a altitudes
+                        superiores a 1.400 metros.</li>
                 </ul>
             </div>
 
@@ -903,11 +917,15 @@
                             id="m4-tag">Kinetic Gravitational Field</span>
                     </div>
                 </div>
-                <p class="desc" id="m4-desc">Panel de telemetría dinámica donde la gravedad, la inercia cinética y la cadencia se visualizan en un campo de energía continuo.</p>
+                <p class="desc" id="m4-desc">Panel de telemetría dinámica donde la gravedad, la inercia cinética y la
+                    cadencia se visualizan en un campo de energía continuo.</p>
                 <ul class="feature-bullets" id="m4-bullets">
-                    <li><strong>Tensión Gravitatoria</strong>: Líneas de fuerza verticales ancladas milimétricamente al relieve en rampas ≥8%.</li>
-                    <li><strong>Onda Cinética de Inercia</strong>: Onda senoidal a lo largo de la base (cian en avance fluido, carmesí rápido cuando la pendiente frena la inercia).</li>
-                    <li><strong>Línea Guía VAM Flotante</strong>: Trazo dorado de ritmo objetivo que acompaña la ascensión 12 px sobre el perfil.</li>
+                    <li><strong>Tensión Gravitatoria</strong>: Líneas de fuerza verticales ancladas milimétricamente al
+                        relieve en rampas ≥8%.</li>
+                    <li><strong>Onda Cinética de Inercia</strong>: Onda senoidal a lo largo de la base (cian en avance
+                        fluido, carmesí rápido cuando la pendiente frena la inercia).</li>
+                    <li><strong>Línea Guía VAM Flotante</strong>: Trazo dorado de ritmo objetivo que acompaña la
+                        ascensión 12 px sobre el perfil.</li>
                 </ul>
             </div>
 
@@ -920,11 +938,15 @@
                             id="m5-tag">Monolithic Obsidian & Radiant Plasma</span>
                     </div>
                 </div>
-                <p class="desc" id="m5-desc">Escultura geométrica de montaña en cristal de obsidiana facetado ahumado con un núcleo de plasma radiante interior y aristas láser neón.</p>
+                <p class="desc" id="m5-desc">Escultura geométrica de montaña en cristal de obsidiana facetado ahumado
+                    con un núcleo de plasma radiante interior y aristas láser neón.</p>
                 <ul class="feature-bullets" id="m5-bullets">
-                    <li><strong>Cristal de Obsidiana Facetado</strong>: Bloque sólido oscuro de montaña con cortes de diamante a 45° y faceta 3D pulida.</li>
-                    <li><strong>Núcleo Radiante de Plasma</strong>: Franja interior incandescente que emite el gradiente térmico de pendiente estrictamente acotada.</li>
-                    <li><strong>Haz Láser Neón y Cápsulas Holográficas</strong>: Arista superior con doble línea (resplandor celeste difuso de 6 px + núcleo blanco puro de 2.2 px).</li>
+                    <li><strong>Cristal de Obsidiana Facetado</strong>: Bloque sólido oscuro de montaña con cortes de
+                        diamante a 45° y faceta 3D pulida.</li>
+                    <li><strong>Núcleo Radiante de Plasma</strong>: Franja interior incandescente que emite el gradiente
+                        térmico de pendiente estrictamente acotada.</li>
+                    <li><strong>Haz Láser Neón y Cápsulas Holográficas</strong>: Arista superior con doble línea
+                        (resplandor celeste difuso de 6 px + núcleo blanco puro de 2.2 px).</li>
                 </ul>
             </div>
 
@@ -937,11 +959,15 @@
                             id="m6-tag">Isometric GPS Map</span>
                     </div>
                 </div>
-                <p class="desc" id="m6-desc">Navegación espacial interactiva que proyecta la ruta completa como un mapa 3D con colores de altimetría.</p>
+                <p class="desc" id="m6-desc">Navegación espacial interactiva que proyecta la ruta completa como un mapa
+                    3D con colores de altimetría.</p>
                 <ul class="feature-bullets" id="m6-bullets">
-                    <li><strong>Proyección Topográfica Real</strong>: Escala y ángulos GPS reales del mundo proyectados en una cuadrícula isométrica 3D.</li>
-                    <li><strong>Baliza de Navegación 3D</strong>: Indicador dinámico que se mueve y rota a lo largo de la ruta marcando la posición exacta del ciclista.</li>
-                    <li><strong>Gradiente Multiescala</strong>: Bloques de color integrados en la estructura 3D que delatan las ascensiones.</li>
+                    <li><strong>Proyección Topográfica Real</strong>: Escala y ángulos GPS reales del mundo proyectados
+                        en una cuadrícula isométrica 3D.</li>
+                    <li><strong>Baliza de Navegación 3D</strong>: Indicador dinámico que se mueve y rota a lo largo de
+                        la ruta marcando la posición exacta del ciclista.</li>
+                    <li><strong>Gradiente Multiescala</strong>: Bloques de color integrados en la estructura 3D que
+                        delatan las ascensiones.</li>
                 </ul>
             </div>
         </div>
@@ -1069,7 +1095,8 @@
 
     <footer>
         <p id="footer-text">ALTGRAPH v1.0.5 ELITE &bull; Desarrollado por David García Pascual &bull; <a
-                href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Código Fuente en GitHub</a> &bull; <a href="https://www.instagram.com/altgraph.app/" target="_blank">Instagram</a></p>
+                href="https://github.com/DAVOE75/ALTGRAPH" target="_blank">Código Fuente en GitHub</a> &bull; <a
+                href="https://www.instagram.com/altgraph.app/" target="_blank">Instagram</a></p>
     </footer>
 
     <script>
@@ -1183,7 +1210,8 @@
                 g8Label: `🏔️ Altimetría 3D (Escala 20km)`,
                 g9Label: `🏔️ Altimetría 3D (Escala 200km)`,
                 g10Label: `🎛️ Menú de Selección de Datos`,
-                g11Label: `📊 Dashboard de Datos Completo`,},
+                g11Label: `📊 Dashboard de Datos Completo`,
+            },
             en: {
                 radarFt1Title: `🗺️ Relief on Map`,
                 radarFt1Desc: `Allows you to follow your GPX route while observing the 3D profile of the upcoming terrain on an overlaid ribbon.`,
@@ -1293,7 +1321,8 @@
                 g8Label: `🏔️ 3D Altimetry (20km Scale)`,
                 g9Label: `🏔️ 3D Altimetry (200km Scale)`,
                 g10Label: `🎛️ Data Selection Menu`,
-                g11Label: `📊 Full Data Dashboard`,},
+                g11Label: `📊 Full Data Dashboard`,
+            },
             fr: {
                 radarFt1Title: `🗺️ Relief sur la Carte`,
                 radarFt1Desc: `Vous permet de suivre votre itinéraire GPX tout en observant le profil 3D du terrain à venir sur un ruban superposé.`,
@@ -1403,7 +1432,8 @@
                 g8Label: `🏔️ Altimétrie 3D (Échelle 20km)`,
                 g9Label: `🏔️ Altimétrie 3D (Échelle 200km)`,
                 g10Label: `🎛️ Menu de Sélection de Données`,
-                g11Label: `📊 Tableau de Bord Complet`,},
+                g11Label: `📊 Tableau de Bord Complet`,
+            },
             it: {
                 radarFt1Title: `🗺️ Rilievo sulla Mappa`,
                 radarFt1Desc: `Ti permette di seguire il tuo percorso GPX mentre osservi il profilo 3D del terreno in arrivo su un nastro sovrapposto.`,
@@ -1513,7 +1543,8 @@
                 g8Label: `🏔️ Altimetria 3D (Scala 20km)`,
                 g9Label: `🏔️ Altimetria 3D (Scala 200km)`,
                 g10Label: `🎛️ Menu Selezione Dati`,
-                g11Label: `📊 Cruscotto Dati Completo`,},
+                g11Label: `📊 Cruscotto Dati Completo`,
+            },
             de: {
                 radarFt1Title: `🗺️ Relief auf der Karte`,
                 radarFt1Desc: `Ermöglicht es Ihnen, Ihrer GPX-Route zu folgen und gleichzeitig das 3D-Profil des kommenden Geländes auf einem überlagerten Band zu beobachten.`,
@@ -1714,7 +1745,8 @@
                 g8Label: `🏔️ 3D-Altimetrie (20km Maßstab)`,
                 g9Label: `🏔️ 3D-Altimetrie (200km Maßstab)`,
                 g10Label: `🎛️ Datenauswahlmenü`,
-                g11Label: `📊 Vollständiges Daten-Dashboard`,},
+                g11Label: `📊 Vollständiges Daten-Dashboard`,
+            },
         };
 
         function setLanguage(lang) {
@@ -1831,7 +1863,7 @@
             if (document.getElementById('install-steps')) document.getElementById('install-steps').innerHTML = t.installSteps;
             if (document.getElementById('footer-text')) document.getElementById('footer-text').innerHTML = t.footerText;
 
-            
+
             if (document.getElementById('badge-lang')) document.getElementById('badge-lang').innerHTML = t.badgeLang;
             if (document.getElementById('sec-climb-viewer-title')) document.getElementById('sec-climb-viewer-title').innerHTML = t.secClimbViewerTitle;
             if (document.getElementById('sec-climb-viewer-desc')) document.getElementById('sec-climb-viewer-desc').innerHTML = t.secClimbViewerDesc;
@@ -1867,4 +1899,3 @@
 </body>
 
 </html>
-
