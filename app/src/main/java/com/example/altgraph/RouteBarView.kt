@@ -917,6 +917,6 @@ class RouteBarView(context: Context) : View(context) {
         // Title
         histPaint.textSize = 17f
         histPaint.textAlign = Paint.Align.CENTER
-        canvas.drawText("% distr.", panelLeft + panelW / 2f, top + 16f, histPaint)
+        canvas.drawText(context.getString(R.string.label_dist_format, "%"), panelLeft + panelW / 2f, top + 16f, histPaint)
     }
 }

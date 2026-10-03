@@ -65,7 +65,7 @@ class GradientTrendView @JvmOverloads constructor(
 
         // 1. Título
         titlePaint.textSize = (h * 0.08f).coerceIn(14f, 20f)
-        canvas.drawText("TENDENCIA PENDIENTE 3D", padX, h * 0.16f, titlePaint)
+        canvas.drawText(context.getString(R.string.label_gradient_trend_3d), padX, h * 0.16f, titlePaint)
 
         // 2. Pendiente Actual + Flecha de Tendencia
         gradeValuePaint.textSize = (h * 0.28f).coerceIn(28f, 56f)

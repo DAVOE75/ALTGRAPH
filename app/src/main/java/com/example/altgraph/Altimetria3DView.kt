@@ -2156,7 +2156,7 @@ class Altimetria3DView @JvmOverloads constructor(
         val labels = listOf("<0%", "0-3%", "3-5%", "5-8%", "8-10%", "10-13%", "13-17%", "17%+")
         
         val titlePaint = Paint().apply { color = Color.WHITE; textSize = 13f * fontScale; typeface = Typeface.DEFAULT_BOLD; isAntiAlias = true }
-        canvas.drawText("Pendiente Media", legendX, legendY - 10f, titlePaint)
+        canvas.drawText(context.getString(R.string.label_avg_slope), legendX, legendY - 10f, titlePaint)
         
         var currentX = legendX
         grades.forEachIndexed { idx, grade ->

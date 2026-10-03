@@ -60,7 +60,8 @@ class MainActivity : Activity() {
         }
 
         val subtitle = TextView(this).apply {
-            text = "${getString(R.string.title_settings)} • v0.7.0 ELITE"
+            val versionName = packageManager.getPackageInfo(packageName, 0).versionName
+            text = "${getString(R.string.title_settings)} • v$versionName ELITE"
             textSize = 12f
             setTextColor(Color.parseColor("#A1A1AA"))
             gravity = Gravity.CENTER
@@ -99,7 +100,7 @@ class MainActivity : Activity() {
             tabEliteContainer
         )
 
-        val tabTitles = listOf("🎨 Estilo", "🏔️ 3D", "📊 2D", "🚴 VAM", "🚀 Pro", "👑 Elite")
+        val tabTitles = listOf(getString(R.string.tab_style), getString(R.string.tab_3d), getString(R.string.tab_2d), getString(R.string.tab_vam), getString(R.string.tab_pro), getString(R.string.tab_elite))
         val tabButtons = mutableListOf<Button>()
 
         fun selectTab(activeIdx: Int) {
@@ -145,7 +146,7 @@ class MainActivity : Activity() {
 
         // Opción: Modelo de Altimetría (Selector de las 5 Vistas Revolucionarias)
         val styleCard = createCardContainer()
-        val styleLabel = createSectionLabel("VISTA Y MODELO DE ALTIMETRÍA (RUTA GLOBAL)")
+        val styleLabel = createSectionLabel(getString(R.string.label_vista_global))
         val initialStyle = prefs.altimetriaStyle
         val styleValueText = createValueText("${initialStyle.icon} ${initialStyle.title}")
         val styleDescText = TextView(this).apply {
@@ -185,7 +186,7 @@ class MainActivity : Activity() {
 
         // Opción: Modelo de Altimetría (Visor de Puertos)
         val climbStyleCard = createCardContainer()
-        val climbStyleLabel = createSectionLabel("VISTA Y MODELO DE ALTIMETRÍA (VISOR DE PUERTOS)")
+        val climbStyleLabel = createSectionLabel(getString(R.string.label_vista_puertos))
         val climbInitialStyle = prefs.climbAltimetriaStyle
         val climbStyleValueText = createValueText("${climbInitialStyle.icon} ${climbInitialStyle.title}")
         val climbStyleDescText = TextView(this).apply {
@@ -264,7 +265,7 @@ class MainActivity : Activity() {
         // Opción: Girar 90° Modo Apaisado
         val rotate90Card = createCardContainer()
         val switchRotate90 = Switch(this).apply {
-            text = getString(R.string.setting_rotate_90_cw) + " (RUTA GLOBAL)"
+            text = getString(R.string.setting_rotate_90_cw) + getString(R.string.suffix_global)
             textSize = 15f
             setTextColor(Color.WHITE)
             isChecked = prefs.rotate90Clockwise
@@ -276,7 +277,7 @@ class MainActivity : Activity() {
 
         val climbRotate90Card = createCardContainer()
         val climbSwitchRotate90 = Switch(this).apply {
-            text = getString(R.string.setting_rotate_90_cw) + " (VISOR PUERTOS)"
+            text = getString(R.string.setting_rotate_90_cw) + getString(R.string.suffix_puertos)
             textSize = 15f
             setTextColor(Color.WHITE)
             isChecked = prefs.climbRotate90Clockwise
@@ -355,7 +356,7 @@ class MainActivity : Activity() {
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         }
 
-        val lookaheadMinusBtn = createActionButton("- Reducir") {
+        val lookaheadMinusBtn = createActionButton(getString(R.string.btn_reduce)) {
             val curr = prefs.lookaheadMeters3d
             val nextVal = when {
                 curr > 150000 -> 150000
@@ -374,7 +375,7 @@ class MainActivity : Activity() {
             lookaheadValueText.text = formatLookaheadText(nextVal)
         }
 
-        val lookaheadPlusBtn = createActionButton("+ Aumentar") {
+        val lookaheadPlusBtn = createActionButton(getString(R.string.btn_increase)) {
             val curr = prefs.lookaheadMeters3d
             val nextVal = when {
                 curr < 500 -> curr + 50
@@ -436,14 +437,14 @@ class MainActivity : Activity() {
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         }
 
-        val rampMinMinusBtn = createActionButton("- 1%") {
+        val rampMinMinusBtn = createActionButton(getString(R.string.btn_reduce_1_pct)) {
             if (prefs.rampMinSlopePct > 5.0) {
                 prefs.rampMinSlopePct -= 1.0
                 rampMinValueText.text = "${prefs.rampMinSlopePct.toInt()}%"
             }
         }
 
-        val rampMinPlusBtn = createActionButton("+ 1%") {
+        val rampMinPlusBtn = createActionButton(getString(R.string.btn_increase_1_pct)) {
             if (prefs.rampMinSlopePct < prefs.rampMaxSlopePct - 1.0) {
                 prefs.rampMinSlopePct += 1.0
                 rampMinValueText.text = "${prefs.rampMinSlopePct.toInt()}%"
@@ -467,14 +468,14 @@ class MainActivity : Activity() {
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         }
 
-        val rampMaxMinusBtn = createActionButton("- 1%") {
+        val rampMaxMinusBtn = createActionButton(getString(R.string.btn_reduce_1_pct)) {
             if (prefs.rampMaxSlopePct > prefs.rampMinSlopePct + 1.0) {
                 prefs.rampMaxSlopePct -= 1.0
                 rampMaxValueText.text = "${prefs.rampMaxSlopePct.toInt()}%"
             }
         }
 
-        val rampMaxPlusBtn = createActionButton("+ 1%") {
+        val rampMaxPlusBtn = createActionButton(getString(R.string.btn_increase_1_pct)) {
             if (prefs.rampMaxSlopePct < 30.0) {
                 prefs.rampMaxSlopePct += 1.0
                 rampMaxValueText.text = "${prefs.rampMaxSlopePct.toInt()}%"
@@ -636,14 +637,14 @@ class MainActivity : Activity() {
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         }
 
-        val visibleMinusBtn = createActionButton("- 1") {
+        val visibleMinusBtn = createActionButton(getString(R.string.btn_reduce_1)) {
             if (prefs.visibleBlocksCount > 1) {
                 prefs.visibleBlocksCount -= 1
                 visibleBlocksValueText.text = "${prefs.visibleBlocksCount} tramos"
             }
         }
 
-        val visiblePlusBtn = createActionButton("+ 1") {
+        val visiblePlusBtn = createActionButton(getString(R.string.btn_increase_1)) {
             if (prefs.visibleBlocksCount < 10) {
                 prefs.visibleBlocksCount += 1
                 visibleBlocksValueText.text = "${prefs.visibleBlocksCount} tramos"
@@ -729,14 +730,14 @@ class MainActivity : Activity() {
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         }
 
-        val vamMinusBtn = createActionButton("- 50 m/h") {
+        val vamMinusBtn = createActionButton(getString(R.string.btn_reduce_50)) {
             if (prefs.targetVam > 500) {
                 prefs.targetVam -= 50
                 vamValueText.text = "${prefs.targetVam} m/h"
             }
         }
 
-        val vamPlusBtn = createActionButton("+ 50 m/h") {
+        val vamPlusBtn = createActionButton(getString(R.string.btn_increase_50)) {
             if (prefs.targetVam < 2000) {
                 prefs.targetVam += 50
                 vamValueText.text = "${prefs.targetVam} m/h"
@@ -787,7 +788,7 @@ class MainActivity : Activity() {
         // PESTAÑA 5: 🚀 PRO (MÁXIMO NIVEL SDK)
         // ==========================================
 
-        val proLabel = createSectionLabel("WORLD TOUR PRO FEATURES")
+        val proLabel = createSectionLabel(getString(R.string.label_pro_features))
         tabProContainer.addView(proLabel)
 
         // Smart Zoom

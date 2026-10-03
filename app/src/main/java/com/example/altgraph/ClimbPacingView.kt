@@ -82,7 +82,8 @@ class ClimbPacingView @JvmOverloads constructor(
 
         // 1. Título VAM
         titlePaint.textSize = (h * 0.08f).coerceIn(14f, 20f)
-        canvas.drawText("RITMO VAM (OBJ: ${targetVam} m/h)", padX, h * 0.16f, titlePaint)
+        val titleText = context.getString(R.string.label_target_vam_format, targetVam)
+        canvas.drawText(titleText, padX, h * 0.16f, titlePaint)
 
         // 2. Valor VAM Principal
         vamValuePaint.textSize = (h * 0.28f).coerceIn(28f, 56f)
@@ -91,7 +92,7 @@ class ClimbPacingView @JvmOverloads constructor(
 
         // 3. Etiqueta y Valor de Velocidad Objetivo en km/h
         speedLabelPaint.textSize = (h * 0.07f).coerceIn(12f, 18f)
-        canvas.drawText("VELOCIDAD OBJETIVO", padX, h * 0.62f, speedLabelPaint)
+        canvas.drawText(context.getString(R.string.label_target_speed), padX, h * 0.62f, speedLabelPaint)
 
         speedValuePaint.textSize = (h * 0.22f).coerceIn(22f, 42f)
         val speedStr = if (targetSpeedKmh > 0.0) "%.1f km/h".format(targetSpeedKmh) else "--.- km/h"
@@ -99,9 +100,9 @@ class ClimbPacingView @JvmOverloads constructor(
 
         // 4. Insinia de Estado
         val (badgeText, badgeColor) = when (status) {
-            ClimbPacingCalculator.PacingStatus.ON_PACE -> "EN RITMO" to "#22C55E"
-            ClimbPacingCalculator.PacingStatus.OVERPACING -> "SOBREESFUERZO" to "#EF4444"
-            ClimbPacingCalculator.PacingStatus.UNDERPACING -> "POR DEBAJO" to "#38BDF8"
+            ClimbPacingCalculator.PacingStatus.ON_PACE -> context.getString(R.string.label_pacing_on_pace) to "#22C55E"
+            ClimbPacingCalculator.PacingStatus.OVERPACING -> context.getString(R.string.label_pacing_overpacing) to "#EF4444"
+            ClimbPacingCalculator.PacingStatus.UNDERPACING -> context.getString(R.string.label_pacing_underpacing) to "#38BDF8"
         }
 
         badgeBgPaint.color = Color.parseColor(badgeColor)

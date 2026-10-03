@@ -11,7 +11,7 @@
 
     <string name="data_type_fatigue_grade_title">Fatigue Grade (GF)</string>
     <string name="data_type_fatigue_grade_desc">Scientific fatigue grade &amp; difficulty index for climb rating</string>
-    <string name="data_type_climb_3d_title">Visor de Puertos 3D</string>
+    <string name="data_type_climb_3d_title">3D Climb Viewer</string>
     <string name="data_type_climb_3d_desc">Independent 3D mountain pass viewer for loaded routes</string>
 
     <string name="data_type_climb_pacing_title">ClimbPacing VAM Target</string>
@@ -23,8 +23,8 @@
     <string name="data_type_altgraph_map_title">Topographic Map IGN (ALTGRAPH)</string>
     <string name="data_type_altgraph_map_desc">Fullscreen IGN 1:25.000 MBTILES topographic map with route and GPS position</string>
 
-    <string name="data_type_route_bar_title">Radar Altimétrico</string>
-    <string name="data_type_route_bar_desc">Cinta vertical de pendiente estilo radar para los próximos kilómetros</string>
+    <string name="data_type_route_bar_title">Altimetry Radar</string>
+    <string name="data_type_route_bar_desc">Vertical radar-style gradient ribbon for upcoming kilometers</string>
 
 
     <!-- UI Labels for AltimetriaView -->
@@ -97,7 +97,34 @@
     <string name="elite_btn_activate">ACTIVATE</string>
     <string name="elite_strava_segments">Strava Live Segments 3D (Beta)</string>
     <string name="elite_weather_overlay">Wind &amp; Weather Overlay</string>
-    <string name="elite_radar_enabled">Radar Altimétrico (Data Field)</string>
+    <string name="elite_radar_enabled">Altimetry Radar (Data Field)</string>
     <string name="elite_toast_unlocked">Elite Features Unlocked!</string>
     <string name="elite_toast_invalid">Invalid License Key</string>
+    <string name="tab_style">🎨 Style</string>
+    <string name="tab_3d">🏔️ 3D</string>
+    <string name="tab_2d">📊 2D</string>
+    <string name="tab_vam">🚴 VAM</string>
+    <string name="tab_pro">🚀 Pro</string>
+    <string name="tab_elite">👑 Elite</string>
+    <string name="label_vista_global">ALTIMETRY VIEW AND MODEL (GLOBAL ROUTE)</string>
+    <string name="label_vista_puertos">ALTIMETRY VIEW AND MODEL (CLIMB VIEWER)</string>
+    <string name="suffix_global"> (GLOBAL ROUTE)</string>
+    <string name="suffix_puertos"> (CLIMB VIEWER)</string>
+    <string name="btn_reduce">- Reduce</string>
+    <string name="btn_increase">+ Increase</string>
+    <string name="label_pro_features">WORLD TOUR PRO FEATURES</string>
+    <string name="label_gradient_trend_3d">3D GRADIENT TREND</string>
+    <string name="label_target_vam_format">VAM PACING (TARGET: %1$d m/h)</string>
+    <string name="label_target_speed">TARGET SPEED</string>
+    <string name="label_pacing_on_pace">ON PACE</string>
+    <string name="label_pacing_overpacing">OVERPACING</string>
+    <string name="label_pacing_underpacing">UNDERPACING</string>
+    <string name="label_avg_slope">Avg Gradient</string>
+    <string name="label_dist_format">%1$s distr.</string>
+    <string name="btn_reduce_1_pct">- 1%</string>
+    <string name="btn_increase_1_pct">+ 1%</string>
+    <string name="btn_reduce_1">- 1</string>
+    <string name="btn_increase_1">+ 1</string>
+    <string name="btn_reduce_50">- 50 m/h</string>
+    <string name="btn_increase_50">+ 50 m/h</string>
 </resources>
