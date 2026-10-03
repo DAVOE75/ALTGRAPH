@@ -366,6 +366,13 @@ class RouteBarView(context: Context) : View(context) {
             // 3. Textos de porcentaje medio en la franja superior (sin el fondo oscurecido general)
             percentTextPaint.setShadowLayer(4f, 0f, 2f, Color.BLACK) // Sombra fuerte para legibilidad sin fondo oscuro
             FontHelper.applyFontToPaint(maxGradeBlockPaint, fontFamilyKey, Typeface.BOLD)
+            
+            // DYNAMIC SCALING FOR HEIGHT COMPRESSION
+            val currentMaxGradeTextSize = Math.min(24f, headerHeight * 0.45f).coerceAtLeast(10f)
+            maxGradeBlockPaint.textSize = currentMaxGradeTextSize
+            maxGradeArrowPaint.textSize = currentMaxGradeTextSize
+            percentTextPaint.textSize = Math.min(32f, headerHeight * 0.8f).coerceAtLeast(12f)
+            
             val cyPercent = (headerHeight / 2f) + (percentTextPaint.textSize / 3f)
             // getSubBlockSize only returns 50.0 or 100.0 for typical route lookaheads
             val showMaxGrade = strat.subBlockSizeMeters <= 100.0 && strat.subBlocksMax.isNotEmpty()
@@ -659,6 +666,8 @@ class RouteBarView(context: Context) : View(context) {
 
             // 3. Textos de %
             percentTextPaint.setShadowLayer(4f, 0f, 2f, Color.BLACK)
+            // DYNAMIC SCALING FOR WIDTH COMPRESSION IN VERTICAL MODE
+            percentTextPaint.textSize = Math.min(32f, headerWidth * 0.8f).coerceAtLeast(12f)
             val cxPercent = headerWidth / 2f
             for (band in bands) {
                 val top = h - ((band.endIndex + 1) * blockHeight)
@@ -845,6 +854,9 @@ class RouteBarView(context: Context) : View(context) {
             canvas.drawRect(rect, bgPaint)
             
             if (alertText.isNotEmpty()) {
+                // Ajustar tamaño de texto según la altura disponible
+                alertPaint.textSize = Math.min(38f, (h - radarH) * 0.8f).coerceAtLeast(12f)
+                
                 // Texto centrado vertical y horizontalmente en la franja
                 val cy = radarH + (h - radarH) / 2f + (alertPaint.textSize / 3f)
                 canvas.drawText(alertText, w / 2f, cy, alertPaint)
@@ -859,8 +871,8 @@ class RouteBarView(context: Context) : View(context) {
                 // Texto centrado rotado o vertical
                 // Para no complicarlo con rotación, lo centramos normal en la zona superior
                 alertPaint.textAlign = Paint.Align.CENTER
-                alertPaint.textSize = 35f
-                canvas.drawText(alertText, radarW + (w - radarW) / 2f, 40f, alertPaint)
+                alertPaint.textSize = Math.min(35f, (w - radarW) * 0.8f).coerceAtLeast(10f)
+                canvas.drawText(alertText, radarW + (w - radarW) / 2f, alertPaint.textSize + 10f, alertPaint)
             }
         }
     }
