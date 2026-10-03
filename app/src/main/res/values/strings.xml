@@ -127,4 +127,37 @@
     <string name="btn_increase_1">+ 1</string>
     <string name="btn_reduce_50">- 50 m/h</string>
     <string name="btn_increase_50">+ 50 m/h</string>
+    <string name="style_classic_title">Classic 3D (Default)</string>
+    <string name="style_classic_desc">Professional profile with 3D bevel, smooth gradient 0-15% and sharp metrics</string>
+    <string name="style_horizon_title">Isometric Horizon</string>
+    <string name="style_horizon_desc">Cockpit perspective projected towards horizon with rider light beam</string>
+    <string name="style_oasis_title">Tactical Oases &amp; Crucibles</string>
+    <string name="style_oasis_desc">Highlights recovery flats in ice blue and steep walls in thermal fire</string>
+    <string name="style_force_title">Force Field &amp; Fatigue</string>
+    <string name="style_force_desc">Biometric inertia relief and dynamic modulation of accumulated fatigue</string>
+    <string name="style_monolith_title">Obsidian &amp; Plasma Monolith</string>
+    <string name="style_monolith_desc">Faceted dark crystal with luminous plasma core and laser ridge</string>
+    <string name="style_global_title">Global Isometric Map</string>
+    <string name="style_global_desc">Architectural 3D vision of the entire route in snake form</string>
+    <string name="toast_vista">View: %1$s</string>
+    <string name="toast_visor_puertos">Climb Viewer: %1$s</string>
+    <string name="label_elite_header">👑 ALTGRAPH ELITE 👑</string>
+    <string name="label_elite_features">🎯 Radar ELITE Features</string>
+    <string name="label_ghost">👻 Ghost — Previous best time
+(Recorded at end of route)</string>
+    <string name="label_energy_bar">🔋 Remaining energy bar</string>
+    <string name="label_poi_icons">📍 POI Icons on ruler</string>
+    <string name="label_histogram">📊 Gradient Histogram</string>
+    <string name="label_radar_3d">🏔️ 3D Radar with isometric perspective</string>
+    <string name="label_radar_theme">Radar Theme:</string>
+    <string name="theme_standard">Standard</string>
+    <string name="theme_oasis">Oasis</string>
+    <string name="theme_crucibles">Crucibles</string>
+    <string name="theme_mist">Mist</string>
+    <string name="theme_forcefield">Force Field</string>
+    <string name="theme_forcefield_alt">Field</string>
+    <string name="label_alerts_radar">⚠️ Alerts (Walls, Next Climb...)</string>
+    <string name="label_tramos">blocks</string>
+    <string name="theme_classic_alt">Classic</string>
+    <string name="theme_crucible_alt">Crucible</string>
 </resources>

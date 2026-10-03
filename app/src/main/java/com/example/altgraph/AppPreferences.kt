@@ -270,42 +270,42 @@ class AppPreferences(context: Context) {
     }
 }
 
-enum class AltimetriaStyle(val key: String, val icon: String, val title: String, val description: String) {
+enum class AltimetriaStyle(val key: String, val icon: String, val titleRes: Int, val descRes: Int) {
     CLASSIC(
         key = "classic",
         icon = "🏔️",
-        title = "Clásica 3D (Por defecto)",
-        description = "Perfil profesional con bisel 3D, degradado suave del 0 al 15% y cotas nítidas"
+        titleRes = R.string.style_classic_title,
+        descRes = R.string.style_classic_desc
     ),
     HORIZON_ISOMETRIC(
         key = "horizon_iso",
         icon = "✈️",
-        title = "Horizonte Isométrico",
-        description = "Perspectiva de cabina proyectada hacia el horizonte con haz luminoso del ciclista"
+        titleRes = R.string.style_horizon_title,
+        descRes = R.string.style_horizon_desc
     ),
     TACTICAL_OASES(
         key = "tactical_oases",
         icon = "❄️",
-        title = "Oasis y Crisoles Tácticos",
-        description = "Destaca descansillos de recuperación en azul hielo y muros duros en fuego térmico"
+        titleRes = R.string.style_oasis_title,
+        descRes = R.string.style_oasis_desc
     ),
     DYNAMIC_FORCE_FIELD(
         key = "force_field",
         icon = "⚡",
-        title = "Campo de Fuerza y Fatiga",
-        description = "Relieve biométrico de inercia y modulación dinámica de dureza acumulada"
+        titleRes = R.string.style_force_title,
+        descRes = R.string.style_force_desc
     ),
     MONOLITHIC_OBSIDIAN(
         key = "monolithic",
         icon = "💎",
-        title = "Monolito Obsidiana y Plasma",
-        description = "Cristal oscuro facetado con núcleo de plasma luminoso y cresta láser"
+        titleRes = R.string.style_monolith_title,
+        descRes = R.string.style_monolith_desc
     ),
     GLOBAL_ISOMETRIC(
         key = "global_iso",
         icon = "🗺️",
-        title = "Mapa Isométrico Global",
-        description = "Visión arquitectónica 3D de todo el recorrido en forma de serpiente"
+        titleRes = R.string.style_global_title,
+        descRes = R.string.style_global_desc
     );
 
     companion object {

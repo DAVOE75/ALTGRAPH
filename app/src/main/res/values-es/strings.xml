@@ -128,4 +128,37 @@
     <string name="btn_increase_1">+ 1</string>
     <string name="btn_reduce_50">- 50 m/h</string>
     <string name="btn_increase_50">+ 50 m/h</string>
+    <string name="style_classic_title">Clásica 3D (Por defecto)</string>
+    <string name="style_classic_desc">Perfil profesional con bisel 3D, degradado suave del 0 al 15% y cotas nítidas</string>
+    <string name="style_horizon_title">Horizonte Isométrico</string>
+    <string name="style_horizon_desc">Perspectiva de cabina proyectada hacia el horizonte con haz luminoso del ciclista</string>
+    <string name="style_oasis_title">Oasis y Crisoles Tácticos</string>
+    <string name="style_oasis_desc">Destaca descansillos de recuperación en azul hielo y muros duros en fuego térmico</string>
+    <string name="style_force_title">Campo de Fuerza y Fatiga</string>
+    <string name="style_force_desc">Relieve biométrico de inercia y modulación dinámica de dureza acumulada</string>
+    <string name="style_monolith_title">Monolito Obsidiana y Plasma</string>
+    <string name="style_monolith_desc">Cristal oscuro facetado con núcleo de plasma luminoso y cresta láser</string>
+    <string name="style_global_title">Mapa Isométrico Global</string>
+    <string name="style_global_desc">Visión arquitectónica 3D de todo el recorrido en forma de serpiente</string>
+    <string name="toast_vista">Vista: %1$s</string>
+    <string name="toast_visor_puertos">Visor Puertos: %1$s</string>
+    <string name="label_elite_header">👑 ALTGRAPH ELITE 👑</string>
+    <string name="label_elite_features">🎯 Radar ELITE Features</string>
+    <string name="label_ghost">👻 Ghost — Mejor marca anterior
+(Grabado al terminar la ruta)</string>
+    <string name="label_energy_bar">🔋 Barra de energía restante</string>
+    <string name="label_poi_icons">📍 Iconos POI en la regla</string>
+    <string name="label_histogram">📊 Histograma de pendientes</string>
+    <string name="label_radar_3d">🏔️ Radar 3D con perspectiva isométrica</string>
+    <string name="label_radar_theme">Tema del Radar:</string>
+    <string name="theme_standard">Estándar</string>
+    <string name="theme_oasis">Oasis</string>
+    <string name="theme_crucibles">Crisoles</string>
+    <string name="theme_mist">Bruma</string>
+    <string name="theme_forcefield">Campo de Fuerza</string>
+    <string name="theme_forcefield_alt">Campo</string>
+    <string name="label_alerts_radar">⚠️ Avisos (Muros, Próx. Puerto...)</string>
+    <string name="label_tramos">tramos</string>
+    <string name="theme_classic_alt">Clásico</string>
+    <string name="theme_crucible_alt">Crisol</string>
 </resources>

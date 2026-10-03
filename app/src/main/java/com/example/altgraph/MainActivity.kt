@@ -148,9 +148,9 @@ class MainActivity : Activity() {
         val styleCard = createCardContainer()
         val styleLabel = createSectionLabel(getString(R.string.label_vista_global))
         val initialStyle = prefs.altimetriaStyle
-        val styleValueText = createValueText("${initialStyle.icon} ${initialStyle.title}")
+        val styleValueText = createValueText("${initialStyle.icon} ${getString(initialStyle.titleRes)}")
         val styleDescText = TextView(this).apply {
-            text = initialStyle.description
+            text = getString(initialStyle.descRes)
             textSize = 12f
             setTextColor(Color.parseColor("#94A3B8"))
             gravity = Gravity.CENTER
@@ -160,16 +160,16 @@ class MainActivity : Activity() {
         val styleOptions = AltimetriaStyle.entries
 
         val styleSpinner = Spinner(this).apply {
-            val adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, styleOptions.map { "${it.icon} ${it.title}" })
+            val adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, styleOptions.map { "${it.icon} ${getString(it.titleRes)}" })
             this.adapter = adapter
             setSelection(styleOptions.indexOf(initialStyle))
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     val selected = styleOptions[position]
                     prefs.altimetriaStyle = selected
-                    styleValueText.text = "${selected.icon} ${selected.title}"
-                    styleDescText.text = selected.description
-                    Toast.makeText(this@MainActivity, "Vista: ${selected.title}", Toast.LENGTH_SHORT).show()
+                    styleValueText.text = "${selected.icon} ${getString(selected.titleRes)}"
+                    styleDescText.text = getString(selected.descRes)
+                    Toast.makeText(this@MainActivity, getString(R.string.toast_vista, getString(selected.titleRes)), Toast.LENGTH_SHORT).show()
                 }
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
@@ -188,9 +188,9 @@ class MainActivity : Activity() {
         val climbStyleCard = createCardContainer()
         val climbStyleLabel = createSectionLabel(getString(R.string.label_vista_puertos))
         val climbInitialStyle = prefs.climbAltimetriaStyle
-        val climbStyleValueText = createValueText("${climbInitialStyle.icon} ${climbInitialStyle.title}")
+        val climbStyleValueText = createValueText("${climbInitialStyle.icon} ${getString(climbInitialStyle.titleRes)}")
         val climbStyleDescText = TextView(this).apply {
-            text = climbInitialStyle.description
+            text = getString(climbInitialStyle.descRes)
             textSize = 12f
             setTextColor(Color.parseColor("#94A3B8"))
             gravity = Gravity.CENTER
@@ -198,16 +198,16 @@ class MainActivity : Activity() {
         }
 
         val climbStyleSpinner = Spinner(this).apply {
-            val adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, styleOptions.map { "${it.icon} ${it.title}" })
+            val adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_dropdown_item, styleOptions.map { "${it.icon} ${getString(it.titleRes)}" })
             this.adapter = adapter
             setSelection(styleOptions.indexOf(climbInitialStyle))
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     val selected = styleOptions[position]
                     prefs.climbAltimetriaStyle = selected
-                    climbStyleValueText.text = "${selected.icon} ${selected.title}"
-                    climbStyleDescText.text = selected.description
-                    Toast.makeText(this@MainActivity, "Visor Puertos: ${selected.title}", Toast.LENGTH_SHORT).show()
+                    climbStyleValueText.text = "${selected.icon} ${getString(selected.titleRes)}"
+                    climbStyleDescText.text = getString(selected.descRes)
+                    Toast.makeText(this@MainActivity, getString(R.string.toast_visor_puertos, getString(selected.titleRes)), Toast.LENGTH_SHORT).show()
                 }
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
@@ -630,7 +630,7 @@ class MainActivity : Activity() {
         // Opción: Tramos Visibles
         val visibleBlocksCard = createCardContainer()
         val visibleBlocksLabel = createSectionLabel(getString(R.string.setting_visible_blocks_count))
-        val visibleBlocksValueText = createValueText("${prefs.visibleBlocksCount} tramos")
+        val visibleBlocksValueText = createValueText("${prefs.visibleBlocksCount} ${getString(R.string.label_tramos)}")
         val visibleBlocksRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER
@@ -640,14 +640,14 @@ class MainActivity : Activity() {
         val visibleMinusBtn = createActionButton(getString(R.string.btn_reduce_1)) {
             if (prefs.visibleBlocksCount > 1) {
                 prefs.visibleBlocksCount -= 1
-                visibleBlocksValueText.text = "${prefs.visibleBlocksCount} tramos"
+                visibleBlocksValueText.text = "${prefs.visibleBlocksCount} ${getString(R.string.label_tramos)}"
             }
         }
 
         val visiblePlusBtn = createActionButton(getString(R.string.btn_increase_1)) {
             if (prefs.visibleBlocksCount < 10) {
                 prefs.visibleBlocksCount += 1
-                visibleBlocksValueText.text = "${prefs.visibleBlocksCount} tramos"
+                visibleBlocksValueText.text = "${prefs.visibleBlocksCount} ${getString(R.string.label_tramos)}"
             }
         }
 
@@ -854,7 +854,7 @@ class MainActivity : Activity() {
         // ==========================================
         // PESTAÑA 6: 👑 ELITE (PAYWALL)
         // ==========================================
-        val eliteLabel = createSectionLabel("👑 ALTGRAPH ELITE 👑")
+        val eliteLabel = createSectionLabel(getString(R.string.label_elite_header))
         tabEliteContainer.addView(eliteLabel)
         
         val unlockTitle = TextView(this).apply {
@@ -935,13 +935,13 @@ class MainActivity : Activity() {
         tabEliteContainer.addView(radarCard)
 
         // ── Radar ELITE sub-features ─────────────────────────────────────────
-        val eliteSubLabel = createSectionLabel("🎯 Radar ELITE Features")
+        val eliteSubLabel = createSectionLabel(getString(R.string.label_elite_features))
         tabEliteContainer.addView(eliteSubLabel)
 
         // Ghost / Virtual Pacer
         val ghostCard = createCardContainer()
         val switchGhost = Switch(this).apply {
-            text = "👻 Ghost — Mejor marca anterior\n(Grabado al terminar la ruta)"
+            text = getString(R.string.label_ghost)
             textSize = 14f
             setTextColor(Color.WHITE)
             isChecked = prefs.eliteGhostEnabled
@@ -954,7 +954,7 @@ class MainActivity : Activity() {
         // Energy Bar
         val energyBarCard = createCardContainer()
         val switchEnergyBar = Switch(this).apply {
-            text = "🔋 Barra de energía restante"
+            text = getString(R.string.label_energy_bar)
             textSize = 14f
             setTextColor(Color.WHITE)
             isChecked = prefs.eliteEnergyBarEnabled
@@ -967,7 +967,7 @@ class MainActivity : Activity() {
         // POI Ruler
         val poiRulerCard = createCardContainer()
         val switchPoiRuler = Switch(this).apply {
-            text = "📍 Iconos POI en la regla"
+            text = getString(R.string.label_poi_icons)
             textSize = 14f
             setTextColor(Color.WHITE)
             isChecked = prefs.elitePoiRulerEnabled
@@ -980,7 +980,7 @@ class MainActivity : Activity() {
         // Histogram
         val histCard = createCardContainer()
         val switchHist = Switch(this).apply {
-            text = "📊 Histograma de pendientes"
+            text = getString(R.string.label_histogram)
             textSize = 14f
             setTextColor(Color.WHITE)
             isChecked = prefs.eliteHistogramEnabled
@@ -993,7 +993,7 @@ class MainActivity : Activity() {
         // Radar 3D
         val radar3dCard = createCardContainer()
         val switchRadar3d = Switch(this).apply {
-            text = "🏔️ Radar 3D con perspectiva isométrica"
+            text = getString(R.string.label_radar_3d)
             textSize = 14f
             setTextColor(Color.WHITE)
             isChecked = prefs.eliteRadar3dEnabled
@@ -1004,14 +1004,14 @@ class MainActivity : Activity() {
         
         // --- THEME SELECTOR ---
         val themeLabel = TextView(this).apply {
-            text = "Tema del Radar:"
+            text = getString(R.string.label_radar_theme)
             textSize = 14f
             setTextColor(Color.WHITE)
             setPadding(0, 16, 0, 8)
         }
         radar3dCard.addView(themeLabel)
         
-        val themes = arrayOf("Estándar", "Oasis", "Crisoles", "Bruma", "Campo de Fuerza")
+        val themes = arrayOf(getString(R.string.theme_standard), getString(R.string.theme_oasis), getString(R.string.theme_crucibles), getString(R.string.theme_mist), getString(R.string.theme_forcefield))
         val themeRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = android.view.Gravity.CENTER
@@ -1023,9 +1023,9 @@ class MainActivity : Activity() {
         val themeButtons = mutableListOf<android.widget.Button>()
         themes.forEach { theme ->
             val shortName = when (theme) {
-                "Estándar" -> "Clásico"
-                "Crisoles" -> "Crisol"
-                "Campo de Fuerza" -> "Campo"
+                getString(R.string.theme_standard) -> getString(R.string.theme_classic_alt)
+                getString(R.string.theme_crucibles) -> getString(R.string.theme_crucible_alt)
+                getString(R.string.theme_forcefield) -> getString(R.string.theme_forcefield_alt)
                 else -> theme
             }
             val btn = createSegmentButton(shortName, prefs.eliteRadarTheme == theme) {
@@ -1042,7 +1042,7 @@ class MainActivity : Activity() {
         // Radar Alerts (Avisos Dinámicos)
         val radarAlertsCard = createCardContainer()
         val switchRadarAlerts = Switch(this).apply {
-            text = "⚠️ Avisos (Muros, Próx. Puerto...)"
+            text = getString(R.string.label_alerts_radar)
             textSize = 14f
             setTextColor(Color.WHITE)
             isChecked = prefs.eliteRadarAlertsEnabled
