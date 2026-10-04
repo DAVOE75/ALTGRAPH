@@ -301,7 +301,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     system.addConsumer(OnStreamState.StartStreaming(DataType.Type.ELEVATION_REMAINING)) { state: OnStreamState ->
                         val streamState = state.state
                         if (streamState is StreamState.Streaming) {
-                            val e = streamState.dataPoint.values[DataType.Field.ELEVATION_REMAINING]
+                            val e = streamState.dataPoint.values[DataType.Field.ASCENT_REMAINING]
                                 ?: streamState.dataPoint.values[DataType.Field.SINGLE]
                                 ?: 0.0
                             calculator.updateClimbData(elevRemaining = e)
