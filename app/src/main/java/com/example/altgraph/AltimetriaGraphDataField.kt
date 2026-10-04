@@ -28,12 +28,19 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
     private val scope = CoroutineScope(Dispatchers.Main)
     private var streamJob: Job? = null
     private val calculator = AltimetriaStrategyCalculator()
-    private var karooSystem: KarooSystemService? = null
+    // calculateStrategy() acumula distancia en cada llamada: el stream reutiliza el
+    // resultado reciente de la vista en vez de calcularlo una segunda vez por segundo
+    private var lastStrategy: StrategyData? = null
+    private var lastStrategyAt = 0L
+    // Conexión compartida entre las vistas abiertas de este campo: antes el cancel de
+    // una vista la desconectaba aunque otra vista siguiera usándola
+    private val systemRef = RefCounted<KarooSystemService> { it.disconnect() }
 
     override fun startStream(emitter: Emitter<StreamState>) {
         streamJob = scope.launch {
             while (true) {
-                val strategy = calculator.calculateStrategy()
+                val fresh = System.currentTimeMillis() - lastStrategyAt < 2500
+                val strategy = lastStrategy?.takeIf { fresh } ?: calculator.calculateStrategy()
                 emitter.onNext(
                     StreamState.Streaming(
                         DataPoint(
@@ -58,7 +65,7 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
         emitter.onNext(UpdateGraphicConfig(showHeader = false))
 
-        if (karooSystem == null) {
+        systemRef.acquire(emitter) {
             val system = KarooSystemService(context)
             system.connect { connected ->
                 if (connected) {
@@ -185,7 +192,7 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                     }
                 }
             }
-            karooSystem = system
+            system
         }
 
         val altimetriaView = AltimetriaView(context)
@@ -198,15 +205,32 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
         )
         altimetriaView.layout(0, 0, w, h)
 
+        // Un único bitmap por vista: updateView es síncrono, así que se puede reutilizar
+        val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        var lastFrame: List<Any?>? = null
+
         val viewJob = scope.launch {
             while (true) {
                 val prefs = AppPreferences.getInstance(context)
                 val strategy = calculator.calculateStrategy(context)
+                lastStrategy = strategy
+                lastStrategyAt = System.currentTimeMillis()
+                val zoneColor = calculator.getZoneColor(calculator.currentElevation)
+
+                // Nada ha cambiado (parado, sin ruta...): no redibujar ni reenviar el bitmap
+                val frame = listOf(strategy, zoneColor, prefs.showBlockPercentages, prefs.visibleBlocksCount)
+                if (frame == lastFrame) {
+                    delay(1000)
+                    continue
+                }
+                lastFrame = frame
+
                 altimetriaView.updateStrategyData(
                     remainingDistance = strategy.remainingDistance,
                     timeToSummit = strategy.timeToSummit,
                     avgGrade = strategy.visibleAvgGrade,
-                    currentZoneColor = calculator.getZoneColor(calculator.currentElevation),
+                    currentZoneColor = zoneColor,
                     nextBlocks = strategy.nextBlocks,
                     attackAlert = strategy.attackAlert,
                     blockSizeMeters = strategy.blockSizeMeters,
@@ -214,8 +238,7 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                     visibleBlocksCount = prefs.visibleBlocksCount
                 )
 
-                val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-                val canvas = Canvas(bitmap)
+                bitmap.eraseColor(android.graphics.Color.TRANSPARENT)
                 altimetriaView.draw(canvas)
 
                 val remoteViews = RemoteViews(context.packageName, R.layout.view_remote_graphic)
@@ -229,8 +252,7 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
 
         emitter.setCancellable {
             viewJob.cancel()
-            karooSystem?.disconnect()
-            karooSystem = null
+            systemRef.release(emitter)
         }
     }
 }

@@ -7,6 +7,9 @@ class AppPreferences(context: Context) {
 
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
+    /** Copia de todos los ajustes, para detectar si algo cambió entre frames. */
+    val snapshot: Map<String, *> get() = prefs.all
+
     var fontFamilyKey: String
         get() = prefs.getString(KEY_FONT_FAMILY, "sans-serif-condensed") ?: "sans-serif-condensed"
         set(value) = prefs.edit().putString(KEY_FONT_FAMILY, value).apply()

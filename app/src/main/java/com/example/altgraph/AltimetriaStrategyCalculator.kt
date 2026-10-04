@@ -1102,7 +1102,7 @@ class AltimetriaStrategyCalculator {
         }
 
 
-        val visibleHairpins = absoluteHairpins
+        val visibleHairpins = absoluteHairpins.toList() // copia: la lista se modifica en el sitio
             .map { it - windowStartDist }
             .filter { it in 0.0..actualLookahead }
 

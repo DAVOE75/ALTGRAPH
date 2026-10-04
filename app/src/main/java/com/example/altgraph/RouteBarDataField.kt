@@ -29,17 +29,22 @@ import kotlinx.coroutines.launch
 class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar") {
 
     private val scope = CoroutineScope(Dispatchers.Main)
-    private var streamJob: Job? = null
-    private var viewJob: Job? = null
     private val calculator = AltimetriaStrategyCalculator()
-    private var karooSystem: KarooSystemService? = null
+    // calculateStrategy() acumula distancia en cada llamada: el stream reutiliza el
+    // resultado reciente de la vista en vez de calcularlo una segunda vez por segundo
+    private var lastStrategy: StrategyData? = null
+    private var lastStrategyAt = 0L
+    // Conexión compartida entre las vistas abiertas de este campo: antes el cancel de
+    // una vista la desconectaba aunque otra vista siguiera usándola
+    private val systemRef = RefCounted<KarooSystemService> { it.disconnect() }
     private var ghostRecorder: GhostRecorder? = null
     private var lastRouteName: String? = null
 
     override fun startStream(emitter: Emitter<StreamState>) {
-        streamJob = scope.launch {
+        val streamJob = scope.launch {
             while (true) {
-                val strategy = calculator.calculateStrategy()
+                val fresh = System.currentTimeMillis() - lastStrategyAt < 2500
+                val strategy = lastStrategy?.takeIf { fresh } ?: calculator.calculateStrategy()
                 emitter.onNext(
                     StreamState.Streaming(
                         DataPoint(
@@ -55,7 +60,7 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
             }
         }
         emitter.setCancellable {
-            streamJob?.cancel()
+            streamJob.cancel()
         }
     }
 
@@ -63,7 +68,7 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
         emitter.onNext(UpdateGraphicConfig(showHeader = false))
         if (ghostRecorder == null) ghostRecorder = GhostRecorder(context)
 
-        if (karooSystem == null) {
+        systemRef.acquire(emitter) {
             val system = KarooSystemService(context)
             system.connect { connected ->
                 if (connected) {
@@ -129,7 +134,7 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                     }
                 }
             }
-            karooSystem = system
+            system
         }
 
         val routeBarView = RouteBarView(context)
@@ -148,8 +153,9 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
         var cachedBitmap: Bitmap? = null
         var cachedCanvas: Canvas? = null
         val bgPaint = Paint().apply { color = Color.TRANSPARENT }
+        var lastFrame: List<Any?>? = null
 
-        viewJob = scope.launch {
+        val viewJob = scope.launch {
             while (true) {
                 if (cachedBitmap == null || cachedBitmap!!.width != w || cachedBitmap!!.height != h) {
                     cachedBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
@@ -161,17 +167,29 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                 
                 calculator.viewWidth = w
                 
+                val prefs = AppPreferences.getInstance(context)
+                val isElite = prefs.eliteRadarEnabled
+                val strategy = if (isElite) calculator.calculateStrategy(context).also {
+                    lastStrategy = it
+                    lastStrategyAt = System.currentTimeMillis()
+                } else null
+                val ghost = if (isElite && prefs.eliteGhostEnabled)
+                    ghostRecorder?.ghostRelativeToRider(calculator.currentRouteDistance) else null
+
+                // Nada ha cambiado (parado, sin ruta...): no redibujar ni reenviar el bitmap
+                val frame = listOf(strategy, ghost, prefs.snapshot)
+                if (frame == lastFrame) {
+                    delay(1000)
+                    continue
+                }
+                lastFrame = frame
+
                 // Clear the canvas with transparent background so map shows through
                 currentCanvas.drawColor(Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR)
                 
-                val prefs = AppPreferences.getInstance(context)
-                val isElite = prefs.eliteRadarEnabled
-                
                 if (isElite) {
-                    val strategy = calculator.calculateStrategy(context)
                     routeBarView.strategyData = strategy
-                    routeBarView.ghostRelativeMeters = if (prefs.eliteGhostEnabled)
-                        ghostRecorder?.ghostRelativeToRider(calculator.currentRouteDistance) else null
+                    routeBarView.ghostRelativeMeters = ghost
                     routeBarView.showEnergyBar = prefs.eliteEnergyBarEnabled
                     routeBarView.showPoiRuler = prefs.elitePoiRulerEnabled
                     routeBarView.showHistogram = prefs.eliteHistogramEnabled
@@ -201,12 +219,11 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
         }
 
         emitter.setCancellable {
-            viewJob?.cancel()
+            viewJob.cancel()
             // cachedBitmap?.recycle()
             cachedBitmap = null
             cachedCanvas = null
-            karooSystem?.disconnect()
-            karooSystem = null
+            systemRef.release(emitter)
         }
     }
 }

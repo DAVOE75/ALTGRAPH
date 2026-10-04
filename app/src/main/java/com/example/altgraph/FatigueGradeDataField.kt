@@ -14,10 +14,9 @@ import kotlinx.coroutines.launch
 class FatigueGradeDataField(extension: String) : DataTypeImpl(extension, "fatigue_grade") {
 
     private val scope = CoroutineScope(Dispatchers.Default)
-    private var streamJob: Job? = null
 
     override fun startStream(emitter: Emitter<StreamState>) {
-        streamJob = scope.launch {
+        val streamJob = scope.launch {
             ClimbStateManager.currentApm.collectLatest { fatigueValue ->
                 emitter.onNext(
                     StreamState.Streaming(
@@ -30,7 +29,7 @@ class FatigueGradeDataField(extension: String) : DataTypeImpl(extension, "fatigu
             }
         }
         emitter.setCancellable {
-            streamJob?.cancel()
+            streamJob.cancel()
         }
     }
 }

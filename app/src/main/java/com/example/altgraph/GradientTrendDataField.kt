@@ -24,15 +24,15 @@ import kotlinx.coroutines.launch
 class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradient_trend") {
 
     private val scope = CoroutineScope(Dispatchers.Main)
-    private var streamJob: Job? = null
-    private var viewJob: Job? = null
     private val trendTracker = GradientTrendTracker()
-    private var karooSystem: KarooSystemService? = null
+    // Conexión compartida entre las vistas abiertas de este campo: antes el cancel de
+    // una vista la desconectaba aunque otra vista siguiera usándola
+    private val systemRef = RefCounted<KarooSystemService> { it.disconnect() }
 
     var currentGradientPct: Double = 0.0
 
     override fun startStream(emitter: Emitter<StreamState>) {
-        streamJob = scope.launch {
+        val streamJob = scope.launch {
             while (true) {
                 val effectiveGrade = if (currentGradientPct > 0.1) currentGradientPct else 7.5
                 val trendResult = trendTracker.addSample(effectiveGrade)
@@ -62,14 +62,14 @@ class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradi
         }
 
         emitter.setCancellable {
-            streamJob?.cancel()
+            streamJob.cancel()
         }
     }
 
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
         emitter.onNext(UpdateGraphicConfig(showHeader = false))
 
-        if (karooSystem == null) {
+        systemRef.acquire(emitter) {
             val system = KarooSystemService(context)
             system.connect { connected ->
                 if (connected) {
@@ -84,7 +84,7 @@ class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradi
                     }
                 }
             }
-            karooSystem = system
+            system
         }
 
         val w = if (config.viewSize.first > 0) config.viewSize.first else 480
@@ -97,16 +97,28 @@ class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradi
         )
         trendView.layout(0, 0, w, h)
 
-        viewJob = scope.launch {
+        // Un único bitmap por vista: updateView es síncrono, así que se puede reutilizar
+        val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        var lastFrame: List<Any>? = null
+
+        val viewJob = scope.launch {
             while (true) {
                 val effectiveGrade = if (currentGradientPct > 0.1) currentGradientPct else 7.5
                 val trendResult = trendTracker.addSample(effectiveGrade)
                 val maxRamp = if (trendResult.maxRampPeak > 0.1) trendResult.maxRampPeak else 12.8
 
+                // Mismo formato que muestra la vista: no redibujar si no cambia lo que se ve
+                val frame = listOf("%.1f".format(trendResult.currentGrade), trendResult.trend, "%.1f".format(maxRamp))
+                if (frame == lastFrame) {
+                    delay(1000)
+                    continue
+                }
+                lastFrame = frame
+
                 trendView.updateTrendData(trendResult.currentGrade, trendResult.trend, maxRamp)
 
-                val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-                val canvas = Canvas(bitmap)
+                bitmap.eraseColor(android.graphics.Color.TRANSPARENT)
                 trendView.draw(canvas)
 
                 val remoteViews = RemoteViews(context.packageName, R.layout.view_remote_graphic)
@@ -119,9 +131,8 @@ class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradi
         }
 
         emitter.setCancellable {
-            viewJob?.cancel()
-            karooSystem?.disconnect()
-            karooSystem = null
+            viewJob.cancel()
+            systemRef.release(emitter)
         }
     }
 }

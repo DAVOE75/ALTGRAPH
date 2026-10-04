@@ -34,10 +34,19 @@ private const val TAG = "ALTGRAPH"
 class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "altimetria_3d") {
 
     private val scope = CoroutineScope(Dispatchers.Main)
-    private var streamJob: Job? = null
     private val calculator = AltimetriaStrategyCalculator()
-    private var karooSystem: KarooSystemService? = null
-    private var zoomReceiver: BroadcastReceiver? = null
+    // calculateStrategy() acumula distancia en cada llamada: el stream reutiliza el
+    // resultado reciente de la vista en vez de calcularlo una segunda vez por segundo
+    private var lastStrategy: StrategyData? = null
+    private var lastStrategyAt = 0L
+    // Conexión compartida entre las vistas abiertas de este campo: antes el cancel de
+    // una vista la desconectaba aunque otra vista siguiera usándola
+    private val systemRef = RefCounted<KarooSystemService> { it.disconnect() }
+    // Un solo receiver por campo aunque haya varias vistas abiertas: con uno por vista
+    // cada toque hacía zoom/pan varias veces
+    private val zoomReceiverRef = RefCounted<Pair<Context, BroadcastReceiver>> { (ctx, r) ->
+        try { ctx.unregisterReceiver(r) } catch (e: Exception) {}
+    }
 
     companion object {
         const val ACTION_CYCLE_3D_ZOOM = "com.example.altgraph.ACTION_CYCLE_3D_ZOOM"
@@ -49,9 +58,10 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
     }
 
     override fun startStream(emitter: Emitter<StreamState>) {
-        streamJob = scope.launch {
+        val streamJob = scope.launch {
             while (true) {
-                val strategy = calculator.calculateStrategy()
+                val fresh = System.currentTimeMillis() - lastStrategyAt < 2500
+                val strategy = lastStrategy?.takeIf { fresh } ?: calculator.calculateStrategy()
                 emitter.onNext(
                     StreamState.Streaming(
                         DataPoint(
@@ -69,15 +79,15 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
             }
         }
         emitter.setCancellable {
-            streamJob?.cancel()
+            streamJob.cancel()
         }
     }
 
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
         emitter.onNext(UpdateGraphicConfig(showHeader = false))
 
-        if (zoomReceiver == null) {
-            zoomReceiver = object : BroadcastReceiver() {
+        zoomReceiverRef.acquire(emitter) {
+            val zoomReceiver = object : BroadcastReceiver() {
                 override fun onReceive(ctx: Context?, intent: Intent?) {
                     if (intent?.action == ACTION_ZOOM_IN && ctx != null) {
                         val prefs = AppPreferences.getInstance(ctx)
@@ -138,9 +148,10 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                 @Suppress("UnspecifiedRegisterReceiverFlag")
                 context.applicationContext.registerReceiver(zoomReceiver, filter)
             }
+            context.applicationContext to zoomReceiver
         }
 
-        if (karooSystem == null) {
+        systemRef.acquire(emitter) {
             val system = KarooSystemService(context)
             system.connect { connected ->
                 if (connected) {
@@ -298,7 +309,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                     }
                 }
             }
-            karooSystem = system
+            system
         }
 
         val altimetria3DView = Altimetria3DView(context)
@@ -313,12 +324,24 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
 
         var cachedBitmap: Bitmap? = null
         var cachedCanvas: Canvas? = null
+        var lastFrame: List<Any?>? = null
 
         val viewJob = scope.launch {
             while (true) {
                 val prefs = AppPreferences.getInstance(context)
                 val strategy = calculator.calculateStrategy(context)
+                lastStrategy = strategy
+                lastStrategyAt = System.currentTimeMillis()
                 val startElev = if (strategy.windowStartElevation > 0.0) strategy.windowStartElevation else calculator.currentElevation
+
+                // Nada ha cambiado (parado, sin ruta...): no redibujar ni reenviar el bitmap.
+                // Es el campo más caro: render 3D por software y bitmap grande por Binder.
+                val frame = listOf(strategy, startElev, calculator.instantBarometricGrade, calculator.currentHeading, prefs.snapshot)
+                if (frame == lastFrame) {
+                    delay(1000)
+                    continue
+                }
+                lastFrame = frame
                 altimetria3DView.oasisDistanceToNextCrucible = strategy.oasisDistanceToNextCrucible
                 altimetria3DView.virtualPacerRelativeDistance = strategy.virtualPacerRelativeDistance
                 altimetria3DView.energyBatteryLevel = strategy.energyBatteryLevel
@@ -524,14 +547,8 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
             // cachedBitmap?.recycle()
             cachedBitmap = null
             cachedCanvas = null
-            zoomReceiver?.let {
-                try {
-                    context.applicationContext.unregisterReceiver(it)
-                } catch (e: Exception) {}
-            }
-            zoomReceiver = null
-            karooSystem?.disconnect()
-            karooSystem = null
+            zoomReceiverRef.release(emitter)
+            systemRef.release(emitter)
         }
     }
 }

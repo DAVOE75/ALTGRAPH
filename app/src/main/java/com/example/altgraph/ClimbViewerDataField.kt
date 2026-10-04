@@ -37,10 +37,15 @@ private const val TAG = "ALTGRAPH_VIEWER"
 class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d") {
 
     private val scope = CoroutineScope(Dispatchers.Main)
-    private var streamJob: Job? = null
     private val calculator by lazy { AltimetriaStrategyCalculator() }
-    private var karooSystem: KarooSystemService? = null
-    private var interactionReceiver: BroadcastReceiver? = null
+    // Conexión compartida entre las vistas abiertas de este campo: antes el cancel de
+    // una vista la desconectaba aunque otra vista siguiera usándola
+    private val systemRef = RefCounted<KarooSystemService> { it.disconnect() }
+    // Un solo receiver por campo aunque haya varias vistas abiertas: con uno por vista
+    // cada toque cambiaba de puerto o de zoom varias veces
+    private val interactionReceiverRef = RefCounted<Pair<Context, BroadcastReceiver>> { (ctx, r) ->
+        try { ctx.unregisterReceiver(r) } catch (e: Exception) {}
+    }
 
     private var currentClimbIndex = 0
     private var currentZoomQuarter: Int = 0
@@ -53,7 +58,7 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
     }
 
     override fun startStream(emitter: Emitter<StreamState>) {
-        streamJob = scope.launch {
+        val streamJob = scope.launch {
             while (true) {
                 emitter.onNext(
                     StreamState.Streaming(
@@ -67,15 +72,15 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
             }
         }
         emitter.setCancellable {
-            streamJob?.cancel()
+            streamJob.cancel()
         }
     }
 
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
         emitter.onNext(UpdateGraphicConfig(showHeader = false))
 
-        if (interactionReceiver == null) {
-            interactionReceiver = object : BroadcastReceiver() {
+        interactionReceiverRef.acquire(emitter) {
+            val interactionReceiver = object : BroadcastReceiver() {
                 override fun onReceive(ctx: Context?, intent: Intent?) {
                     val climbs = calculator.routeClimbs
                     val currentClimb = if (climbs.isNotEmpty()) climbs[currentClimbIndex % climbs.size] else null
@@ -118,9 +123,10 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                 @Suppress("UnspecifiedRegisterReceiverFlag")
                 context.applicationContext.registerReceiver(interactionReceiver, filter)
             }
+            context.applicationContext to interactionReceiver
         }
 
-        if (karooSystem == null) {
+        systemRef.acquire(emitter) {
             val system = KarooSystemService(context)
             system.connect { connected ->
                 if (connected) {
@@ -182,7 +188,7 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                     }
                 }
             }
-            karooSystem = system
+            system
         }
 
         val altimetria3DView = Altimetria3DView(context).apply {
@@ -422,12 +428,8 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
             // cachedBitmap?.recycle()
             cachedBitmap = null
             cachedCanvas = null
-            karooSystem?.disconnect()
-            karooSystem = null
-            interactionReceiver?.let {
-                context.applicationContext.unregisterReceiver(it)
-                interactionReceiver = null
-            }
+            systemRef.release(emitter)
+            interactionReceiverRef.release(emitter)
         }
     }
 }
