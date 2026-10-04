@@ -789,7 +789,8 @@ class AltimetriaStrategyCalculator {
         this.polylineScaleFactor = 1.0
     }
 
-    fun calculateStrategy(context: Context? = null): StrategyData {
+    // advance=false: calcula la estrategia con el estado actual SIN mutarlo (EMA, integración, clima, Strava, APM)
+    fun calculateStrategy(context: Context? = null, advance: Boolean = true): StrategyData {
         val prefs = context?.let { AppPreferences.getInstance(it) }
 
         val blockSize = prefs?.blockSizeMeters ?: 100.0
@@ -825,10 +826,10 @@ class AltimetriaStrategyCalculator {
                 instantBarometricGrade >= 4.0 -> baseLookahead.coerceAtLeast(1000.0) // Normal climb
                 else -> baseLookahead.coerceAtLeast(3000.0) // Flat or descent
             }
-            smartLookahead = smartLookahead + (targetLookahead - smartLookahead) * 0.05
+            if (advance) smartLookahead = smartLookahead + (targetLookahead - smartLookahead) * 0.05
             lookaheadDist = smartLookahead
         } else {
-            smartLookahead = baseLookahead
+            if (advance) smartLookahead = baseLookahead
         }
 
         val isNavigating = isNavigatingRoute && (routePoints.isNotEmpty() || routeElevationProfile.isNotEmpty())
@@ -840,16 +841,18 @@ class AltimetriaStrategyCalculator {
             // Integrar por tiempo transcurrido, no "1 s por llamada": con varias vistas o
             // streams del mismo campo, calculateStrategy() se llama más de una vez por segundo.
             // ponytail: tope de 2 s tras un hueco (vista fuera de pantalla), como el 1 s fijo anterior
-            val nowMs = System.currentTimeMillis()
-            val dt = if (lastIntegrationMs == 0L) 1.0 else ((nowMs - lastIntegrationMs) / 1000.0).coerceIn(0.0, 2.0)
-            lastIntegrationMs = nowMs
-            if (currentSpeed > 0.1) {
-                liveDistanceAccumulated += currentSpeed * dt
-            }
+            if (advance) {
+                val nowMs = System.currentTimeMillis()
+                val dt = if (lastIntegrationMs == 0L) 1.0 else ((nowMs - lastIntegrationMs) / 1000.0).coerceIn(0.0, 2.0)
+                lastIntegrationMs = nowMs
+                if (currentSpeed > 0.1) {
+                    liveDistanceAccumulated += currentSpeed * dt
+                }
 
-            // Acumular el punto actual en el historial si avanzamos más de 5 metros
-            if (freeRideHistory.isEmpty() || liveDistanceAccumulated - freeRideHistory.last().first >= 5.0) {
-                freeRideHistory.add(Pair(liveDistanceAccumulated, currentElevation))
+                // Acumular el punto actual en el historial si avanzamos más de 5 metros
+                if (freeRideHistory.isEmpty() || liveDistanceAccumulated - freeRideHistory.last().first >= 5.0) {
+                    freeRideHistory.add(Pair(liveDistanceAccumulated, currentElevation))
+                }
             }
 
             // La ventana ahora mira hacia atrás desde la posición actual
@@ -892,7 +895,7 @@ class AltimetriaStrategyCalculator {
             val hasAttack = attackAlertsEnabled && freeSubBlocks.any { it > thresholdAttack }
             val liveFatigue = (freeSubBlocks.average() * 8.5 + asphaltFactor * 10).roundToInt().coerceIn(10, 250)
 
-            ClimbStateManager.updateApm(liveFatigue)
+            if (advance) ClimbStateManager.updateApm(liveFatigue)
 
             val liveHairpins = emptyList<Double>()
             val livePois = emptyList<Poi>()
@@ -1254,7 +1257,7 @@ class AltimetriaStrategyCalculator {
             maxRampPct = trueMaxGrade
         ).roundToInt()
 
-        ClimbStateManager.updateApm(totalGf)
+        if (advance) ClimbStateManager.updateApm(totalGf)
 
         // 12. Filtrar puertos visibles en la ventana 3D actual
         val visibleClimbs = routeClimbs.filter { climb ->
@@ -1283,7 +1286,7 @@ class AltimetriaStrategyCalculator {
         }
 
         // Virtual pacer init logic for route mode
-        if (virtualPacerDistance == 0.0) virtualPacerDistance = currentRiderDistance
+        if (advance && virtualPacerDistance == 0.0) virtualPacerDistance = currentRiderDistance
 
         // ELITE FEATURE: Wind Overlay
         var windEffect: Double? = null
@@ -1294,7 +1297,7 @@ class AltimetriaStrategyCalculator {
             val prefs = AppPreferences.getInstance(ctx)
             if (prefs.weatherOverlayEnabled) {
                 val currentTime = System.currentTimeMillis()
-                if (currentTime - lastWindCheckTime > 5 * 60 * 1000) { // Check every 5 mins
+                if (advance && currentTime - lastWindCheckTime > 5 * 60 * 1000) { // Check every 5 mins
                     if (routePoints.isNotEmpty()) {
                         val pt = routePoints[windowStartIndex]
                         WeatherService.fetchWeatherData(pt.latitude, pt.longitude)
@@ -1317,7 +1320,7 @@ class AltimetriaStrategyCalculator {
 
             // ELITE FEATURE: Strava Live Segments Mock
             if (prefs.stravaSegmentsEnabled) {
-                if (!isStravaSegmentActive && instantBarometricGrade > 7.0 && currentRiderDistance > stravaSegmentStartDist + 3000) {
+                if (advance && !isStravaSegmentActive && instantBarometricGrade > 7.0 && currentRiderDistance > stravaSegmentStartDist + 3000) {
                     isStravaSegmentActive = true
                     stravaSegmentStartDist = currentRiderDistance
                     stravaPrGhostDist = currentRiderDistance
@@ -1326,10 +1329,10 @@ class AltimetriaStrategyCalculator {
                 if (isStravaSegmentActive) {
                     val distInSegment = currentRiderDistance - stravaSegmentStartDist
                     if (distInSegment > 2000.0) {
-                        isStravaSegmentActive = false // Segment finished
+                        if (advance) isStravaSegmentActive = false // Segment finished
                     } else {
                         stravaRelDist = distInSegment
-                        stravaPrGhostDist += (5.5 * 1.0) // Ghost runs at 1300 VAM (approx 5.5 m/s)
+                        if (advance) stravaPrGhostDist += (5.5 * 1.0) // Ghost runs at 1300 VAM (approx 5.5 m/s)
                         stravaGhostRelDist = stravaPrGhostDist - currentRiderDistance
                     }
                 }
