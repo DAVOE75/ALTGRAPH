@@ -29,7 +29,7 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                 val snap = AltgraphRepository.snapshot.value
                 if (snap != null) {
                     val strategy = snap.strategy
-                    safeUpdate(onDead = { cancel() }) {
+                    safeUpdate(onDead = { cancel(); AltgraphRepository.release(emitter) }) {
                         emitter.onNext(
                             StreamState.Streaming(
                                 DataPoint(
@@ -77,7 +77,7 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
             while (isActive) {
                 val snap = AltgraphRepository.snapshot.value
                 if (snap != null) {
-                    safeUpdate(onDead = { cancel() }) {
+                    safeUpdate(onDead = { cancel(); AltgraphRepository.release(emitter) }) {
                         val prefs = AppPreferences.getInstance(context)
                         val strategy = snap.strategy
                         val zoneColor = snap.zoneColor
@@ -85,8 +85,6 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                         // Nada ha cambiado (parado, sin ruta...): no redibujar ni reenviar el bitmap
                         val frame = listOf(strategy, zoneColor, prefs.showBlockPercentages, prefs.visibleBlocksCount)
                         if (frame != lastFrame) {
-                            lastFrame = frame
-
                             altimetriaView.updateStrategyData(
                                 remainingDistance = strategy.remainingDistance,
                                 timeToSummit = strategy.timeToSummit,
@@ -106,6 +104,8 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                             remoteViews.setImageViewBitmap(R.id.img_graphic, bitmap)
 
                             emitter.updateView(remoteViews)
+                            // Solo tras enviar con éxito: si el frame falla, el siguiente tick lo reintenta
+                            lastFrame = frame
                         }
                     }
                 }

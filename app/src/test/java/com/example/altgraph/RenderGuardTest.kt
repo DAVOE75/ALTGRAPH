@@ -25,4 +25,15 @@ class RenderGuardTest {
         safeUpdate(onDead = { error("no") }) { ran++ }
         assertEquals(1, ran)
     }
+
+    @Test
+    fun cancellationIsRethrownWithoutOnDead() {
+        var dead = 0
+        try {
+            safeUpdate(onDead = { dead++ }) { throw kotlinx.coroutines.CancellationException("c") }
+            org.junit.Assert.fail("debía propagarse")
+        } catch (e: kotlinx.coroutines.CancellationException) {
+        }
+        assertEquals(0, dead)
+    }
 }
