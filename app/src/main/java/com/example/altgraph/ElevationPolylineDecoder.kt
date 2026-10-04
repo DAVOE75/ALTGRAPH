@@ -11,7 +11,7 @@ import android.util.Log
 object ElevationPolylineDecoder {
 
     private const val TAG = "ElevPolyDecoder"
-    private const val DEFAULT_PRECISION = 1.0
+    private const val DEFAULT_PRECISION = 10.0
     private const val ALT_PRECISION = 1e5
 
     data class ElevationPoint(
@@ -44,15 +44,15 @@ object ElevationPolylineDecoder {
 
             if (expectedLengthMeters > 0.0) {
                 val ratio = totalDist / expectedLengthMeters
-                if (ratio in 9.0..11.0) {
-                    Log.d(TAG, "Detectada precisión 10.0 (dist=$totalDist vs expected=$expectedLengthMeters)")
-                    points = decodeWithPrecision(encoded, 10.0)
-                } else if (ratio > 50000.0) {
+                if (ratio in 0.09..0.11) {
+                    Log.d(TAG, "Detectada precisión 1.0 (dist=$totalDist vs expected=$expectedLengthMeters)")
+                    points = decodeWithPrecision(encoded, 1.0)
+                } else if (ratio > 500.0) {
                     Log.d(TAG, "Detectada precisión 1e5 (dist=$totalDist vs expected=$expectedLengthMeters)")
                     points = decodeWithPrecision(encoded, 1e5)
                 }
             } else {
-                if (totalDist > 20_000_000 || maxElev > 30_000) {
+                if (totalDist > 2_000_000 || maxElev > 30_000) {
                     Log.w(TAG, "Valores extremos detectados (dist=$totalDist, elev=$maxElev). Usando ALT_PRECISION.")
                     points = decodeWithPrecision(encoded, ALT_PRECISION)
                 }

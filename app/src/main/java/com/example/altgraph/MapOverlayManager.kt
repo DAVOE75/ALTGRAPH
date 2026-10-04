@@ -40,6 +40,7 @@ class MapOverlayManager(
         val state = navEvent.state as? OnNavigationState.NavigationState.NavigatingRoute
         
         val mode = prefs.eliteMapOverlayMode
+        Log.d("MapOverlayManager", "updateOverlay: mode=$mode, unlocked=${prefs.isEliteUnlocked}, state=${state != null}")
         if (mode == "off" || !prefs.isEliteUnlocked || state == null) {
             clearPolylines(emitter)
             return
@@ -47,6 +48,7 @@ class MapOverlayManager(
 
         // Just use polyline hash as routeId since NavigatingRoute doesn't expose routeId natively here
         val routeId = state.routePolyline.take(30)
+        Log.d("MapOverlayManager", "updateOverlay: routeId=$routeId, last=$lastRouteId")
         if (routeId.isEmpty()) {
             clearPolylines(emitter)
             lastRouteId = null
@@ -56,8 +58,12 @@ class MapOverlayManager(
         if (routeId == lastRouteId) return
         lastRouteId = routeId
 
-        val elevEncoded = state.routeElevationPolyline
+        var elevEncoded = state.routeElevationPolyline
+        if (elevEncoded.isNullOrEmpty()) {
+            elevEncoded = (state.javaClass.methods.find { it.name == "getElevationPolyline" }?.invoke(state) as? String)
+        }
         val pathEncoded = state.routePolyline
+        Log.d("MapOverlayManager", "updateOverlay: elevLength=${elevEncoded?.length}, pathLength=${pathEncoded?.length}")
 
         if (elevEncoded.isNullOrEmpty() || pathEncoded.isNullOrEmpty()) {
             clearPolylines(emitter)
@@ -65,32 +71,31 @@ class MapOverlayManager(
         }
 
         try {
-            val elevResult = ElevationPolylineDecoder.decodeSafe(elevEncoded)
+            val safeRouteDist = state.routeDistance ?: 0.0
+            val elevResult = ElevationPolylineDecoder.decodeSafe(elevEncoded, safeRouteDist)
             if (elevResult !is ElevationPolylineDecoder.DecodeResult.Success) return
 
-            val elevPoints = elevResult.points
+            val elevPoints = ElevationPolylineDecoder.smooth(elevResult.points, 10)
             val segments = createGradeSegments(elevPoints)
             
             // Filter by climbs if needed
             val finalSegments = if (mode == "climbs") {
-                calculator.setRouteElevationProfile(elevEncoded)
+                calculator.setRouteElevationProfile(elevEncoded, safeRouteDist)
                 val climbs = calculator.routeClimbs
                 segments.filter { seg ->
                     climbs.any { climb -> seg.startDist >= climb.startDistance && seg.endDist <= climb.endDistance }
                 }
             } else {
-                segments.filter { it.grade >= 2.0 || it.grade <= -2.0 } // Hide flats to keep map clean
+                segments // Do not filter out flats for 'entire route' mode
             }
 
-            val pathLatLngs = PolylineCodec.decode(pathEncoded, 1e5)
-            val pathWithDistances = assignDistancesToPath(pathLatLngs)
+            val path = RoutePath.fromPolyline(pathEncoded, state.routeDistance) ?: return
 
+            Log.d("MapOverlayManager", "updateOverlay: created ${finalSegments.size} segments to draw")
             clearPolylines(emitter)
 
             finalSegments.forEachIndexed { index, segment ->
-                val subPath = pathWithDistances
-                    .filter { it.distance in segment.startDist..segment.endDist }
-                    .map { it.lat to it.lng }
+                val subPath = path.subPath(segment.startDist, segment.endDist)
 
                 if (subPath.size >= 2) {
                     val encoded = PolylineCodec.encode(subPath, 1e5)
@@ -101,6 +106,7 @@ class MapOverlayManager(
                     activePolylines.add(polylineId)
                 }
             }
+            Log.d("MapOverlayManager", "updateOverlay: Emitted ${activePolylines.size} polylines!")
         } catch (e: Exception) {
             Log.e("MapOverlayManager", "Error processing overlay", e)
         }
@@ -113,27 +119,77 @@ class MapOverlayManager(
         activePolylines.clear()
     }
 
+    private fun getElevationAt(points: List<ElevationPolylineDecoder.ElevationPoint>, distance: Double): Double {
+        if (points.isEmpty()) return 0.0
+        val d = distance.coerceIn(points.first().distance, points.last().distance)
+        var lo = 0
+        var hi = points.size - 1
+        while (hi - lo > 1) {
+            val mid = (lo + hi) / 2
+            if (points[mid].distance <= d) lo = mid else hi = mid
+        }
+        val p1 = points[lo]
+        val p2 = points[hi]
+        if (p2.distance == p1.distance) return p1.elevation
+        val t = (d - p1.distance) / (p2.distance - p1.distance)
+        return p1.elevation + t * (p2.elevation - p1.elevation)
+    }
+
     private fun createGradeSegments(points: List<ElevationPolylineDecoder.ElevationPoint>): List<GradeSegment> {
         val segments = mutableListOf<GradeSegment>()
-        val step = 50.0 // 50m buckets
-        
-        val totalDist = points.lastOrNull()?.distance ?: return emptyList()
-        var currentDist = 0.0
+        if (points.isEmpty()) return segments
 
-        while (currentDist < totalDist) {
-            val endDist = min(currentDist + step, totalDist)
-            
-            val startElev = points.firstOrNull { it.distance >= currentDist }?.elevation
-            val endElev = points.lastOrNull { it.distance <= endDist }?.elevation
-            
-            if (startElev != null && endElev != null && (endDist - currentDist) > 10.0) {
-                val grade = ((endElev - startElev) / (endDist - currentDist)) * 100.0
-                segments.add(GradeSegment(currentDist, endDist, grade))
+        val totalDist = points.last().distance
+        val step = 10.0
+
+        var currentStartDist = -1.0
+        var currentEndDist = -1.0
+        var currentColorHex = ""
+        var currentGradeSum = 0.0
+        var currentWeight = 0.0
+
+        var d = 0.0
+        while (d < totalDist - 1.0) {
+            val endD = minOf(d + step, totalDist)
+            val dist = endD - d
+            if (dist < 5.0) {
+                d = endD
+                continue
             }
-            currentDist += step
+            
+            val e1 = getElevationAt(points, d)
+            val e2 = getElevationAt(points, endD)
+            val grade = ((e2 - e1) / dist) * 100.0
+            val colorHex = GradeColorScale.getColorHex(grade)
+
+            if (currentStartDist < 0) {
+                currentStartDist = d
+                currentEndDist = endD
+                currentColorHex = colorHex
+                currentGradeSum = grade * dist
+                currentWeight = dist
+            } else if (colorHex == currentColorHex) {
+                currentEndDist = endD
+                currentGradeSum += grade * dist
+                currentWeight += dist
+            } else {
+                val avgGrade = if (currentWeight > 0) currentGradeSum / currentWeight else 0.0
+                segments.add(GradeSegment(currentStartDist, currentEndDist, avgGrade))
+                
+                currentStartDist = d
+                currentEndDist = endD
+                currentColorHex = colorHex
+                currentGradeSum = grade * dist
+                currentWeight = dist
+            }
+            d = endD
         }
         
-        // Simple smoothing/merging could go here, but buckets are enough for visual overlay
+        if (currentStartDist >= 0) {
+            val avgGrade = if (currentWeight > 0) currentGradeSum / currentWeight else 0.0
+            segments.add(GradeSegment(currentStartDist, currentEndDist, avgGrade))
+        }
+
         return segments
     }
 

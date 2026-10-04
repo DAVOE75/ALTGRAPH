@@ -376,7 +376,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                 )
 
                 if (cachedBitmap == null || cachedBitmap?.width != w || cachedBitmap?.height != h) {
-                    cachedBitmap?.recycle()
+                    // cachedBitmap?.recycle()
                     val newBmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
                     cachedBitmap = newBmp
                     cachedCanvas = Canvas(newBmp)
@@ -521,7 +521,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
 
         emitter.setCancellable {
             viewJob.cancel()
-            cachedBitmap?.recycle()
+            // cachedBitmap?.recycle()
             cachedBitmap = null
             cachedCanvas = null
             zoomReceiver?.let {

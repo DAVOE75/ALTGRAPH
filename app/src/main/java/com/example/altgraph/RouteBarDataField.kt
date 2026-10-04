@@ -77,7 +77,7 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                             if (elevPoly.isNullOrEmpty()) {
                                 elevPoly = (state.javaClass.methods.find { it.name == "getElevationPolyline" }?.invoke(state) as? String)
                             }
-                            calculator.setRouteElevationProfile(elevPoly)
+                            calculator.setRouteElevationProfile(elevPoly, state.routeDistance)
                             calculator.syncRouteDistance(state.routeDistance)
 
                             // Ghost recording — key route by first 30 chars of polyline
@@ -202,7 +202,7 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
 
         emitter.setCancellable {
             viewJob?.cancel()
-            cachedBitmap?.recycle()
+            // cachedBitmap?.recycle()
             cachedBitmap = null
             cachedCanvas = null
             karooSystem?.disconnect()

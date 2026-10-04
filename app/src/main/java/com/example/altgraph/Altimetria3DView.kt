@@ -1306,7 +1306,8 @@ class Altimetria3DView @JvmOverloads constructor(
             windPaint.color = wColor
             windPaint.alpha = (Math.abs(wind) * 255).toInt().coerceIn(50, 255)
             // Draw wind arrows on the ribbon
-            for (i in 0 until totalMicroSamples step totalMicroSamples / 10) {
+            val stepSize = Math.max(1, totalMicroSamples / 10)
+            for (i in 0 until totalMicroSamples step stepSize) {
                 val px = xFront[i]
                 val py = yFront[i] - 30f
                 val dx = if (wind < 0) -20f else 20f

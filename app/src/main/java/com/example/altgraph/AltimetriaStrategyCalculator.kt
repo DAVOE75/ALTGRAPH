@@ -475,13 +475,16 @@ class AltimetriaStrategyCalculator {
         return climb.copy(apm = apm, category = category)
     }
 
-    fun setRouteElevationProfile(encoded: String?) {
+    fun setRouteElevationProfile(encoded: String?, routeDistance: Double? = null) {
         val safeEncoded = encoded ?: ""
         if (safeEncoded == lastElevationPolyline) return
         lastElevationPolyline = safeEncoded
         
         Log.e("AltiCalc", "setRouteElevationProfile called, encoded length=${encoded?.length}")
-        val expectedLength = (routePoints.lastOrNull()?.distance ?: 0.0) - globalRouteOffset
+        
+        // Use true route distance from system if available! Otherwise fallback to geometric length.
+        val expectedLength = routeDistance ?: ((routePoints.lastOrNull()?.distance ?: 0.0) - globalRouteOffset)
+        
         val result = ElevationPolylineDecoder.decodeSafe(encoded, expectedLength.coerceAtLeast(0.0))
         if (result is ElevationPolylineDecoder.DecodeResult.Success) {
             var pts = ElevationPolylineDecoder.smooth(result.points)
@@ -1043,7 +1046,9 @@ class AltimetriaStrategyCalculator {
 
             val sElevDiff = sElevEnd - sElevStart
             val sDist = (sDistEnd - sDistStart).coerceAtLeast(1.0)
-            val grade = if (useTopographicCalculation) {
+            val grade = if (sDistEnd <= 0.0) {
+                -999.0
+            } else if (useTopographicCalculation) {
                 val distRealSq = sDist * sDist
                 val elevSq = sElevDiff * sElevDiff
                 val horizontalDist = if (distRealSq > elevSq) sqrt(distRealSq - elevSq) else sDist

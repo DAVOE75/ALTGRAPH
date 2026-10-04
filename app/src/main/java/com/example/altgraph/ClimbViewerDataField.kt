@@ -419,7 +419,7 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
 
         emitter.setCancellable {
             viewJob.cancel()
-            cachedBitmap?.recycle()
+            // cachedBitmap?.recycle()
             cachedBitmap = null
             cachedCanvas = null
             karooSystem?.disconnect()

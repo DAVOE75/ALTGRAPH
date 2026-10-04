@@ -296,13 +296,14 @@ class RouteBarView(context: Context) : View(context) {
 
         // Agrupar por colores para calcular la pendiente media de cada franja visual
         val bands = mutableListOf<ColorBand>()
-        var currentColor = GradeColorScale.getColorHex(blocks[0].toDouble())
+        val firstGrade = blocks[0].toDouble()
+        var currentColor = if (firstGrade <= -900.0) "#9E9E9E" else GradeColorScale.getColorHex(firstGrade)
         var currentBand = ColorBand(0, 0, currentColor, blocks[0].toDouble())
         bands.add(currentBand)
         
         for (i in 1 until numBlocks) {
             val grade = blocks[i].toDouble()
-            val color = GradeColorScale.getColorHex(grade)
+            val color = if (grade <= -900.0) "#9E9E9E" else GradeColorScale.getColorHex(grade)
             if (color == currentColor) {
                 currentBand.endIndex = i
                 currentBand.sumGrade += grade
