@@ -3,6 +3,7 @@ package com.example.altgraph
 import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.hammerhead.karooext.extension.KarooExtension
+import kotlinx.coroutines.cancel
 
 class AltimetriaExtensionService : KarooExtension("altgraph", "0.4.63") {
 
@@ -45,6 +46,7 @@ class AltimetriaExtensionService : KarooExtension("altgraph", "0.4.63") {
     override fun onDestroy() {
         mapOverlayManager?.stop()
         karooSystem?.disconnect()
+        scope.cancel()
         super.onDestroy()
     }
 }

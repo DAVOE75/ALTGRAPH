@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlin.math.*
 
@@ -32,19 +33,24 @@ class MapOverlayManager(
     // Decodificar y recortar la ruta es pesado: fuera del hilo principal y de uno en uno
     @OptIn(ExperimentalCoroutinesApi::class)
     private val worker = Dispatchers.Default.limitedParallelism(1)
+    // Trabajo de este manager: se cancela en stop() para que nada encolado siga emitiendo
+    private val job = SupervisorJob(scope.coroutineContext[Job])
+    private val stopped get() = !job.isActive
 
     fun start(emitter: Emitter<MapEffect>) {
         consumerId = karooSystem.addConsumer<OnNavigationState> { navEvent ->
-            scope.launch(worker) { updateOverlay(navEvent, emitter) }
+            scope.launch(worker + job) { updateOverlay(navEvent, emitter) }
         }
     }
 
     fun stop() {
+        job.cancel()
         consumerId?.let { karooSystem.removeConsumer(it) }
         consumerId = null
     }
 
     private fun updateOverlay(navEvent: OnNavigationState, emitter: Emitter<MapEffect>) {
+        if (stopped) return
         val state = navEvent.state as? OnNavigationState.NavigationState.NavigatingRoute
         
         val mode = prefs.eliteMapOverlayMode
@@ -101,9 +107,11 @@ class MapOverlayManager(
             val path = RoutePath.fromPolyline(pathEncoded, elevPoints.lastOrNull()?.distance) ?: return
 
             Log.d("MapOverlayManager", "updateOverlay: created ${finalSegments.size} segments to draw")
+            if (stopped) return // el decode puede tardar: no emitir si ya se paró
             clearPolylines(emitter)
 
-            finalSegments.forEachIndexed { index, segment ->
+            for ((index, segment) in finalSegments.withIndex()) {
+                if (stopped) return
                 val subPath = path.subPath(segment.startDist, segment.endDist)
 
                 if (subPath.size >= 2) {
@@ -213,25 +221,20 @@ class MapOverlayManager(
 
         /**
          * Con pasos de 10 m salen cientos o miles de tramos en una ruta larga, y cada uno
-         * es una polilínea en el mapa del Karoo. Acumula tramos contiguos hasta MIN_SEGMENT_M;
-         * un último tramo corto se une al anterior.
+         * es una polilínea en el mapa del Karoo. Une entre sí los tramos cortos contiguos
+         * hasta MIN_SEGMENT_M; un tramo largo nunca se une a nada, así no se diluye una
+         * subida o bajada larga en la media de un tramo corto.
+         * ponytail: los cortos agrupados se promedian aunque mezclen subida y bajada (son < 300 m)
          */
         internal fun mergeShortSegments(segments: List<GradeSegment>): List<GradeSegment> {
             val merged = mutableListOf<GradeSegment>()
             for (seg in segments) {
                 val prev = merged.lastOrNull()
-                if (prev != null && prev.endDist == seg.startDist && length(prev) < MIN_SEGMENT_M) {
+                if (prev != null && prev.endDist == seg.startDist &&
+                    length(prev) < MIN_SEGMENT_M && length(seg) < MIN_SEGMENT_M) {
                     merged[merged.lastIndex] = combine(prev, seg)
                 } else {
                     merged.add(seg)
-                }
-            }
-            if (merged.size >= 2) {
-                val last = merged.last()
-                val prev = merged[merged.lastIndex - 1]
-                if (length(last) < MIN_SEGMENT_M && prev.endDist == last.startDist) {
-                    merged.removeAt(merged.lastIndex)
-                    merged[merged.lastIndex] = combine(prev, last)
                 }
             }
             return merged
