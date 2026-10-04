@@ -3,6 +3,7 @@ package com.example.altgraph
 import android.content.Context
 import android.util.Log
 import io.hammerhead.karooext.KarooSystemService
+import io.hammerhead.karooext.models.DataType
 import io.hammerhead.karooext.models.OnLocationChanged
 import io.hammerhead.karooext.models.OnMapZoomLevel
 import io.hammerhead.karooext.models.OnNavigationState
@@ -206,7 +207,12 @@ object AltgraphRepository {
             val st = event.state
             if (st is StreamState.Streaming) {
                 val values = st.dataPoint.values
-                s.launch { NavigationSync.applyStream(core.calculator, kind, values) }
+                s.launch {
+                    NavigationSync.applyStream(core.calculator, kind, values)
+                    // Mismo valor y fallback que leían ClimbPacing y GradientTrend con su propio consumer
+                    if (kind == DataType.Type.ELEVATION_GRADE)
+                        core.rawGrade = values[DataType.Field.ELEVATION_GRADE] ?: values[DataType.Field.SINGLE] ?: 0.0
+                }
             }
         }
     }

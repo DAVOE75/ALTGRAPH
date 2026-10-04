@@ -7,6 +7,8 @@ data class Snapshot(
     val strategy: StrategyData,
     val currentElevation: Double,
     val instantBarometricGrade: Double,
+    // ELEVATION_GRADE tal cual llega del stream (instantBarometricGrade lo mezcla además con la EMA de elevación)
+    val rawGrade: Double,
     val currentHeading: Double,
     val currentSpeed: Double,
     val currentRouteDistance: Double,
@@ -23,6 +25,7 @@ class AltgraphCore(val calculator: AltimetriaStrategyCalculator = AltimetriaStra
 
     var mapZoomLevel: Double? = null
     var pan3dMeters: Double = 0.0
+    var rawGrade: Double = 0.0
 
     /** Único punto que avanza el calculador (una vez por segundo). */
     fun tick(context: Context?): Snapshot {
@@ -33,6 +36,7 @@ class AltgraphCore(val calculator: AltimetriaStrategyCalculator = AltimetriaStra
             strategy = strategy,
             currentElevation = calculator.currentElevation,
             instantBarometricGrade = calculator.instantBarometricGrade,
+            rawGrade = rawGrade,
             currentHeading = calculator.currentHeading,
             currentSpeed = calculator.currentSpeed,
             currentRouteDistance = calculator.currentRouteDistance,

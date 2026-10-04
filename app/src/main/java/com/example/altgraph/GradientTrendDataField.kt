@@ -33,7 +33,7 @@ class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradi
                 val snap = AltgraphRepository.snapshot.value
                 if (snap != null) {
                     safeUpdate(onDead = { cancel(); AltgraphRepository.release(emitter) }) {
-                        val grade = snap.instantBarometricGrade
+                        val grade = snap.rawGrade
                         val effectiveGrade = if (grade > 0.1) grade else 7.5
                         // El tracker no es thread-safe y stream y vista corren en hilos distintos
                         val trendResult = synchronized(trendTracker) { trendTracker.addSample(effectiveGrade) }
@@ -96,7 +96,7 @@ class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradi
                 val snap = AltgraphRepository.snapshot.value
                 if (snap != null) {
                     safeUpdate(onDead = { cancel(); AltgraphRepository.release(emitter) }) {
-                        val grade = snap.instantBarometricGrade
+                        val grade = snap.rawGrade
                         val effectiveGrade = if (grade > 0.1) grade else 7.5
                         // El tracker no es thread-safe y stream y vista corren en hilos distintos
                         val trendResult = synchronized(trendTracker) { trendTracker.addSample(effectiveGrade) }

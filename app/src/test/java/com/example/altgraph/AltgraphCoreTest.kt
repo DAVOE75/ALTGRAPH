@@ -31,6 +31,15 @@ class AltgraphCoreTest {
         assertEquals(dist, accumulated(core.calculator), 0.0)
     }
 
+    @Test
+    fun snapshotCarriesRawGradeUnblended() {
+        val core = AltgraphCore()
+        core.rawGrade = 6.5
+        core.calculator.updateLiveGrade(2.0)
+        val snap = core.tick(null)
+        assertEquals(6.5, snap.rawGrade, 0.0)
+    }
+
     private fun withRoute(c: AltimetriaStrategyCalculator) {
         val poly = PolylineCodec.encode(listOf(40.0 to -3.0, 40.0225 to -3.0, 40.045 to -3.0), 1e5)
         NavigationSync.applyNavigation(

@@ -34,7 +34,7 @@ class ClimbPacingDataField(extension: String) : DataTypeImpl(extension, "climb_p
                         val targetVam = 900
                         val result = ClimbPacingCalculator.calculatePacing(
                             currentSpeedMps = snap.currentSpeed,
-                            currentGradientPct = snap.instantBarometricGrade,
+                            currentGradientPct = snap.rawGrade,
                             userTargetVam = targetVam
                         )
 
@@ -92,7 +92,7 @@ class ClimbPacingDataField(extension: String) : DataTypeImpl(extension, "climb_p
                         val targetVam = prefs.targetVam
                         val result = ClimbPacingCalculator.calculatePacing(
                             currentSpeedMps = snap.currentSpeed,
-                            currentGradientPct = snap.instantBarometricGrade,
+                            currentGradientPct = snap.rawGrade,
                             userTargetVam = targetVam
                         )
 
