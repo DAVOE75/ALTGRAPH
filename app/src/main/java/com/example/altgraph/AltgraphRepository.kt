@@ -59,8 +59,13 @@ object AltgraphRepository {
     private val _snapshot = MutableStateFlow<Snapshot?>(null)
     val snapshot: StateFlow<Snapshot?> = _snapshot
 
+    // Un solo hilo para toda la vida del proceso y nunca se cierra: tras stop()+start() el trabajo
+    // que siguiera en curso (tick o evento no suspend) termina antes de que corra nada nuevo sobre core
+    private val repoDispatcher: ExecutorCoroutineDispatcher by lazy {
+        Executors.newSingleThreadExecutor { Thread(it, "altgraph-repo") }.asCoroutineDispatcher()
+    }
+
     // Se crean en start() y se anulan en stop(); protegidos por el monitor del objeto
-    @Volatile private var repoDispatcher: ExecutorCoroutineDispatcher? = null
     @Volatile private var scope: CoroutineScope? = null
     private var karooSystem: KarooSystemService? = null
     private var tickJob: Job? = null
@@ -74,9 +79,7 @@ object AltgraphRepository {
         Log.i(TAG, "AltgraphRepository start")
         val ctx = context.applicationContext ?: context
         appContext = ctx
-        val dispatcher = Executors.newSingleThreadExecutor { Thread(it, "altgraph-repo") }.asCoroutineDispatcher()
-        val s = CoroutineScope(SupervisorJob() + dispatcher + CoroutineExceptionHandler { _, e -> Log.e(TAG, "repo", e) })
-        repoDispatcher = dispatcher
+        val s = CoroutineScope(SupervisorJob() + repoDispatcher + CoroutineExceptionHandler { _, e -> Log.e(TAG, "repo", e) })
         scope = s
 
         val system = KarooSystemService(ctx)
@@ -98,8 +101,7 @@ object AltgraphRepository {
         if (gate.isActive) tickJob = launchTick(s)
     }
 
-    // Nota: close() no espera; un tick en curso puede solaparse con un start() rápido en el mismo
-    // proceso (ventana de un tick). Mejora: crear el ejecutor una sola vez y no cerrarlo nunca.
+    // Nota: el ejecutor no se cierra; cancelar el scope basta y un start() rápido reutiliza el mismo hilo
     @Synchronized
     fun stop() {
         val s = scope ?: return
@@ -107,8 +109,6 @@ object AltgraphRepository {
         karooSystem = null
         tickJob = null
         s.cancel()
-        repoDispatcher?.close()
-        repoDispatcher = null
         scope = null
         // Tras un stop() el core queda obsoleto y Karoo reenvía la navegación al reconectar
         lastNav = null
@@ -160,7 +160,7 @@ object AltgraphRepository {
     }
 
     private fun dispatcher(): ExecutorCoroutineDispatcher =
-        repoDispatcher ?: throw CancellationException("AltgraphRepository detenido")
+        if (scope != null) repoDispatcher else throw CancellationException("AltgraphRepository detenido")
 
     private fun launchTick(s: CoroutineScope): Job = s.launch {
         while (isActive) {
