@@ -46,9 +46,13 @@ O novo modo **Radar Altimétrico** se sobrepõe ao mapa do seu Karoo, permitindo
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_20km.png" width="220" alt="Rota Global 3D 20km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_200km.png" width="220" alt="Rota Global 3D 200km" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer.png" width="220" alt="Visor de Subidas 3ª Cat" /> |
 
-| ⛰️ Visor de Subidas - Especial C.E. | ⛰️ Visor de Subidas (Isométrico) | 🗺️ GPS Isométrico (Global) |
+| ⛰️ Visor de Subidas - Especial C.E. | ⛰️ Visor de Subidas (Isométrico) <div align="center">
+
+| 🗺️ GPS Isométrico (Global) |
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_especial.png" width="220" alt="Visor de Subidas Especial CE" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_iso.png" width="220" alt="Visor de Subidas Isométrico" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps.png" width="220" alt="GPS Isométrico Global" /> |
+
+</div>
 
 ---
 ## 🌐 Portal Web Oficial e Suporte Multilíngue (6 Idiomas)

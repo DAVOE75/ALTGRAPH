@@ -67,9 +67,13 @@ The new **Altimetry Radar** mode overlays your Karoo map, allowing you to see bo
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_20km.png" width="220" alt="🏔️ 3D Altimetry (20km)" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_200km.png" width="220" alt="🏔️ 3D Altimetry (200km)" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer.png" width="220" alt="🏔️ Climb Viewer - 3rd Cat" /> |
 
-| 🏔️ Climb Viewer - HC (Especial) | 🏔️ Climb Viewer (Isometric) | 🗺️ GPS Isometric (Global) |
+| 🏔️ Climb Viewer - HC (Especial) | 🏔️ Climb Viewer (Isometric) <div align="center">
+
+| 🗺️ GPS Isometric (Global) |
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_especial.png" width="220" alt="🏔️ Climb Viewer - HC (Especial)" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_iso.png" width="220" alt="🏔️ Climb Viewer (Isometric)" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps.png" width="220" alt="🗺️ GPS Isometric (Global)" /> |
+
+</div>
 
 
 ---

@@ -46,9 +46,13 @@ La nuova modalità **Radar Altimetrico** si sovrappone alla mappa del Karoo, con
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_20km.png" width="220" alt="🏔️ Altimetria 3D (20km)" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_200km.png" width="220" alt="🏔️ Altimetria 3D (200km)" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer.png" width="220" alt="🏔️ Visualizzatore - 3ª Cat" /> |
 
-| 🏔️ Visualizzatore - HC | 🏔️ Visualizzatore (Isometrico) | 🗺️ GPS Isometrico (Globale) |
+| 🏔️ Visualizzatore - HC | 🏔️ Visualizzatore (Isometrico) <div align="center">
+
+| 🗺️ GPS Isometrico (Globale) |
 | :---: | :---: | :---: |
 | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_especial.png" width="220" alt="🏔️ Visualizzatore - HC" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_climb_viewer_iso.png" width="220" alt="🏔️ Visualizzatore (Isometrico)" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_3d_profile_gps.png" width="220" alt="🗺️ GPS Isometrico (Globale)" /> |
+
+</div>
 
 ## 🆚 ALTGRAPH vs Climber Nativo di Karoo
 ALTGRAPH non sostituisce il Climber nativo, ma lo integra offrendo una **vista grafica completa** e personalizzabile. Le differenze principali sono:
