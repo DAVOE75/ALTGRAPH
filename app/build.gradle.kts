@@ -19,6 +19,9 @@ android {
 
     buildTypes {
         release {
+            // Sin firma el APK no se instala (INSTALL_PARSE_FAILED_NO_CERTIFICATES).
+            // Misma clave debug que las versiones 0.x-1.0.2, para que actualicen sin desinstalar.
+            signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
