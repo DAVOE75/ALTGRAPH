@@ -224,7 +224,7 @@ class MapOverlayManager(
     }
 
     companion object {
-        // ponytail: umbral fijo; si hiciera falta más detalle en puertos cortos, bajarlo
+        // Nota: umbral fijo; si hiciera falta más detalle en puertos cortos, bajarlo
         private const val MIN_SEGMENT_M = 300.0
 
         /**
@@ -232,7 +232,7 @@ class MapOverlayManager(
          * es una polilínea en el mapa del Karoo. Une entre sí los tramos cortos contiguos
          * hasta MIN_SEGMENT_M; un tramo largo nunca se une a nada, así no se diluye una
          * subida o bajada larga en la media de un tramo corto.
-         * ponytail: los cortos agrupados se promedian aunque mezclen subida y bajada (son < 300 m)
+         * Nota: los cortos agrupados se promedian aunque mezclen subida y bajada (son < 300 m)
          */
         internal fun mergeShortSegments(segments: List<GradeSegment>): List<GradeSegment> {
             val merged = mutableListOf<GradeSegment>()

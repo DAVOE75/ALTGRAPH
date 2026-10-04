@@ -65,6 +65,8 @@ object AltgraphRepository {
     private var karooSystem: KarooSystemService? = null
     private var tickJob: Job? = null
     @Volatile private var appContext: Context? = null
+    // Último estado de navegación (solo se escribe en el hilo del repositorio)
+    @Volatile private var lastNav: OnNavigationState? = null
 
     @Synchronized
     fun start(context: Context) {
@@ -96,7 +98,7 @@ object AltgraphRepository {
         if (gate.isActive) tickJob = launchTick(s)
     }
 
-    // ponytail: close() no espera; un tick en curso puede solaparse con un start() rápido en el mismo
+    // Nota: close() no espera; un tick en curso puede solaparse con un start() rápido en el mismo
     // proceso (ventana de un tick). Mejora: crear el ejecutor una sola vez y no cerrarlo nunca.
     @Synchronized
     fun stop() {
@@ -108,6 +110,8 @@ object AltgraphRepository {
         repoDispatcher?.close()
         repoDispatcher = null
         scope = null
+        // Tras un stop() el core queda obsoleto y Karoo reenvía la navegación al reconectar
+        lastNav = null
     }
 
     // hold/release llegan desde hilos Binder: el monitor ordena launch/cancel igual que el gate
@@ -139,6 +143,16 @@ object AltgraphRepository {
 
     fun addNavListener(l: (OnNavigationState) -> Unit) {
         navListeners.add(l)
+        // Karoo entregó el estado de navegación al conectar, antes de que existiera esta vista: se reenvía el último
+        scope?.launch {
+            lastNav?.let {
+                try {
+                    l(it)
+                } catch (e: Exception) {
+                    Log.e(TAG, "navListener", e)
+                }
+            }
+        }
     }
 
     fun removeNavListener(l: (OnNavigationState) -> Unit) {
@@ -165,6 +179,7 @@ object AltgraphRepository {
         KIND_NAV -> system.addConsumer<OnNavigationState> { event ->
             s.launch {
                 NavigationSync.applyNavigation(core.calculator, event.state)
+                lastNav = event
                 navListeners.forEach { l ->
                     try {
                         l(event)

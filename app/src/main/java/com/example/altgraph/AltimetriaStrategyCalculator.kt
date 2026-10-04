@@ -840,7 +840,7 @@ class AltimetriaStrategyCalculator {
             val baseGrade = instantBarometricGrade
             // Integrar por tiempo transcurrido, no "1 s por llamada": con varias vistas o
             // streams del mismo campo, calculateStrategy() se llama más de una vez por segundo.
-            // ponytail: tope de 2 s tras un hueco (vista fuera de pantalla), como el 1 s fijo anterior
+            // Nota: tope de 2 s tras un hueco (vista fuera de pantalla), como el 1 s fijo anterior
             if (advance) {
                 val nowMs = System.currentTimeMillis()
                 val dt = if (lastIntegrationMs == 0L) 1.0 else ((nowMs - lastIntegrationMs) / 1000.0).coerceIn(0.0, 2.0)
