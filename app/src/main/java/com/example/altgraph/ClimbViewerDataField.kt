@@ -13,22 +13,21 @@ import android.graphics.Typeface
 import android.os.Build
 import android.view.View
 import android.widget.RemoteViews
-import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.hammerhead.karooext.internal.Emitter
 import io.hammerhead.karooext.internal.ViewEmitter
 import io.hammerhead.karooext.models.DataPoint
 import io.hammerhead.karooext.models.DataType
-import io.hammerhead.karooext.models.OnLocationChanged
 import io.hammerhead.karooext.models.OnNavigationState
-import io.hammerhead.karooext.models.OnStreamState
 import io.hammerhead.karooext.models.StreamState
 import io.hammerhead.karooext.models.UpdateGraphicConfig
 import io.hammerhead.karooext.models.ViewConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -37,10 +36,6 @@ private const val TAG = "ALTGRAPH_VIEWER"
 class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d") {
 
     private val scope = CoroutineScope(Dispatchers.Main)
-    private val calculator by lazy { AltimetriaStrategyCalculator() }
-    // Conexión compartida entre las vistas abiertas de este campo: antes el cancel de
-    // una vista la desconectaba aunque otra vista siguiera usándola
-    private val systemRef = RefCounted<KarooSystemService> { it.disconnect() }
     // Un solo receiver por campo aunque haya varias vistas abiertas: con uno por vista
     // cada toque cambiaba de puerto o de zoom varias veces
     private val interactionReceiverRef = RefCounted<Pair<Context, BroadcastReceiver>> { (ctx, r) ->
@@ -82,7 +77,7 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
         interactionReceiverRef.acquire(emitter) {
             val interactionReceiver = object : BroadcastReceiver() {
                 override fun onReceive(ctx: Context?, intent: Intent?) {
-                    val climbs = calculator.routeClimbs
+                    val climbs = AltgraphRepository.snapshot.value?.routeClimbs ?: emptyList()
                     val currentClimb = if (climbs.isNotEmpty()) climbs[currentClimbIndex % climbs.size] else null
 
                     when (intent?.action) {
@@ -126,70 +121,11 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
             context.applicationContext to interactionReceiver
         }
 
-        systemRef.acquire(emitter) {
-            val system = KarooSystemService(context)
-            system.connect { connected ->
-                if (connected) {
-                    system.addConsumer<OnNavigationState> { navEvent ->
-                        val state = navEvent.state
-                        if (state is OnNavigationState.NavigationState.NavigatingRoute) {
-                            calculator.isNavigatingRoute = true
-                            calculator.activeRouteName = state.name
-                            val routeLength = calculator.routePoints.lastOrNull()?.distance ?: (calculator.routeElevationProfile.lastOrNull()?.distance ?: 0.0)
-                            if (routeLength > 0.0) {
-                                calculator.syncRouteDistance(state.routeDistance)
-                            }
-                            calculator.setRouteFromPolyline(state.routePolyline)
-                            
-                            var elevPoly = state.routeElevationPolyline
-                            if (elevPoly.isNullOrEmpty()) {
-                                elevPoly = (state.javaClass.methods.find { it.name == "getElevationPolyline" }?.invoke(state) as? String)
-                            }
-                            calculator.setRouteElevationProfile(elevPoly)
-                            
-                            val routeKey = "route:${state.name}"
-                            val routeClimbs = state.climbs.map { climb ->
-                                RouteClimb(
-                                    startDistance = climb.startDistance,
-                                    endDistance = climb.startDistance + climb.length,
-                                    length = climb.length,
-                                    totalElevation = climb.totalElevation,
-                                    avgGrade = climb.grade
-                                )
-                            }
-                            calculator.syncRouteClimbs(routeKey, routeClimbs)
-                        } else if (state is OnNavigationState.NavigationState.NavigatingToDestination) {
-                            calculator.isNavigatingRoute = true
-                            val dist = (state.javaClass.methods.find { it.name == "getDestinationDistance" || it.name == "getDistance" }?.invoke(state) as? Double) ?: 0.0
-                            val routeLength = calculator.routePoints.lastOrNull()?.distance ?: (calculator.routeElevationProfile.lastOrNull()?.distance ?: 0.0)
-                            if (routeLength > 0.0) {
-                                calculator.syncRouteDistance(dist)
-                            }
-                            val elevPoly = state.elevationPolyline
-                            calculator.setRouteElevationProfile(elevPoly)
-                        } else if (state.javaClass.simpleName == "Idle") {
-                            calculator.clearRoute()
-                            currentClimbIndex = 0
-                        }
-                    }
-                    
-                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.ELEVATION_GRADE)) { state: OnStreamState ->
-                        val streamState = state.state
-                        if (streamState is StreamState.Streaming) {
-                            val grade = streamState.dataPoint.values[DataType.Field.ELEVATION_GRADE] as? Double 
-                                ?: streamState.dataPoint.values[DataType.Field.SINGLE] as? Double 
-                                ?: 0.0
-                            calculator.updateLiveGrade(grade)
-                        }
-                    }
-                    
-                    system.addConsumer<OnLocationChanged> { locEvent ->
-                        calculator.updateCurrentLocation(locEvent.lat, locEvent.lng)
-                    }
-                }
-            }
-            system
+        AltgraphRepository.hold(emitter)
+        val navListener: (OnNavigationState) -> Unit = { navEvent ->
+            if (navEvent.state.javaClass.simpleName == "Idle") currentClimbIndex = 0
         }
+        AltgraphRepository.addNavListener(navListener)
 
         val altimetria3DView = Altimetria3DView(context).apply {
             isClimbMode = true
@@ -221,8 +157,19 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
         }
         val bgPaint = Paint().apply { color = Color.BLACK }
 
-        val viewJob = scope.launch {
-            while (true) {
+        val viewJob = CoroutineScope(Dispatchers.Default).launch {
+            while (isActive) {
+                val snap = AltgraphRepository.snapshot.value
+                if (snap != null) {
+                // Fuera de safeUpdate: climbStrategy es suspend (calcula en el hilo del calculador)
+                val climbs = snap.routeClimbs
+                if (currentClimbIndex >= climbs.size) currentClimbIndex = 0
+                val climb = climbs.getOrNull(currentClimbIndex)
+                val quarterLength = (climb?.length ?: 0.0) / 4.0
+                val customStartDist = if (climb == null) 0.0 else if (currentZoomQuarter > 0) climb.startDistance + (currentZoomQuarter - 1) * quarterLength else climb.startDistance
+                val customLength = if (climb == null) 0.0 else if (currentZoomQuarter > 0) quarterLength else climb.length
+                val strategy = if (climb != null) AltgraphRepository.climbStrategy(climb, customStartDist, customLength) else null
+                safeUpdate(onDead = { cancel(); AltgraphRepository.release(emitter); AltgraphRepository.removeNavListener(navListener) }) {
                 if (cachedBitmap == null || cachedBitmap!!.width != w || cachedBitmap!!.height != h) {
                     cachedBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
                     cachedCanvas = Canvas(cachedBitmap!!)
@@ -232,8 +179,7 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                 val currentCanvas = cachedCanvas!!
                 currentCanvas.drawRect(0f, 0f, w.toFloat(), h.toFloat(), bgPaint)
 
-                val climbs = calculator.routeClimbs
-                if (climbs.isEmpty()) {
+                if (climb == null || strategy == null) {
                     val isRotated = AppPreferences.getInstance(context).climbRotate90Clockwise
                     var drawW = w.toFloat()
                     var drawH = h.toFloat()
@@ -249,21 +195,13 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                         currentCanvas.restore()
                     }
                 } else {
-                    if (currentClimbIndex >= climbs.size) currentClimbIndex = 0
-                    val climb = climbs[currentClimbIndex]
-                    
-                    val quarterLength = climb.length / 4.0
-                    val customStartDist = if (currentZoomQuarter > 0) climb.startDistance + (currentZoomQuarter - 1) * quarterLength else climb.startDistance
-                    val customLength = if (currentZoomQuarter > 0) quarterLength else climb.length
-                    
-                    val strategy = calculator.getStrategyDataForClimb(climb, customStartDist, customLength)
                     val prefs = AppPreferences.getInstance(context)
                     
                     val lookahead = customLength.toInt().coerceAtLeast(100)
                     
                     // Calculamos progreso del ciclista
-                    val riderProgress = if (calculator.currentRouteDistance >= customStartDist && calculator.currentRouteDistance <= customStartDist + customLength) {
-                        ((calculator.currentRouteDistance - customStartDist) / customLength).toFloat()
+                    val riderProgress = if (snap.currentRouteDistance >= customStartDist && snap.currentRouteDistance <= customStartDist + customLength) {
+                        ((snap.currentRouteDistance - customStartDist) / customLength).toFloat()
                     } else {
                         -1f // -1f ocultará la baliza en la gráfica
                     }
@@ -348,13 +286,13 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                     currentCanvas.drawText(climbTitle, drawW / 2f, drawH * 0.10f, overlayPaint)
                     
                     // Line 1: Length | Elevation | Status
-                    val distStr = if (calculator.isNavigatingRoute) {
-                        val distanceToStart = climb.startDistance - calculator.currentRouteDistance
+                    val distStr = if (snap.isNavigatingRoute) {
+                        val distanceToStart = climb.startDistance - snap.currentRouteDistance
                         val km = (Math.abs(distanceToStart) / 1000).toInt()
                         val m = (Math.abs(distanceToStart) % 1000).toInt()
                         if (distanceToStart > 0) {
                             if (km > 0) " | Faltan ${km}km ${m}m" else " | Faltan ${m}m"
-                        } else if (distanceToStart <= 0 && calculator.currentRouteDistance < climb.endDistance) {
+                        } else if (distanceToStart <= 0 && snap.currentRouteDistance < climb.endDistance) {
                             " | En puerto"
                         } else {
                             " | Superado"
@@ -364,7 +302,7 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                     val line1 = "${String.format("%.1f", climb.length / 1000f)}km | +${climb.totalElevation.toInt()}m$distStr"
                     
                     // Line 2: Pend. Actual | P.Med | P.Max
-                    val liveGrade = calculator.instantBarometricGrade
+                    val liveGrade = snap.instantBarometricGrade
                     val maxG = if (strategy.visibleMaxGrade > 0) strategy.visibleMaxGrade else climb.avgGrade
                     val line2Part1 = "Pend. Actual: ${String.format("%.1f", liveGrade)}%  |  P.Med: ${String.format("%.1f", climb.avgGrade)}%  |  P.Max: "
                     val line2Part2 = "${String.format("%.1f", maxG)}%"
@@ -418,7 +356,8 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
 
                 emitter.onNext(UpdateGraphicConfig(showHeader = false))
                 emitter.updateView(remoteViews)
-
+                }
+                }
                 delay(1000)
             }
         }
@@ -428,7 +367,8 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
             // cachedBitmap?.recycle()
             cachedBitmap = null
             cachedCanvas = null
-            systemRef.release(emitter)
+            AltgraphRepository.release(emitter)
+            AltgraphRepository.removeNavListener(navListener)
             interactionReceiverRef.release(emitter)
         }
     }
