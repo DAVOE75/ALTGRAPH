@@ -31,18 +31,48 @@ class AltgraphCoreTest {
         assertEquals(dist, accumulated(core.calculator), 0.0)
     }
 
+    private fun withRoute(c: AltimetriaStrategyCalculator) {
+        val poly = PolylineCodec.encode(listOf(40.0 to -3.0, 40.0225 to -3.0, 40.045 to -3.0), 1e5)
+        NavigationSync.applyNavigation(
+            c,
+            OnNavigationState.NavigationState.NavigatingRoute(
+                routePolyline = poly, routeDistance = 5000.0, routeElevationPolyline = null,
+                rejoinPolyline = null, rejoinDistance = null, name = "T", reversed = false,
+                breadcrumb = false, pois = emptyList(), climbs = emptyList()
+            )
+        )
+    }
+
     @Test
     fun routeBarZoomDoesNotLeakIntoTick() {
         val core = AltgraphCore()
         val twin = AltimetriaStrategyCalculator()
+        withRoute(core.calculator)
+        withRoute(twin)
         val snap = core.tick(null)
         twin.calculateStrategy(null) // mismo número de ticks que el core
         core.mapZoomLevel = 14.0
-        core.strategyForRouteBar(null, 120, snap)
+        val zoomed = core.strategyForRouteBar(null, 120, snap)
         assertNull(core.calculator.mapZoomLevel)
-        // El zoom de la barra no se cuela en el tick: igual que un calculador gemelo sin zoom
-        core.mapZoomLevel = 14.0
+        // El zoom cambia de verdad la estrategia (la igualdad de abajo no es trivial)
+        assertNotEquals(snap.strategy, zoomed)
+        // Un zoom que se quedara en el calculador no debe colarse en el tick
+        core.calculator.mapZoomLevel = 14.0
         assertEquals(twin.calculateStrategy(null), core.tick(null).strategy)
+        assertNull(core.calculator.mapZoomLevel)
+    }
+
+    @Test
+    fun panLeftOnCalculatorDoesNotLeakIntoTick() {
+        val core = AltgraphCore()
+        val twin = AltimetriaStrategyCalculator()
+        withRoute(core.calculator)
+        withRoute(twin)
+        core.tick(null)
+        twin.calculateStrategy(null)
+        core.calculator.manualPanOffsetMeters = 700.0
+        assertEquals(twin.calculateStrategy(null), core.tick(null).strategy)
+        assertEquals(0.0, core.calculator.manualPanOffsetMeters, 0.0)
     }
 
     @Test
