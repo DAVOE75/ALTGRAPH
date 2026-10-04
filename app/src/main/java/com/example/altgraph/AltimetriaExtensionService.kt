@@ -25,6 +25,7 @@ class AltimetriaExtensionService : KarooExtension("altgraph", "0.4.63") {
 
     override fun onCreate() {
         super.onCreate()
+        AltgraphRepository.start(applicationContext)
         karooSystem = KarooSystemService(applicationContext)
         karooSystem?.connect { }
     }
@@ -47,6 +48,7 @@ class AltimetriaExtensionService : KarooExtension("altgraph", "0.4.63") {
         mapOverlayManager?.stop()
         karooSystem?.disconnect()
         scope.cancel()
+        AltgraphRepository.stop()
         super.onDestroy()
     }
 }
