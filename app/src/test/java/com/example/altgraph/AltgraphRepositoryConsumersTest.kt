@@ -6,7 +6,7 @@ import org.junit.Test
 class AltgraphRepositoryConsumersTest {
 
     @Test
-    fun reconnectReplacesConsumers() {
+    fun registersOnceAndRemoveAllClearsThem() {
         var next = 0
         val active = mutableListOf<String>()
         val removed = mutableListOf<String>()
@@ -16,9 +16,13 @@ class AltgraphRepositoryConsumersTest {
         )
 
         registry.register(listOf("nav", "loc"))
+        // Una reconexión no vuelve a dar de alta: el SDK ya los re-registra
         registry.register(listOf("nav", "loc"))
+        assertEquals(listOf("c1", "c2"), active)
+        assertEquals(emptyList<String>(), removed)
 
+        registry.removeAll()
         assertEquals(listOf("c1", "c2"), removed)
-        assertEquals(listOf("c3", "c4"), active)
+        assertEquals(emptyList<String>(), active)
     }
 }

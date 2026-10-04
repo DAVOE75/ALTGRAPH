@@ -26,8 +26,8 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.Executors
 
 /**
- * Sustituye los ids de consumer en cada reconexión: primero quita todos los
- * anteriores y luego da de alta uno por cada `kind`.
+ * Consumers de una instancia de KarooSystemService: se dan de alta una sola vez (el SDK los
+ * vuelve a registrar él mismo en cada reconexión) y se quitan todos en stop().
  */
 internal class ConsumerRegistry(
     private val add: (String) -> String,
@@ -36,9 +36,13 @@ internal class ConsumerRegistry(
     private val ids = mutableListOf<String>()
 
     fun register(kinds: List<String>) {
+        if (ids.isNotEmpty()) return
+        kinds.forEach { ids.add(add(it)) }
+    }
+
+    fun removeAll() {
         ids.forEach(remove)
         ids.clear()
-        kinds.forEach { ids.add(add(it)) }
     }
 }
 
@@ -68,6 +72,7 @@ object AltgraphRepository {
     // Se crean en start() y se anulan en stop(); protegidos por el monitor del objeto
     @Volatile private var scope: CoroutineScope? = null
     private var karooSystem: KarooSystemService? = null
+    private var consumers: ConsumerRegistry? = null
     private var tickJob: Job? = null
     @Volatile private var appContext: Context? = null
     // Último estado de navegación (solo se escribe en el hilo del repositorio)
@@ -89,13 +94,12 @@ object AltgraphRepository {
             remove = { id -> system.removeConsumer(id) }
         )
         val kinds = listOf(KIND_NAV, KIND_LOC, KIND_ZOOM) + NavigationSync.STREAM_TYPES
-        // connect vuelve a llamar al callback en cada reconexión: se re-registra sin duplicar
-        system.connect { connected ->
-            if (connected) {
-                registry.register(kinds)
-                Log.i(TAG, "consumers registrados: ${kinds.size}")
-            }
-        }
+        // Alta única antes de conectar: el SDK registra en cada (re)conexión todos los consumers
+        // que tiene. No se tocan desde el callback de connect, que corre dentro de ese recorrido.
+        registry.register(kinds)
+        consumers = registry
+        Log.i(TAG, "consumers registrados: ${kinds.size}")
+        system.connect()
 
         // Holders que siguieran activos de antes de un stop()
         if (gate.isActive) tickJob = launchTick(s)
@@ -105,6 +109,8 @@ object AltgraphRepository {
     @Synchronized
     fun stop() {
         val s = scope ?: return
+        consumers?.removeAll()
+        consumers = null
         karooSystem?.disconnect()
         karooSystem = null
         tickJob = null
