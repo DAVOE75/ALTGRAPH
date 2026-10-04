@@ -20,7 +20,7 @@ class AltimetriaExtensionService : KarooExtension("altgraph", "0.4.63") {
 
     private var mapOverlayManager: MapOverlayManager? = null
     private var karooSystem: KarooSystemService? = null
-    private val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Default)
+    private val scope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default)
 
     override fun onCreate() {
         super.onCreate()
@@ -30,11 +30,15 @@ class AltimetriaExtensionService : KarooExtension("altgraph", "0.4.63") {
 
     override fun startMap(emitter: io.hammerhead.karooext.internal.Emitter<io.hammerhead.karooext.models.MapEffect>) {
         val sys = karooSystem ?: return
-        mapOverlayManager = MapOverlayManager(applicationContext, scope, sys)
-        mapOverlayManager?.start(emitter)
-        
+        // Cada startMap creaba un manager y un consumer nuevos sin quitar los anteriores
+        mapOverlayManager?.stop()
+        val manager = MapOverlayManager(applicationContext, scope, sys)
+        mapOverlayManager = manager
+        manager.start(emitter)
+
         emitter.setCancellable {
-            mapOverlayManager?.stop()
+            manager.stop()
+            if (mapOverlayManager === manager) mapOverlayManager = null
         }
     }
 

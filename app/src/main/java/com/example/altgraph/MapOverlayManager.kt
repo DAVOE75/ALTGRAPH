@@ -11,7 +11,9 @@ import io.hammerhead.karooext.models.OnNavigationState
 import io.hammerhead.karooext.models.ShowPolyline
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlin.math.*
 
 class MapOverlayManager(
@@ -26,14 +28,20 @@ class MapOverlayManager(
 
     data class GradeSegment(val startDist: Double, val endDist: Double, val grade: Double)
 
+    private var consumerId: String? = null
+    // Decodificar y recortar la ruta es pesado: fuera del hilo principal y de uno en uno
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val worker = Dispatchers.Default.limitedParallelism(1)
+
     fun start(emitter: Emitter<MapEffect>) {
-        karooSystem.addConsumer<OnNavigationState> { navEvent ->
-            updateOverlay(navEvent, emitter)
+        consumerId = karooSystem.addConsumer<OnNavigationState> { navEvent ->
+            scope.launch(worker) { updateOverlay(navEvent, emitter) }
         }
     }
 
     fun stop() {
-        // Consumer will be cleared when KarooSystem disconnects
+        consumerId?.let { karooSystem.removeConsumer(it) }
+        consumerId = null
     }
 
     private fun updateOverlay(navEvent: OnNavigationState, emitter: Emitter<MapEffect>) {
@@ -113,8 +121,13 @@ class MapOverlayManager(
     }
 
     private fun clearPolylines(emitter: Emitter<MapEffect>) {
-        activePolylines.forEach {
-            emitter.onNext(HidePolyline(it))
+        try {
+            activePolylines.forEach {
+                emitter.onNext(HidePolyline(it))
+            }
+        } catch (e: Exception) {
+            // El mapa del host puede haber desaparecido (DeadObjectException)
+            Log.w("MapOverlayManager", "clearPolylines failed", e)
         }
         activePolylines.clear()
     }
@@ -190,7 +203,32 @@ class MapOverlayManager(
             segments.add(GradeSegment(currentStartDist, currentEndDist, avgGrade))
         }
 
-        return segments
+        return mergeShortSegments(segments)
+    }
+
+    /**
+     * Con pasos de 10 m salen cientos o miles de tramos en una ruta larga, y cada uno
+     * es una polilínea en el mapa del Karoo. Une los tramos cortos con el anterior.
+     */
+    private fun mergeShortSegments(segments: List<GradeSegment>): List<GradeSegment> {
+        val merged = mutableListOf<GradeSegment>()
+        for (seg in segments) {
+            val prev = merged.lastOrNull()
+            val len = seg.endDist - seg.startDist
+            val prevLen = prev?.let { it.endDist - it.startDist } ?: 0.0
+            if (prev != null && (len < MIN_SEGMENT_M || prevLen < MIN_SEGMENT_M)) {
+                val grade = (prev.grade * prevLen + seg.grade * len) / (prevLen + len)
+                merged[merged.lastIndex] = GradeSegment(prev.startDist, seg.endDist, grade)
+            } else {
+                merged.add(seg)
+            }
+        }
+        return merged
+    }
+
+    companion object {
+        // ponytail: umbral fijo; si hiciera falta más detalle en puertos cortos, bajarlo
+        private const val MIN_SEGMENT_M = 300.0
     }
 
     data class PathPoint(val lat: Double, val lng: Double, val distance: Double)
