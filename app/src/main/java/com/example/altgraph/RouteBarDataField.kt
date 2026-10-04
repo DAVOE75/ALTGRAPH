@@ -7,60 +7,54 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.view.View
 import android.widget.RemoteViews
-import io.hammerhead.karooext.KarooSystemService
 import io.hammerhead.karooext.extension.DataTypeImpl
 import io.hammerhead.karooext.internal.Emitter
 import io.hammerhead.karooext.internal.ViewEmitter
 import io.hammerhead.karooext.models.DataPoint
 import io.hammerhead.karooext.models.DataType
-import io.hammerhead.karooext.models.OnLocationChanged
-import io.hammerhead.karooext.models.OnMapZoomLevel
 import io.hammerhead.karooext.models.OnNavigationState
-import io.hammerhead.karooext.models.OnStreamState
 import io.hammerhead.karooext.models.StreamState
 import io.hammerhead.karooext.models.UpdateGraphicConfig
 import io.hammerhead.karooext.models.ViewConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar") {
 
-    private val scope = CoroutineScope(Dispatchers.Main)
-    private val calculator = AltimetriaStrategyCalculator()
-    // calculateStrategy() acumula distancia en cada llamada: el stream reutiliza el
-    // resultado reciente de la vista en vez de calcularlo una segunda vez por segundo
-    private var lastStrategy: StrategyData? = null
-    private var lastStrategyAt = 0L
-    // Conexión compartida entre las vistas abiertas de este campo: antes el cancel de
-    // una vista la desconectaba aunque otra vista siguiera usándola
-    private val systemRef = RefCounted<KarooSystemService> { it.disconnect() }
     private var ghostRecorder: GhostRecorder? = null
     private var lastRouteName: String? = null
 
     override fun startStream(emitter: Emitter<StreamState>) {
-        val streamJob = scope.launch {
-            while (true) {
-                val fresh = System.currentTimeMillis() - lastStrategyAt < 2500
-                val strategy = lastStrategy?.takeIf { fresh } ?: calculator.calculateStrategy()
-                emitter.onNext(
-                    StreamState.Streaming(
-                        DataPoint(
-                            dataTypeId = dataTypeId,
-                            values = mapOf(
-                                DataType.Field.SINGLE to strategy.avgGrade,
-                                "remaining_distance" to strategy.remainingDistance
+        AltgraphRepository.hold(emitter)
+        val job = CoroutineScope(Dispatchers.Default).launch {
+            while (isActive) {
+                val snap = AltgraphRepository.snapshot.value
+                if (snap != null) {
+                    val strategy = snap.strategy
+                    safeUpdate(onDead = { cancel(); AltgraphRepository.release(emitter) }) {
+                        emitter.onNext(
+                            StreamState.Streaming(
+                                DataPoint(
+                                    dataTypeId = dataTypeId,
+                                    values = mapOf(
+                                        DataType.Field.SINGLE to strategy.avgGrade,
+                                        "remaining_distance" to strategy.remainingDistance
+                                    )
+                                )
                             )
                         )
-                    )
-                )
+                    }
+                }
                 delay(1000)
             }
         }
         emitter.setCancellable {
-            streamJob.cancel()
+            job.cancel()
+            AltgraphRepository.release(emitter)
         }
     }
 
@@ -68,74 +62,29 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
         emitter.onNext(UpdateGraphicConfig(showHeader = false))
         if (ghostRecorder == null) ghostRecorder = GhostRecorder(context)
 
-        systemRef.acquire(emitter) {
-            val system = KarooSystemService(context)
-            system.connect { connected ->
-                if (connected) {
-                    system.addConsumer<OnNavigationState> { navEvent ->
-                        val state = navEvent.state
-                        if (state is OnNavigationState.NavigationState.NavigatingRoute) {
-                            calculator.isNavigatingRoute = true
-                            calculator.setRouteFromPolyline(state.routePolyline)
-                            
-                            var elevPoly = state.routeElevationPolyline
-                            if (elevPoly.isNullOrEmpty()) {
-                                elevPoly = (state.javaClass.methods.find { it.name == "getElevationPolyline" }?.invoke(state) as? String)
-                            }
-                            calculator.setRouteElevationProfile(elevPoly, state.routeDistance)
-                            calculator.syncRouteDistance(state.routeDistance)
+        AltgraphRepository.hold(emitter)
 
-                            // Ghost recording — key route by first 30 chars of polyline
-                            val routeKey = state.routePolyline.take(30)
-                            if (routeKey != lastRouteName) {
-                                lastRouteName = routeKey
-                                ghostRecorder?.startRoute(routeKey)
-                            }
-                            ghostRecorder?.update(state.routeDistance)
+        // Solo el ghost: el calculador lo alimenta ya el repositorio (NavigationSync)
+        val navListener: (OnNavigationState) -> Unit = { navEvent ->
+            val state = navEvent.state
+            if (state is OnNavigationState.NavigationState.NavigatingRoute) {
+                // Ghost recording — key route by first 30 chars of polyline
+                val routeKey = state.routePolyline.take(30)
+                if (routeKey != lastRouteName) {
+                    lastRouteName = routeKey
+                    ghostRecorder?.startRoute(routeKey)
+                }
+                ghostRecorder?.update(state.routeDistance)
 
-                        } else if (state is OnNavigationState.NavigationState.NavigatingToDestination) {
-                            val dist = (state.javaClass.methods.find { it.name == "getDestinationDistance" || it.name == "getDistance" }?.invoke(state) as? Double) ?: 0.0
-                            calculator.isNavigatingRoute = true
-                            calculator.setRouteElevationProfile(state.elevationPolyline)
-                            calculator.syncRouteDistance(dist)
-                        } else {
-                            if (state.javaClass.simpleName == "Idle") {
-                                ghostRecorder?.finishRoute()
-                                ghostRecorder?.clearRoute()
-                                lastRouteName = null
-                                calculator.clearRoute()
-                            }
-                        }
-                    }
-
-                    system.addConsumer<OnLocationChanged> { locEvent ->
-                        calculator.updateCurrentLocation(locEvent.lat, locEvent.lng)
-                    }
-                    
-                    system.addConsumer<OnMapZoomLevel> { zoomEvent ->
-                        calculator.mapZoomLevel = zoomEvent.zoomLevel
-                    }
-                    
-                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.ELEVATION_GRADE)) { state: OnStreamState ->
-                        val streamState = state.state
-                        if (streamState is StreamState.Streaming) {
-                            val grade = streamState.dataPoint.values[DataType.Field.ELEVATION_GRADE] as? Double 
-                                ?: streamState.dataPoint.values[DataType.Field.SINGLE] as? Double 
-                                ?: 0.0
-                            calculator.updateLiveGrade(grade)
-                        }
-                    }
-                    system.addConsumer(OnStreamState.StartStreaming(DataType.Type.POWER)) { state: OnStreamState ->
-                        val streamState = state.state
-                        if (streamState is StreamState.Streaming) {
-                            val power = streamState.dataPoint.values[DataType.Field.SINGLE] as? Double ?: 0.0
-                            calculator.setPower(power)
-                        }
-                    }
+            } else {
+                if (state.javaClass.simpleName == "Idle") {
+                    ghostRecorder?.finishRoute()
+                    ghostRecorder?.clearRoute()
+                    lastRouteName = null
                 }
             }
-            system
         }
+        AltgraphRepository.addNavListener(navListener)
 
         val routeBarView = RouteBarView(context)
         // If it's a very tall and thin view, it's likely on the side. 
@@ -155,75 +104,75 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
         val bgPaint = Paint().apply { color = Color.TRANSPARENT }
         var lastFrame: List<Any?>? = null
 
-        val viewJob = scope.launch {
-            while (true) {
-                if (cachedBitmap == null || cachedBitmap!!.width != w || cachedBitmap!!.height != h) {
-                    cachedBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-                    cachedCanvas = Canvas(cachedBitmap!!)
-                }
+        val viewJob = CoroutineScope(Dispatchers.Default).launch {
+            while (isActive) {
+                val snap = AltgraphRepository.snapshot.value
+                if (snap != null) {
+                    val prefs = AppPreferences.getInstance(context)
+                    val isElite = prefs.eliteRadarEnabled
+                    // Fuera de safeUpdate: es suspend (calcula en el hilo del calculador)
+                    val strategy = if (isElite) AltgraphRepository.strategyForRouteBar(w, snap) else null
+                    safeUpdate(onDead = { cancel(); AltgraphRepository.release(emitter); AltgraphRepository.removeNavListener(navListener) }) {
+                        if (cachedBitmap == null || cachedBitmap!!.width != w || cachedBitmap!!.height != h) {
+                            cachedBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+                            cachedCanvas = Canvas(cachedBitmap!!)
+                        }
 
-                val currentBmp = cachedBitmap!!
-                val currentCanvas = cachedCanvas!!
-                
-                calculator.viewWidth = w
-                
-                val prefs = AppPreferences.getInstance(context)
-                val isElite = prefs.eliteRadarEnabled
-                val strategy = if (isElite) calculator.calculateStrategy(context).also {
-                    lastStrategy = it
-                    lastStrategyAt = System.currentTimeMillis()
-                } else null
-                val ghost = if (isElite && prefs.eliteGhostEnabled)
-                    ghostRecorder?.ghostRelativeToRider(calculator.currentRouteDistance) else null
+                        val currentBmp = cachedBitmap!!
+                        val currentCanvas = cachedCanvas!!
 
-                // Nada ha cambiado (parado, sin ruta...): no redibujar ni reenviar el bitmap
-                val frame = listOf(strategy, ghost, prefs.snapshot)
-                if (frame == lastFrame) {
-                    delay(1000)
-                    continue
-                }
-                lastFrame = frame
+                        val ghost = if (isElite && prefs.eliteGhostEnabled)
+                            ghostRecorder?.ghostRelativeToRider(snap.currentRouteDistance) else null
 
-                // Clear the canvas with transparent background so map shows through
-                currentCanvas.drawColor(Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR)
+                        // Nada ha cambiado (parado, sin ruta...): no redibujar ni reenviar el bitmap
+                        val frame = listOf(strategy, ghost, prefs.snapshot)
+                        if (frame == lastFrame) return@safeUpdate
+
+                        // Clear the canvas with transparent background so map shows through
+                        currentCanvas.drawColor(Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR)
                 
-                if (isElite) {
-                    routeBarView.strategyData = strategy
-                    routeBarView.ghostRelativeMeters = ghost
-                    routeBarView.showEnergyBar = prefs.eliteEnergyBarEnabled
-                    routeBarView.showPoiRuler = prefs.elitePoiRulerEnabled
-                    routeBarView.showHistogram = prefs.eliteHistogramEnabled
-                    routeBarView.showRadar3d = prefs.eliteRadar3dEnabled
-                    routeBarView.radarTheme = prefs.eliteRadarTheme
-                    routeBarView.showPowerBar = prefs.elitePowerBarEnabled
-                    routeBarView.showRadarAlerts = prefs.eliteRadarAlertsEnabled
-                    routeBarView.userFtp = prefs.userFtp
-                    routeBarView.draw(currentCanvas)
-                } else {
-                    val p = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                        color = Color.RED
-                        textSize = 14f
-                        textAlign = Paint.Align.CENTER
+                        if (isElite) {
+                            routeBarView.strategyData = strategy
+                            routeBarView.ghostRelativeMeters = ghost
+                            routeBarView.showEnergyBar = prefs.eliteEnergyBarEnabled
+                            routeBarView.showPoiRuler = prefs.elitePoiRulerEnabled
+                            routeBarView.showHistogram = prefs.eliteHistogramEnabled
+                            routeBarView.showRadar3d = prefs.eliteRadar3dEnabled
+                            routeBarView.radarTheme = prefs.eliteRadarTheme
+                            routeBarView.showPowerBar = prefs.elitePowerBarEnabled
+                            routeBarView.showRadarAlerts = prefs.eliteRadarAlertsEnabled
+                            routeBarView.userFtp = prefs.userFtp
+                            routeBarView.draw(currentCanvas)
+                        } else {
+                            val p = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                                color = Color.RED
+                                textSize = 14f
+                                textAlign = Paint.Align.CENTER
+                            }
+                            currentCanvas.drawText("ELITE", w/2f, h/2f, p)
+                        }
+
+                        val remoteViews = RemoteViews(context.packageName, R.layout.view_remote_graphic)
+                        remoteViews.setImageViewBitmap(R.id.img_graphic, currentBmp)
+
+                        emitter.onNext(UpdateGraphicConfig(showHeader = false))
+                        emitter.updateView(remoteViews)
+
+                        // Solo tras enviar con éxito: si el frame falla, el siguiente tick lo reintenta
+                        lastFrame = frame
                     }
-                    currentCanvas.drawText("ELITE", w/2f, h/2f, p)
                 }
-
-                val remoteViews = RemoteViews(context.packageName, R.layout.view_remote_graphic)
-                remoteViews.setImageViewBitmap(R.id.img_graphic, currentBmp)
-
-                emitter.onNext(UpdateGraphicConfig(showHeader = false))
-                emitter.updateView(remoteViews)
-
                 delay(1000)
             }
         }
 
         emitter.setCancellable {
             viewJob.cancel()
+            AltgraphRepository.release(emitter)
+            AltgraphRepository.removeNavListener(navListener)
             // cachedBitmap?.recycle()
             cachedBitmap = null
             cachedCanvas = null
-            systemRef.release(emitter)
         }
     }
 }
