@@ -8,6 +8,7 @@ import io.hammerhead.karooext.models.OnMapZoomLevel
 import io.hammerhead.karooext.models.OnNavigationState
 import io.hammerhead.karooext.models.OnStreamState
 import io.hammerhead.karooext.models.StreamState
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
@@ -95,6 +96,8 @@ object AltgraphRepository {
         if (gate.isActive) tickJob = launchTick(s)
     }
 
+    // ponytail: close() no espera; un tick en curso puede solaparse con un start() rápido en el mismo
+    // proceso (ventana de un tick). Mejora: crear el ejecutor una sola vez y no cerrarlo nunca.
     @Synchronized
     fun stop() {
         val s = scope ?: return
@@ -143,11 +146,16 @@ object AltgraphRepository {
     }
 
     private fun dispatcher(): ExecutorCoroutineDispatcher =
-        repoDispatcher ?: throw IllegalStateException("AltgraphRepository no iniciado")
+        repoDispatcher ?: throw CancellationException("AltgraphRepository detenido")
 
     private fun launchTick(s: CoroutineScope): Job = s.launch {
         while (isActive) {
-            _snapshot.value = core.tick(appContext)
+            // Un tick que falla se registra y el bucle sigue (tick no es suspend: no traga cancelaciones)
+            try {
+                _snapshot.value = core.tick(appContext)
+            } catch (e: Exception) {
+                Log.e(TAG, "tick", e)
+            }
             delay(1000)
         }
     }
