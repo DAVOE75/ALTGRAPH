@@ -33,7 +33,8 @@ class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradi
                     safeUpdate(onDead = { cancel(); AltgraphRepository.release(emitter) }) {
                         val grade = snap.instantBarometricGrade
                         val effectiveGrade = if (grade > 0.1) grade else 7.5
-                        val trendResult = trendTracker.addSample(effectiveGrade)
+                        // El tracker no es thread-safe y stream y vista corren en hilos distintos
+                        val trendResult = synchronized(trendTracker) { trendTracker.addSample(effectiveGrade) }
 
                         val trendCode = when (trendResult.trend) {
                             GradientTrend.STEEPENING -> 1.0  // ↗️ Aumentando pendiente
@@ -94,7 +95,8 @@ class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradi
                     safeUpdate(onDead = { cancel(); AltgraphRepository.release(emitter) }) {
                         val grade = snap.instantBarometricGrade
                         val effectiveGrade = if (grade > 0.1) grade else 7.5
-                        val trendResult = trendTracker.addSample(effectiveGrade)
+                        // El tracker no es thread-safe y stream y vista corren en hilos distintos
+                        val trendResult = synchronized(trendTracker) { trendTracker.addSample(effectiveGrade) }
                         val maxRamp = if (trendResult.maxRampPeak > 0.1) trendResult.maxRampPeak else 12.8
 
                         // Mismo formato que muestra la vista: no redibujar si no cambia lo que se ve
