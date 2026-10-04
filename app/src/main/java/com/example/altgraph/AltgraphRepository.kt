@@ -147,22 +147,29 @@ object AltgraphRepository {
         scope?.launch { core.pan3dMeters += deltaMeters }
     }
 
+    // Alta y reenvío en el mismo bloque del hilo del repositorio: un evento ya encolado no llega dos veces
     fun addNavListener(l: (OnNavigationState) -> Unit) {
-        navListeners.add(l)
-        // Karoo entregó el estado de navegación al conectar, antes de que existiera esta vista: se reenvía el último
-        scope?.launch {
-            lastNav?.let {
-                try {
-                    l(it)
-                } catch (e: Exception) {
-                    Log.e(TAG, "navListener", e)
-                }
-            }
+        val s = scope ?: run { navListeners.add(l); return }
+        s.launch {
+            navListeners.add(l)
+            // Karoo entregó el estado de navegación al conectar, antes de que existiera esta vista: se reenvía el último
+            lastNav?.let { deliverNav(l, it) }
         }
     }
 
+    // Baja inmediata (la entrega comprueba pertenencia) y otra en el hilo por si el alta seguía encolada
     fun removeNavListener(l: (OnNavigationState) -> Unit) {
         navListeners.remove(l)
+        scope?.launch { navListeners.remove(l) }
+    }
+
+    private fun deliverNav(l: (OnNavigationState) -> Unit, event: OnNavigationState) {
+        if (l !in navListeners) return
+        try {
+            l(event)
+        } catch (e: Exception) {
+            Log.e(TAG, "navListener", e)
+        }
     }
 
     private fun dispatcher(): ExecutorCoroutineDispatcher =
@@ -186,13 +193,7 @@ object AltgraphRepository {
             s.launch {
                 NavigationSync.applyNavigation(core.calculator, event.state)
                 lastNav = event
-                navListeners.forEach { l ->
-                    try {
-                        l(event)
-                    } catch (e: Exception) {
-                        Log.e(TAG, "navListener", e)
-                    }
-                }
+                navListeners.forEach { l -> deliverNav(l, event) }
             }
         }
         KIND_LOC -> system.addConsumer<OnLocationChanged> { event ->

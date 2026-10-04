@@ -27,6 +27,9 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
 
     private var ghostRecorder: GhostRecorder? = null
     private var lastRouteName: String? = null
+    // Un solo listener de navegación para todas las vistas abiertas (como el único consumer de antes):
+    // con uno por vista el GhostRecorder compartido recibiría cada evento varias veces
+    private val ghostNavRef = RefCounted<(OnNavigationState) -> Unit> { AltgraphRepository.removeNavListener(it) }
 
     override fun startStream(emitter: Emitter<StreamState>) {
         AltgraphRepository.hold(emitter)
@@ -84,7 +87,7 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                 }
             }
         }
-        AltgraphRepository.addNavListener(navListener)
+        ghostNavRef.acquire(emitter) { navListener.also { AltgraphRepository.addNavListener(it) } }
 
         val routeBarView = RouteBarView(context)
         // If it's a very tall and thin view, it's likely on the side. 
@@ -110,7 +113,7 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                 if (snap != null) {
                     val prefs = AppPreferences.getInstance(context)
                     val isElite = prefs.eliteRadarEnabled
-                    safeUpdate(onDead = { cancel(); AltgraphRepository.release(emitter); AltgraphRepository.removeNavListener(navListener) }) {
+                    safeUpdate(onDead = { cancel(); AltgraphRepository.release(emitter); ghostNavRef.release(emitter) }) {
                         // Suspend (calcula en el hilo del calculador); dentro de safeUpdate para que un fallo no mate el bucle
                         val strategy = if (isElite) AltgraphRepository.strategyForRouteBar(w, snap) else null
                         if (cachedBitmap == null || cachedBitmap!!.width != w || cachedBitmap!!.height != h) {
@@ -168,13 +171,13 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
         // Siempre libera el token al terminar el bucle (excepción, parada del repositorio...); es idempotente
         viewJob.invokeOnCompletion {
             AltgraphRepository.release(emitter)
-            AltgraphRepository.removeNavListener(navListener)
+            ghostNavRef.release(emitter)
         }
 
         emitter.setCancellable {
             viewJob.cancel()
             AltgraphRepository.release(emitter)
-            AltgraphRepository.removeNavListener(navListener)
+            ghostNavRef.release(emitter)
             // cachedBitmap?.recycle()
             cachedBitmap = null
             cachedCanvas = null
