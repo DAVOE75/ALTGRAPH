@@ -110,9 +110,9 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                 if (snap != null) {
                     val prefs = AppPreferences.getInstance(context)
                     val isElite = prefs.eliteRadarEnabled
-                    // Fuera de safeUpdate: es suspend (calcula en el hilo del calculador)
-                    val strategy = if (isElite) AltgraphRepository.strategyForRouteBar(w, snap) else null
                     safeUpdate(onDead = { cancel(); AltgraphRepository.release(emitter); AltgraphRepository.removeNavListener(navListener) }) {
+                        // Suspend (calcula en el hilo del calculador); dentro de safeUpdate para que un fallo no mate el bucle
+                        val strategy = if (isElite) AltgraphRepository.strategyForRouteBar(w, snap) else null
                         if (cachedBitmap == null || cachedBitmap!!.width != w || cachedBitmap!!.height != h) {
                             cachedBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
                             cachedCanvas = Canvas(cachedBitmap!!)
@@ -164,6 +164,11 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                 }
                 delay(1000)
             }
+        }
+        // Siempre libera el token al terminar el bucle (excepción, parada del repositorio...); es idempotente
+        viewJob.invokeOnCompletion {
+            AltgraphRepository.release(emitter)
+            AltgraphRepository.removeNavListener(navListener)
         }
 
         emitter.setCancellable {

@@ -161,15 +161,15 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
             while (isActive) {
                 val snap = AltgraphRepository.snapshot.value
                 if (snap != null) {
-                // Fuera de safeUpdate: climbStrategy es suspend (calcula en el hilo del calculador)
                 val climbs = snap.routeClimbs
                 if (currentClimbIndex >= climbs.size) currentClimbIndex = 0
                 val climb = climbs.getOrNull(currentClimbIndex)
                 val quarterLength = (climb?.length ?: 0.0) / 4.0
                 val customStartDist = if (climb == null) 0.0 else if (currentZoomQuarter > 0) climb.startDistance + (currentZoomQuarter - 1) * quarterLength else climb.startDistance
                 val customLength = if (climb == null) 0.0 else if (currentZoomQuarter > 0) quarterLength else climb.length
-                val strategy = if (climb != null) AltgraphRepository.climbStrategy(climb, customStartDist, customLength) else null
                 safeUpdate(onDead = { cancel(); AltgraphRepository.release(emitter); AltgraphRepository.removeNavListener(navListener) }) {
+                // Suspend (calcula en el hilo del calculador); dentro de safeUpdate para que un fallo no mate el bucle
+                val strategy = if (climb != null) AltgraphRepository.climbStrategy(climb, customStartDist, customLength) else null
                 if (cachedBitmap == null || cachedBitmap!!.width != w || cachedBitmap!!.height != h) {
                     cachedBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
                     cachedCanvas = Canvas(cachedBitmap!!)
@@ -360,6 +360,11 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                 }
                 delay(1000)
             }
+        }
+        // Siempre libera el token al terminar el bucle (excepción, parada del repositorio...); es idempotente
+        viewJob.invokeOnCompletion {
+            AltgraphRepository.release(emitter)
+            AltgraphRepository.removeNavListener(navListener)
         }
 
         emitter.setCancellable {

@@ -163,9 +163,9 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
             while (isActive) {
                 val snap = AltgraphRepository.snapshot.value
                 if (snap != null) {
-                    // Fuera de safeUpdate: es suspend (con paneo calcula en el hilo del calculador)
-                    val strategy = AltgraphRepository.strategyFor3D(snap)
                     safeUpdate(onDead = { cancel(); AltgraphRepository.release(emitter) }) {
+                        // Suspend (con paneo calcula en el hilo del calculador); dentro de safeUpdate para que un fallo no mate el bucle
+                        val strategy = AltgraphRepository.strategyFor3D(snap)
                         val prefs = AppPreferences.getInstance(context)
                         val startElev = if (strategy.windowStartElevation > 0.0) strategy.windowStartElevation else snap.currentElevation
 
@@ -375,6 +375,10 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                 }
                 delay(1000)
             }
+        }
+        // Siempre libera el token al terminar el bucle (excepción, parada del repositorio...); es idempotente
+        viewJob.invokeOnCompletion {
+            AltgraphRepository.release(emitter)
         }
 
         emitter.setCancellable {
