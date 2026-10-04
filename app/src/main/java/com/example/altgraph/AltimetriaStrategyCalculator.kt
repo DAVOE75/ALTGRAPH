@@ -106,6 +106,7 @@ class AltimetriaStrategyCalculator {
     private val liveElevationHistory = mutableListOf<Double>()
     private var lastElevationSample = 350.0
     private var liveDistanceAccumulated = 0.0
+    private var lastIntegrationMs = 0L
     private val freeRideHistory = mutableListOf<Pair<Double, Double>>() // Distancia, Elevación
     var instantBarometricGrade = 0.0
     
@@ -836,8 +837,14 @@ class AltimetriaStrategyCalculator {
         // Genera el perfil 3D con el historial acumulado en tiempo real en lugar de proyectar al futuro
         if (!isNavigating) {
             val baseGrade = instantBarometricGrade
+            // Integrar por tiempo transcurrido, no "1 s por llamada": con varias vistas o
+            // streams del mismo campo, calculateStrategy() se llama más de una vez por segundo.
+            // ponytail: tope de 2 s tras un hueco (vista fuera de pantalla), como el 1 s fijo anterior
+            val nowMs = System.currentTimeMillis()
+            val dt = if (lastIntegrationMs == 0L) 1.0 else ((nowMs - lastIntegrationMs) / 1000.0).coerceIn(0.0, 2.0)
+            lastIntegrationMs = nowMs
             if (currentSpeed > 0.1) {
-                liveDistanceAccumulated += currentSpeed * 1.0 // Medido cada segundo
+                liveDistanceAccumulated += currentSpeed * dt
             }
 
             // Acumular el punto actual en el historial si avanzamos más de 5 metros

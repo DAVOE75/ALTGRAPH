@@ -31,4 +31,19 @@ class RefCountedTest {
         ref.acquire(Any()) { created++; "conn2" }
         assertEquals(2, created)
     }
+
+    @Test
+    fun failedCreateDoesNotKeepAHolder() {
+        val released = mutableListOf<String>()
+        val ref = RefCounted<String> { released.add(it) }
+        val failed = Any()
+        try {
+            ref.acquire(failed) { throw IllegalStateException("boom") }
+        } catch (e: IllegalStateException) {}
+
+        val ok = Any()
+        ref.acquire(ok) { "conn" }
+        ref.release(ok)
+        assertEquals(listOf("conn"), released)
+    }
 }

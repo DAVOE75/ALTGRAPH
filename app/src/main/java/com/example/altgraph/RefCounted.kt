@@ -13,8 +13,10 @@ class RefCounted<T : Any>(private val onRelease: (T) -> Unit) {
 
     @Synchronized
     fun acquire(token: Any, create: () -> T): T {
+        // Registrar el token solo si create() no lanza: si no, quedaría un holder sin cancel
+        val v = value ?: create().also { value = it }
         holders.add(token)
-        return value ?: create().also { value = it }
+        return v
     }
 
     @Synchronized
