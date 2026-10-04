@@ -933,6 +933,57 @@ class MainActivity : Activity() {
         }
         radarCard.addView(switchRadar)
         tabEliteContainer.addView(radarCard)
+        
+        // Map Overlay Mode Spinner
+        val mapOverlayCard = createCardContainer()
+        val mapOverlayLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(0, 0, 0, 16)
+        }
+        val mapOverlayTitle = TextView(this).apply {
+            text = getString(R.string.elite_map_overlay_mode)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            setPadding(0, 0, 0, 8)
+            alpha = if (prefs.isEliteUnlocked) 1.0f else 0.5f
+        }
+        mapOverlayLayout.addView(mapOverlayTitle)
+        
+        val mapOverlaySpinner = Spinner(this).apply {
+            isEnabled = prefs.isEliteUnlocked
+            val options = arrayOf(
+                getString(R.string.elite_map_overlay_off),
+                getString(R.string.elite_map_overlay_climbs),
+                getString(R.string.elite_map_overlay_all)
+            )
+            val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, options)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            this.adapter = adapter
+            
+            // Set initial selection
+            val currentMode = prefs.eliteMapOverlayMode
+            setSelection(when(currentMode) {
+                "all" -> 2
+                "climbs" -> 1
+                else -> 0
+            })
+            
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val newMode = when(position) {
+                        2 -> "all"
+                        1 -> "climbs"
+                        else -> "off"
+                    }
+                    prefs.eliteMapOverlayMode = newMode
+                    (view as? TextView)?.setTextColor(Color.parseColor("#4CAF50"))
+                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+        }
+        mapOverlayLayout.addView(mapOverlaySpinner)
+        mapOverlayCard.addView(mapOverlayLayout)
+        tabEliteContainer.addView(mapOverlayCard)
 
         // ── Radar ELITE sub-features ─────────────────────────────────────────
         val eliteSubLabel = createSectionLabel(getString(R.string.label_elite_features))

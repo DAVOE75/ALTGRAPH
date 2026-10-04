@@ -94,6 +94,11 @@
     <string name="elite_btn_activate">AKTIVIEREN</string>
     <string name="elite_strava_segments">Strava Live Segments 3D (Beta)</string>
     <string name="elite_weather_overlay">Wind- &amp; Wetter-Overlay</string>
+    <string name="elite_radar_enabled">Höhenradar (Data Field)</string>
+    <string name="elite_map_overlay_mode">Karten-Overlay-Modus</string>
+    <string name="elite_map_overlay_off">Aus</string>
+    <string name="elite_map_overlay_climbs">Nur Anstiege</string>
+    <string name="elite_map_overlay_all">Gesamte Route</string>
     <string name="elite_toast_unlocked">Elite-Funktionen entsperrt!</string>
     <string name="elite_toast_invalid">Ungültige Lizenz</string>
 </resources>

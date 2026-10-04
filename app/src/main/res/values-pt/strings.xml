@@ -93,6 +93,11 @@
     <string name="elite_btn_activate">ATIVAR</string>
     <string name="elite_strava_segments">Strava Live Segments 3D (Beta)</string>
     <string name="elite_weather_overlay">Camada de Vento e Clima</string>
+    <string name="elite_radar_enabled">Radar Altimétrico (Data Field)</string>
+    <string name="elite_map_overlay_mode">Modo Sobreposição Mapa</string>
+    <string name="elite_map_overlay_off">Desativado</string>
+    <string name="elite_map_overlay_climbs">Apenas Subidas</string>
+    <string name="elite_map_overlay_all">Rota Completa</string>
     <string name="elite_toast_unlocked">Recursos Elite Desbloqueados!</string>
     <string name="elite_toast_invalid">Licença Inválida</string>
 </resources>

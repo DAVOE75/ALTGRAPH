@@ -194,6 +194,10 @@ class AppPreferences(context: Context) {
     var eliteRadarAlertsEnabled: Boolean
         get() = prefs.getBoolean(KEY_ELITE_RADAR_ALERTS_ENABLED, true) && isEliteUnlocked
         set(value) = prefs.edit().putBoolean(KEY_ELITE_RADAR_ALERTS_ENABLED, value).apply()
+        
+    var eliteMapOverlayMode: String
+        get() = if (isEliteUnlocked) prefs.getString(KEY_ELITE_MAP_OVERLAY_MODE, "climbs") ?: "climbs" else "off"
+        set(value) = prefs.edit().putString(KEY_ELITE_MAP_OVERLAY_MODE, value).apply()
 
     var userFtp: Int
         get() = prefs.getInt(KEY_USER_FTP, 250)
@@ -257,6 +261,7 @@ class AppPreferences(context: Context) {
         private const val KEY_ELITE_RADAR_THEME = "elite_radar_theme"
         private const val KEY_ELITE_POWER_BAR_ENABLED = "elite_power_bar_enabled"
         private const val KEY_ELITE_RADAR_ALERTS_ENABLED = "elite_radar_alerts_enabled"
+        private const val KEY_ELITE_MAP_OVERLAY_MODE = "elite_map_overlay_mode"
         private const val KEY_USER_FTP = "user_ftp"
 
         @Volatile

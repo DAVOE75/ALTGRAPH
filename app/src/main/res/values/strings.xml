@@ -98,6 +98,10 @@
     <string name="elite_strava_segments">Strava Live Segments 3D (Beta)</string>
     <string name="elite_weather_overlay">Wind &amp; Weather Overlay</string>
     <string name="elite_radar_enabled">Altimetry Radar (Data Field)</string>
+    <string name="elite_map_overlay_mode">Map Gradient Overlay Mode</string>
+    <string name="elite_map_overlay_off">Off</string>
+    <string name="elite_map_overlay_climbs">Only Climbs</string>
+    <string name="elite_map_overlay_all">Entire Route</string>
     <string name="elite_toast_unlocked">Elite Features Unlocked!</string>
     <string name="elite_toast_invalid">Invalid License Key</string>
     <string name="tab_style">🎨 Style</string>
