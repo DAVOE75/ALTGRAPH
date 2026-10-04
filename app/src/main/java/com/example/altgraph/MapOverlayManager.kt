@@ -95,9 +95,10 @@ class MapOverlayManager(
                 }
             } else {
                 segments // Do not filter out flats for 'entire route' mode
-            }
+            }.let { mergeShortSegments(it) }
 
-            val path = RoutePath.fromPolyline(pathEncoded, state.routeDistance) ?: return
+            // Escalar a la distancia del perfil: los tramos se miden sobre él
+            val path = RoutePath.fromPolyline(pathEncoded, elevPoints.lastOrNull()?.distance) ?: return
 
             Log.d("MapOverlayManager", "updateOverlay: created ${finalSegments.size} segments to draw")
             clearPolylines(emitter)
@@ -203,32 +204,47 @@ class MapOverlayManager(
             segments.add(GradeSegment(currentStartDist, currentEndDist, avgGrade))
         }
 
-        return mergeShortSegments(segments)
-    }
-
-    /**
-     * Con pasos de 10 m salen cientos o miles de tramos en una ruta larga, y cada uno
-     * es una polilínea en el mapa del Karoo. Une los tramos cortos con el anterior.
-     */
-    private fun mergeShortSegments(segments: List<GradeSegment>): List<GradeSegment> {
-        val merged = mutableListOf<GradeSegment>()
-        for (seg in segments) {
-            val prev = merged.lastOrNull()
-            val len = seg.endDist - seg.startDist
-            val prevLen = prev?.let { it.endDist - it.startDist } ?: 0.0
-            if (prev != null && (len < MIN_SEGMENT_M || prevLen < MIN_SEGMENT_M)) {
-                val grade = (prev.grade * prevLen + seg.grade * len) / (prevLen + len)
-                merged[merged.lastIndex] = GradeSegment(prev.startDist, seg.endDist, grade)
-            } else {
-                merged.add(seg)
-            }
-        }
-        return merged
+        return segments
     }
 
     companion object {
         // ponytail: umbral fijo; si hiciera falta más detalle en puertos cortos, bajarlo
         private const val MIN_SEGMENT_M = 300.0
+
+        /**
+         * Con pasos de 10 m salen cientos o miles de tramos en una ruta larga, y cada uno
+         * es una polilínea en el mapa del Karoo. Acumula tramos contiguos hasta MIN_SEGMENT_M;
+         * un último tramo corto se une al anterior.
+         */
+        internal fun mergeShortSegments(segments: List<GradeSegment>): List<GradeSegment> {
+            val merged = mutableListOf<GradeSegment>()
+            for (seg in segments) {
+                val prev = merged.lastOrNull()
+                if (prev != null && prev.endDist == seg.startDist && length(prev) < MIN_SEGMENT_M) {
+                    merged[merged.lastIndex] = combine(prev, seg)
+                } else {
+                    merged.add(seg)
+                }
+            }
+            if (merged.size >= 2) {
+                val last = merged.last()
+                val prev = merged[merged.lastIndex - 1]
+                if (length(last) < MIN_SEGMENT_M && prev.endDist == last.startDist) {
+                    merged.removeAt(merged.lastIndex)
+                    merged[merged.lastIndex] = combine(prev, last)
+                }
+            }
+            return merged
+        }
+
+        private fun length(s: GradeSegment) = s.endDist - s.startDist
+
+        private fun combine(a: GradeSegment, b: GradeSegment): GradeSegment {
+            val la = length(a)
+            val lb = length(b)
+            val grade = if (la + lb > 0) (a.grade * la + b.grade * lb) / (la + lb) else a.grade
+            return GradeSegment(a.startDist, b.endDist, grade)
+        }
     }
 
     data class PathPoint(val lat: Double, val lng: Double, val distance: Double)
