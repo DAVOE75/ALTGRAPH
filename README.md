@@ -14,11 +14,14 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
 - **Ajuste de Escala Dinámica en Campos Múltiples**: Hemos reprogramado la lógica visual de la escala kilométrica inferior. Los textos (0m, 50m, 1km...) ahora calculan el espacio de forma inteligente. Esto arregla un problema visual donde los números se cortaban al usar el radar en pantallas con múltiples campos de datos divididos.
 - **Calibración Genuina de GPS**: El progreso del radar de Altimetría ahora está matemáticamente anclado al avance real del GPS de tu Karoo (y no únicamente a la línea de ruta teórica), solucionando problemas de desfase en rutas muy largas.
 - **Lógica de renderizado**: Solucionado un solapamiento gráfico que ocurría al ocultar la barra de avisos dinámicos en vistas apaisadas.
-- **Ruta de Mapa Coloreada por Gradiente (Match Perfecto)**: La línea de ruta dibujada sobre el mapa topográfico ahora se pinta de colores en tiempo real indicando la dureza de la pendiente. Usa exactamente la misma escala matemática rigurosa que el Radar Altimétrico, permitiendo que ambos coincidan milimétricamente. Además, hemos diseñado el trazado para sobreponerse perfectamente a la línea nativa del Karoo.
 
-| 🗺️ Ruta Coloreada en el Mapa | 🗺️ Detalle de Tramos Duros |
-| :---: | :---: |
-| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_map_route_colors.png" width="220" alt="Ruta Coloreada Mapa 1" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_map_route_colors_2.png" width="220" alt="Ruta Coloreada Mapa 2" /> |
+> [!NOTE]
+> **Ruta de Mapa Coloreada por Gradiente (Match Perfecto)**: La línea de ruta dibujada sobre el mapa topográfico ahora se pinta de colores en tiempo real indicando la dureza de la pendiente. Usa exactamente la misma escala matemática rigurosa que el Radar Altimétrico, permitiendo que ambos coincidan milimétricamente. Además, hemos diseñado el trazado para sobreponerse perfectamente a la línea nativa del Karoo.
+
+| 🗺️ Ruta Completa Coloreada | 🗺️ Detalle de Tramos Duros | 🗺️ Vista de Puerto Individual |
+| :---: | :---: | :---: |
+| <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_map_route_colors.png" width="220" alt="Ruta 1" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_map_route_colors_2.png" width="220" alt="Ruta 2" /> | <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_map_route_colors_3.png" width="220" alt="Puerto" /> |
+
 
 ## 🐛 VERSIÓN 1.0.4: PRECISIÓN GPS MILIMÉTRICA 🐛
 
