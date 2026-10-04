@@ -1,6 +1,7 @@
 package com.example.altgraph
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CalculatorAdvanceTest {
@@ -37,15 +38,19 @@ class CalculatorAdvanceTest {
     }
 
     @Test
-    fun advanceFalseReturnsSameStrategyAsAdvanceTrueWouldUseNow() {
-        val a = AltimetriaStrategyCalculator()
-        val b = AltimetriaStrategyCalculator()
-        a.currentSpeed = 0.0
-        b.currentSpeed = 0.0
-        assertEquals(
-            a.calculateStrategy(advance = false).remainingDistance,
-            b.calculateStrategy(advance = true).remainingDistance,
-            0.0
-        )
+    fun advanceFalseReturnsIdenticalNonTrivialStrategyRepeatedly() {
+        val c = AltimetriaStrategyCalculator()
+        c.currentSpeed = 10.0
+        c.calculateStrategy() // avanza una vez: liveDistanceAccumulated = 10 m
+
+        val first = c.calculateStrategy(advance = false)
+        Thread.sleep(50)
+        val second = c.calculateStrategy(advance = false)
+
+        assertEquals(first, second)
+        // No trivial: perfil libre con ventana y sub-bloques reales, y el ciclista dentro de la ventana
+        assertTrue(first.subBlocks.isNotEmpty())
+        assertTrue(first.profileElevations.size == first.subBlocks.size + 1)
+        assertTrue(first.riderProgress > 0f)
     }
 }
