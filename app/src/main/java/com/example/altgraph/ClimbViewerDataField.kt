@@ -53,6 +53,8 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
     }
 
     override fun startStream(emitter: Emitter<StreamState>) {
+        val latch = CancelLatch()
+        emitter.setCancellable { latch.cancel() }
         val streamJob = scope.launch {
             while (true) {
                 emitter.onNext(
@@ -66,12 +68,12 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                 delay(1000)
             }
         }
-        emitter.setCancellable {
-            streamJob.cancel()
-        }
+        latch.attach(streamJob) {}
     }
 
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
+        val latch = CancelLatch()
+        emitter.setCancellable { latch.cancel() }
         emitter.onNext(UpdateGraphicConfig(showHeader = false))
 
         interactionReceiverRef.acquire(emitter) {
@@ -367,8 +369,7 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
             AltgraphRepository.removeNavListener(navListener)
         }
 
-        emitter.setCancellable {
-            viewJob.cancel()
+        latch.attach(viewJob) {
             // cachedBitmap?.recycle()
             cachedBitmap = null
             cachedCanvas = null

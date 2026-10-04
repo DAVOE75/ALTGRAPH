@@ -25,6 +25,8 @@ class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradi
     private val trendTracker = GradientTrendTracker()
 
     override fun startStream(emitter: Emitter<StreamState>) {
+        val latch = CancelLatch()
+        emitter.setCancellable { latch.cancel() }
         AltgraphRepository.hold(emitter)
         val streamJob = CoroutineScope(Dispatchers.Default).launch {
             while (isActive) {
@@ -62,13 +64,14 @@ class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradi
             }
         }
 
-        emitter.setCancellable {
-            streamJob.cancel()
+        latch.attach(streamJob) {
             AltgraphRepository.release(emitter)
         }
     }
 
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
+        val latch = CancelLatch()
+        emitter.setCancellable { latch.cancel() }
         emitter.onNext(UpdateGraphicConfig(showHeader = false))
 
         AltgraphRepository.hold(emitter)
@@ -120,8 +123,7 @@ class GradientTrendDataField(extension: String) : DataTypeImpl(extension, "gradi
             }
         }
 
-        emitter.setCancellable {
-            viewJob.cancel()
+        latch.attach(viewJob) {
             AltgraphRepository.release(emitter)
         }
     }

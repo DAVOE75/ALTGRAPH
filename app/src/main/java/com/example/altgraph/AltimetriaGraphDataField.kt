@@ -23,6 +23,8 @@ import kotlinx.coroutines.launch
 class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "altimetria_graph") {
 
     override fun startStream(emitter: Emitter<StreamState>) {
+        val latch = CancelLatch()
+        emitter.setCancellable { latch.cancel() }
         AltgraphRepository.hold(emitter)
         val job = CoroutineScope(Dispatchers.Default).launch {
             while (isActive) {
@@ -48,13 +50,14 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
                 delay(1000)
             }
         }
-        emitter.setCancellable {
-            job.cancel()
+        latch.attach(job) {
             AltgraphRepository.release(emitter)
         }
     }
 
     override fun startView(context: Context, config: ViewConfig, emitter: ViewEmitter) {
+        val latch = CancelLatch()
+        emitter.setCancellable { latch.cancel() }
         emitter.onNext(UpdateGraphicConfig(showHeader = false))
         AltgraphRepository.hold(emitter)
 
@@ -113,8 +116,7 @@ class AltimetriaGraphDataType(extension: String) : DataTypeImpl(extension, "alti
             }
         }
 
-        emitter.setCancellable {
-            job.cancel()
+        latch.attach(job) {
             AltgraphRepository.release(emitter)
         }
     }
