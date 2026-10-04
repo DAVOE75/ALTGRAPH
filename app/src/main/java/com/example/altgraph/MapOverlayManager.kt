@@ -36,6 +36,14 @@ class MapOverlayManager(
     // Trabajo de este manager: se cancela en stop() para que nada encolado siga emitiendo
     private val job = SupervisorJob(scope.coroutineContext[Job])
     private val stopped get() = !job.isActive
+    // stop() y cada emisión van bajo el mismo lock: tras stop() no sale ningún efecto más
+    private val emitLock = Any()
+
+    private fun emit(emitter: Emitter<MapEffect>, effect: MapEffect): Boolean = synchronized(emitLock) {
+        if (stopped) return false
+        emitter.onNext(effect)
+        true
+    }
 
     fun start(emitter: Emitter<MapEffect>) {
         consumerId = karooSystem.addConsumer<OnNavigationState> { navEvent ->
@@ -44,7 +52,7 @@ class MapOverlayManager(
     }
 
     fun stop() {
-        job.cancel()
+        synchronized(emitLock) { job.cancel() }
         consumerId?.let { karooSystem.removeConsumer(it) }
         consumerId = null
     }
@@ -119,7 +127,7 @@ class MapOverlayManager(
                     val colorHex = GradeColorScale.getColorHex(segment.grade)
                     val colorInt = Color.parseColor(colorHex)
                     val polylineId = "altgraph-grade-$index"
-                    emitter.onNext(ShowPolyline(id = polylineId, encodedPolyline = encoded, color = colorInt, width = 8))
+                    if (!emit(emitter, ShowPolyline(id = polylineId, encodedPolyline = encoded, color = colorInt, width = 8))) return
                     activePolylines.add(polylineId)
                 }
             }
@@ -131,8 +139,8 @@ class MapOverlayManager(
 
     private fun clearPolylines(emitter: Emitter<MapEffect>) {
         try {
-            activePolylines.forEach {
-                emitter.onNext(HidePolyline(it))
+            for (id in activePolylines) {
+                if (!emit(emitter, HidePolyline(id))) break
             }
         } catch (e: Exception) {
             // El mapa del host puede haber desaparecido (DeadObjectException)
