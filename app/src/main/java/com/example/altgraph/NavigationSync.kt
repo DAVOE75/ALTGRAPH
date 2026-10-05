@@ -33,7 +33,7 @@ object NavigationSync {
                 calc.isNavigatingRoute = true
                 calc.activeRouteName = state.name
                 calc.syncRouteDistance(state.routeDistance)
-                calc.setRouteFromPolyline(state.routePolyline)
+                calc.setRouteFromPolyline(state.routePolyline, state.name)
 
                 var elevPoly = state.routeElevationPolyline
                 if (elevPoly.isNullOrEmpty()) {

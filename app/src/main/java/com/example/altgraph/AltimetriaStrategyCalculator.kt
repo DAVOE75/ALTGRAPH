@@ -633,11 +633,18 @@ class AltimetriaStrategyCalculator {
         return p1.elevation + t * (p2.elevation - p1.elevation)
     }
 
-    fun setRouteFromPolyline(polyline: String) {
+    private var lastRouteNameForReset: String? = null
+
+    fun setRouteFromPolyline(polyline: String, routeName: String? = null) {
         if (polyline == lastRoutePolyline) return
         lastRoutePolyline = polyline
-        polylineScaleFactor = 1.0
-        maxRouteLengthSeen = 0.0
+        
+        if (routeName != null && routeName != lastRouteNameForReset) {
+            polylineScaleFactor = 1.0
+            maxRouteLengthSeen = 0.0
+            routeDistanceOffset = 0.0
+            lastRouteNameForReset = routeName
+        }
         
         val points = decodePolyline(polyline)
         if (points.isEmpty()) {
