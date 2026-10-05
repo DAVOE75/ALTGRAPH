@@ -9,6 +9,12 @@ It revolutionizes the traditional concept of cycling altimetry by incorporating 
 
 
 
+## 🚀 VERSION 1.0.9: ELITE GRADIENT ZONES HISTOGRAM 🚀
+
+- **NEW ELITE FEATURE (v1.0.9) - Gradient Zones (Histogram %)**: Brand new visual data field! Analyze your ride in real-time by seeing exactly what percentage of distance and absolute time you have spent in each of the 8 gradient zones (from Descent to Extreme >17%). Fully integrated colors matching the Altimetry Radar, dynamic text sizing, and premium security lock.
+
+<p align="center"><img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_gradient_zones.png" width="300" alt="Gradient Zones" /></p>
+
 ## 🚀 VERSION 1.0.6: INSTALLATION FIX & 3D IMPROVEMENTS 🚀
 
 - **3D Performance & Smoothness**: Resolved a severe memory exhaustion and freezing issue (*Garbage Collection thrashing*). The 3D altimetry models and topographic peaks have been heavily optimized, resulting in extremely smooth graphical performance and lower battery consumption.

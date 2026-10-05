@@ -8,6 +8,12 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
 
 
 
+## 🚀 VERSIÓN 1.0.9: HISTOGRAMA DE ZONAS ELITE 🚀
+
+- **NUEVA FUNCIÓN ELITE (v1.0.9) - Zonas de Dureza (Histograma %)**: ¡Nuevo campo de datos visual! Analiza tu ruta en tiempo real viendo exactamente qué porcentaje de distancia y tiempo (absoluto) has pasado en cada una de las 8 franjas de pendiente (desde Bajada hasta Extrema >17%). Incluye colores 100% integrados con el Radar Altimétrico, tamaño dinámico de texto y protección premium de seguridad.
+
+<p align="center"><img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_gradient_zones.png" width="300" alt="Gradient Zones" /></p>
+
 ## 🚀 VERSIÓN 1.0.6: CORRECCIÓN DE INSTALACIÓN Y MEJORAS 3D 🚀
 
 - **Rendimiento 3D y fluidez**: Solucionado un problema severo de agotamiento de memoria y bloqueos en el dispositivo (*Garbage Collection thrashing*). Los modelos de altimetría tridimensional y picos topográficos han sido optimizados, lo que resulta en un rendimiento gráfico extremadamente fluido y un menor consumo de batería.
