@@ -1,12 +1,18 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png" alt="ALTGRAPH Logo" width="160" />
 </p>
-# ALTGRAPH (v1.0.5 ELITE)
+# ALTGRAPH (v1.0.6 ELITE)
 <p>Read in: <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README.md">🇪🇸 Español</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_en.md">🇬🇧 English</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_fr.md">🇫🇷 Français</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_it.md">🇮🇹 Italiano</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_de.md">🇩🇪 Deutsch</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_pt.md">🇵🇹 Português</a></p>
 **ALTGRAPH** is a next-generation professional altimetry and performance extension for **Hammerhead Karoo** cycling computers (Karoo 2 and Karoo 3), developed by **David García Pascual** using the official `karoo-ext` SDK.
 It revolutionizes the traditional concept of cycling altimetry by incorporating a **Suite of 6 Altimetry Visualization Models** with a live dynamic selector, a 15-stage continuous monochromatic scale, a 50-meter rolling window quantum advance, adaptive multiscale resolution, mountain pass analysis, optional topographic calculation (pure horizontal projection), mathematical detection of hairpin turns (tornanti), filtering by POI categories (Towns, Fountains, Viewpoints, Summits), a tap-to-zoom scale switcher, Google Sans / Condensed typography, a 90° rotated full-screen landscape mode, dual **VAM** pace with recommended speed, and scientific calculation of the **Fatigue Grade (GF)**.
 
 
+
+
+## 🚀 VERSION 1.0.6: INSTALLATION FIX & 3D IMPROVEMENTS 🚀
+
+- **3D Performance & Smoothness**: Resolved a severe memory exhaustion and freezing issue (*Garbage Collection thrashing*). The 3D altimetry models and topographic peaks have been heavily optimized, resulting in extremely smooth graphical performance and lower battery consumption.
+- **APK Signature & Auto-update fix**: Fixed the installation error (`INSTALL_PARSE_FAILED_NO_CERTIFICATES`) caused by missing certificates in the APK. Manual downloads and direct auto-updates from the Karoo will now install flawlessly.
 
 
 ## 🌟 VERSION 1.0.5: DYNAMIC SCALE & OPTIONAL ALERTS 🌟
