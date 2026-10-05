@@ -10,7 +10,7 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
 
 ## 🚀 VERSIÓN 1.0.9: HISTOGRAMA DE ZONAS ELITE 🚀
 
-- **NUEVA FUNCIÓN ELITE (v1.0.9) - Zonas de Dureza (Histograma %)**: ¡Nuevo campo de datos visual! Analiza tu ruta en tiempo real viendo exactamente qué porcentaje de distancia y tiempo (absoluto) has pasado en cada una de las 8 franjas de pendiente (desde Bajada hasta Extrema >17%). Incluye colores 100% integrados con el Radar Altimétrico, tamaño dinámico de texto y protección premium de seguridad.
+- **NUEVA FUNCIÓN ELITE (v1.0.9) - Zonas de Dureza (Histograma %)**: ¡Nuevo campo de datos visual! Analiza tu ruta en tiempo real viendo exactamente qué porcentaje de distancia y tiempo (absoluto) has pasado en cada una de las 8 franjas de pendiente (desde Bajada hasta Extrema >17%). Incluye colores 100% integrados con el Radar Altimétrico, tamaño dinámico de texto y se activa automáticamente con tu clave de Suscripción Elite.
 
 <p align="center"><img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_gradient_zones.png" width="300" alt="Gradient Zones" /></p>
 
@@ -98,7 +98,7 @@ Visita el **[Portal Web Oficial de ALTGRAPH (davoe75.github.io/ALTGRAPH)](https:
 - **Strava Live Segments 3D (Beta):** Simulación en vivo (KOM Ghost) en puertos de alta dureza.
 - **Wind & Weather Overlay:** Integración nativa (Open-Meteo) para representar dirección del viento en vivo mediante vectores 3D (Headwind/Tailwind).
 ## 🚀 Novedades
-- **NUEVA FUNCIÓN ELITE (v1.0.9) - Zonas de Dureza (Histograma %)**: ¡Nuevo campo de datos visual! Analiza tu ruta en tiempo real viendo exactamente qué porcentaje de distancia y tiempo (absoluto) has pasado en cada una de las 8 franjas de pendiente (desde Bajada hasta Extrema >17%). Incluye colores 100% integrados con el Radar Altimétrico, tamaño dinámico de texto y protección premium de seguridad.
+- **NUEVA FUNCIÓN ELITE (v1.0.9) - Zonas de Dureza (Histograma %)**: ¡Nuevo campo de datos visual! Analiza tu ruta en tiempo real viendo exactamente qué porcentaje de distancia y tiempo (absoluto) has pasado en cada una de las 8 franjas de pendiente (desde Bajada hasta Extrema >17%). Incluye colores 100% integrados con el Radar Altimétrico, tamaño dinámico de texto y se activa automáticamente con tu clave de Suscripción Elite.
  y Funciones Destacadas (v0.7.0 ELITE)
 ### 🏔️ Visor de Puertos de Montaña (NUEVO en v0.4.5+)
 La funcionalidad más demandada por la comunidad ciclista. Un **campo de datos a pantalla completa** dedicado exclusivamente a la visualización integral de los puertos de montaña detectados automáticamente en tu ruta cargada:
