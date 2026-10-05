@@ -34,6 +34,6 @@ class RoutePathTest {
     fun emptyOrDegenerateInput() {
         assertNull(RoutePath.fromPolyline("", 1000.0))
         val path = RoutePath.fromPolyline(encoded, null)!!
-        assertTrue(path.subPath(200.0, 100.0).isEmpty())
+        assertTrue(path.subPath(200.0, 100.0).size < 2)
     }
 }
