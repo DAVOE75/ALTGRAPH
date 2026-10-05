@@ -20,6 +20,17 @@
     <string name="data_type_gradient_trend_title">Tendência 3D e Rampa Máxima</string>
     <string name="data_type_gradient_trend_desc">Tendência de inclinação em tempo real e pico máximo % do trecho</string>
 
+    <string name="data_type_grade_zones_title">Zonas de Inclinação</string>
+    <string name="data_type_grade_zones_desc">Histograma percentual em tempo real (Plano, Média, Parede...)</string>
+    <string name="grade_zone_descent">Descida</string>
+    <string name="grade_zone_flat">Plano</string>
+    <string name="grade_zone_mild">Suave</string>
+    <string name="grade_zone_medium">Média</string>
+    <string name="grade_zone_hard">Dura</string>
+    <string name="grade_zone_very_hard">Muito Dura</string>
+    <string name="grade_zone_wall">Parede</string>
+    <string name="grade_zone_extreme">Extrema</string>
+
     <string name="data_type_altgraph_map_title">Mapa Topográfico IGN (ALTGRAPH)</string>
     <string name="data_type_altgraph_map_desc">Mapa topográfico IGN 1:25.000 MBTILES em tela cheia com rota e posição GPS</string>
 

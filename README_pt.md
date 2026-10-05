@@ -62,7 +62,9 @@ Visite o **[Portal Web Oficial do ALTGRAPH (davoe75.github.io/ALTGRAPH)](https:/
 - **Strava Live Segments 3D (Beta):** Simulação ao vivo (KOM Ghost) em subidas desafiadoras.
 - **Wind & Weather Overlay:** Integração nativa (Open-Meteo) para representar a direção do vento ao vivo usando vetores 3D (Vento a favor/Vento contra).
 
-## 🚀 Novidades e Principais Funcionalidades (v0.7.0)
+## 🚀 Novidades
+- **NOVA FUNÇÃO ELITE (v1.0.9) - Zonas de Inclinação (Histograma %)**: Novo campo de dados com o tempo e distância percorridos em 8 zonas de inclinação diferentes!
+ e Principais Funcionalidades (v0.7.0)
 ### ⛰️ Visor de Subidas 3D (NOVO na v0.4.5+)
 A funcionalidade mais solicitada pela comunidade ciclista. Um **campo de dados em tela cheia** dedicado exclusivamente à visualização abrangente das subidas detectadas automaticamente em sua rota carregada:
 - **Navegação de Subidas**: Setas `<` e `>` ampliadas para explorar todas as subidas da rota antes de sair ou durante a pedalada.

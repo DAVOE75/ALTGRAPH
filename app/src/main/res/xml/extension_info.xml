@@ -57,4 +57,11 @@
         graphical="true"
         icon="@drawable/ic_altigraph_logo" />
 
+    <DataType
+        typeId="grade_zones"
+        displayName="@string/data_type_grade_zones_title"
+        description="@string/data_type_grade_zones_desc"
+        graphical="true"
+        icon="@drawable/ic_altigraph_logo" />
+
 </ExtensionInfo>

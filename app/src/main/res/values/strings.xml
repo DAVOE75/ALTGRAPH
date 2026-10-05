@@ -20,6 +20,18 @@
     <string name="data_type_gradient_trend_title">3D Gradient Trend &amp; Max Ramp</string>
     <string name="data_type_gradient_trend_desc">Real-time gradient trend (Steepening/Easing) &amp; max % peak in segment</string>
 
+    <string name="data_type_grade_zones_title">Gradient Zones</string>
+    <string name="data_type_grade_zones_desc">Real-time percentage histogram of gradients (Flat, Climb, Wall...)</string>
+
+    <string name="grade_zone_descent">Descent</string>
+    <string name="grade_zone_flat">Flat</string>
+    <string name="grade_zone_mild">Mild</string>
+    <string name="grade_zone_medium">Medium</string>
+    <string name="grade_zone_hard">Hard</string>
+    <string name="grade_zone_very_hard">Very Hard</string>
+    <string name="grade_zone_wall">Wall</string>
+    <string name="grade_zone_extreme">Extreme</string>
+
     <string name="data_type_altgraph_map_title">Topographic Map IGN (ALTGRAPH)</string>
     <string name="data_type_altgraph_map_desc">Fullscreen IGN 1:25.000 MBTILES topographic map with route and GPS position</string>
 

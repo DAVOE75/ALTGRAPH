@@ -20,6 +20,17 @@
     <string name="data_type_gradient_trend_title">3D Steigungstrend &amp; Max Ramp</string>
     <string name="data_type_gradient_trend_desc">Echtzeit-Steigungstrend und maximale Rampe im Segment</string>
 
+    <string name="data_type_grade_zones_title">Steigungszonen</string>
+    <string name="data_type_grade_zones_desc">Prozentuales Echtzeit-Histogramm (Flach, Schwer, Wand...)</string>
+    <string name="grade_zone_descent">Abfahrt</string>
+    <string name="grade_zone_flat">Flach</string>
+    <string name="grade_zone_mild">Leicht</string>
+    <string name="grade_zone_medium">Mittel</string>
+    <string name="grade_zone_hard">Schwer</string>
+    <string name="grade_zone_very_hard">Sehr Schwer</string>
+    <string name="grade_zone_wall">Wand</string>
+    <string name="grade_zone_extreme">Extrem</string>
+
     <string name="data_type_altgraph_map_title">Topografische Karte IGN (ALTGRAPH)</string>
     <string name="data_type_altgraph_map_desc">Vollbild IGN 1:25.000 MBTILES topografische Karte mit Route und GPS-Position</string>
 

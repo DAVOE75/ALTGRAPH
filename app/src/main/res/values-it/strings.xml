@@ -20,6 +20,17 @@
     <string name="data_type_gradient_trend_title">Tendenza 3D e Pendenza Max</string>
     <string name="data_type_gradient_trend_desc">Tendenza della pendenza in tempo reale e picco massimo nel tratto</string>
 
+    <string name="data_type_grade_zones_title">Zone di Pendenza</string>
+    <string name="data_type_grade_zones_desc">Istogramma percentuale in tempo reale (Pianura, Durezza, Muro...)</string>
+    <string name="grade_zone_descent">Discesa</string>
+    <string name="grade_zone_flat">Pianura</string>
+    <string name="grade_zone_mild">Lieve</string>
+    <string name="grade_zone_medium">Media</string>
+    <string name="grade_zone_hard">Dura</string>
+    <string name="grade_zone_very_hard">Molto Dura</string>
+    <string name="grade_zone_wall">Muro</string>
+    <string name="grade_zone_extreme">Estrema</string>
+
     <string name="data_type_altgraph_map_title">Mappa Topografica IGN (ALTGRAPH)</string>
     <string name="data_type_altgraph_map_desc">Mappa topografica IGN 1:25.000 MBTILES a schermo intero con percorso e posizione GPS</string>
 
