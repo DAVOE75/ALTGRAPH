@@ -23,6 +23,18 @@ class Altimetria3DView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
+    private var reusableWallPaint: Paint? = null
+    private var reusableTopPaint: Paint? = null
+    private var reusableKmTextPaint: Paint? = null
+    private var reusablePolyPath: Path? = null
+    private var reusableArrowPath: Path? = null
+    private var reusableLegendPaint: Paint? = null
+    private var reusableLegendTextPaint: Paint? = null
+    private var reusableLegendTitlePaint: Paint? = null
+    private var reusablePinPaint: Paint? = null
+    private var reusablePeakTextPaint: Paint? = null
+    private var reusableTriPath: Path? = null
+
     private val bgPaint = Paint().apply {
         color = Color.BLACK
         style = Paint.Style.FILL
@@ -782,19 +794,21 @@ class Altimetria3DView @JvmOverloads constructor(
             }
         }
 
-        val pinPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        if (reusablePinPaint == null) reusablePinPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
             style = Paint.Style.FILL
             setShadowLayer(4f, 0f, 2f, Color.parseColor("#80000000"))
         }
-
-        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        
+        if (reusablePeakTextPaint == null) reusablePeakTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
             textSize = 14f // Reduced size
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL) // Light instead of bold
             textAlign = Paint.Align.CENTER
             setShadowLayer(3f, 0f, 1f, Color.parseColor("#99000000"))
         }
+        val pinPaint = reusablePinPaint!!
+        val textPaint = reusablePeakTextPaint!!
 
         for (peak in selectedPeaks) {
             val idx = peak.first
@@ -803,12 +817,13 @@ class Altimetria3DView @JvmOverloads constructor(
             val elev = peak.second
 
             val triSize = 12f
-            val triPath = Path().apply {
-                moveTo(px, pyTop - 6f)
-                lineTo(px - triSize / 2f, pyTop - 6f - triSize)
-                lineTo(px + triSize / 2f, pyTop - 6f - triSize)
-                close()
-            }
+            val triPath = reusableTriPath ?: Path().also { reusableTriPath = it }
+            triPath.reset()
+            triPath.moveTo(px, pyTop - 6f)
+            triPath.lineTo(px - triSize / 2f, pyTop - 6f - triSize)
+            triPath.lineTo(px + triSize / 2f, pyTop - 6f - triSize)
+            triPath.close()
+            
             canvas.drawPath(triPath, pinPaint)
             
             canvas.drawText("${elev.toInt()}m", px, pyTop - 10f - triSize, textPaint)
@@ -2048,18 +2063,25 @@ class Altimetria3DView @JvmOverloads constructor(
             beaconY = by + centerY
         }
 
-        val wallPaint = Paint().apply { style = Paint.Style.FILL }
-        val topPaint = Paint().apply {
+        // Reused Paint objects to avoid GC thrashing
+        if (reusableWallPaint == null) reusableWallPaint = Paint().apply { style = Paint.Style.FILL }
+        if (reusableTopPaint == null) reusableTopPaint = Paint().apply {
             color = Color.WHITE
             strokeWidth = 3f
             style = Paint.Style.STROKE
             isAntiAlias = true
         }
-        val kmTextPaint = Paint().apply {
+        if (reusableKmTextPaint == null) reusableKmTextPaint = Paint().apply {
             color = Color.LTGRAY
-            textSize = 14f * fontScale
             isAntiAlias = true
         }
+        reusableKmTextPaint?.textSize = 14f * fontScale
+        val wallPaint = reusableWallPaint!!
+        val topPaint = reusableTopPaint!!
+        val kmTextPaint = reusableKmTextPaint!!
+        
+        if (reusablePolyPath == null) reusablePolyPath = Path()
+        if (reusableArrowPath == null) reusableArrowPath = Path()
 
         val ramps = mutableListOf<String>()
 
@@ -2074,7 +2096,8 @@ class Altimetria3DView @JvmOverloads constructor(
             wallPaint.color = if (isTraveled) darkenColor(baseColor, 0.32f) else baseColor
             topPaint.color = if (isTraveled) Color.parseColor("#4B5563") else Color.WHITE
             
-            val poly = Path()
+            val poly = reusablePolyPath!!
+            poly.reset()
             poly.moveTo(p1x + centerX, p1y + centerY)
             poly.lineTo(p2x + centerX, p2y + centerY)
             poly.lineTo(b2x + centerX, b2y + centerY)
@@ -2115,7 +2138,8 @@ class Altimetria3DView @JvmOverloads constructor(
                     
                     canvas.drawLine(mx, arrowTopY, mx, arrowBottomY, rampArrowPaint)
                     
-                    val arrowPath = Path()
+                    val arrowPath = reusableArrowPath!!
+                    arrowPath.reset()
                     arrowPath.moveTo(mx, arrowBottomY)
                     arrowPath.lineTo(mx - 6f, arrowBottomY - 10f)
                     arrowPath.lineTo(mx + 6f, arrowBottomY - 10f)
@@ -2149,14 +2173,21 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private fun drawIsoLegend(canvas: Canvas, w: Float, h: Float) {
-        val paint = Paint().apply { style = Paint.Style.FILL }
-        val textPaint = Paint().apply { color = Color.WHITE; textSize = 11f * fontScale; isAntiAlias = true }
+        if (reusableLegendPaint == null) reusableLegendPaint = Paint().apply { style = Paint.Style.FILL }
+        if (reusableLegendTextPaint == null) reusableLegendTextPaint = Paint().apply { color = Color.WHITE; isAntiAlias = true }
+        if (reusableLegendTitlePaint == null) reusableLegendTitlePaint = Paint().apply { color = Color.WHITE; typeface = Typeface.DEFAULT_BOLD; isAntiAlias = true }
+        
+        val paint = reusableLegendPaint!!
+        val textPaint = reusableLegendTextPaint!!
+        textPaint.textSize = 11f * fontScale
+        val titlePaint = reusableLegendTitlePaint!!
+        titlePaint.textSize = 13f * fontScale
+        
         val legendX = w * 0.05f
         val legendY = h * 0.82f
         val grades = listOf(-1.0, 1.0, 4.0, 6.0, 9.0, 11.0, 14.0, 18.0)
         val labels = listOf("<0%", "0-3%", "3-5%", "5-8%", "8-10%", "10-13%", "13-17%", "17%+")
         
-        val titlePaint = Paint().apply { color = Color.WHITE; textSize = 13f * fontScale; typeface = Typeface.DEFAULT_BOLD; isAntiAlias = true }
         canvas.drawText(context.getString(R.string.label_avg_slope), legendX, legendY - 10f, titlePaint)
         
         var currentX = legendX
