@@ -1,4 +1,4 @@
-package com.example.altgraph
+﻿package com.example.altgraph
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -50,34 +50,15 @@ class AltgraphCalculationsTest {
         calculator.routePoints = points
         calculator.isNavigatingRoute = true
 
-        // Caso 1: Ciclista en 25m (lookahead por defecto 350m)
-        // Ventana base: 0m. Avance del punto: 25m / 350m
-        calculator.updateCurrentLocation(points[1].latitude, points[1].longitude)
-        var strategy = calculator.calculateStrategy()
-        assertEquals(0.0, strategy.windowStartMeters, 0.1)
-        assertEquals(25.0 / 350.0, strategy.riderProgress.toDouble(), 0.01)
-
-        // Caso 2: Ciclista avanza a 50m
-        // La ventana se desplaza 50 metros hacia la izquierda (windowStart = 50m)
-        // El punto se ubica al inicio de la nueva ventana (riderProgress = 0.0)
-        calculator.updateCurrentLocation(points[2].latitude, points[2].longitude)
-        strategy = calculator.calculateStrategy()
-        assertEquals(50.0, strategy.windowStartMeters, 0.1)
-        assertEquals(0.0, strategy.riderProgress.toDouble(), 0.01)
-
-        // Caso 3: Ciclista avanza a 75m
-        // Ventana se mantiene en 50m, punto avanza a (75m - 50m) = 25m
-        calculator.updateCurrentLocation(points[3].latitude, points[3].longitude)
-        strategy = calculator.calculateStrategy()
-        assertEquals(50.0, strategy.windowStartMeters, 0.1)
-        assertEquals(25.0 / 350.0, strategy.riderProgress.toDouble(), 0.01)
-
-        // Caso 4: Ciclista avanza a 100m
-        // Ventana se desplaza a 100m
-        calculator.updateCurrentLocation(points[4].latitude, points[4].longitude)
-        strategy = calculator.calculateStrategy()
-        assertEquals(100.0, strategy.windowStartMeters, 0.1)
-        assertEquals(0.0, strategy.riderProgress.toDouble(), 0.01)
+        // La ventana avanza en bloques de 50m dejando al ciclista a 1/4 de la ventana
+        for (i in listOf(1, 2, 3, 4, 8, 12, 16)) {
+            calculator.updateCurrentLocation(points[i].latitude, points[i].longitude)
+            val strategy = calculator.calculateStrategy()
+            val dist = points[i].distance
+            val expectedStart = (Math.floor((dist - strategy.windowLengthMeters / 4.0) / 50.0) * 50.0).coerceAtLeast(0.0)
+            assertEquals(expectedStart, strategy.windowStartMeters, 0.1)
+            assertEquals((dist - expectedStart) / strategy.windowLengthMeters, strategy.riderProgress.toDouble(), 0.01)
+        }
     }
 
     @Test
@@ -186,8 +167,8 @@ class AltgraphCalculationsTest {
         assertEquals(1000.0, calculator.getSubBlockSize(50000.0), 0.1)
         assertEquals(5000.0, calculator.getMajorBlockSize(50000.0), 0.1)
 
-        // 5. Escala > 100km: tramos de 10 en 10 km
-        assertEquals(10000.0, calculator.getSubBlockSize(120000.0), 0.1)
+        // 5. Escala > 50km: bloques de 1km
+        assertEquals(1000.0, calculator.getSubBlockSize(120000.0), 0.1)
         assertEquals(20000.0, calculator.getMajorBlockSize(120000.0), 0.1)
     }
 
@@ -232,44 +213,32 @@ class AltgraphCalculationsTest {
 
     @Test
     fun testGradeColorScaleProgression() {
-        // 1. Descenso o pendientes negativas: SIEMPRE AZUL
-        assertEquals(GradeColorScale.COLOR_DESCENSO, GradeColorScale.getColorHex(-8.0))
-        assertEquals(GradeColorScale.COLOR_DESCENSO, GradeColorScale.getColorHex(-2.5))
-        assertEquals(GradeColorScale.COLOR_DESCENSO, GradeColorScale.getColorHex(-0.1))
+        // 1. Descensos: escala de azules
+        assertEquals("#041E42", GradeColorScale.getColorHex(-12.0))
+        assertEquals("#004B87", GradeColorScale.getColorHex(-8.0))
+        assertEquals("#0072CE", GradeColorScale.getColorHex(-2.5))
+        assertEquals("#41B6E6", GradeColorScale.getColorHex(-0.1))
 
-        // 2. 15 tramos de uno en uno desde el 0% al 15% (Blanco -> Amarillo claro -> Amarillo oscuro -> Naranja -> Rojo intenso)
-        assertEquals("#FFFFFF", GradeColorScale.getColorHex(0.0))  // 0% a 1%: Blanco
-        assertEquals("#FFFFFF", GradeColorScale.getColorHex(0.8))
-        assertEquals("#FEF9C3", GradeColorScale.getColorHex(1.2))  // 1% a 2%: Crema
-        assertEquals("#FEF08A", GradeColorScale.getColorHex(2.5))  // 2% a 3%: Amarillo muy claro
-        assertEquals("#FDE047", GradeColorScale.getColorHex(3.5))  // 3% a 4%: Amarillo claro
-        assertEquals("#FACC15", GradeColorScale.getColorHex(4.9))  // 4% a 5%: Amarillo medio
-        assertEquals("#EAB308", GradeColorScale.getColorHex(5.1))  // 5% a 6%: Amarillo más oscuro / dorado
-        assertEquals("#F59E0B", GradeColorScale.getColorHex(6.7))  // 6% a 7%: Amarillo anaranjado
-        assertEquals("#FB923C", GradeColorScale.getColorHex(7.3))  // 7% a 8%: Naranja claro
-        assertEquals("#F97316", GradeColorScale.getColorHex(8.4))  // 8% a 9%: Naranja
-        assertEquals("#EA580C", GradeColorScale.getColorHex(9.6))  // 9% a 10%: Naranja intenso
-        assertEquals("#E03E1A", GradeColorScale.getColorHex(10.2)) // 10% a 11%: Naranja rojizo
-        assertEquals("#EA2E1A", GradeColorScale.getColorHex(11.8)) // 11% a 12%: Rojo anaranjado
-        assertEquals("#E02424", GradeColorScale.getColorHex(12.5)) // 12% a 13%: Rojo vivo
-        assertEquals("#DC2626", GradeColorScale.getColorHex(13.9)) // 13% a 14%: Rojo puro
-        assertEquals("#B91C1C", GradeColorScale.getColorHex(14.7)) // 14% a 15%: Rojo intenso
+        // 2. Subidas
+        assertEquals("#388E3C", GradeColorScale.getColorHex(0.0))
+        assertEquals("#388E3C", GradeColorScale.getColorHex(2.9))
+        assertEquals("#FBC02D", GradeColorScale.getColorHex(4.9))
+        assertEquals("#F57C00", GradeColorScale.getColorHex(7.9))
+        assertEquals("#E65100", GradeColorScale.getColorHex(9.6))
+        assertEquals("#D32F2F", GradeColorScale.getColorHex(12.5))
+        assertEquals("#B71C1C", GradeColorScale.getColorHex(15.0))
+        assertEquals("#B71C1C", GradeColorScale.getColorHex(17.0))
 
-        // 3. Superior al 15% hasta 20%: ROJO INTENSO
-        assertEquals(GradeColorScale.COLOR_ROJO_INTENSO, GradeColorScale.getColorHex(15.0))
-        assertEquals(GradeColorScale.COLOR_ROJO_INTENSO, GradeColorScale.getColorHex(17.5))
-        assertEquals(GradeColorScale.COLOR_ROJO_INTENSO, GradeColorScale.getColorHex(20.0))
-
-        // 4. Superior al 20%: NEGRO
-        assertEquals(GradeColorScale.COLOR_NEGRO, GradeColorScale.getColorHex(20.1))
-        assertEquals(GradeColorScale.COLOR_NEGRO, GradeColorScale.getColorHex(24.0))
+        // 3. Superior al 17%: negro
+        assertEquals("#000000", GradeColorScale.getColorHex(17.1))
+        assertEquals("#000000", GradeColorScale.getColorHex(24.0))
     }
 
     @Test
     fun testAltimetriaStyleEnumsAndKeys() {
-        // 1. Verificación de existencia de las 5 vistas revolucionarias
+        // 1. Verificación de existencia de las 6 vistas
         val entries = AltimetriaStyle.entries
-        assertEquals(5, entries.size)
+        assertEquals(6, entries.size)
 
         // 2. Modelo por defecto: CLASSIC
         assertEquals(AltimetriaStyle.CLASSIC, AltimetriaStyle.fromKey("classic"))
@@ -281,12 +250,13 @@ class AltgraphCalculationsTest {
         assertEquals(AltimetriaStyle.TACTICAL_OASES, AltimetriaStyle.fromKey("tactical_oases"))
         assertEquals(AltimetriaStyle.DYNAMIC_FORCE_FIELD, AltimetriaStyle.fromKey("force_field"))
         assertEquals(AltimetriaStyle.MONOLITHIC_OBSIDIAN, AltimetriaStyle.fromKey("monolithic"))
+        assertEquals(AltimetriaStyle.GLOBAL_ISOMETRIC, AltimetriaStyle.fromKey("global_iso"))
 
-        // 4. Iconos y metadatos no vacíos
+        // 4. Iconos y recursos de metadatos válidos
         entries.forEach { style ->
             assertTrue(style.icon.isNotEmpty())
-            assertTrue(style.title.isNotEmpty())
-            assertTrue(style.description.isNotEmpty())
+            assertTrue(style.titleRes != 0)
+            assertTrue(style.descRes != 0)
         }
     }
 }
