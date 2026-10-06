@@ -314,8 +314,9 @@ class AltimetriaStrategyCalculator {
             var realMinDistance = Double.MAX_VALUE
             val dists = FloatArray(1)
             
-            val searchStart = if (nearestIndex == 0) 0 else (nearestIndex - 20).coerceAtLeast(0)
-            val searchEnd = if (nearestIndex == 0) routePoints.size else (nearestIndex + 500).coerceAtMost(routePoints.size)
+            val isLost = (nearestIndex != 0 && routePoints.isNotEmpty() && Math.hypot(lat - routePoints[nearestIndex].latitude, lng - routePoints[nearestIndex].longitude) > 0.005) // approx 500m
+            val searchStart = if (nearestIndex == 0 || isLost) 0 else (nearestIndex - 20).coerceAtLeast(0)
+            val searchEnd = if (nearestIndex == 0 || isLost) routePoints.size else (nearestIndex + 500).coerceAtMost(routePoints.size)
             
             var newNearestIdx = nearestIndex
             for (i in searchStart until searchEnd) {
@@ -326,7 +327,7 @@ class AltimetriaStrategyCalculator {
                 // Penalizar saltos largos en el índice para evitar que en rutas circulares 
                 // salte al final de la ruta por un metro de diferencia en el GPS.
                 val indexDiff = Math.abs(i - nearestIndex)
-                val penalty = if (indexDiff > 500) 500.0 else (indexDiff * 0.1)
+                val penalty = if (nearestIndex == 0) 0.0 else (if (indexDiff > 500) 500.0 else (indexDiff * 0.1))
                 
                 val effectiveDist = dist + penalty
                 
@@ -337,11 +338,6 @@ class AltimetriaStrategyCalculator {
                 }
             }
             nearestIndex = newNearestIdx
-            
-            // PREVIEW FIX: Si el punto más cercano está a más de 5km, asumimos que está en casa probando.
-            if (realMinDistance > 5000.0) {
-                nearestIndex = 0
-            }
             
             val computedDist = routePoints[nearestIndex].distance
             this.currentRouteDistance = computedDist + routeDistanceOffset
@@ -360,16 +356,19 @@ class AltimetriaStrategyCalculator {
             val polylineRemaining = rawPolylineTotal - currentPolylineDist
             
             if (polylineRemaining > 500.0) {
-                polylineScaleFactor = karooRemainingDistance / polylineRemaining
-                // Scale all distance arrays to match reality
-                routePoints = routePoints.map { it.copy(distance = it.distance * polylineScaleFactor) }
-                if (routeElevationProfile.isNotEmpty()) {
-                    routeElevationProfile = routeElevationProfile.map { it.copy(distance = it.distance * polylineScaleFactor) }
+                val factor = karooRemainingDistance / polylineRemaining
+                if (factor in 0.8..1.2) {
+                    polylineScaleFactor = factor
+                    // Scale all distance arrays to match reality
+                    routePoints = routePoints.map { it.copy(distance = it.distance * polylineScaleFactor) }
+                    if (routeElevationProfile.isNotEmpty()) {
+                        routeElevationProfile = routeElevationProfile.map { it.copy(distance = it.distance * polylineScaleFactor) }
+                    }
+                    if (absoluteHairpins.isNotEmpty()) {
+                        absoluteHairpins = absoluteHairpins.map { it * polylineScaleFactor }.toMutableList()
+                    }
+                    android.util.Log.d("AltiCalc", "Calibrated distances. Factor: $polylineScaleFactor")
                 }
-                if (absoluteHairpins.isNotEmpty()) {
-                    absoluteHairpins = absoluteHairpins.map { it * polylineScaleFactor }.toMutableList()
-                }
-                android.util.Log.d("AltiCalc", "Calibrated distances. Factor: $polylineScaleFactor")
             }
         }
         val currentPolylineLength = routePoints.lastOrNull()?.distance ?: (routeElevationProfile.lastOrNull()?.distance ?: 0.0)
