@@ -201,11 +201,16 @@ class AltimetriaStrategyCalculator {
         elevFromBottom: Double = elevationFromBottom,
         elevRemaining: Double = elevationRemaining
     ) {
-        if (distToTop >= 0.0) this.distanceToTop = distToTop
-        if (elevToTop >= 0.0) this.elevationToTop = elevToTop
-        if (distFromBottom >= 0.0) this.distanceFromBottom = distFromBottom
-        if (elevFromBottom >= 0.0) this.elevationFromBottom = elevFromBottom
-        if (elevRemaining >= 0.0) this.elevationRemaining = elevRemaining
+        var changed = false
+        if (distToTop >= 0.0 && this.distanceToTop != distToTop) { this.distanceToTop = distToTop; changed = true }
+        if (elevToTop >= 0.0 && this.elevationToTop != elevToTop) { this.elevationToTop = elevToTop; changed = true }
+        if (distFromBottom >= 0.0 && this.distanceFromBottom != distFromBottom) { this.distanceFromBottom = distFromBottom; changed = true }
+        if (elevFromBottom >= 0.0 && this.elevationFromBottom != elevFromBottom) { this.elevationFromBottom = elevFromBottom; changed = true }
+        if (elevRemaining >= 0.0 && this.elevationRemaining != elevRemaining) { this.elevationRemaining = elevRemaining; changed = true }
+        
+        if (changed) {
+            Log.d("AltiCalc", "ClimbData Updated: distToTop=$distanceToTop, elevToTop=$elevationToTop, distFromBottom=$distanceFromBottom, elevFromBottom=$elevationFromBottom, elevRemaining=$elevationRemaining")
+        }
     }
 
     fun updateLiveElevation(elev: Double) {
@@ -434,12 +439,14 @@ class AltimetriaStrategyCalculator {
             routeKeyForClimbs = routeKey
             if (incoming.isNotEmpty()) {
                 routeClimbs = incoming.map { calculateClimbCategory(it) }
+                Log.d("AltiCalc", "syncRouteClimbs: Nueva ruta '$routeKey'. Inicializados ${routeClimbs.size} puertos.")
             }
         } else if (incoming.isNotEmpty()) {
             val currentStartDists = routeClimbs.map { it.startDistance }.toSet()
             val newClimbs = incoming.filter { it.startDistance !in currentStartDists }.map { calculateClimbCategory(it) }
             if (newClimbs.isNotEmpty()) {
                 routeClimbs = (routeClimbs + newClimbs).sortedBy { it.startDistance }
+                Log.d("AltiCalc", "syncRouteClimbs: Añadidos ${newClimbs.size} nuevos puertos a '$routeKey'. Total: ${routeClimbs.size}")
             }
         }
     }
@@ -1018,7 +1025,10 @@ class AltimetriaStrategyCalculator {
         val subBlockSize = getSubBlockSize(actualLookahead)
         val majorBlockSize = getMajorBlockSize(actualLookahead)
 
-        val numSubBlocks = (actualLookahead / subBlockSize).roundToInt().coerceIn(2, 2000)
+        // Add extra blocks (+ 2) to buffer the right edge. As riderProgress increases, 
+        // the view slides left, revealing the right edge. Without extra blocks, it shows a black gap 
+        // until the 50m quantum window snaps and regenerates the array.
+        val numSubBlocks = (actualLookahead / subBlockSize).roundToInt().coerceIn(2, 2000) + 2
         val routeSubBlocks = mutableListOf<Float>()
         val routeSubBlocksMax = mutableListOf<Float>()
         val routeElevations = mutableListOf<Float>()

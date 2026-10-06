@@ -1,8 +1,11 @@
 package com.example.altgraph
 
+import android.util.Log
 import kotlin.math.roundToInt
 
 object ClimbPacingCalculator {
+
+    private const val TAG = "ClimbPacingCalculator"
 
     enum class PacingStatus {
         ON_PACE,
@@ -22,12 +25,15 @@ object ClimbPacingCalculator {
         currentGradientPct: Double,
         userTargetVam: Int = 900
     ): PacingResult {
+        Log.d(TAG, "calculatePacing: speed=$currentSpeedMps m/s, grad=$currentGradientPct%, targetVam=$userTargetVam")
+
         // En parado / interiores (Modo Demo de prueba cuando no hay movimiento)
         if (currentSpeedMps <= 0.1) {
             val demoGrade = 7.2
             val demoSpeedKmh = (userTargetVam.toDouble() / (demoGrade * 10.0)).coerceIn(3.0, 45.0)
             val demoVam = 850
 
+            Log.d(TAG, "Mode: Demo (Speed <= 0.1). returning VAM=$demoVam, targetSpeed=$demoSpeedKmh")
             return PacingResult(
                 currentVam = demoVam,
                 targetVam = userTargetVam,
@@ -43,6 +49,7 @@ object ClimbPacingCalculator {
             } else {
                 0
             }
+            Log.d(TAG, "Mode: Flat/Downhill (Grad <= 0.5%). returning VAM=$calculatedVam")
             return PacingResult(
                 currentVam = calculatedVam,
                 targetVam = userTargetVam,
@@ -65,6 +72,7 @@ object ClimbPacingCalculator {
             else -> PacingStatus.ON_PACE
         }
 
+        Log.d(TAG, "Mode: Active Climb. Calculated VAM=$calculatedVam, Target Speed=$targetSpeedKmh km/h, DiffRatio=$diffRatio -> Status=$status")
         return PacingResult(
             currentVam = calculatedVam,
             targetVam = userTargetVam,

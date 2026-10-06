@@ -79,26 +79,53 @@ object NavigationSync {
     // Claves y fallbacks idénticos a los consumers del campo 3D (POWER, del RouteBar)
     fun applyStream(calc: AltimetriaStrategyCalculator, type: String, values: Map<String, Double>) {
         val single = values[DataType.Field.SINGLE]
+        
         when (type) {
-            DataType.Type.SPEED ->
-                calc.currentSpeed = values[DataType.Field.SPEED] ?: single ?: 0.0
-            DataType.Type.PRESSURE_ELEVATION_CORRECTION ->
-                calc.updateLiveElevation(values[DataType.Field.PRESSURE_ELEVATION] ?: single ?: 0.0)
-            DataType.Type.ELEVATION_GRADE ->
-                calc.updateLiveGrade(values[DataType.Field.ELEVATION_GRADE] ?: single ?: 0.0)
-            DataType.Type.POWER ->
-                calc.setPower(single ?: 0.0)
-            DataType.Type.DISTANCE_TO_TOP ->
-                calc.updateClimbData(distToTop = values[DataType.Field.DISTANCE_TO_TOP] ?: single ?: 0.0)
-            DataType.Type.ELEVATION_TO_TOP ->
-                calc.updateClimbData(elevToTop = values[DataType.Field.ELEVATION_TO_TOP] ?: single ?: 0.0)
+            DataType.Type.SPEED -> {
+                val speed = values[DataType.Field.SPEED] ?: single ?: 0.0
+                // Log.v(TAG, "STREAM SPEED: $speed m/s") // Opcional, puede generar mucho ruido
+                calc.currentSpeed = speed
+            }
+            DataType.Type.PRESSURE_ELEVATION_CORRECTION -> {
+                val elev = values[DataType.Field.PRESSURE_ELEVATION] ?: single ?: 0.0
+                Log.d(TAG, "STREAM ELEVATION: $elev m")
+                calc.updateLiveElevation(elev)
+            }
+            DataType.Type.ELEVATION_GRADE -> {
+                val grade = values[DataType.Field.ELEVATION_GRADE] ?: single ?: 0.0
+                // Log.v(TAG, "STREAM GRADE: $grade %") // Opcional, puede generar mucho ruido
+                calc.updateLiveGrade(grade)
+            }
+            DataType.Type.POWER -> {
+                val pwr = single ?: 0.0
+                calc.setPower(pwr)
+            }
+            DataType.Type.DISTANCE_TO_TOP -> {
+                val dist = values[DataType.Field.DISTANCE_TO_TOP] ?: single ?: 0.0
+                Log.d(TAG, "STREAM DIST_TO_TOP: $dist m")
+                calc.updateClimbData(distToTop = dist)
+            }
+            DataType.Type.ELEVATION_TO_TOP -> {
+                val elevTop = values[DataType.Field.ELEVATION_TO_TOP] ?: single ?: 0.0
+                Log.d(TAG, "STREAM ELEV_TO_TOP: $elevTop m")
+                calc.updateClimbData(elevToTop = elevTop)
+            }
             // Bug conocido (no se corrige): FROM_BOTTOM lee las claves TO_TOP, como el campo 3D
-            DataType.Type.DISTANCE_FROM_BOTTOM ->
-                calc.updateClimbData(distFromBottom = values[DataType.Field.DISTANCE_TO_TOP] ?: single ?: 0.0)
-            DataType.Type.ELEVATION_FROM_BOTTOM ->
-                calc.updateClimbData(elevFromBottom = values[DataType.Field.ELEVATION_TO_TOP] ?: single ?: 0.0)
-            DataType.Type.ELEVATION_REMAINING ->
-                calc.updateClimbData(elevRemaining = values[DataType.Field.ASCENT_REMAINING] ?: single ?: 0.0)
+            DataType.Type.DISTANCE_FROM_BOTTOM -> {
+                val distBot = values[DataType.Field.DISTANCE_TO_TOP] ?: single ?: 0.0
+                Log.d(TAG, "STREAM DIST_FROM_BOTTOM: $distBot m")
+                calc.updateClimbData(distFromBottom = distBot)
+            }
+            DataType.Type.ELEVATION_FROM_BOTTOM -> {
+                val elevBot = values[DataType.Field.ELEVATION_TO_TOP] ?: single ?: 0.0
+                Log.d(TAG, "STREAM ELEV_FROM_BOTTOM: $elevBot m")
+                calc.updateClimbData(elevFromBottom = elevBot)
+            }
+            DataType.Type.ELEVATION_REMAINING -> {
+                val elevRem = values[DataType.Field.ASCENT_REMAINING] ?: single ?: 0.0
+                Log.d(TAG, "STREAM ELEV_REMAINING: $elevRem m")
+                calc.updateClimbData(elevRemaining = elevRem)
+            }
         }
     }
 }
