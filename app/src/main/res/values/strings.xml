@@ -159,8 +159,7 @@
     <string name="toast_visor_puertos">Climb Viewer: %1$s</string>
     <string name="label_elite_header">👑 ALTGRAPH ELITE 👑</string>
     <string name="label_elite_features">🎯 Radar ELITE Features</string>
-    <string name="label_ghost">👻 Ghost — Previous best time
-(Recorded at end of route)</string>
+    <string name="label_ghost">👻 KGhost gap (requires the KGhost app)</string>
     <string name="label_energy_bar">🔋 Remaining energy bar</string>
     <string name="label_poi_icons">📍 POI Icons on ruler</string>
     <string name="label_histogram">📊 Gradient Histogram</string>
