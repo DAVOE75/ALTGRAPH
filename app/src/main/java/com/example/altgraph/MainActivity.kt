@@ -44,7 +44,7 @@ class MainActivity : Activity() {
         // 1. Header Card (Logo, Título y Versión)
         val headerCard = createCardContainer()
         val logo = ImageView(this).apply {
-            setImageResource(R.drawable.ic_altigraph_logo)
+            setImageResource(R.mipmap.ic_launcher)
             layoutParams = LinearLayout.LayoutParams(120, 120).apply {
                 gravity = Gravity.CENTER_HORIZONTAL
                 bottomMargin = 8
