@@ -648,11 +648,13 @@ class AltimetriaStrategyCalculator {
         if (polyline == lastRoutePolyline) return
         lastRoutePolyline = polyline
         
+        var isNewRouteName = false
         if (routeName != null && routeName != lastRouteNameForReset) {
             polylineScaleFactor = 1.0
             maxRouteLengthSeen = 0.0
             routeDistanceOffset = 0.0
             lastRouteNameForReset = routeName
+            isNewRouteName = true
         }
 
         
@@ -665,7 +667,7 @@ class AltimetriaStrategyCalculator {
         }
 
         var isContinuation = false
-        if (routePoints.isNotEmpty()) {
+        if (!isNewRouteName && routePoints.isNotEmpty()) {
             val oldStart = routePoints.first()
             val newStart = points.first()
             
@@ -674,11 +676,10 @@ class AltimetriaStrategyCalculator {
             val dLonStart = Math.abs(oldStart.longitude - newStart.second) * (111320.0 * Math.cos(Math.toRadians(oldStart.latitude)))
             val distBetweenStarts = Math.hypot(dLatStart, dLonStart)
             
-            val dLatRider = Math.abs(currentLatitude - newStart.first) * 111320.0
-            val dLonRider = Math.abs(currentLongitude - newStart.second) * (111320.0 * Math.cos(Math.toRadians(currentLatitude)))
-            val distFromRider = Math.hypot(dLatRider, dLonRider)
-            
-            if (distBetweenStarts > 100.0 && distFromRider < 1500.0) {
+            // If it's the SAME route name, but the polyline starts somewhere else (>100m away),
+            // Karoo cropped it (e.g. at the start of a climb or a recalculation).
+            // We treat this as a continuation of the same route to preserve distance.
+            if (distBetweenStarts > 100.0) {
                 isContinuation = true
             }
         }
@@ -729,6 +730,7 @@ class AltimetriaStrategyCalculator {
         }
 
         this.routePoints = result
+        this.nearestIndex = 0
         this.isNavigatingRoute = true
         
         // If we already received the elevation profile, apply it now
