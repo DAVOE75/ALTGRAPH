@@ -14,7 +14,9 @@ data class Snapshot(
     val currentRouteDistance: Double,
     val isNavigatingRoute: Boolean,
     val zoneColor: String,
-    val routeClimbs: List<RouteClimb>
+    val routeClimbs: List<RouteClimb>,
+    // Hueco con el fantasma de KGhost (null si KGhost no publica)
+    val ghostGap: GhostGap? = null
 )
 
 /**
@@ -26,6 +28,9 @@ class AltgraphCore(val calculator: AltimetriaStrategyCalculator = AltimetriaStra
     var mapZoomLevel: Double? = null
     var pan3dMeters: Double = 0.0
     var rawGrade: Double = 0.0
+    // Últimas partes del hueco de KGhost (tiempo y distancia); null = sin dato
+    var kghostTime: GapPart? = null
+    var kghostDist: GapPart? = null
 
     /** Único punto que avanza el calculador (una vez por segundo). */
     fun tick(context: Context?): Snapshot {
@@ -42,7 +47,8 @@ class AltgraphCore(val calculator: AltimetriaStrategyCalculator = AltimetriaStra
             currentRouteDistance = calculator.currentRouteDistance,
             isNavigatingRoute = calculator.isNavigatingRoute,
             zoneColor = calculator.getZoneColor(calculator.currentElevation),
-            routeClimbs = calculator.routeClimbs.toList()
+            routeClimbs = calculator.routeClimbs.toList(),
+            ghostGap = combineGhostGap(kghostTime, kghostDist)
         )
     }
 

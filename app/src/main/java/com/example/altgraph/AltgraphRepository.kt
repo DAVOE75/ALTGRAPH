@@ -105,6 +105,8 @@ object AltgraphRepository {
         appContext = ctx
         val s = CoroutineScope(SupervisorJob() + repoDispatcher + CoroutineExceptionHandler { _, e -> Log.e(TAG, "repo", e) })
         scope = s
+        // Primer trabajo del hilo: el backoff de una vida anterior no se arrastra tras stop()/start()
+        s.launch { backoff.clear() }
         val gen = ++generation
 
         val system = KarooSystemService(ctx)
@@ -113,7 +115,7 @@ object AltgraphRepository {
             add = { kind -> addConsumer(system, s, kind, gen) },
             remove = { id -> system.removeConsumer(id) }
         )
-        val kinds = listOf(KIND_NAV, KIND_LOC, KIND_ZOOM) + NavigationSync.STREAM_TYPES
+        val kinds = listOf(KIND_NAV, KIND_LOC, KIND_ZOOM) + NavigationSync.STREAM_TYPES + KGHOST_GAP_TIME + KGHOST_GAP_DIST
         // Alta única antes de conectar: el SDK registra en cada (re)conexión todos los consumers
         // que tiene. No se tocan desde el callback de connect, que corre dentro de ese recorrido.
         registry.register(kinds)
@@ -210,12 +212,23 @@ object AltgraphRepository {
 
     // El host terminó el stream (el SDK ya quitó el consumer): se espera con backoff y se vuelve a dar de alta
     private suspend fun onStreamTerminal(kind: String, reason: String, gen: Int) {
-        // Aquí se limpia el valor de cada kind (Task 3: partes de KGhost)
+        // Sin stream no hay dato: la parte de KGhost se limpia hasta que vuelva a llegar
+        if (isKGhost(kind)) setKGhostPart(kind, null)
         val d = nextBackoffMs(backoff[kind])
         backoff[kind] = d
         Log.w(TAG, "stream $kind terminado ($reason), re-suscribiendo en $d ms")
         delay(d)
         resubscribe(kind, gen)
+    }
+
+    private fun isKGhost(kind: String) = kind == KGHOST_GAP_TIME || kind == KGHOST_GAP_DIST
+
+    // Solo en el hilo del repositorio; registra únicamente las transiciones null <-> dato
+    private fun setKGhostPart(kind: String, part: GapPart?) {
+        val old = if (kind == KGHOST_GAP_TIME) core.kghostTime else core.kghostDist
+        if (kind == KGHOST_GAP_TIME) core.kghostTime = part else core.kghostDist = part
+        if (old == null && part != null) Log.i(TAG, "KGhost gap received: $kind")
+        else if (old != null && part == null) Log.i(TAG, "KGhost gap cleared: $kind")
     }
 
     // Mismo monitor que start/stop: un re-alta no se cruza con un stop()
@@ -247,7 +260,14 @@ object AltgraphRepository {
             onComplete = { s.launch { onStreamTerminal(kind, "complete", gen) } }
         ) { event ->
             val st = event.state
-            if (st is StreamState.Streaming) {
+            if (isKGhost(kind)) {
+                // Cualquier estado cuenta (Searching, Idle...: sin dato la parte se limpia); no pasa por NavigationSync
+                val part = kghostPart(st)
+                s.launch {
+                    if (st is StreamState.Streaming && backoff.remove(kind) != null) Log.i(TAG, "stream $kind recovered")
+                    setKGhostPart(kind, part)
+                }
+            } else if (st is StreamState.Streaming) {
                 val values = st.dataPoint.values
                 s.launch {
                     if (backoff.remove(kind) != null) Log.i(TAG, "stream $kind recovered")
