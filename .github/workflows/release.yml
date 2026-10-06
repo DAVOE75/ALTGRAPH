@@ -1,0 +1,43 @@
+name: Android Release
+
+on:
+  push:
+    tags:
+      - 'v*' # Se ejecuta automáticamente cuando creas un tag que empieza por 'v' (ej. v1.0.0)
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Necesario para poder crear la Release en GitHub
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+
+      - name: Extract Tag Name
+        id: extract_tag
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Create GitHub Release and Upload APK
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app/build/outputs/apk/release/app-release*.apk
+          name: Release ${{ env.TAG_NAME }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
