@@ -47,6 +47,7 @@ data class StrategyData(
     val windowStartElevation: Double = 0.0,
     val subBlocks: List<Float> = emptyList(),
     val subBlocksMax: List<Float> = emptyList(),
+    val windowLengthMeters: Double = 400.0,
     val subBlockSizeMeters: Double = 50.0,
     val majorBlockSizeMeters: Double = 100.0,
     val profileElevations: List<Float> = emptyList(),
@@ -243,7 +244,8 @@ class AltimetriaStrategyCalculator {
         }
     }
 
-    fun getSubBlockSize(lookaheadDist: Double): Double {
+    fun getSubBlockSize(lookaheadDist: Double, customResolution: Int = 0): Double {
+        if (customResolution > 0) return customResolution.toDouble()
         return when {
             lookaheadDist <= 500.0 -> 50.0
             lookaheadDist <= 5000.0 -> 100.0
@@ -652,6 +654,7 @@ class AltimetriaStrategyCalculator {
             routeDistanceOffset = 0.0
             lastRouteNameForReset = routeName
         }
+
         
         val points = decodePolyline(polyline)
         if (points.isEmpty()) {
@@ -661,13 +664,34 @@ class AltimetriaStrategyCalculator {
             return
         }
 
-        // Build a list of raw (lat, lng, distAcumulada) first so we can apply real elevation.
-        // The Karoo polyline encodes ONLY lat/lng — no altitude. We anchor the profile on the
-        // current barometric elevation and accumulate vertical gain from the live grade stream.
-        // Any subsequent live elevation update will correct currentElevation in real time.
-        // BUGFIX: Si es una nueva ruta (ej. Climb Detect), preservamos la distancia real recorrida
-        // para que la gráfica no vuelva a empezar desde 0m, sino desde la distancia actual.
-        val shiftOffset = if (currentRouteDistance > 0.0) currentRouteDistance else liveDistanceAccumulated
+        var isContinuation = false
+        if (routePoints.isNotEmpty()) {
+            val oldStart = routePoints.first()
+            val newStart = points.first()
+            
+            // Approximation for distance in meters
+            val dLatStart = Math.abs(oldStart.latitude - newStart.first) * 111320.0
+            val dLonStart = Math.abs(oldStart.longitude - newStart.second) * (111320.0 * Math.cos(Math.toRadians(oldStart.latitude)))
+            val distBetweenStarts = Math.hypot(dLatStart, dLonStart)
+            
+            val dLatRider = Math.abs(currentLatitude - newStart.first) * 111320.0
+            val dLonRider = Math.abs(currentLongitude - newStart.second) * (111320.0 * Math.cos(Math.toRadians(currentLatitude)))
+            val distFromRider = Math.hypot(dLatRider, dLonRider)
+            
+            if (distBetweenStarts > 100.0 && distFromRider < 1500.0) {
+                isContinuation = true
+            }
+        }
+        
+        if (!isContinuation) {
+            polylineScaleFactor = 1.0
+            maxRouteLengthSeen = 0.0
+            routeDistanceOffset = 0.0
+        }
+
+        val shiftOffset = if (isContinuation) {
+            if (currentRouteDistance > 0.0) currentRouteDistance else liveDistanceAccumulated
+        } else 0.0
         this.globalRouteOffset = shiftOffset
         
         var accumulatedDist = shiftOffset
@@ -876,7 +900,8 @@ class AltimetriaStrategyCalculator {
             val riderDistInWindow = (liveDistanceAccumulated - windowStartDist).coerceAtLeast(0.0)
             val riderProgress = (riderDistInWindow / lookaheadDist).toFloat().coerceIn(0f, 1f)
 
-            val subBlockSize = getSubBlockSize(lookaheadDist)
+            val customResolution = prefs?.eliteRadarResolution ?: 0
+            val subBlockSize = getSubBlockSize(lookaheadDist, customResolution)
             val majorBlockSize = getMajorBlockSize(lookaheadDist)
             val numSubBlocks = (lookaheadDist / subBlockSize).toInt().coerceIn(2, 60)
 
@@ -935,6 +960,7 @@ class AltimetriaStrategyCalculator {
                 windowStartElevation = windowStartElevation,
                 subBlocks = freeSubBlocks,
                 subBlocksMax = freeSubBlocksMax,
+                windowLengthMeters = lookaheadDist,
                 subBlockSizeMeters = subBlockSize,
                 majorBlockSizeMeters = majorBlockSize,
                 profileElevations = freeElevations,
@@ -1022,7 +1048,13 @@ class AltimetriaStrategyCalculator {
         val secondsRemaining = if (currentSpeed > 0.1) (totalDistanceRemaining / currentSpeed).toLong() else 0L
 
         // 5. Cálculo de resolución adaptativa según escala (Lookahead)
-        val subBlockSize = getSubBlockSize(actualLookahead)
+        val customResolution = prefs?.eliteRadarResolution ?: 0
+        var subBlockSize = getSubBlockSize(actualLookahead, customResolution)
+        
+        // Cap blocks to prevent OOM or lag if lookahead is huge but resolution is small
+        if (actualLookahead / subBlockSize > 500.0) {
+            subBlockSize = actualLookahead / 500.0
+        }
         val majorBlockSize = getMajorBlockSize(actualLookahead)
 
         // Add extra blocks (+ 2) to buffer the right edge. As riderProgress increases, 
@@ -1372,6 +1404,7 @@ class AltimetriaStrategyCalculator {
             windowStartElevation = windowStartElevation,
             subBlocks = routeSubBlocks,
             subBlocksMax = routeSubBlocksMax,
+            windowLengthMeters = actualLookahead,
             subBlockSizeMeters = subBlockSize,
             majorBlockSizeMeters = majorBlockSize,
             profileElevations = routeElevations,
@@ -1511,6 +1544,7 @@ class AltimetriaStrategyCalculator {
             windowStartMeters = startDist,
             windowStartElevation = minElev,
             subBlocks = subBlocks,
+            windowLengthMeters = windowLength,
             subBlockSizeMeters = subBlock,
             majorBlockSizeMeters = majorBlock,
             profileElevations = profileElevs,

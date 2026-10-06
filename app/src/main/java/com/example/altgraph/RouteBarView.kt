@@ -327,7 +327,8 @@ class RouteBarView(context: Context) : View(context) {
                 val skewFactor = -0.35f // controla la inclinación para efecto 3D
                 canvas.skew(skewFactor, 0f)
             }
-            val blockWidth = w / numBlocks.toFloat()
+            val expectedBlocks = (strat.windowLengthMeters / strat.subBlockSizeMeters).toFloat()
+            val blockWidth = w / expectedBlocks
             val cWidth = 30f
             val arrowX = (w * 0.25f).coerceAtLeast(cWidth / 2f)
             val progressOffset = (w * strat.riderProgress) - arrowX

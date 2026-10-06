@@ -206,6 +206,10 @@ class AppPreferences(context: Context) {
         get() = prefs.getInt(KEY_USER_FTP, 250)
         set(value) = prefs.edit().putInt(KEY_USER_FTP, value).apply()
 
+    var eliteRadarResolution: Int
+        get() = prefs.getInt(KEY_ELITE_RADAR_RESOLUTION, 0)
+        set(value) = prefs.edit().putInt(KEY_ELITE_RADAR_RESOLUTION, value).apply()
+
     var climbRotate90Clockwise: Boolean
         get() = prefs.getBoolean(KEY_CLIMB_ROTATE_90_CW, false)
         set(value) = prefs.edit().putBoolean(KEY_CLIMB_ROTATE_90_CW, value).apply()
@@ -266,6 +270,7 @@ class AppPreferences(context: Context) {
         private const val KEY_ELITE_RADAR_ALERTS_ENABLED = "elite_radar_alerts_enabled"
         private const val KEY_ELITE_MAP_OVERLAY_MODE = "elite_map_overlay_mode"
         private const val KEY_USER_FTP = "user_ftp"
+        private const val KEY_ELITE_RADAR_RESOLUTION = "elite_radar_resolution"
 
         @Volatile
         private var INSTANCE: AppPreferences? = null
