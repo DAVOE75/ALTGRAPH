@@ -101,7 +101,7 @@ class MapOverlayManager(
             val segments = createGradeSegments(elevPoints)
             
             // Filter by climbs if needed
-            val finalSegments = if (mode == "climbs") {
+            val filteredSegments = if (mode == "climbs") {
                 calculator.setRouteElevationProfile(elevEncoded, safeRouteDist)
                 val climbs = calculator.routeClimbs
                 segments.filter { seg ->
@@ -109,7 +109,11 @@ class MapOverlayManager(
                 }
             } else {
                 segments // Do not filter out flats for 'entire route' mode
-            }.let { mergeShortSegments(it) }
+            }
+            
+            val customResolution = prefs.eliteRadarResolution
+            val minSegmentM = if (customResolution > 0) customResolution.toDouble() else 300.0
+            val finalSegments = mergeShortSegments(filteredSegments, minSegmentM)
 
             // Escalar a la distancia del perfil: los tramos se miden sobre él
             val path = RoutePath.fromPolyline(pathEncoded, elevPoints.lastOrNull()?.distance) ?: return
@@ -234,12 +238,12 @@ class MapOverlayManager(
          * subida o bajada larga en la media de un tramo corto.
          * Nota: los cortos agrupados se promedian aunque mezclen subida y bajada (son < 300 m)
          */
-        internal fun mergeShortSegments(segments: List<GradeSegment>): List<GradeSegment> {
+        internal fun mergeShortSegments(segments: List<GradeSegment>, minSegmentM: Double): List<GradeSegment> {
             val merged = mutableListOf<GradeSegment>()
             for (seg in segments) {
                 val prev = merged.lastOrNull()
                 if (prev != null && prev.endDist == seg.startDist &&
-                    length(prev) < MIN_SEGMENT_M && length(seg) < MIN_SEGMENT_M) {
+                    length(prev) < minSegmentM && length(seg) < minSegmentM) {
                     merged[merged.lastIndex] = combine(prev, seg)
                 } else {
                     merged.add(seg)
