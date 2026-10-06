@@ -45,7 +45,8 @@ class MainActivity : Activity() {
         val headerCard = createCardContainer()
         val logo = ImageView(this).apply {
             setImageResource(R.mipmap.ic_launcher)
-            layoutParams = LinearLayout.LayoutParams(120, 120).apply {
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            layoutParams = LinearLayout.LayoutParams(200, 200).apply {
                 gravity = Gravity.CENTER_HORIZONTAL
                 bottomMargin = 8
             }
