@@ -1,24 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ALTGRAPH</string>
 
     <!-- Extension Data Fields -->
-    <string name="data_type_altimetria_title">Estratega de Altimetría</string>
-    <string name="data_type_altimetria_desc">Gráfico de perfil dinámico con pendientes por tramos y alertas de ataque</string>
+    <string name="data_type_altimetria_title">Estratega de AltimetrÃ­a</string>
+    <string name="data_type_altimetria_desc">GrÃ¡fico de perfil dinÃ¡mico con pendientes por tramos y alertas de ataque</string>
 
     <string name="data_type_altimetria_3d_title">Ruta Global 3D</string>
-    <string name="data_type_altimetria_3d_desc">Perfil de altimetría e itinerario en perspectiva isométrica 3D con pendientes en relief</string>
+    <string name="data_type_altimetria_3d_desc">Perfil de altimetrÃ­a e itinerario en perspectiva isomÃ©trica 3D con pendientes en relief</string>
 
     <string name="data_type_fatigue_grade_title">Grado de Fatiga (GF)</string>
-    <string name="data_type_fatigue_grade_desc">Índice científico de Grado de Fatiga y dureza para clasificación de puertos</string>
+    <string name="data_type_fatigue_grade_desc">Ãndice cientÃ­fico de Grado de Fatiga y dureza para clasificaciÃ³n de puertos</string>
     <string name="data_type_climb_3d_title">Visor de Puertos 3D</string>
-    <string name="data_type_climb_3d_desc">Visor 3D independiente de los puertos de montaña de la ruta</string>
+    <string name="data_type_climb_3d_desc">Visor 3D independiente de los puertos de montaÃ±a de la ruta</string>
 
     <string name="data_type_climb_pacing_title">Ritmo VAM Objetivo</string>
-    <string name="data_type_climb_pacing_desc">Asistente de VAM objetivo (m/h) según la pendiente actual</string>
+    <string name="data_type_climb_pacing_desc">Asistente de VAM objetivo (m/h) segÃºn la pendiente actual</string>
 
-    <string name="data_type_gradient_trend_title">Tendencia 3D y Rampa Máxima</string>
-    <string name="data_type_gradient_trend_desc">Tendencia de pendiente en tiempo real y pico máximo % del tramo</string>
+    <string name="data_type_gradient_trend_title">Tendencia 3D y Rampa MÃ¡xima</string>
+    <string name="data_type_gradient_trend_desc">Tendencia de pendiente en tiempo real y pico mÃ¡ximo % del tramo</string>
 
     <string name="data_type_grade_zones_title">Zonas de Dureza</string>
     <string name="data_type_grade_zones_desc">Histograma porcentual en tiempo real (Llano, Media, Muro...)</string>
@@ -31,65 +31,65 @@
     <string name="grade_zone_wall">Muro</string>
     <string name="grade_zone_extreme">Extrema</string>
 
-    <string name="data_type_altgraph_map_title">Mapa Topográfico IGN (ALTGRAPH)</string>
-    <string name="data_type_altgraph_map_desc">Mapa topográfico IGN 1:25.000 MBTILES a pantalla completa con ruta y posición GPS</string>
+    <string name="data_type_altgraph_map_title">Mapa TopogrÃ¡fico IGN (ALTGRAPH)</string>
+    <string name="data_type_altgraph_map_desc">Mapa topogrÃ¡fico IGN 1:25.000 MBTILES a pantalla completa con ruta y posiciÃ³n GPS</string>
 
-    <string name="data_type_route_bar_title">Radar Altimétrico</string>
-    <string name="data_type_route_bar_desc">Cinta vertical de pendiente estilo radar para los próximos kilómetros</string>
+    <string name="data_type_route_bar_title">Radar AltimÃ©trico</string>
+    <string name="data_type_route_bar_desc">Cinta vertical de pendiente estilo radar para los prÃ³ximos kilÃ³metros</string>
 
 
     <!-- UI Labels for AltimetriaView -->
     <string name="header_climb_strategist">ESTRATEGA DE PUERTO</string>
     <string name="label_dist_remaining">DIST. RESTANTE</string>
     <string name="label_time_to_summit">TIEMPO A CIMA</string>
-    <string name="label_next_blocks">PRÓXIMOS %1$d m (Bloques de %2$d m)</string>
+    <string name="label_next_blocks">PRÃ“XIMOS %1$d m (Bloques de %2$d m)</string>
     <string name="label_current_gradient">PENDIENTE ACTUAL</string>
     <string name="label_avg_gradient_tramo">PENDIENTE MEDIA</string>
-    <string name="label_max_gradient_tramo">PENDIENTE MÁXIMA</string>
-    <string name="alert_attack">¡ATACA!</string>
-    <string name="alert_attack_sub">Rampa dura en el próximo tramo</string>
+    <string name="label_max_gradient_tramo">PENDIENTE MÃXIMA</string>
+    <string name="alert_attack">Â¡ATACA!</string>
+    <string name="alert_attack_sub">Rampa dura en el prÃ³ximo tramo</string>
 
     <!-- Settings Panel Strings -->
-    <string name="title_settings">Panel de Configuración</string>
+    <string name="title_settings">Panel de ConfiguraciÃ³n</string>
     <string name="setting_font_family">Tipo de Letra (Google Sans / Condensed)</string>
     <string name="setting_block_size">Distancia por Bloque del Perfil</string>
-    <string name="setting_visible_blocks_count">Número de Tramos Visibles en Perfil (1 a 10)</string>
-    <string name="setting_lookahead_meters_3d">Distancia de Anticipación 3D (Eje X)</string>
+    <string name="setting_visible_blocks_count">NÃºmero de Tramos Visibles en Perfil (1 a 10)</string>
+    <string name="setting_lookahead_meters_3d">Distancia de AnticipaciÃ³n 3D (Eje X)</string>
     <string name="setting_attack_threshold">Umbral de Alerta de Ataque (%)</string>
     <string name="setting_target_vam">VAM Objetivo (m/h)</string>
     <string name="setting_asphalt_factor">Tipo / Calidad de Asfalto (TA)</string>
     <string name="setting_enable_alerts">Activar Alertas Visuales de Ataque</string>
-    <string name="setting_font_size_3d">Tamaño de Letra en Altimetría 3D</string>
+    <string name="setting_font_size_3d">TamaÃ±o de Letra en AltimetrÃ­a 3D</string>
     <string name="setting_show_block_percentages">Mostrar % de Pendiente en Bloques del Perfil</string>
-    <string name="setting_show_3d_cotas">Mostrar Cotas de Altitud en Gráfico 3D</string>
-    <string name="setting_show_3d_ramps">Mostrar Indicadores de Rampas Duras (≥10%) en 3D</string>
-    <string name="setting_show_route_compass">Mostrar Brújula en Ruta Global</string>
-    <string name="setting_ramp_min_slope">Pendiente Mínima para Flecha de Rampa (%)</string>
-    <string name="setting_ramp_max_slope">Pendiente Máxima para Flecha de Rampa (%)</string>
-    <string name="setting_show_max_gradient">Mostrar Pendiente Máxima en Encabezado 3D</string>
-    <string name="setting_rotate_90_cw">Girar Gráfico 90° (Modo Horizontal / Apaisado)</string>
-    <string name="setting_use_topographic">Usar Método de Cálculo de Pendiente Topográfico (Proyección Horizontal)</string>
-    <string name="setting_show_hairpins">Mostrar Curvas de Herradura (Líneas Negras)</string>
-    <string name="setting_poi_filter">Filtro de Puntos de Interés (Hitos)</string>
-    <string name="setting_poi_towns">🏘️ Pueblos y Ciudades</string>
-    <string name="setting_poi_water">💧 Fuentes de Agua</string>
-    <string name="setting_poi_viewpoints">📸 Miradores y Panorámicas</string>
-    <string name="setting_poi_summits">📡 Cimas y Puertos</string>
-    <string name="setting_show_3d_zoom">Mostrar Controles de Zoom Táctil (🔍) en Gráfico 3D</string>
-    <string name="setting_custom_maps_title">Gestión de Cartografía Personalizada</string>
-    <string name="setting_custom_maps_desc">Descubre e importa packs de mapas vectoriales de alta resolución (.mbtiles / .map) para Karoo</string>
+    <string name="setting_show_3d_cotas">Mostrar Cotas de Altitud en GrÃ¡fico 3D</string>
+    <string name="setting_show_3d_ramps">Mostrar Indicadores de Rampas Duras (â‰¥10%) en 3D</string>
+    <string name="setting_show_route_compass">Mostrar BrÃºjula en Ruta Global</string>
+    <string name="setting_ramp_min_slope">Pendiente MÃ­nima para Flecha de Rampa (%)</string>
+    <string name="setting_ramp_max_slope">Pendiente MÃ¡xima para Flecha de Rampa (%)</string>
+    <string name="setting_show_max_gradient">Mostrar Pendiente MÃ¡xima en Encabezado 3D</string>
+    <string name="setting_rotate_90_cw">Girar GrÃ¡fico 90Â° (Modo Horizontal / Apaisado)</string>
+    <string name="setting_use_topographic">Usar MÃ©todo de CÃ¡lculo de Pendiente TopogrÃ¡fico (ProyecciÃ³n Horizontal)</string>
+    <string name="setting_show_hairpins">Mostrar Curvas de Herradura (LÃ­neas Negras)</string>
+    <string name="setting_poi_filter">Filtro de Puntos de InterÃ©s (Hitos)</string>
+    <string name="setting_poi_towns">ðŸ˜ï¸ Pueblos y Ciudades</string>
+    <string name="setting_poi_water">ðŸ’§ Fuentes de Agua</string>
+    <string name="setting_poi_viewpoints">ðŸ“¸ Miradores y PanorÃ¡micas</string>
+    <string name="setting_poi_summits">ðŸ“¡ Cimas y Puertos</string>
+    <string name="setting_show_3d_zoom">Mostrar Controles de Zoom TÃ¡ctil (ðŸ”) en GrÃ¡fico 3D</string>
+    <string name="setting_custom_maps_title">GestiÃ³n de CartografÃ­a Personalizada</string>
+    <string name="setting_custom_maps_desc">Descubre e importa packs de mapas vectoriales de alta resoluciÃ³n (.mbtiles / .map) para Karoo</string>
 
     <!-- Pro Features -->
-    <string name="setting_smart_zoom">Habilitar Smart Zoom Táctico (Auto-Escala)</string>
-    <string name="setting_oasis_tracking">Habilitar Oasis Tracking (Zonas de Recuperación)</string>
-    <string name="setting_virtual_pacer">Habilitar Virtual Pacer Biomecánico (Holograma Fantasma)</string>
-    <string name="setting_switchback_rendering">Habilitar Dinámica de Herraduras 3D</string>
-    <string name="setting_energy_management">Habilitar Energy Management System (Batería Humana)</string>
+    <string name="setting_smart_zoom">Habilitar Smart Zoom TÃ¡ctico (Auto-Escala)</string>
+    <string name="setting_oasis_tracking">Habilitar Oasis Tracking (Zonas de RecuperaciÃ³n)</string>
+    <string name="setting_virtual_pacer">Habilitar Virtual Pacer BiomecÃ¡nico (Holograma Fantasma)</string>
+    <string name="setting_switchback_rendering">Habilitar DinÃ¡mica de Herraduras 3D</string>
+    <string name="setting_energy_management">Habilitar Energy Management System (BaterÃ­a Humana)</string>
 
     <string name="font_normal">Normal</string>
     <string name="font_large">Largo</string>
     <string name="font_xl">Extra Gr.</string>
-    <string name="status_saved">Ajustes Guardados Automáticamente</string>
+    <string name="status_saved">Ajustes Guardados AutomÃ¡ticamente</string>
     <string name="btn_save_and_exit">Guardar y Salir</string>
 
     <!-- Zone Colors -->
@@ -109,21 +109,21 @@
     <string name="elite_btn_activate">ACTIVAR</string>
     <string name="elite_strava_segments">Segmentos Strava Live 3D (Beta)</string>
     <string name="elite_weather_overlay">Capa de Viento y Clima</string>
-    <string name="elite_radar_enabled">Radar Altimétrico (Data Field)</string>
+    <string name="elite_radar_enabled">Radar AltimÃ©trico (Data Field)</string>
     <string name="elite_map_overlay_mode">Colorear Ruta en Mapa Base</string>
     <string name="elite_map_overlay_off">Desactivado</string>
     <string name="elite_map_overlay_climbs">Solo Puertos</string>
     <string name="elite_map_overlay_all">Toda la ruta</string>
-    <string name="elite_toast_unlocked">¡Funciones Elite Desbloqueadas!</string>
-    <string name="elite_toast_invalid">Licencia Inválida</string>
-    <string name="tab_style">🎨 Estilo</string>
-    <string name="tab_3d">🏔️ 3D</string>
-    <string name="tab_2d">📊 2D</string>
-    <string name="tab_vam">🚴 VAM</string>
-    <string name="tab_pro">🚀 Pro</string>
-    <string name="tab_elite">👑 Elite</string>
-    <string name="label_vista_global">VISTA Y MODELO DE ALTIMETRÍA (RUTA GLOBAL)</string>
-    <string name="label_vista_puertos">VISTA Y MODELO DE ALTIMETRÍA (VISOR DE PUERTOS)</string>
+    <string name="elite_toast_unlocked">Â¡Funciones Elite Desbloqueadas!</string>
+    <string name="elite_toast_invalid">Licencia InvÃ¡lida</string>
+    <string name="tab_style">ðŸŽ¨ Estilo</string>
+    <string name="tab_3d">ðŸ”ï¸ 3D</string>
+    <string name="tab_2d">ðŸ“Š 2D</string>
+    <string name="tab_vam">ðŸš´ VAM</string>
+    <string name="tab_pro">ðŸš€ Pro</string>
+    <string name="tab_elite">ðŸ‘‘ Elite</string>
+    <string name="label_vista_global">VISTA Y MODELO DE ALTIMETRÃA (RUTA GLOBAL)</string>
+    <string name="label_vista_puertos">VISTA Y MODELO DE ALTIMETRÃA (VISOR DE PUERTOS)</string>
     <string name="suffix_global"> (RUTA GLOBAL)</string>
     <string name="suffix_puertos"> (VISOR PUERTOS)</string>
     <string name="btn_reduce">- Reducir</string>
@@ -143,37 +143,47 @@
     <string name="btn_increase_1">+ 1</string>
     <string name="btn_reduce_50">- 50 m/h</string>
     <string name="btn_increase_50">+ 50 m/h</string>
-    <string name="style_classic_title">Clásica 3D (Por defecto)</string>
-    <string name="style_classic_desc">Perfil profesional con bisel 3D, degradado suave del 0 al 15% y cotas nítidas</string>
-    <string name="style_horizon_title">Horizonte Isométrico</string>
+    <string name="style_classic_title">ClÃ¡sica 3D (Por defecto)</string>
+    <string name="style_classic_desc">Perfil profesional con bisel 3D, degradado suave del 0 al 15% y cotas nÃ­tidas</string>
+    <string name="style_horizon_title">Horizonte IsomÃ©trico</string>
     <string name="style_horizon_desc">Perspectiva de cabina proyectada hacia el horizonte con haz luminoso del ciclista</string>
-    <string name="style_oasis_title">Oasis y Crisoles Tácticos</string>
-    <string name="style_oasis_desc">Destaca descansillos de recuperación en azul hielo y muros duros en fuego térmico</string>
+    <string name="style_oasis_title">Oasis y Crisoles TÃ¡cticos</string>
+    <string name="style_oasis_desc">Destaca descansillos de recuperaciÃ³n en azul hielo y muros duros en fuego tÃ©rmico</string>
     <string name="style_force_title">Campo de Fuerza y Fatiga</string>
-    <string name="style_force_desc">Relieve biométrico de inercia y modulación dinámica de dureza acumulada</string>
+    <string name="style_force_desc">Relieve biomÃ©trico de inercia y modulaciÃ³n dinÃ¡mica de dureza acumulada</string>
     <string name="style_monolith_title">Monolito Obsidiana y Plasma</string>
-    <string name="style_monolith_desc">Cristal oscuro facetado con núcleo de plasma luminoso y cresta láser</string>
-    <string name="style_global_title">Mapa Isométrico Global</string>
-    <string name="style_global_desc">Visión arquitectónica 3D de todo el recorrido en forma de serpiente</string>
+    <string name="style_monolith_desc">Cristal oscuro facetado con nÃºcleo de plasma luminoso y cresta lÃ¡ser</string>
+    <string name="style_global_title">Mapa IsomÃ©trico Global</string>
+    <string name="style_global_desc">VisiÃ³n arquitectÃ³nica 3D de todo el recorrido en forma de serpiente</string>
     <string name="toast_vista">Vista: %1$s</string>
     <string name="toast_visor_puertos">Visor Puertos: %1$s</string>
-    <string name="label_elite_header">👑 ALTGRAPH ELITE 👑</string>
-    <string name="label_elite_features">🎯 Funciones Radar ELITE</string>
-    <string name="label_ghost">👻 Ghost — Mejor marca anterior
+    <string name="label_elite_header">ðŸ‘‘ ALTGRAPH ELITE ðŸ‘‘</string>
+    <string name="label_elite_features">ðŸŽ¯ Funciones Radar ELITE</string>
+    <string name="label_ghost">ðŸ‘» Ghost â€” Mejor marca anterior
 (Grabado al terminar la ruta)</string>
-    <string name="label_energy_bar">🔋 Barra de energía restante</string>
-    <string name="label_poi_icons">📍 Iconos POI en la regla</string>
-    <string name="label_histogram">📊 Histograma de pendientes</string>
-    <string name="label_radar_3d">🏔️ Radar 3D con perspectiva isométrica</string>
+    <string name="label_energy_bar">ðŸ”‹ Barra de energÃ­a restante</string>
+    <string name="label_poi_icons">ðŸ“ Iconos POI en la regla</string>
+    <string name="label_histogram">ðŸ“Š Histograma de pendientes</string>
+    <string name="label_radar_3d">ðŸ”ï¸ Radar 3D con perspectiva isomÃ©trica</string>
     <string name="label_radar_theme">Tema del Radar:</string>
-    <string name="theme_standard">Estándar</string>
+    <string name="theme_standard">EstÃ¡ndar</string>
     <string name="theme_oasis">Oasis</string>
     <string name="theme_crucibles">Crisoles</string>
     <string name="theme_mist">Bruma</string>
     <string name="theme_forcefield">Campo de Fuerza</string>
     <string name="theme_forcefield_alt">Campo</string>
-    <string name="label_alerts_radar">⚠️ Avisos (Muros, Próx. Puerto...)</string>
+    <string name="label_alerts_radar">âš ï¸ Avisos (Muros, PrÃ³x. Puerto...)</string>
     <string name="label_tramos">tramos</string>
-    <string name="theme_classic_alt">Clásico</string>
+    <string name="theme_classic_alt">ClÃ¡sico</string>
     <string name="theme_crucible_alt">Crisol</string>
+    <string name="label_radar_resolution">Resolución de bloque (Metros)</string>
+    <string name="radar_resolution_auto">Auto</string>
+    <string name="radar_resolution_20m">20m</string>
+    <string name="radar_resolution_50m">50m</string>
+    <string name="radar_resolution_100m">100m</string>
+    <string name="radar_resolution_150m">150m</string>
+    <string name="radar_resolution_300m">300m</string>
+    <string name="radar_resolution_500m">500m</string>
+    <string name="radar_resolution_1km">1km</string>
 </resources>
+

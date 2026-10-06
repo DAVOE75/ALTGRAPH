@@ -955,7 +955,11 @@ class MainActivity : Activity() {
                 getString(R.string.radar_resolution_auto),
                 getString(R.string.radar_resolution_20m),
                 getString(R.string.radar_resolution_50m),
-                getString(R.string.radar_resolution_100m)
+                getString(R.string.radar_resolution_100m),
+                getString(R.string.radar_resolution_150m),
+                getString(R.string.radar_resolution_300m),
+                getString(R.string.radar_resolution_500m),
+                getString(R.string.radar_resolution_1km)
             )
             val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, options)
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -963,6 +967,10 @@ class MainActivity : Activity() {
             
             val currentRes = prefs.eliteRadarResolution
             setSelection(when(currentRes) {
+                1000 -> 7
+                500 -> 6
+                300 -> 5
+                150 -> 4
                 100 -> 3
                 50 -> 2
                 20 -> 1
@@ -972,6 +980,10 @@ class MainActivity : Activity() {
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     val newRes = when(position) {
+                        7 -> 1000
+                        6 -> 500
+                        5 -> 300
+                        4 -> 150
                         3 -> 100
                         2 -> 50
                         1 -> 20
