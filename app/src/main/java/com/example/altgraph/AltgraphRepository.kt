@@ -52,7 +52,8 @@ internal class ConsumerRegistry(
     }
 
     fun removeAll() {
-        ids.values.forEach(remove)
+        // Un remove que falla (p. ej. DeadObjectException del binder) no debe abortar stop(): se sigue con el resto
+        ids.values.forEach { id -> try { remove(id) } catch (e: Exception) { /* sin Log aquí; se ignora por elemento */ } }
         ids.clear()
     }
 }
@@ -119,7 +120,8 @@ object AltgraphRepository {
         scope = s
         // Primer trabajo del hilo: el backoff y el hueco KGhost de una vida anterior no se arrastran tras stop()/start()
         // (core vive todo el proceso; si KGhost ya no está, el hueco viejo quedaría congelado)
-        s.launch { backoff.clear(); recovered.clear(); lastReAddAt.clear(); core.kghostTime = null; core.kghostDist = null }
+        // También se anula el snapshot: corre tras cualquier tick en curso de la vida anterior, que podría haberlo republicado tras stop()
+        s.launch { backoff.clear(); recovered.clear(); lastReAddAt.clear(); core.kghostTime = null; core.kghostDist = null; _snapshot.value = null }
         val gen = ++generation
 
         val system = KarooSystemService(ctx)
@@ -236,7 +238,8 @@ object AltgraphRepository {
     private suspend fun onStreamTerminal(kind: String, reason: String, gen: Int) {
         // Sin stream no hay dato: la parte de KGhost se limpia hasta que vuelva a llegar
         if (isKGhost(kind)) setKGhostPart(kind, null)
-        val upMs = lastReAddAt[kind]?.let { SystemClock.elapsedRealtime() - it }
+        // remove consume el instante: si el re-alta falla y vuelve aquí, no cuenta como stream vivo y el backoff sigue creciendo
+        val upMs = lastReAddAt.remove(kind)?.let { SystemClock.elapsedRealtime() - it }
         val d = backoffAfterTerminal(backoff[kind], upMs)
         backoff[kind] = d
         recovered.remove(kind)
@@ -265,7 +268,11 @@ object AltgraphRepository {
             lastReAddAt[kind] = SystemClock.elapsedRealtime()
         } catch (e: Exception) {
             Log.w(TAG, "stream $kind: re-alta fallida", e)
-            scope?.launch { onStreamTerminal(kind, "re-add failed: ${e.message}", gen) }
+            // El SDK mete el listener en su mapa antes del AIDL addEventConsumer, que puede lanzar si el host acaba de morir.
+            // Sin conexión no se reintenta: al reconectar el SDK re-registra todo su mapa (incluido el huérfano) y
+            // stop() -> disconnect() quita todos los listeners del SDK, así que nada sobrevive a la vida.
+            if (karooSystem?.connected == true) scope?.launch { onStreamTerminal(kind, "re-add failed: ${e.message}", gen) }
+            else Log.w(TAG, "re-add of $kind failed while disconnected; the SDK will register it on reconnect")
         }
     }
 

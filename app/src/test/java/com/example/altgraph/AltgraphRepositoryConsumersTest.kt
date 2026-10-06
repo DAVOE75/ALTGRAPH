@@ -63,4 +63,24 @@ class AltgraphRepositoryConsumersTest {
         assertEquals(emptyList<String>(), active)
         assertEquals(listOf("c2", "c3", "c1", "c4"), removed)
     }
+
+    @Test
+    fun removeAllContinuesWhenOneRemoveThrows() {
+        var next = 0
+        val added = mutableListOf<String>()
+        val removed = mutableListOf<String>()
+        val registry = ConsumerRegistry(
+            add = { _ -> "c${++next}".also { added.add(it) } },
+            remove = { id -> removed.add(id); if (id == "c1") throw IllegalStateException("dead binder") }
+        )
+
+        registry.register(listOf("nav", "loc"))
+        registry.removeAll()
+        // Un remove que falla no impide quitar el resto
+        assertEquals(listOf("c1", "c2"), removed)
+
+        // El registro quedó vacío: un nuevo register da de alta de nuevo
+        registry.register(listOf("nav"))
+        assertEquals(listOf("c1", "c2", "c3"), added)
+    }
 }
