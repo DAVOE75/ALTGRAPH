@@ -105,8 +105,9 @@ object AltgraphRepository {
         appContext = ctx
         val s = CoroutineScope(SupervisorJob() + repoDispatcher + CoroutineExceptionHandler { _, e -> Log.e(TAG, "repo", e) })
         scope = s
-        // Primer trabajo del hilo: el backoff de una vida anterior no se arrastra tras stop()/start()
-        s.launch { backoff.clear() }
+        // Primer trabajo del hilo: el backoff y el hueco KGhost de una vida anterior no se arrastran tras stop()/start()
+        // (core vive todo el proceso; si KGhost ya no está, el hueco viejo quedaría congelado)
+        s.launch { backoff.clear(); core.kghostTime = null; core.kghostDist = null }
         val gen = ++generation
 
         val system = KarooSystemService(ctx)

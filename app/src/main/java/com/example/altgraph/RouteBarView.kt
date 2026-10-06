@@ -755,8 +755,8 @@ class RouteBarView(context: Context) : View(context) {
                 ghostTextPaint.textSize = Math.min(28f, (radarW - headerWidth) * 0.6f).coerceAtLeast(10f)
                 ghostTextPaint.textAlign = Paint.Align.CENTER
                 ghostTextPaint.color = ghostGapColor(gap)
-                val text = formatGhostGap(gap, radarW - 8f) { ghostTextPaint.measureText(it) }
-                canvas.drawText(text, radarW / 2f, h - 6f, ghostTextPaint)
+                val text = formatGhostGap(gap, radarW - headerWidth - 8f) { ghostTextPaint.measureText(it) }
+                canvas.drawText(text, (headerWidth + radarW) / 2f, h - 6f, ghostTextPaint)
             }
 
             // 6. Alertas dinámicas
