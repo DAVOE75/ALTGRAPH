@@ -1,7 +1,7 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/icon.png" alt="ALTGRAPH Logo" width="150" />
 </p>
-# ALTGRAPH (v1.0.31 ELITE)
+# ALTGRAPH (v1.0.32 ELITE)
 <p>Leer en: <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README.md">🇪🇸 Español</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_en.md">🇬🇧 English</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_fr.md">🇫🇷 Français</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_it.md">🇮🇹 Italiano</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_de.md">🇩🇪 Deutsch</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_pt.md">🇵🇹 Português</a></p>
 
 **ALTGRAPH** es una extensión de rendimiento y altimetría profesional de última generación para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3) desarrollada por **David García Pascual** utilizando el SDK oficial `karoo-ext`.
@@ -11,7 +11,7 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
   <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo-1.png" alt="ALTGRAPH Logo" width="250" />
 </p
 
-## 🚀 ACTUALIZACIÓN MASIVA (v1.0.10 - v1.0.27): ESTABILIDAD, RESOLUCIÓN Y PRECISIÓN 🚀
+## 🚀 ACTUALIZACIÓN MASIVA (v1.0.10 - v1.0.32): ESTABILIDAD, RESOLUCIÓN Y PRECISIÓN 🚀
 
 Esta serie de actualizaciones se ha centrado en pulir el motor interno de seguimiento de rutas y dar más control al usuario Elite:
 
