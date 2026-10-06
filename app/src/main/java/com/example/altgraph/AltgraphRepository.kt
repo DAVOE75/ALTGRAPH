@@ -155,7 +155,12 @@ object AltgraphRepository {
         val s = scope ?: return
         consumers?.removeAll()
         consumers = null
-        karooSystem?.disconnect()
+        // disconnect() puede lanzar DeadObjectException si el binder del host ya murió; el resto del stop() debe ejecutarse siempre
+        try {
+            karooSystem?.disconnect()
+        } catch (e: Exception) {
+            Log.w(TAG, "disconnect failed (host binder dead?)", e)
+        }
         karooSystem = null
         tickJob = null
         s.cancel()
