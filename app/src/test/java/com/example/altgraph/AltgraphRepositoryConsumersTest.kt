@@ -25,4 +25,22 @@ class AltgraphRepositoryConsumersTest {
         assertEquals(listOf("c1", "c2"), removed)
         assertEquals(emptyList<String>(), active)
     }
+
+    @Test
+    fun reAddReplacesIdAndRemoveAllUsesNewOne() {
+        var next = 0
+        val removed = mutableListOf<String>()
+        val registry = ConsumerRegistry(
+            add = { _ -> "c${++next}" },
+            remove = { id -> removed.add(id) }
+        )
+
+        registry.register(listOf("nav", "loc"))
+        registry.reAdd("loc")
+        // El SDK ya quitó el consumer terminado: reAdd no vuelve a quitarlo
+        assertEquals(emptyList<String>(), removed)
+
+        registry.removeAll()
+        assertEquals(listOf("c1", "c3"), removed)
+    }
 }

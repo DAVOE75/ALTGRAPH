@@ -34,18 +34,32 @@ internal class ConsumerRegistry(
     private val add: (String) -> String,
     private val remove: (String) -> Unit
 ) {
-    private val ids = mutableListOf<String>()
+    // kind -> id del consumer vigente
+    private val ids = LinkedHashMap<String, String>()
 
     fun register(kinds: List<String>) {
         if (ids.isNotEmpty()) return
-        kinds.forEach { ids.add(add(it)) }
+        kinds.forEach { ids[it] = add(it) }
+    }
+
+    // Sustituye el consumer de un kind que el host terminó: el SDK ya lo quitó, no se vuelve a quitar
+    fun reAdd(kind: String) {
+        ids[kind] = add(kind)
     }
 
     fun removeAll() {
-        ids.forEach(remove)
+        ids.values.forEach(remove)
         ids.clear()
     }
 }
+
+/** Espera antes de re-suscribir un stream terminado: 2 s, se duplica y se limita a 60 s. */
+internal fun nextBackoffMs(previousMs: Long?): Long =
+    if (previousMs == null) 2000L else minOf(previousMs * 2, 60000L)
+
+/** Solo se re-suscribe si el repositorio sigue en la misma vida (start/stop no ocurrió entre medias). */
+internal fun shouldResubscribe(lostAtGeneration: Int, currentGeneration: Int, running: Boolean): Boolean =
+    running && lostAtGeneration == currentGeneration
 
 /**
  * Única conexión con Karoo y único hilo del calculador compartido.
@@ -78,6 +92,10 @@ object AltgraphRepository {
     @Volatile private var appContext: Context? = null
     // Último estado de navegación (solo se escribe en el hilo del repositorio)
     @Volatile private var lastNav: OnNavigationState? = null
+    // Vida del repositorio: sube en start() y stop() para descartar re-suscripciones de una vida anterior
+    @Volatile private var generation = 0
+    // Espera vigente por stream terminado (solo se toca en el hilo del repositorio)
+    private val backoff = mutableMapOf<String, Long>()
 
     @Synchronized
     fun start(context: Context) {
@@ -87,11 +105,12 @@ object AltgraphRepository {
         appContext = ctx
         val s = CoroutineScope(SupervisorJob() + repoDispatcher + CoroutineExceptionHandler { _, e -> Log.e(TAG, "repo", e) })
         scope = s
+        val gen = ++generation
 
         val system = KarooSystemService(ctx)
         karooSystem = system
         val registry = ConsumerRegistry(
-            add = { kind -> addConsumer(system, s, kind) },
+            add = { kind -> addConsumer(system, s, kind, gen) },
             remove = { id -> system.removeConsumer(id) }
         )
         val kinds = listOf(KIND_NAV, KIND_LOC, KIND_ZOOM) + NavigationSync.STREAM_TYPES
@@ -117,6 +136,7 @@ object AltgraphRepository {
         tickJob = null
         s.cancel()
         scope = null
+        generation++
         // Tras un stop() el core queda obsoleto y Karoo reenvía la navegación al reconectar
         lastNav = null
     }
@@ -188,8 +208,26 @@ object AltgraphRepository {
         }
     }
 
+    // El host terminó el stream (el SDK ya quitó el consumer): se espera con backoff y se vuelve a dar de alta
+    private suspend fun onStreamTerminal(kind: String, reason: String, gen: Int) {
+        // Aquí se limpia el valor de cada kind (Task 3: partes de KGhost)
+        val d = nextBackoffMs(backoff[kind])
+        backoff[kind] = d
+        Log.w(TAG, "stream $kind terminado ($reason), re-suscribiendo en $d ms")
+        delay(d)
+        resubscribe(kind, gen)
+    }
+
+    // Mismo monitor que start/stop: un re-alta no se cruza con un stop()
+    @Synchronized
+    private fun resubscribe(kind: String, gen: Int) {
+        if (!shouldResubscribe(gen, generation, scope != null)) return
+        Log.i(TAG, "stream $kind re-suscrito")
+        consumers?.reAdd(kind)
+    }
+
     // Los callbacks corren en hilos Binder: solo encolan en el hilo del repositorio y vuelven
-    private fun addConsumer(system: KarooSystemService, s: CoroutineScope, kind: String): String = when (kind) {
+    private fun addConsumer(system: KarooSystemService, s: CoroutineScope, kind: String, gen: Int): String = when (kind) {
         KIND_NAV -> system.addConsumer<OnNavigationState> { event ->
             s.launch {
                 NavigationSync.applyNavigation(core.calculator, event.state)
@@ -203,11 +241,16 @@ object AltgraphRepository {
         KIND_ZOOM -> system.addConsumer<OnMapZoomLevel> { event ->
             s.launch { core.mapZoomLevel = event.zoomLevel }
         }
-        else -> system.addConsumer(OnStreamState.StartStreaming(kind)) { event: OnStreamState ->
+        else -> system.addConsumer<OnStreamState>(
+            OnStreamState.StartStreaming(kind),
+            onError = { r -> s.launch { onStreamTerminal(kind, "error: $r", gen) } },
+            onComplete = { s.launch { onStreamTerminal(kind, "complete", gen) } }
+        ) { event ->
             val st = event.state
             if (st is StreamState.Streaming) {
                 val values = st.dataPoint.values
                 s.launch {
+                    if (backoff.remove(kind) != null) Log.i(TAG, "stream $kind recovered")
                     NavigationSync.applyStream(core.calculator, kind, values)
                     // Mismo valor y fallback que leían ClimbPacing y GradientTrend con su propio consumer
                     if (kind == DataType.Type.ELEVATION_GRADE)
