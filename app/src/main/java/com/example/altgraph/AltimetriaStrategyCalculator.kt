@@ -161,8 +161,6 @@ class AltimetriaStrategyCalculator {
 
     // Distancia exacta restante reportada por Karoo en la ruta (útil si no hay puntos GPS)
     var fallbackRemainingDistance: Double = 0.0
-    var routeDistanceOffset: Double = 0.0
-    var maxRouteLengthSeen: Double = 0.0
     var globalRouteOffset: Double = 0.0
 
     // GPX Elevation Profile Completo (SDK 1.1.7+)
@@ -338,59 +336,38 @@ class AltimetriaStrategyCalculator {
             nearestIndex = newNearestIdx
             
             val computedDist = routePoints[nearestIndex].distance
-            this.currentRouteDistance = computedDist + routeDistanceOffset
+            this.currentRouteDistance = computedDist
         }
     }
 
-    fun syncRouteDistance(karooRemainingDistance: Double) {
-        this.fallbackRemainingDistance = karooRemainingDistance
+    /**
+     * [karooRouteDistance] es la longitud TOTAL de la ruta según Karoo (NavigatingRoute.routeDistance),
+     * no la distancia restante. Solo sirve para calibrar la polilínea; la posición del ciclista
+     * (currentRouteDistance) sale siempre de su proyección sobre la ruta, nunca de este valor.
+     */
+    fun syncRouteDistance(karooRouteDistance: Double) {
+        this.fallbackRemainingDistance = karooRouteDistance
 
         if (routePoints.isEmpty()) return
 
-        // [BUGFIX] Calibrate compressed WGS84 polyline distances to real Karoo distances
-        if (polylineScaleFactor == 1.0 && currentLatitude != 0.0 && currentLongitude != 0.0 && karooRemainingDistance > 500.0 && nearestIndex < routePoints.size) {
+        // Calibrar la polilínea (distancias WGS84 comprimidas) a la longitud real de Karoo
+        if (polylineScaleFactor == 1.0 && globalRouteOffset == 0.0 && karooRouteDistance > 500.0) {
             val rawPolylineTotal = routePoints.last().distance
-            val currentPolylineDist = routePoints[nearestIndex].distance
-            val polylineRemaining = rawPolylineTotal - currentPolylineDist
-            
-            if (polylineRemaining > 500.0) {
-                val factor = karooRemainingDistance / polylineRemaining
+            if (rawPolylineTotal > 500.0) {
+                val factor = karooRouteDistance / rawPolylineTotal
                 if (factor in 0.8..1.2) {
                     polylineScaleFactor = factor
-                    // Scale all distance arrays to match reality
-                    routePoints = routePoints.map { it.copy(distance = it.distance * polylineScaleFactor) }
-                    if (routeElevationProfile.isNotEmpty()) {
-                        routeElevationProfile = routeElevationProfile.map { it.copy(distance = it.distance * polylineScaleFactor) }
-                    }
+                    routePoints = routePoints.map { it.copy(distance = it.distance * factor) }
                     if (absoluteHairpins.isNotEmpty()) {
-                        absoluteHairpins = absoluteHairpins.map { it * polylineScaleFactor }.toMutableList()
+                        absoluteHairpins = absoluteHairpins.map { it * factor }.toMutableList()
                     }
+                    // El perfil de elevación ya viene en distancia real de Karoo: no se escala
+                    if (routeElevationProfile.isNotEmpty()) applyTrueElevationsToRoutePoints()
                     android.util.Log.d("AltiCalc", "Calibrated distances. Factor: $polylineScaleFactor")
                 }
             }
         }
-        val currentPolylineLength = routePoints.lastOrNull()?.distance ?: (routeElevationProfile.lastOrNull()?.distance ?: 0.0)
-        
-        // Mantener la longitud máxima vista para evitar reseteos a 0 si el Karoo recorta el polyline (ej. al inicio de un puerto)
-        if (currentPolylineLength > maxRouteLengthSeen) {
-            maxRouteLengthSeen = currentPolylineLength
-        }
-        
-        if (maxRouteLengthSeen > 0.0 && routePoints.isNotEmpty() && nearestIndex < routePoints.size) {
-            val karooRidden = maxRouteLengthSeen - karooRemainingDistance
-            val polylineRidden = routePoints[nearestIndex].distance
-            
-            // BUGFIX: Prevent routeDistanceOffset from dropping when a climb starts (Climb Detect cuts polyline)
-            val newOffset = karooRidden - polylineRidden
-            if (newOffset > routeDistanceOffset) {
-                routeDistanceOffset = newOffset
-            } else if (routeDistanceOffset - newOffset > 5000.0) {
-                // Si cae más de 5km, es un reinicio legítimo (nueva ruta o loop completo)
-                routeDistanceOffset = newOffset
-            }
-        }
     }
-
     fun setRoutePois(symbols: List<io.hammerhead.karooext.models.Symbol.POI>) {
         if (routePoints.isEmpty() || symbols.isEmpty()) {
             this.routePois.clear()
@@ -496,9 +473,6 @@ class AltimetriaStrategyCalculator {
         val result = ElevationPolylineDecoder.decodeSafe(encoded, expectedLength.coerceAtLeast(0.0))
         if (result is ElevationPolylineDecoder.DecodeResult.Success) {
             var pts = ElevationPolylineDecoder.smooth(result.points)
-            if (polylineScaleFactor != 1.0) {
-                pts = pts.map { it.copy(distance = it.distance * polylineScaleFactor) }
-            }
             if (globalRouteOffset > 0.0) {
                 pts = pts.map { it.copy(distance = it.distance + globalRouteOffset) }
             }
@@ -694,8 +668,6 @@ class AltimetriaStrategyCalculator {
         var isNewRouteName = false
         if (routeName != null && routeName != lastRouteNameForReset) {
             polylineScaleFactor = 1.0
-            maxRouteLengthSeen = 0.0
-            routeDistanceOffset = 0.0
             lastRouteNameForReset = routeName
             isNewRouteName = true
         }
@@ -745,8 +717,6 @@ class AltimetriaStrategyCalculator {
         
         if (!isContinuation) {
             polylineScaleFactor = 1.0
-            maxRouteLengthSeen = 0.0
-            routeDistanceOffset = 0.0
         }
 
         val shiftOffset = if (isContinuation) {
@@ -765,7 +735,7 @@ class AltimetriaStrategyCalculator {
                 val prev = points[i - 1]
                 val pt  = points[i]
                 android.location.Location.distanceBetween(prev.first, prev.second, pt.first, pt.second, results)
-                accumulatedDist += results[0]
+                accumulatedDist += results[0] * polylineScaleFactor
             }
             rawDistances[i] = accumulatedDist
         }
@@ -884,8 +854,7 @@ class AltimetriaStrategyCalculator {
         this.distanceFromBottom = 0.0
         this.elevationFromBottom = 0.0
         this.elevationRemaining = 0.0
-        this.routeDistanceOffset = 0.0
-        this.maxRouteLengthSeen = 0.0
+        this.globalRouteOffset = 0.0
         this.lastRoutePolyline = ""
         this.lastElevationPolyline = ""
         this.polylineScaleFactor = 1.0
@@ -1085,7 +1054,7 @@ class AltimetriaStrategyCalculator {
 
         // 4. Distancia y desnivel restantes
         val totalDistanceRemaining: Double = if (routePoints.isNotEmpty()) {
-            (routePoints.last().distance + routeDistanceOffset - currentRiderDistance).coerceAtLeast(0.0)
+            (routePoints.last().distance - currentRiderDistance).coerceAtLeast(0.0)
         } else {
             fallbackRemainingDistance
         }
@@ -1479,7 +1448,7 @@ class AltimetriaStrategyCalculator {
             visibleAvgGrade = visibleAvgGrade,
             visibleMaxGrade = trueMaxGrade,
             routeName = activeRouteName,
-            routeTotalLength = if (routePoints.isNotEmpty()) routePoints.last().distance + routeDistanceOffset else 0.0,
+            routeTotalLength = if (routePoints.isNotEmpty()) routePoints.last().distance else 0.0,
             oasisDistanceToNextCrucible = oasisDistance,
             virtualPacerRelativeDistance = if (virtualPacerEnabled) virtualPacerDistance - currentRiderDistance else null,
             energyBatteryLevel = energyBatteryLevel,

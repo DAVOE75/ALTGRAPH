@@ -259,7 +259,40 @@ class AltgraphCalculationsTest {
             assertTrue(style.descRes != 0)
         }
     }
+
+    private fun longRoute(): AltimetriaStrategyCalculator {
+        val calculator = AltimetriaStrategyCalculator()
+        // Ruta de 10 km con un punto cada 500 m
+        calculator.routePoints = (0..20).map { RoutePoint(40.0 + it * 0.0045, -3.0, 100.0, it * 500.0) }
+        calculator.isNavigatingRoute = true
+        return calculator
+    }
+
+    @Test
+    fun testRouteDistanceSyncNeverResetsRiderPosition() {
+        val calculator = longRoute()
+        // Karoo reporta la longitud TOTAL de la ruta; se reenvía cada vez que cambia el estado (inicio/fin de puerto)
+        calculator.syncRouteDistance(10000.0)
+        calculator.updateCurrentLocation(40.0 + 14 * 0.0045, -3.0)
+        assertEquals(7000.0, calculator.currentRouteDistance, 0.1)
+
+        calculator.syncRouteDistance(10000.0)
+        calculator.updateCurrentLocation(40.0 + 14 * 0.0045, -3.0)
+        assertEquals(7000.0, calculator.currentRouteDistance, 0.1)
+
+        val strategy = calculator.calculateStrategy(advance = false)
+        assertEquals(3000.0, strategy.remainingDistance, 0.1)
+    }
+
+    @Test
+    fun testPolylineCalibratedToFullRouteDistanceFromAnyPosition() {
+        val calculator = longRoute()
+        calculator.updateCurrentLocation(40.0 + 14 * 0.0045, -3.0)
+
+        calculator.syncRouteDistance(10300.0)
+        assertEquals(10300.0, calculator.routePoints.last().distance, 0.1)
+
+        calculator.updateCurrentLocation(40.0 + 14 * 0.0045, -3.0)
+        assertEquals(7210.0, calculator.currentRouteDistance, 0.1)
+    }
 }
-
-
-
