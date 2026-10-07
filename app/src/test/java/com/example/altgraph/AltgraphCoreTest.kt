@@ -102,4 +102,28 @@ class AltgraphCoreTest {
         assertNotEquals(snap.strategy.windowStartMeters, s3d.windowStartMeters, 0.0)
         assertEquals(0.0, core.calculator.manualPanOffsetMeters, 0.0)
     }
+
+    @Test
+    fun ghostGapNullWithoutKGhost() {
+        assertNull(AltgraphCore().tick(null).ghostGap)
+    }
+
+    @Test
+    fun ghostGapFromParts() {
+        val core = AltgraphCore()
+        core.kghostTime = GapPart(-8.0, false)
+        core.kghostDist = GapPart(-30.0, false)
+        assertEquals(GhostGap(-8.0, -30.0, false), core.tick(null).ghostGap)
+    }
+
+    @Test
+    fun clearedPartReachesSnapshot() {
+        val core = AltgraphCore()
+        core.kghostTime = GapPart(-8.0, false)
+        core.kghostDist = GapPart(-30.0, false)
+        assertEquals(GhostGap(-8.0, -30.0, false), core.tick(null).ghostGap)
+        core.kghostTime = null
+        core.kghostDist = null
+        assertNull(core.tick(null).ghostGap)
+    }
 }

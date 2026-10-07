@@ -95,7 +95,7 @@ class RouteBarView(context: Context) : View(context) {
     )
 
     // ── ELITE feature state (set by RouteBarDataField each frame) ────────────
-    var ghostRelativeMeters: Double? = null   // +ahead / -behind in metres
+    var ghostGap: GhostGap? = null   // hueco con KGhost (+ por delante / - por detrás)
     var showEnergyBar: Boolean = false
     var showPowerBar: Boolean = false
     var showRadarAlerts: Boolean = true
@@ -105,16 +105,10 @@ class RouteBarView(context: Context) : View(context) {
     var showRadar3d: Boolean = true
     var radarTheme: String = "Estándar"
 
-    // Ghost marker paint (semi-transparent rider arrow)
-    private val ghostPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.argb(180, 180, 180, 255)  // ghostly blue-white
+    // Texto del hueco con KGhost (reutilizado en cada frame)
+    private val ghostTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
         setShadowLayer(3f, 0f, 1f, Color.BLACK)
-    }
-    private val ghostOutlinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.argb(160, 100, 100, 200)
-        style = Paint.Style.STROKE
-        strokeWidth = 2f
     }
 
     // POI icon paint
@@ -283,6 +277,7 @@ class RouteBarView(context: Context) : View(context) {
         val fontFamilyKey = AppPreferences.getInstance(context).fontFamilyKey
         FontHelper.applyFontToPaint(percentTextPaint, fontFamilyKey, Typeface.BOLD)
         FontHelper.applyFontToPaint(tickTextPaint, fontFamilyKey, Typeface.NORMAL)
+        FontHelper.applyFontToPaint(ghostTextPaint, fontFamilyKey, Typeface.BOLD)
         
         val strat = strategyData ?: return
         
@@ -501,21 +496,6 @@ class RouteBarView(context: Context) : View(context) {
             canvas.drawPath(path, cyclistPaint)
             canvas.drawPath(path, cyclistOutline)
 
-            // 5b. Ghost marker (ELITE) — semi-transparent arrow offset by ghostRelativeMeters
-            val ghostRel = ghostRelativeMeters
-            if (ghostRel != null) {
-                val ghostProgress = strat.riderProgress + (ghostRel / lookahead).toFloat()
-                val ghostX = ((w * ghostProgress).toFloat() - progressOffset).coerceIn(cWidth / 2f, w - cWidth / 2f)
-                val ghostPath = Path()
-                ghostPath.moveTo(ghostX, headerHeight)
-                ghostPath.lineTo(ghostX - (cWidth / 2f), 0f)
-                ghostPath.lineTo(ghostX, 10f)
-                ghostPath.lineTo(ghostX + (cWidth / 2f), 0f)
-                ghostPath.close()
-                canvas.drawPath(ghostPath, ghostPaint)
-                canvas.drawPath(ghostPath, ghostOutlinePaint)
-            }
-
             // 5c. POI icons on ruler (ELITE)
             if (showPoiRuler && strat.pois.isNotEmpty()) {
                 if (showRadar3d) {
@@ -610,6 +590,16 @@ class RouteBarView(context: Context) : View(context) {
             // 8. Grade Histogram (ELITE) — mini panel on the right side of the ruler strip
             if (showHistogram && strat.subBlocks.isNotEmpty()) {
                 drawGradeHistogram(canvas, strat, headerHeight, radarH, w)
+            }
+
+            // 9. Hueco con KGhost (ELITE), a la izquierda de la franja de la regla
+            ghostGap?.let { gap ->
+                ghostTextPaint.textSize = Math.min(28f, (radarH - headerHeight) * 0.6f).coerceAtLeast(10f)
+                ghostTextPaint.textAlign = Paint.Align.LEFT
+                ghostTextPaint.color = ghostGapColor(gap)
+                val text = formatGhostGap(gap, w * 0.45f) { ghostTextPaint.measureText(it) }
+                val cy = headerHeight + (radarH - headerHeight) / 2f + ghostTextPaint.textSize / 3f
+                canvas.drawText(text, 6f, cy, ghostTextPaint)
             }
             
         } else {
@@ -761,6 +751,15 @@ class RouteBarView(context: Context) : View(context) {
             canvas.drawPath(path, cyclistPaint)
             canvas.drawPath(path, cyclistOutline)
             
+            // Hueco con KGhost (ELITE): abajo, centrado en la franja de la regla
+            ghostGap?.let { gap ->
+                ghostTextPaint.textSize = Math.min(28f, (radarW - headerWidth) * 0.6f).coerceAtLeast(10f)
+                ghostTextPaint.textAlign = Paint.Align.CENTER
+                ghostTextPaint.color = ghostGapColor(gap)
+                val text = formatGhostGap(gap, radarW - headerWidth - 8f) { ghostTextPaint.measureText(it) }
+                canvas.drawText(text, (headerWidth + radarW) / 2f, h - 6f, ghostTextPaint)
+            }
+
             // 6. Alertas dinámicas
             if (showRadarAlerts) {
                 drawAlerts(canvas, strat, isHorizontal = false, w, h)

@@ -12,7 +12,6 @@ import io.hammerhead.karooext.internal.Emitter
 import io.hammerhead.karooext.internal.ViewEmitter
 import io.hammerhead.karooext.models.DataPoint
 import io.hammerhead.karooext.models.DataType
-import io.hammerhead.karooext.models.OnNavigationState
 import io.hammerhead.karooext.models.StreamState
 import io.hammerhead.karooext.models.UpdateGraphicConfig
 import io.hammerhead.karooext.models.ViewConfig
@@ -24,12 +23,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar") {
-
-    private var ghostRecorder: GhostRecorder? = null
-    private var lastRouteName: String? = null
-    // Un solo listener de navegación para todas las vistas abiertas (como el único consumer de antes):
-    // con uno por vista el GhostRecorder compartido recibiría cada evento varias veces
-    private val ghostNavRef = RefCounted<(OnNavigationState) -> Unit> { AltgraphRepository.removeNavListener(it) }
 
     override fun startStream(emitter: Emitter<StreamState>) {
         val latch = CancelLatch()
@@ -66,31 +59,8 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
         val latch = CancelLatch()
         emitter.setCancellable { latch.cancel() }
         emitter.onNext(UpdateGraphicConfig(showHeader = false))
-        if (ghostRecorder == null) ghostRecorder = GhostRecorder(context)
 
         AltgraphRepository.hold(emitter)
-
-        // Solo el ghost: el calculador lo alimenta ya el repositorio (NavigationSync)
-        val navListener: (OnNavigationState) -> Unit = { navEvent ->
-            val state = navEvent.state
-            if (state is OnNavigationState.NavigationState.NavigatingRoute) {
-                // Ghost recording — key route by first 30 chars of polyline
-                val routeKey = state.routePolyline.take(30)
-                if (routeKey != lastRouteName) {
-                    lastRouteName = routeKey
-                    ghostRecorder?.startRoute(routeKey)
-                }
-                ghostRecorder?.update(state.routeDistance)
-
-            } else {
-                if (state.javaClass.simpleName == "Idle") {
-                    ghostRecorder?.finishRoute()
-                    ghostRecorder?.clearRoute()
-                    lastRouteName = null
-                }
-            }
-        }
-        ghostNavRef.acquire(emitter) { navListener.also { AltgraphRepository.addNavListener(it) } }
 
         val routeBarView = RouteBarView(context)
         // If it's a very tall and thin view, it's likely on the side. 
@@ -116,7 +86,7 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                 if (snap != null) {
                     val prefs = AppPreferences.getInstance(context)
                     val isElite = prefs.eliteRadarEnabled
-                    safeUpdate(onDead = { cancel(); AltgraphRepository.release(emitter); ghostNavRef.release(emitter) }) {
+                    safeUpdate(onDead = { cancel(); AltgraphRepository.release(emitter) }) {
                         // Suspend (calcula en el hilo del calculador); dentro de safeUpdate para que un fallo no mate el bucle
                         val strategy = if (isElite) AltgraphRepository.strategyForRouteBar(w, snap) else null
                         if (cachedBitmap == null || cachedBitmap!!.width != w || cachedBitmap!!.height != h) {
@@ -127,11 +97,10 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                         val currentBmp = cachedBitmap!!
                         val currentCanvas = cachedCanvas!!
 
-                        val ghost = if (isElite && prefs.eliteGhostEnabled)
-                            ghostRecorder?.ghostRelativeToRider(snap.currentRouteDistance) else null
+                        val gap = if (isElite && prefs.eliteGhostEnabled) snap.ghostGap else null
 
                         // Nada ha cambiado (parado, sin ruta...): no redibujar ni reenviar el bitmap
-                        val frame = listOf(strategy, ghost, prefs.snapshot)
+                        val frame = listOf(strategy, gap, prefs.snapshot)
                         if (frame == lastFrame) return@safeUpdate
 
                         // Clear the canvas with transparent background so map shows through
@@ -139,7 +108,7 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                 
                         if (isElite) {
                             routeBarView.strategyData = strategy
-                            routeBarView.ghostRelativeMeters = ghost
+                            routeBarView.ghostGap = gap
                             routeBarView.showEnergyBar = prefs.eliteEnergyBarEnabled
                             routeBarView.showPoiRuler = prefs.elitePoiRulerEnabled
                             routeBarView.showHistogram = prefs.eliteHistogramEnabled
@@ -174,12 +143,10 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
         // Siempre libera el token al terminar el bucle (excepción, parada del repositorio...); es idempotente
         viewJob.invokeOnCompletion {
             AltgraphRepository.release(emitter)
-            ghostNavRef.release(emitter)
         }
 
         latch.attach(viewJob) {
             AltgraphRepository.release(emitter)
-            ghostNavRef.release(emitter)
             // cachedBitmap?.recycle()
             cachedBitmap = null
             cachedCanvas = null
