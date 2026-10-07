@@ -11,17 +11,22 @@ import kotlin.math.roundToInt
 
 class RouteBarView(context: Context) : View(context) {
 
+    private companion object {
+        // Tamaño fijo de la regla: no depende de la escala de letra del panel de estilo
+        const val RULER_TEXT_SIZE = 25f
+    }
+
     var strategyData: StrategyData? = null
 
     private val segmentPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
     }
-    
+
     private val headerOverlayPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.argb(40, 0, 0, 0)
         style = Paint.Style.FILL
     }
-    
+
     private val pastOverlayPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.argb(100, 0, 0, 0) // Oscurece el tramo ya recorrido (sin dejarlo totalmente negro)
         style = Paint.Style.FILL
@@ -33,7 +38,7 @@ class RouteBarView(context: Context) : View(context) {
         strokeWidth = 3f
         alpha = 200
     }
-    
+
     private val percentTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         textSize = 42f
@@ -74,13 +79,13 @@ class RouteBarView(context: Context) : View(context) {
         textAlign = Paint.Align.CENTER
         setShadowLayer(3f, 0f, 2f, Color.BLACK)
     }
-    
+
     private val cyclistPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#FBC02D")
         style = Paint.Style.FILL
         setShadowLayer(4f, 0f, 2f, Color.BLACK)
     }
-    
+
     private val cyclistOutline = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.BLACK
         style = Paint.Style.STROKE
@@ -155,7 +160,7 @@ class RouteBarView(context: Context) : View(context) {
                 val lightColor = Color.HSVToColor(hsv)
                 hsv[2] = Math.max(0.0f, hsv[2] * 0.5f) // darken from original (1.3 * 0.5 = 0.65)
                 val darkColor = Color.HSVToColor(hsv)
-                
+
                 val grad = android.graphics.LinearGradient(
                     0f, top, 0f, bottom,
                     intArrayOf(lightColor, baseColor, darkColor),
@@ -165,7 +170,7 @@ class RouteBarView(context: Context) : View(context) {
                 segmentPaint.shader = grad
                 canvas.drawRect(left, top, right + 1f, bottom, segmentPaint)
                 segmentPaint.shader = null
-                
+
                 // Shiny highlight
                 val shinePaint = Paint().apply {
                     color = Color.argb(40, 255, 255, 255)
@@ -183,7 +188,7 @@ class RouteBarView(context: Context) : View(context) {
                 val darkColor = Color.HSVToColor(hsv)
                 hsv[2] = Math.min(1.0f, hsv[2] * 2.4f)
                 val lightColor = Color.HSVToColor(hsv)
-                
+
                 val grad = android.graphics.LinearGradient(
                     0f, top, 0f, bottom,
                     intArrayOf(darkColor, lightColor, darkColor),
@@ -193,7 +198,7 @@ class RouteBarView(context: Context) : View(context) {
                 segmentPaint.shader = grad
                 canvas.drawRect(left, top, right + 1f, bottom, segmentPaint)
                 segmentPaint.shader = null
-                
+
                 // Add inner shadow
                 val innerShadow = Paint().apply {
                     color = Color.argb(100, 0, 0, 0)
@@ -212,7 +217,7 @@ class RouteBarView(context: Context) : View(context) {
                 )
                 segmentPaint.color = glassColor
                 canvas.drawRect(left, top, right + 1f, bottom, segmentPaint)
-                
+
                 val glassGlow = android.graphics.LinearGradient(
                     left, top, right, bottom,
                     intArrayOf(Color.argb(80, 255, 255, 255), Color.TRANSPARENT),
@@ -223,7 +228,7 @@ class RouteBarView(context: Context) : View(context) {
                     shader = glassGlow
                 }
                 canvas.drawRect(left, top, right + 1f, bottom, glowPaint)
-                
+
                 // Glass border
                 val borderPaint = Paint().apply {
                     color = Color.argb(60, 255, 255, 255)
@@ -240,10 +245,10 @@ class RouteBarView(context: Context) : View(context) {
                 val darkColor = Color.HSVToColor(hsv)
                 hsv[2] = Math.min(1.0f, hsv[2] * 1.8f)
                 val neonColor = Color.HSVToColor(hsv)
-                
+
                 segmentPaint.color = darkColor
                 canvas.drawRect(left, top, right + 1f, bottom, segmentPaint)
-                
+
                 val neonBorder = Paint().apply {
                     color = neonColor
                     style = Paint.Style.STROKE
@@ -251,7 +256,7 @@ class RouteBarView(context: Context) : View(context) {
                     setShadowLayer(8f, 0f, 0f, color)
                 }
                 canvas.drawRect(left, top, right, bottom, neonBorder)
-                
+
                 // Draw some grid lines
                 val gridPaint = Paint().apply {
                     color = Color.argb(50, 255, 255, 255)
@@ -272,20 +277,24 @@ class RouteBarView(context: Context) : View(context) {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        
+
         // Aplicar fuente del usuario a los textos
         val fontFamilyKey = AppPreferences.getInstance(context).fontFamilyKey
         FontHelper.applyFontToPaint(percentTextPaint, fontFamilyKey, Typeface.BOLD)
         FontHelper.applyFontToPaint(tickTextPaint, fontFamilyKey, Typeface.NORMAL)
         FontHelper.applyFontToPaint(ghostTextPaint, fontFamilyKey, Typeface.BOLD)
-        
+        FontHelper.applyFontToPaint(maxGradeArrowPaint, fontFamilyKey, Typeface.BOLD)
+        FontHelper.applyFontToPaint(histPaint, fontFamilyKey, Typeface.BOLD)
+        // Escala de letra del panel de estilo: los textos crecen/decrecen y la franja se reparte en consecuencia
+        val fontScale = AppPreferences.getInstance(context).fontSize3dScale
+
         val strat = strategyData ?: return
-        
+
         val w = width.toFloat()
         val h = height.toFloat()
-        val blocks = strat.subBlocks
+        val blocks = strat.subBlocks + strat.rightBufferBlocks
         if (blocks.isEmpty()) return
-        
+
         val numBlocks = blocks.size
         val isHorizontal = w > h
 
@@ -295,7 +304,7 @@ class RouteBarView(context: Context) : View(context) {
         var currentColor = if (firstGrade <= -900.0) "#9E9E9E" else GradeColorScale.getColorHex(firstGrade)
         var currentBand = ColorBand(0, 0, currentColor, blocks[0].toDouble())
         bands.add(currentBand)
-        
+
         for (i in 1 until numBlocks) {
             val grade = blocks[i].toDouble()
             val color = if (grade <= -900.0) "#9E9E9E" else GradeColorScale.getColorHex(grade)
@@ -313,9 +322,14 @@ class RouteBarView(context: Context) : View(context) {
 
         if (isHorizontal) {
             // HORIZONTAL MODE
-            val radarH = if (showRadarAlerts) h * 0.60f else h.toFloat()
-            val headerHeight = radarH * 0.50f
-            
+            // Reparto vertical según lo activo: barras inferiores, alertas, regla y franja de pendiente
+            val bottomBarH = 12f
+            val barsH = (if (showEnergyBar) bottomBarH else 0f) + (if (showPowerBar) bottomBarH else 0f)
+            val usableH = (h - barsH).coerceAtLeast(h * 0.5f)
+            val alertH = if (showRadarAlerts) (38f * fontScale * 1.25f).coerceIn(usableH * 0.2f, usableH * 0.35f) else 0f
+            val radarH = usableH - alertH
+            val rulerH = (15f + 2f + RULER_TEXT_SIZE / 0.85f).coerceIn(radarH * 0.25f, radarH * 0.42f)
+            val headerHeight = radarH - rulerH
             // 1. Dibujar franjas de color con ligera perspectiva isométrica
             if (showRadar3d) {
                 canvas.save()
@@ -336,14 +350,14 @@ class RouteBarView(context: Context) : View(context) {
             if (showRadar3d) {
                 canvas.restore()
             }
-            
+
             // Draw checkered start pattern if we are before the actual route starts
-            val totalLookahead = strat.subBlockSizeMeters * strat.subBlocks.size
+            val totalLookahead = strat.windowLengthMeters
             val startX = w * (0.0 - strat.windowStartMeters).toFloat() / totalLookahead.toFloat() - progressOffset
             if (startX > 0f) {
                 canvas.drawRect(0f, 0f, startX, headerHeight, checkeredPaint)
             }
-            
+
             // Draw checkered end pattern if the route finishes within the window
             var endX = w.toFloat() + Math.abs(progressOffset)
             if (strat.routeTotalLength > 0.0) {
@@ -363,13 +377,13 @@ class RouteBarView(context: Context) : View(context) {
             // 3. Textos de porcentaje medio en la franja superior (sin el fondo oscurecido general)
             percentTextPaint.setShadowLayer(4f, 0f, 2f, Color.BLACK) // Sombra fuerte para legibilidad sin fondo oscuro
             FontHelper.applyFontToPaint(maxGradeBlockPaint, fontFamilyKey, Typeface.BOLD)
-            
+
             // DYNAMIC SCALING FOR HEIGHT COMPRESSION
-            val currentMaxGradeTextSize = Math.min(24f, headerHeight * 0.45f).coerceAtLeast(10f)
+            val currentMaxGradeTextSize = Math.min(24f * fontScale, headerHeight * 0.45f).coerceAtLeast(10f)
             maxGradeBlockPaint.textSize = currentMaxGradeTextSize
             maxGradeArrowPaint.textSize = currentMaxGradeTextSize
-            percentTextPaint.textSize = Math.min(32f, headerHeight * 0.8f).coerceAtLeast(12f)
-            
+            percentTextPaint.textSize = Math.min(54f * fontScale, headerHeight * 0.9f).coerceAtLeast(12f)
+
             val cyPercent = (headerHeight / 2f) + (percentTextPaint.textSize / 3f)
             // getSubBlockSize only returns 50.0 or 100.0 for typical route lookaheads
             val showMaxGrade = strat.subBlockSizeMeters <= 100.0 && strat.subBlocksMax.isNotEmpty()
@@ -377,19 +391,19 @@ class RouteBarView(context: Context) : View(context) {
                 val left = band.startIndex * blockWidth - progressOffset
                 val right = (band.endIndex + 1) * blockWidth - progressOffset
                 val bandWidth = right - left
-                
+
                 // Si la banda está fuera de la pantalla no dibujar su %
                 if (right <= 0f || left >= w) continue
-                
-                if (bandWidth > 50f) {
+
+                if (bandWidth > percentTextPaint.textSize * 1.6f) {
                     val count = band.endIndex - band.startIndex + 1
                     val avgGrade = (Math.round(band.sumGrade / count)).toInt()
                     // Adjust drawing to not overlap with checkered start/end if it crosses them
                     val actualLeft = Math.max(left, startX)
                     val actualRight = Math.min(right, endX)
                     val drawCenter = actualLeft + (actualRight - actualLeft) / 2f
-                    canvas.drawText("${avgGrade}%", drawCenter, cyPercent, percentTextPaint)
-                    
+                    drawGradeLabel(canvas, avgGrade, drawCenter, cyPercent, percentTextPaint.textSize)
+
                     // Max grade label (top-left corner) — computed as extreme across all subBlocks in the band
                     if (showMaxGrade) {
                         val blockGrades = (band.startIndex..band.endIndex)
@@ -403,18 +417,18 @@ class RouteBarView(context: Context) : View(context) {
                         if (extremeG != null) {
                             val arrow = if (extremeG < 0) "▼" else "▲"
                             val maxLabel = "${Math.abs(Math.round(extremeG))}%"
-                            
-                            val labelX = actualLeft + 24f // Center relative to text
+
+                            val labelX = actualLeft + currentMaxGradeTextSize // Center relative to text
                             val arrowY = maxGradeArrowPaint.textSize + 4f
                             val textY = arrowY + maxGradeBlockPaint.textSize + 2f
-                            
+
                             val baseColor = Color.parseColor(band.colorHex)
                             val hsv = FloatArray(3)
                             Color.colorToHSV(baseColor, hsv)
                             hsv[1] = Math.min(1.0f, hsv[1] * 1.2f) // Increase saturation a bit
                             hsv[2] *= 0.5f // Decrease brightness for a darker tone
                             maxGradeArrowPaint.color = Color.HSVToColor(hsv)
-                            
+
                             canvas.drawText(arrow, labelX, arrowY, maxGradeArrowPaint)
                             canvas.drawText(maxLabel, labelX, textY, maxGradeBlockPaint)
                         }
@@ -434,7 +448,7 @@ class RouteBarView(context: Context) : View(context) {
             canvas.drawLine(-w, headerHeight, w * 2, headerHeight, dividerPaint)
 
             // Ticks de distancia (Escala dinámica)
-            val lookahead = strat.subBlockSizeMeters * strat.subBlocks.size
+            val lookahead = strat.windowLengthMeters
             val tickInterval = when {
                 lookahead <= 350 -> 50.0
                 lookahead <= 700 -> 100.0
@@ -454,9 +468,9 @@ class RouteBarView(context: Context) : View(context) {
                     val rulerSpace = radarH - headerHeight
                     val dynamicTickLen = Math.min(15f, rulerSpace * 0.25f)
                     val maxTextHeight = rulerSpace - dynamicTickLen - 2f
-                    val currentTextSize = Math.min(28f, maxTextHeight * 0.85f).coerceAtLeast(10f)
+                    val currentTextSize = Math.min(RULER_TEXT_SIZE, maxTextHeight * 0.85f).coerceAtLeast(10f)
                     tickTextPaint.textSize = currentTextSize
-                    
+
                     // Línea de marca hacia abajo
                     canvas.drawLine(px, headerHeight, px, headerHeight + dynamicTickLen, dividerPaint)
                     // Texto (un-skew if 3D)
@@ -517,7 +531,7 @@ class RouteBarView(context: Context) : View(context) {
                         }
                         // Draw a small vertical tick at ruler level and the icon above
                         canvas.drawLine(poiX, headerHeight, poiX, headerHeight + 22f, dividerPaint)
-                        
+
                         // Draw unskewed icon
                         if (showRadar3d) {
                             canvas.save()
@@ -534,10 +548,10 @@ class RouteBarView(context: Context) : View(context) {
                     canvas.restore()
                 }
             }
-            
+
             // 6. Alertas dinámicas
             if (showRadarAlerts) {
-                drawAlerts(canvas, strat, isHorizontal = true, w, h)
+                drawAlerts(canvas, strat, isHorizontal = true, 0f, radarH, w, radarH + alertH, fontScale)
             }
 
             // 7. Energy / Power Bars (ELITE) — thin horizontal bars below the alert strip
@@ -561,11 +575,11 @@ class RouteBarView(context: Context) : View(context) {
                 val barTop = h - bottomOffset - 12f
                 val barHeight = 12f
                 canvas.drawRect(0f, barTop, w, barTop + barHeight, energyBgPaint)
-                
+
                 val currentPwr = strat.currentPower.toFloat()
                 val ftp = userFtp.toFloat().coerceAtLeast(1f)
                 val percentFtp = currentPwr / ftp
-                
+
                 val barColor = when {
                     percentFtp < 0.55f -> Color.parseColor("#808080") // Z1: Active Recovery (Gray)
                     percentFtp < 0.75f -> Color.parseColor("#4CAF50") // Z2: Endurance (Green)
@@ -573,7 +587,7 @@ class RouteBarView(context: Context) : View(context) {
                     percentFtp < 1.05f -> Color.parseColor("#FF9800") // Z4: Threshold (Orange)
                     percentFtp < 1.20f -> Color.parseColor("#F44336") // Z5: VO2 Max (Red)
                     percentFtp < 1.50f -> Color.parseColor("#9C27B0") // Z6: Anaerobic Capacity (Purple)
-                    else -> Color.parseColor("#FFEB3B") // Z7: Neuromuscular (Yellow/White - let's use White or bright yellow) 
+                    else -> Color.parseColor("#FFEB3B") // Z7: Neuromuscular (Yellow/White - let's use White or bright yellow)
                 }
                 if (percentFtp >= 1.50f) {
                     val p2 = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE; style = Paint.Style.FILL }
@@ -594,20 +608,22 @@ class RouteBarView(context: Context) : View(context) {
 
             // 9. Hueco con KGhost (ELITE), a la izquierda de la franja de la regla
             ghostGap?.let { gap ->
-                ghostTextPaint.textSize = Math.min(28f, (radarH - headerHeight) * 0.6f).coerceAtLeast(10f)
+                ghostTextPaint.textSize = Math.min(28f * fontScale, (radarH - headerHeight) * 0.6f).coerceAtLeast(10f)
                 ghostTextPaint.textAlign = Paint.Align.LEFT
                 ghostTextPaint.color = ghostGapColor(gap)
                 val text = formatGhostGap(gap, w * 0.45f) { ghostTextPaint.measureText(it) }
                 val cy = headerHeight + (radarH - headerHeight) / 2f + ghostTextPaint.textSize / 3f
                 canvas.drawText(text, 6f, cy, ghostTextPaint)
             }
-            
+
         } else {
             // VERTICAL MODE
             val radarW = if (showRadarAlerts) w * 0.60f else w.toFloat()
-            val headerWidth = radarW * 0.50f
-            val blockHeight = h / numBlocks.toFloat()
-            
+            tickTextPaint.textSize = RULER_TEXT_SIZE
+            val rulerW = (tickTextPaint.measureText("8888m") + 21f).coerceIn(radarW * 0.25f, radarW * 0.5f)
+            val headerWidth = radarW - rulerW
+            val blockHeight = h * (strat.subBlockSizeMeters / strat.windowLengthMeters).toFloat()
+
             // 1. Dibujar franjas de color con ligera perspectiva isométrica (vertical mode)
             if (showRadar3d) {
                 canvas.save()
@@ -624,12 +640,12 @@ class RouteBarView(context: Context) : View(context) {
             }
 
             // Draw checkered start pattern if before actual route starts
-            val totalLookahead = strat.subBlockSizeMeters * strat.subBlocks.size
+            val totalLookahead = strat.windowLengthMeters
             val startY = h - (h * (0.0 - strat.windowStartMeters).toFloat() / totalLookahead.toFloat())
             if (startY < h) {
                 canvas.drawRect(0f, startY, headerWidth, h, checkeredPaint)
             }
-            
+
             // Draw checkered end pattern if route finishes within window
             var endY = 0f
             if (strat.routeTotalLength > 0.0) {
@@ -642,7 +658,7 @@ class RouteBarView(context: Context) : View(context) {
             // 2. Oscurecer lo que queda atrás (abajo)
             val cHeight = 30f
             var riderY = (h - (h * strat.riderProgress)).coerceAtLeast(cHeight / 2f).coerceAtMost(h - (cHeight / 2f))
-            
+
             if (startY < h) {
                 val distMeters = (startY - riderY) * totalLookahead / h
                 if (distMeters in 0f..25f) {
@@ -659,26 +675,26 @@ class RouteBarView(context: Context) : View(context) {
             // 3. Textos de %
             percentTextPaint.setShadowLayer(4f, 0f, 2f, Color.BLACK)
             // DYNAMIC SCALING FOR WIDTH COMPRESSION IN VERTICAL MODE
-            percentTextPaint.textSize = Math.min(32f, headerWidth * 0.8f).coerceAtLeast(12f)
+            percentTextPaint.textSize = Math.min(54f * fontScale, headerWidth * 0.9f).coerceAtLeast(12f)
             val cxPercent = headerWidth / 2f
             for (band in bands) {
                 val top = h - ((band.endIndex + 1) * blockHeight)
                 val bottom = h - (band.startIndex * blockHeight)
                 val bandHeight = bottom - top
-                
+
                 // Si la banda está debajo de startY (pre-ruta), no dibujar
                 if (top >= startY) continue
                 // Si la banda está arriba de endY (meta), tampoco dibujar
                 if (bottom <= endY) continue
-                
-                if (bandHeight > 40f) {
+
+                if (bandHeight > percentTextPaint.textSize * 1.25f) {
                     val count = band.endIndex - band.startIndex + 1
                     val avgGrade = (Math.round(band.sumGrade / count)).toInt()
                     // Adjust drawing to not overlap with checkered start/end
                     val actualBottom = Math.min(bottom, startY)
                     val actualTop = Math.max(top, endY)
                     val cyPercent = actualTop + ((actualBottom - actualTop) / 2f) + (percentTextPaint.textSize / 3f)
-                    canvas.drawText("${avgGrade}%", cxPercent, cyPercent, percentTextPaint)
+                    drawGradeLabel(canvas, avgGrade, cxPercent, cyPercent, percentTextPaint.textSize)
                 }
             }
 
@@ -693,7 +709,7 @@ class RouteBarView(context: Context) : View(context) {
             canvas.drawLine(headerWidth, -h, headerWidth, h * 2, dividerPaint)
 
             // Ticks de distancia
-            val lookahead = strat.subBlockSizeMeters * strat.subBlocks.size
+            val lookahead = strat.windowLengthMeters
             val tickInterval = when {
                 lookahead <= 350 -> 50.0
                 lookahead <= 700 -> 100.0
@@ -711,13 +727,13 @@ class RouteBarView(context: Context) : View(context) {
                 // Dynamic scaling for vertical ruler
                 val rulerSpace = radarW - headerWidth
                 val dynamicTickLen = Math.min(15f, rulerSpace * 0.25f)
-                
+
                 canvas.drawLine(headerWidth, py, headerWidth + dynamicTickLen, py, dividerPaint)
                 val kmLabel = if (tickDist >= 1000) "${(tickDist / 1000).toInt()}km" else "${tickDist.toInt()}m"
-                
+
                 // Scale down if it's too wide
-                tickTextPaint.textSize = 28f
-                var currentTextSize = 28f
+                tickTextPaint.textSize = RULER_TEXT_SIZE
+                var currentTextSize = RULER_TEXT_SIZE
                 val maxTextWidth = rulerSpace - dynamicTickLen - 4f
                 if (tickTextPaint.measureText(kmLabel) > maxTextWidth) {
                     currentTextSize = currentTextSize * (maxTextWidth / tickTextPaint.measureText(kmLabel))
@@ -750,10 +766,10 @@ class RouteBarView(context: Context) : View(context) {
             path.close()
             canvas.drawPath(path, cyclistPaint)
             canvas.drawPath(path, cyclistOutline)
-            
+
             // Hueco con KGhost (ELITE): abajo, centrado en la franja de la regla
             ghostGap?.let { gap ->
-                ghostTextPaint.textSize = Math.min(28f, (radarW - headerWidth) * 0.6f).coerceAtLeast(10f)
+                ghostTextPaint.textSize = Math.min(28f * fontScale, (radarW - headerWidth) * 0.6f).coerceAtLeast(10f)
                 ghostTextPaint.textAlign = Paint.Align.CENTER
                 ghostTextPaint.color = ghostGapColor(gap)
                 val text = formatGhostGap(gap, radarW - headerWidth - 8f) { ghostTextPaint.measureText(it) }
@@ -762,9 +778,29 @@ class RouteBarView(context: Context) : View(context) {
 
             // 6. Alertas dinámicas
             if (showRadarAlerts) {
-                drawAlerts(canvas, strat, isHorizontal = false, w, h)
+                drawAlerts(canvas, strat, isHorizontal = false, radarW, 0f, w, h, fontScale)
             }
         }
+    }
+
+    // Número grande y símbolo % más pequeño, centrados como un único texto
+    private fun drawGradeLabel(canvas: Canvas, grade: Int, cx: Float, cy: Float, numberSize: Float) {
+        val number = grade.toString()
+        val signSize = numberSize * 0.6f
+        percentTextPaint.textSize = numberSize
+        val numberW = percentTextPaint.measureText(number)
+        percentTextPaint.textSize = signSize
+        val signW = percentTextPaint.measureText("%")
+        val startX = cx - (numberW + signW) / 2f
+
+        percentTextPaint.textAlign = Paint.Align.LEFT
+        percentTextPaint.textSize = numberSize
+        canvas.drawText(number, startX, cy, percentTextPaint)
+        percentTextPaint.textSize = signSize
+        // El % va arriba, alineado con la parte alta del número (como el 1ª)
+        canvas.drawText("%", startX + numberW, cy - (numberSize - signSize) * 0.72f, percentTextPaint)
+        percentTextPaint.textSize = numberSize
+        percentTextPaint.textAlign = Paint.Align.CENTER
     }
 
     private fun formatDist(m: Double): String {
@@ -775,7 +811,16 @@ class RouteBarView(context: Context) : View(context) {
         }
     }
 
-    private fun drawAlerts(canvas: Canvas, strat: StrategyData, isHorizontal: Boolean, w: Float, h: Float) {
+    private fun drawAlerts(
+        canvas: Canvas,
+        strat: StrategyData,
+        isHorizontal: Boolean,
+        left: Float,
+        top: Float,
+        right: Float,
+        bottom: Float,
+        fontScale: Float
+    ) {
         // Usar la distancia exacta del ciclista en lugar de la relativa a la ventana
         val trueRiderDist = strat.routeTotalLength - strat.remainingDistance
         
@@ -784,10 +829,10 @@ class RouteBarView(context: Context) : View(context) {
         
         val activeClimb = strat.activeClimbs.find { trueRiderDist >= it.startDistance && trueRiderDist < it.endDistance }
         if (activeClimb != null) {
-            val currentBlockIdx = (strat.riderProgress * strat.subBlocks.size).toInt()
+            val currentBlockIdx = (strat.riderProgress * strat.windowLengthMeters / strat.subBlockSizeMeters).toInt()
             var steepDist: Double? = null
             var steepGrade: Float? = null
-            
+
             for (i in currentBlockIdx until strat.subBlocks.size) {
                 val grade = strat.subBlocks[i]
                 if (grade >= 12f) {
@@ -799,7 +844,7 @@ class RouteBarView(context: Context) : View(context) {
                     }
                 }
             }
-            
+
             if (steepDist != null && steepGrade != null && steepDist < 5000) {
                 alertText = "Muro ${steepGrade.toInt()}% a ${formatDist(steepDist)}"
                 alertColorHex = GradeColorScale.getColorHex(steepGrade.toDouble())
@@ -820,9 +865,14 @@ class RouteBarView(context: Context) : View(context) {
 
         if (alertText.isEmpty()) {
             // Si no hay alerta, el color de la franja debe coincidir con la pendiente actual del ciclista
-            val currentBlockIdx = (strat.riderProgress * strat.subBlocks.size).toInt().coerceIn(0, strat.subBlocks.size - 1)
+            val currentBlockIdx = (strat.riderProgress * strat.windowLengthMeters / strat.subBlockSizeMeters).toInt().coerceIn(0, strat.subBlocks.size - 1)
             val currentGrade = if (strat.subBlocks.isNotEmpty()) strat.subBlocks[currentBlockIdx].toDouble() else 0.0
             alertColorHex = GradeColorScale.getColorHex(currentGrade)
+        }
+
+        // Sin más puertos por delante, el último aviso deja paso a la distancia a meta
+        if (alertText.isEmpty() && strat.routeTotalLength > 0.0 && strat.remainingDistance > 0.0) {
+            alertText = "Meta a ${formatDist(strat.remainingDistance)}"
         }
 
         // Fondo de la franja: mezclamos el color de alerta con un poco de transparencia/blanco para que sea "más claro"
@@ -839,7 +889,7 @@ class RouteBarView(context: Context) : View(context) {
             )
             style = Paint.Style.FILL
         }
-        
+
         val alertPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.BLACK // Texto negro sobre fondo claro
             textSize = 38f // Reduced text size as requested
@@ -849,31 +899,27 @@ class RouteBarView(context: Context) : View(context) {
         }
 
         if (isHorizontal) {
-            // Franja inferior completa
-            val radarH = h * 0.60f
-            val rect = android.graphics.RectF(0f, radarH, w, h)
-            canvas.drawRect(rect, bgPaint)
-            
+            // Franja inferior, justo debajo de la regla
+            canvas.drawRect(android.graphics.RectF(left, top, right, bottom), bgPaint)
+
             if (alertText.isNotEmpty()) {
-                // Ajustar tamaño de texto según la altura disponible
-                alertPaint.textSize = Math.min(38f, (h - radarH) * 0.8f).coerceAtLeast(12f)
-                
+                // Ajustar tamaño de texto según la altura disponible y la escala de letra
+                alertPaint.textSize = Math.min(38f * fontScale, (bottom - top) * 0.8f).coerceAtLeast(12f)
+
                 // Texto centrado vertical y horizontalmente en la franja
-                val cy = radarH + (h - radarH) / 2f + (alertPaint.textSize / 3f)
-                canvas.drawText(alertText, w / 2f, cy, alertPaint)
+                val cy = top + (bottom - top) / 2f + (alertPaint.textSize / 3f)
+                canvas.drawText(alertText, (left + right) / 2f, cy, alertPaint)
             }
         } else {
-            // Franja derecha completa (vertical mode)
-            val radarW = w * 0.60f
-            val rect = android.graphics.RectF(radarW, 0f, w, h)
-            canvas.drawRect(rect, bgPaint)
-            
+            // Franja derecha (vertical mode)
+            canvas.drawRect(android.graphics.RectF(left, top, right, bottom), bgPaint)
+
             if (alertText.isNotEmpty()) {
                 // Texto centrado rotado o vertical
                 // Para no complicarlo con rotación, lo centramos normal en la zona superior
                 alertPaint.textAlign = Paint.Align.CENTER
-                alertPaint.textSize = Math.min(35f, (w - radarW) * 0.8f).coerceAtLeast(10f)
-                canvas.drawText(alertText, radarW + (w - radarW) / 2f, alertPaint.textSize + 10f, alertPaint)
+                alertPaint.textSize = Math.min(35f * fontScale, (right - left) * 0.8f).coerceAtLeast(10f)
+                canvas.drawText(alertText, left + (right - left) / 2f, top + alertPaint.textSize + 10f, alertPaint)
             }
         }
     }

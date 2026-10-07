@@ -65,7 +65,9 @@ data class StrategyData(
     val stravaSegmentDistance: Double? = null,
     val stravaPrGhostDistance: Double? = null,
     val windEffectIntensity: Double? = null, // -1 to 1 (-1 headwind, 1 tailwind)
-    val routeCoords: List<Pair<Double, Double>> = emptyList() // Added for Global Isometric GPS
+    val routeCoords: List<Pair<Double, Double>> = emptyList(), // Added for Global Isometric GPS
+    // Pendientes de los bloques posteriores a subBlocks: reserva a la derecha de la RouteBar (solo la RouteBar la usa)
+    val rightBufferBlocks: List<Float> = emptyList()
 )
 
 class AltimetriaStrategyCalculator {
@@ -1175,6 +1177,26 @@ class AltimetriaStrategyCalculator {
             routeElevations.add(sElevEnd.toFloat())
         }
 
+        // Reserva a la derecha medida en distancia (no en nº de bloques): cubre el desfase de la ventana
+        // cuantizada a 50 m y la inclinación del efecto 3D, para que nunca asome un hueco sin datos
+        val rightBufferMeters = quantumMeters + actualLookahead * 0.4
+        val rightBufferCount = Math.ceil(rightBufferMeters / subBlockSize).toInt().coerceIn(2, 500)
+        val rightBufferBlocks = ArrayList<Float>(rightBufferCount)
+        for (j in numSubBlocks until numSubBlocks + rightBufferCount) {
+            val bStart = windowStartDist + (j * subBlockSize)
+            val bEnd = bStart + subBlockSize
+            val bElevDiff = getElevationAtDistance(bEnd) - getElevationAtDistance(bStart)
+            val bGrade = if (useTopographicCalculation) {
+                val distRealSq = subBlockSize * subBlockSize
+                val elevSq = bElevDiff * bElevDiff
+                val horizontalDist = if (distRealSq > elevSq) sqrt(distRealSq - elevSq) else subBlockSize
+                (bElevDiff / horizontalDist) * 100.0
+            } else {
+                (bElevDiff / subBlockSize) * 100.0
+            }
+            rightBufferBlocks.add(bGrade.toFloat())
+        }
+
         // Construcción de bloques mayores para telemetría y rótulos
         val numMajorBlocks = (actualLookahead / majorBlockSize).roundToInt().coerceIn(1, 200)
         val routeMajorBlocks = mutableListOf<Float>()
@@ -1440,6 +1462,7 @@ class AltimetriaStrategyCalculator {
             windowStartElevation = windowStartElevation,
             subBlocks = routeSubBlocks,
             subBlocksMax = routeSubBlocksMax,
+            rightBufferBlocks = rightBufferBlocks,
             windowLengthMeters = actualLookahead,
             subBlockSizeMeters = subBlockSize,
             majorBlockSizeMeters = majorBlockSize,
