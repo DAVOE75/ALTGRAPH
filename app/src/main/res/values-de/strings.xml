@@ -112,4 +112,13 @@
     <string name="elite_map_overlay_all">Gesamte Route</string>
     <string name="elite_toast_unlocked">Elite-Funktionen entsperrt!</string>
     <string name="elite_toast_invalid">Ungültige Lizenz</string>
+    <string name="label_radar_resolution">Blockauflösung (Meter)</string>
+    <string name="radar_resolution_auto">Auto</string>
+    <string name="radar_resolution_20m">20m</string>
+    <string name="radar_resolution_50m">50m</string>
+    <string name="radar_resolution_100m">100m</string>
+    <string name="radar_resolution_150m">150m</string>
+    <string name="radar_resolution_300m">300m</string>
+    <string name="radar_resolution_500m">500m</string>
+    <string name="radar_resolution_1km">1km</string>
 </resources>

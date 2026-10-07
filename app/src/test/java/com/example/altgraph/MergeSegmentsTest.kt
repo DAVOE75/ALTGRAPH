@@ -6,7 +6,7 @@ import org.junit.Test
 
 class MergeSegmentsTest {
 
-    private fun merge(vararg s: GradeSegment) = MapOverlayManager.mergeShortSegments(s.toList())
+    private fun merge(vararg s: GradeSegment) = MapOverlayManager.mergeShortSegments(s.toList(), 300.0)
 
     @Test
     fun longFlatDoesNotSwallowFollowingClimb() {

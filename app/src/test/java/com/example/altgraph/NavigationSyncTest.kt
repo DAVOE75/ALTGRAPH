@@ -55,6 +55,24 @@ class NavigationSyncTest {
     }
 
     @Test
+    fun croppedPolylineKeepsFullRoute() {
+        val cropped = PolylineCodec.encode(listOf(40.009 to -3.0, 40.018 to -3.0), 1e5)
+        val a = AltimetriaStrategyCalculator()
+        a.setRouteFromPolyline(goodPolyline, "Test")
+        val fullSize = a.routePoints.size
+        val fullLast = a.routePoints.last().distance
+
+        a.setRouteFromPolyline(cropped, "Test")
+        assertEquals(fullSize, a.routePoints.size)
+        assertEquals(40.0, a.routePoints.first().latitude, 1e-6)
+        assertEquals(fullLast, a.routePoints.last().distance, 0.0)
+
+        a.setRouteFromPolyline(goodPolyline, "Test")
+        assertEquals(fullSize, a.routePoints.size)
+        assertEquals(40.0, a.routePoints.first().latitude, 1e-6)
+    }
+
+    @Test
     fun idleClearsRoute() {
         val a = AltimetriaStrategyCalculator()
         NavigationSync.applyNavigation(a, route(goodPolyline))

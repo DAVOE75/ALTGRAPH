@@ -112,4 +112,13 @@
     <string name="elite_map_overlay_all">Itinéraire Complet</string>
     <string name="elite_toast_unlocked">Fonctions Elite débloquées !</string>
     <string name="elite_toast_invalid">Licence invalide</string>
+    <string name="label_radar_resolution">Résolution de bloc (Mètres)</string>
+    <string name="radar_resolution_auto">Auto</string>
+    <string name="radar_resolution_20m">20m</string>
+    <string name="radar_resolution_50m">50m</string>
+    <string name="radar_resolution_100m">100m</string>
+    <string name="radar_resolution_150m">150m</string>
+    <string name="radar_resolution_300m">300m</string>
+    <string name="radar_resolution_500m">500m</string>
+    <string name="radar_resolution_1km">1km</string>
 </resources>

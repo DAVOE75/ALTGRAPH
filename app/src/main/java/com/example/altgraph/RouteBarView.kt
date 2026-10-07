@@ -23,7 +23,7 @@ class RouteBarView(context: Context) : View(context) {
     }
     
     private val pastOverlayPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.argb(200, 0, 0, 0) // Oscurece el tramo ya recorrido
+        color = Color.argb(100, 0, 0, 0) // Oscurece el tramo ya recorrido (sin dejarlo totalmente negro)
         style = Paint.Style.FILL
     }
 
@@ -322,7 +322,8 @@ class RouteBarView(context: Context) : View(context) {
                 val skewFactor = -0.35f // controla la inclinación para efecto 3D
                 canvas.skew(skewFactor, 0f)
             }
-            val blockWidth = w / numBlocks.toFloat()
+            val expectedBlocks = (strat.windowLengthMeters / strat.subBlockSizeMeters).toFloat()
+            val blockWidth = w / expectedBlocks
             val cWidth = 30f
             val arrowX = (w * 0.25f).coerceAtLeast(cWidth / 2f)
             val progressOffset = (w * strat.riderProgress) - arrowX

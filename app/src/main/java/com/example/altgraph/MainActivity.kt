@@ -44,8 +44,9 @@ class MainActivity : Activity() {
         // 1. Header Card (Logo, Título y Versión)
         val headerCard = createCardContainer()
         val logo = ImageView(this).apply {
-            setImageResource(R.mipmap.ic_launcher)
-            layoutParams = LinearLayout.LayoutParams(120, 120).apply {
+            setImageResource(R.drawable.altgraph_logo)
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            layoutParams = LinearLayout.LayoutParams(200, 200).apply {
                 gravity = Gravity.CENTER_HORIZONTAL
                 bottomMargin = 8
             }
@@ -933,6 +934,71 @@ class MainActivity : Activity() {
         }
         radarCard.addView(switchRadar)
         tabEliteContainer.addView(radarCard)
+        
+        // Radar Resolution Spinner
+        val radarResCard = createCardContainer()
+        val radarResLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(0, 0, 0, 16)
+        }
+        val radarResTitle = TextView(this).apply {
+            text = getString(R.string.label_radar_resolution)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            setPadding(0, 0, 0, 8)
+            alpha = if (prefs.isEliteUnlocked) 1.0f else 0.5f
+        }
+        radarResLayout.addView(radarResTitle)
+        
+        val radarResSpinner = Spinner(this).apply {
+            isEnabled = prefs.isEliteUnlocked
+            val options = arrayOf(
+                getString(R.string.radar_resolution_auto),
+                getString(R.string.radar_resolution_20m),
+                getString(R.string.radar_resolution_50m),
+                getString(R.string.radar_resolution_100m),
+                getString(R.string.radar_resolution_150m),
+                getString(R.string.radar_resolution_300m),
+                getString(R.string.radar_resolution_500m),
+                getString(R.string.radar_resolution_1km)
+            )
+            val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, options)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            this.adapter = adapter
+            
+            val currentRes = prefs.eliteRadarResolution
+            setSelection(when(currentRes) {
+                1000 -> 7
+                500 -> 6
+                300 -> 5
+                150 -> 4
+                100 -> 3
+                50 -> 2
+                20 -> 1
+                else -> 0
+            })
+            
+            onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    val newRes = when(position) {
+                        7 -> 1000
+                        6 -> 500
+                        5 -> 300
+                        4 -> 150
+                        3 -> 100
+                        2 -> 50
+                        1 -> 20
+                        else -> 0
+                    }
+                    prefs.eliteRadarResolution = newRes
+                    (view as? TextView)?.setTextColor(Color.parseColor("#4CAF50"))
+                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+        }
+        radarResLayout.addView(radarResSpinner)
+        radarResCard.addView(radarResLayout)
+        tabEliteContainer.addView(radarResCard)
         
         // Map Overlay Mode Spinner
         val mapOverlayCard = createCardContainer()

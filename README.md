@@ -1,12 +1,26 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo.png" alt="ALTGRAPH Logo" width="160" />
+  <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/icon.png" alt="ALTGRAPH Logo" width="150" />
 </p>
-# ALTGRAPH (v1.0.9 ELITE)
+# ALTGRAPH (v1.0.34 ELITE)
 <p>Leer en: <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README.md">🇪🇸 Español</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_en.md">🇬🇧 English</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_fr.md">🇫🇷 Français</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_it.md">🇮🇹 Italiano</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_de.md">🇩🇪 Deutsch</a> | <a href="https://github.com/DAVOE75/ALTGRAPH/blob/main/README_pt.md">🇵🇹 Português</a></p>
+
 **ALTGRAPH** es una extensión de rendimiento y altimetría profesional de última generación para ciclocomputadores **Hammerhead Karoo** (Karoo 2 y Karoo 3) desarrollada por **David García Pascual** utilizando el SDK oficial `karoo-ext`.
 Revoluciona el concepto tradicional de altimetría ciclista incorporando una **Suite de 6 Modelos de Visualización Altimétrica** con selector dinámico en vivo, escala monocromática continua de 15 tramos, avance cuántico en ventana rodante de 50 metros, resolución adaptativa multiescala, análisis de puertos de montaña, cálculo topográfico opcional (proyección horizontal pura), detección matemática de curvas de herradura (tornanti), filtrado por categorías de Hitos (Pueblos, Fuentes, Miradores, Cimas), conmutador de escala de zoom al tocar la pantalla, tipografías Google Sans / Condensed, modo apaisado rotado a 90° a pantalla completa, ritmo **VAM** dual con velocidad recomendada y cálculo científico del **Grado de Fatiga (GF)**.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo-1.png" alt="ALTGRAPH Logo" width="250" />
+</p
 
+## 🚀 ACTUALIZACIÓN MASIVA (v1.0.10 - v1.0.34): ESTABILIDAD, RESOLUCIÓN Y PRECISIÓN 🚀
+
+Esta serie de actualizaciones se ha centrado en pulir el motor interno de seguimiento de rutas y dar más control al usuario Elite:
+
+- **Resolución de Radar Personalizable (Novedad ELITE)**: Se ha añadido un nuevo menú desplegable para forzar la resolución del Radar Altimétrico a gusto del usuario. En lugar de usar la escala "Auto" adaptativa al zoom, ahora puedes obligar al radar a diseccionar el terreno cada **20m, 50m, 100m, 150m, 300m, 500m o 1km**. Ideal para no perderse ninguna micro-rampa en falsos llanos.
+- **Motor de Tracking Blindado (Adiós a los saltos al km0)**: Se ha reescrito por completo el algoritmo de seguimiento GPS sobre el polyline. Se acabaron los molestos reinicios a 0 metros y la suma ilógica de distancias cuando el Karoo recalcula una ruta, recorta el polyline por un puerto (Climb Detect), o cuando recargas manualmente un track a mitad de trayecto. Ahora el anclaje a tu coordenada real es matemático y milimétrico.
+- **Corrección Gráfica del Radar (Black gap fix)**: Solucionado un defecto visual en el cálculo dinámico de la anchura de los bloques de pendiente que causaba que el radar no llegara hasta el borde izquierdo de la pantalla dejando un hueco negro. 
+- **Nuevo Icono y Limpieza Visual**: Rediseño del icono oficial de la extensión de Karoo por un escudo minimalista mucho más integrado con la interfaz del sistema.
+- **Traducciones Nativas Perfectas**: Revisión de la codificación UTF-8 y despliegue del 100% de los nuevos textos en Español, Inglés, Francés, Alemán, Italiano y Portugués.
+- **OTA Updates (Auto-Actualizador)**: Mejoras internas en el sistema de auto-actualización del Karoo y corrección de firmas duplicadas que impedían instalar algunas versiones previas.
 
 ## 🚀 VERSIÓN 1.0.9: HISTOGRAMA DE ZONAS ELITE 🚀
 

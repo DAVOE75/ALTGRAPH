@@ -111,4 +111,13 @@
     <string name="elite_map_overlay_all">Rota Completa</string>
     <string name="elite_toast_unlocked">Recursos Elite Desbloqueados!</string>
     <string name="elite_toast_invalid">Licença Inválida</string>
+    <string name="label_radar_resolution">Resolução do bloco (Metros)</string>
+    <string name="radar_resolution_auto">Auto</string>
+    <string name="radar_resolution_20m">20m</string>
+    <string name="radar_resolution_50m">50m</string>
+    <string name="radar_resolution_100m">100m</string>
+    <string name="radar_resolution_150m">150m</string>
+    <string name="radar_resolution_300m">300m</string>
+    <string name="radar_resolution_500m">500m</string>
+    <string name="radar_resolution_1km">1km</string>
 </resources>
