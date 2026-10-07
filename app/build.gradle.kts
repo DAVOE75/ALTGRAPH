@@ -1,7 +1,19 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
 }
+
+// Clave de firma fija: variables de entorno (CI) o ~/.altgraph/keystore.properties (local).
+// Sin ella se firma con la clave debug, que cambia en cada máquina/ejecución y rompe las actualizaciones OTA.
+val localKeystore = Properties().apply {
+    val f = File(System.getProperty("user.home"), ".altgraph/keystore.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+fun signingValue(env: String, prop: String): String? =
+    System.getenv(env)?.takeIf { it.isNotBlank() } ?: localKeystore.getProperty(prop)
+val altgraphStoreFile = signingValue("ALTGRAPH_KEYSTORE_FILE", "storeFile")
 
 android {
     namespace = "com.example.altgraph"
@@ -17,14 +29,28 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        if (altgraphStoreFile != null) {
+            create("altgraph") {
+                storeFile = file(altgraphStoreFile)
+                storePassword = signingValue("ALTGRAPH_KEYSTORE_PASSWORD", "storePassword")
+                keyAlias = signingValue("ALTGRAPH_KEY_ALIAS", "keyAlias")
+                keyPassword = signingValue("ALTGRAPH_KEY_PASSWORD", "keyPassword")
+            }
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.findByName("altgraph") ?: signingConfigs.getByName("debug")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("altgraph") ?: signingConfigs.getByName("debug")
         }
     }
     testOptions {
