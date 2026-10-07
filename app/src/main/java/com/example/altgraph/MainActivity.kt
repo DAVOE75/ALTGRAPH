@@ -874,6 +874,8 @@ class MainActivity : Activity() {
             setTextColor(Color.WHITE)
             textSize = 14f
             setText(prefs.licenseKey)
+            isSingleLine = true
+            imeOptions = android.view.inputmethod.EditorInfo.IME_ACTION_DONE
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -1218,7 +1220,19 @@ class MainActivity : Activity() {
         powerBarCard.addView(ftpLayout)
         tabEliteContainer.addView(powerBarCard)
 
+        licenseInput.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
+                activateBtn.performClick()
+                true
+            } else false
+        }
+
         activateBtn.setOnClickListener {
+            // Cerrar el teclado para dejar el resto de opciones accesibles
+            licenseInput.clearFocus()
+            (getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager)
+                .hideSoftInputFromWindow(licenseInput.windowToken, 0)
+
             val key = licenseInput.text.toString().trim()
             prefs.licenseKey = key
             val unlocked = prefs.isEliteUnlocked
@@ -1237,6 +1251,24 @@ class MainActivity : Activity() {
             switchPowerBar.isEnabled = unlocked
             switchRadarAlerts.isEnabled = unlocked
             ftpInput.isEnabled = unlocked
+            radarResSpinner.isEnabled = unlocked
+            mapOverlaySpinner.isEnabled = unlocked
+            radarResTitle.alpha = if (unlocked) 1.0f else 0.5f
+            mapOverlayTitle.alpha = if (unlocked) 1.0f else 0.5f
+
+            // Los interruptores se crearon bloqueados (apagados): reflejar el estado real al desbloquear
+            if (unlocked) {
+                switchStrava.isChecked = prefs.stravaSegmentsEnabled
+                switchWeather.isChecked = prefs.weatherOverlayEnabled
+                switchRadar.isChecked = prefs.eliteRadarEnabled
+                switchGhost.isChecked = prefs.eliteGhostEnabled
+                switchEnergyBar.isChecked = prefs.eliteEnergyBarEnabled
+                switchPoiRuler.isChecked = prefs.elitePoiRulerEnabled
+                switchHist.isChecked = prefs.eliteHistogramEnabled
+                switchRadar3d.isChecked = prefs.eliteRadar3dEnabled
+                switchPowerBar.isChecked = prefs.elitePowerBarEnabled
+                switchRadarAlerts.isChecked = prefs.eliteRadarAlertsEnabled
+            }
             
             if (unlocked) {
                 Toast.makeText(this, getString(R.string.elite_toast_unlocked), Toast.LENGTH_LONG).show()
