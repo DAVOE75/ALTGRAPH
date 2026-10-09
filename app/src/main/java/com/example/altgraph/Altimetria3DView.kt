@@ -206,22 +206,24 @@ class Altimetria3DView @JvmOverloads constructor(
     }
 
     private val gravelShaderPaint: Paint by lazy {
-        val bitmap = android.graphics.Bitmap.createBitmap(16, 16, android.graphics.Bitmap.Config.ARGB_8888)
+        val bitmap = android.graphics.Bitmap.createBitmap(48, 48, android.graphics.Bitmap.Config.ARGB_8888)
         val c = Canvas(bitmap)
-        val p = Paint().apply { color = Color.parseColor("#30000000"); style = Paint.Style.FILL }
-        c.drawCircle(4f, 4f, 2f, p)
-        c.drawCircle(12f, 12f, 2f, p)
-        c.drawCircle(4f, 12f, 1.5f, p)
+        val p = Paint().apply { color = Color.parseColor("#80000000"); style = Paint.Style.FILL } // 50% opacity black
+        c.drawCircle(12f, 12f, 5f, p)
+        c.drawCircle(36f, 36f, 5f, p)
+        c.drawCircle(12f, 36f, 4f, p)
+        c.drawCircle(36f, 12f, 4f, p)
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             shader = android.graphics.BitmapShader(bitmap, android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT)
         }
     }
 
     private val trailShaderPaint: Paint by lazy {
-        val bitmap = android.graphics.Bitmap.createBitmap(24, 24, android.graphics.Bitmap.Config.ARGB_8888)
+        val bitmap = android.graphics.Bitmap.createBitmap(64, 64, android.graphics.Bitmap.Config.ARGB_8888)
         val c = Canvas(bitmap)
-        val p = Paint().apply { color = Color.parseColor("#403E2723"); strokeWidth = 2.5f; style = Paint.Style.STROKE }
-        c.drawLine(0f, 0f, 24f, 24f, p)
+        val p = Paint().apply { color = Color.parseColor("#A03E2723"); strokeWidth = 8f; style = Paint.Style.STROKE } // 62% opacity dark brown
+        c.drawLine(0f, 0f, 64f, 64f, p)
+        c.drawLine(0f, 64f, 64f, 0f, p) // Make it a cross/dirt pattern for better visibility
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             shader = android.graphics.BitmapShader(bitmap, android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT)
         }
