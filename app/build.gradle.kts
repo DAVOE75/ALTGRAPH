@@ -23,8 +23,8 @@ android {
         applicationId = "com.example.altgraph"
         minSdk = 26
         targetSdk = 34
-        versionCode = 138
-        versionName = "1.0.38"
+        versionCode = 139
+        versionName = "1.0.39"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -36,6 +36,8 @@ android {
                 storePassword = signingValue("ALTGRAPH_KEYSTORE_PASSWORD", "storePassword")
                 keyAlias = signingValue("ALTGRAPH_KEY_ALIAS", "keyAlias")
                 keyPassword = signingValue("ALTGRAPH_KEY_PASSWORD", "keyPassword")
+                v1SigningEnabled = true
+                v2SigningEnabled = true
             }
         }
     }
