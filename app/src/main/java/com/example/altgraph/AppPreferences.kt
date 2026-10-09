@@ -218,6 +218,10 @@ class AppPreferences(context: Context) {
         get() = prefs.getBoolean(KEY_ROUTE_MAP_HEADING_UP, false)
         set(value) = prefs.edit().putBoolean(KEY_ROUTE_MAP_HEADING_UP, value).apply()
 
+    var showSurfaceTextures: Boolean
+        get() = prefs.getBoolean(KEY_SHOW_SURFACE_TEXTURES, false)
+        set(value) = prefs.edit().putBoolean(KEY_SHOW_SURFACE_TEXTURES, value).apply()
+
     companion object {
         private const val PREFS_NAME = "altgraph_settings"
         private const val KEY_FONT_FAMILY = "font_family_key"
@@ -246,6 +250,7 @@ class AppPreferences(context: Context) {
         private const val KEY_SHOW_POI_VIEWPOINTS = "show_poi_viewpoints"
         private const val KEY_SHOW_POI_SUMMITS = "show_poi_summits"
         private const val KEY_SHOW_3D_ZOOM = "show_3d_zoom_controls"
+        private const val KEY_SHOW_SURFACE_TEXTURES = "show_surface_textures"
         private const val KEY_CUSTOM_MAP_PROVIDER = "custom_map_provider_key"
         private const val KEY_ALTIMETRIA_STYLE = "altimetria_style_key"
         private const val KEY_CLIMB_ALTIMETRIA_STYLE = "climb_altimetria_style_key"

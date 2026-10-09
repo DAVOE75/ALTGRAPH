@@ -229,7 +229,8 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                             routeName = strategy.routeName,
                             routeCoords = strategy.routeCoords,
                             mapRotationAngle = mapRotAngle,
-                            isHeadingUp = isHeadingUp
+                            isHeadingUp = isHeadingUp,
+                            showSurfaceTextures = prefs.showSurfaceTextures
                         )
 
                         if (cachedBitmap == null || cachedBitmap?.width != w || cachedBitmap?.height != h) {

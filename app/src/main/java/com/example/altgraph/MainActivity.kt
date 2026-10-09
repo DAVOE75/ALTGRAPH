@@ -937,6 +937,21 @@ class MainActivity : Activity() {
         radarCard.addView(switchRadar)
         tabEliteContainer.addView(radarCard)
         
+        // Opción: Texturizado por Superficie (Gravel/MTB) (Elite)
+        val showSurfaceTexturesCard = createCardContainer()
+        val switchShowSurfaceTextures = Switch(this).apply {
+            text = getString(R.string.setting_show_surface_textures)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.showSurfaceTextures
+            isEnabled = prefs.isEliteUnlocked
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.showSurfaceTextures = isChecked
+            }
+        }
+        showSurfaceTexturesCard.addView(switchShowSurfaceTextures)
+        tabEliteContainer.addView(showSurfaceTexturesCard)
+        
         // Radar Resolution Spinner
         val radarResCard = createCardContainer()
         val radarResLayout = LinearLayout(this).apply {

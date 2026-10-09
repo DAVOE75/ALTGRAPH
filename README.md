@@ -11,6 +11,10 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
   <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo-1.png" alt="ALTGRAPH Logo" width="250" />
 </p
 
+## 🚀 VERSIÓN 1.0.41: TEXTURAS DE TERRENO (GRAVEL/MTB) 🚀
+
+- **Texturizado por Superficie (Novedad ELITE)**: Se ha añadido un nuevo interruptor en el Panel de Control Elite para activar texturas en la cinta 3D. Ahora, si activas esta opción, el motor de renderizado intercalará de forma dinámica patrones visuales de Grava (puntos oscuros) y Trail (líneas de sendero) sobre los colores habituales de desnivel. ¡Ideal para tener una pre-visualización de cuándo termina el asfalto!
+
 ## 🚀 ACTUALIZACIÓN MASIVA (v1.0.10 - v1.0.40): ESTABILIDAD, RESOLUCIÓN Y PRECISIÓN 🚀
 
 Esta serie de actualizaciones se ha centrado en pulir el motor interno de seguimiento de rutas y dar más control al usuario Elite:

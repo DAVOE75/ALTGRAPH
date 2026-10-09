@@ -254,7 +254,8 @@ class ClimbViewerDataType(extension: String) : DataTypeImpl(extension, "climb_3d
                         routeName = "",
                         customTitle = "",
                         showHeaderStats = false,
-                        routeCoords = strategy.routeCoords
+                        routeCoords = strategy.routeCoords,
+                        showSurfaceTextures = prefs.showSurfaceTextures
                     )
                     
                     altimetria3DView.draw(currentCanvas)

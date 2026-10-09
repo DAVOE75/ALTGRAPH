@@ -9,6 +9,10 @@ It revolutionizes the traditional concept of cycling altimetry by incorporating 
 
 
 
+## 🚀 VERSION 1.0.41: TERRAIN TEXTURES (GRAVEL/MTB) 🚀
+
+- **Surface Texturing (ELITE Novelty)**: A new toggle has been added to the Elite Control Panel to activate textures on the 3D ribbon. Now, if you enable this option, the rendering engine will dynamically interleave visual patterns for Gravel (dark dots) and Trail (path lines) over the usual gradient colors. Ideal for getting a preview of when the asphalt ends!
+
 ## 🚀 VERSION 1.0.9: ELITE GRADIENT ZONES HISTOGRAM 🚀
 
 - **NEW ELITE FEATURE (v1.0.9) - Gradient Zones (Histogram %)**: Brand new visual data field! Analyze your ride in real-time by seeing exactly what percentage of distance and absolute time you have spent in each of the 8 gradient zones (from Descent to Extreme >17%). Fully integrated colors matching the Altimetry Radar, dynamic text sizing, and is unlocked automatically with your Elite Subscription key.

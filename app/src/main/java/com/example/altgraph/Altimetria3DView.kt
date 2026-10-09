@@ -205,6 +205,28 @@ class Altimetria3DView @JvmOverloads constructor(
         style = Paint.Style.STROKE
     }
 
+    private val gravelShaderPaint: Paint by lazy {
+        val bitmap = android.graphics.Bitmap.createBitmap(16, 16, android.graphics.Bitmap.Config.ARGB_8888)
+        val c = Canvas(bitmap)
+        val p = Paint().apply { color = Color.parseColor("#30000000"); style = Paint.Style.FILL }
+        c.drawCircle(4f, 4f, 2f, p)
+        c.drawCircle(12f, 12f, 2f, p)
+        c.drawCircle(4f, 12f, 1.5f, p)
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            shader = android.graphics.BitmapShader(bitmap, android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT)
+        }
+    }
+
+    private val trailShaderPaint: Paint by lazy {
+        val bitmap = android.graphics.Bitmap.createBitmap(24, 24, android.graphics.Bitmap.Config.ARGB_8888)
+        val c = Canvas(bitmap)
+        val p = Paint().apply { color = Color.parseColor("#403E2723"); strokeWidth = 2.5f; style = Paint.Style.STROKE }
+        c.drawLine(0f, 0f, 24f, 24f, p)
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            shader = android.graphics.BitmapShader(bitmap, android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT)
+        }
+    }
+
     private val subBlockPctTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         typeface = Typeface.create("sans-serif-condensed", Typeface.BOLD)
@@ -449,6 +471,7 @@ class Altimetria3DView @JvmOverloads constructor(
     private val pacingPath = Path()
     private val plasmaCorePath = Path()
     private var showHeaderStats: Boolean = true
+    private var showSurfaceTextures: Boolean = false
 
     fun update3DData(
         blocks: List<Float>,
@@ -490,7 +513,8 @@ class Altimetria3DView @JvmOverloads constructor(
         showHeaderStats: Boolean = true,
         routeCoords: List<Pair<Double, Double>> = emptyList(),
         mapRotationAngle: Double = 0.0,
-        isHeadingUp: Boolean = false
+        isHeadingUp: Boolean = false,
+        showSurfaceTextures: Boolean = false
     ) {
         if (blocks.isNotEmpty()) {
             this.nextBlocks = blocks
@@ -529,6 +553,7 @@ class Altimetria3DView @JvmOverloads constructor(
         this.showHeaderStats = showHeaderStats
         this.mapRotationAngle = mapRotationAngle
         this.isHeadingUp = isHeadingUp
+        this.showSurfaceTextures = showSurfaceTextures
         if (subBlocks.isNotEmpty()) {
             this.subBlocks = subBlocks
         }
@@ -1423,6 +1448,11 @@ class Altimetria3DView @JvmOverloads constructor(
 
             ribbonSurfacePaint.color = topColor
             canvas.drawPath(ribbonQuadPath, ribbonSurfacePaint)
+            if (showSurfaceTextures) {
+                val surfaceType = (i / 10) % 3
+                if (surfaceType == 1) canvas.drawPath(ribbonQuadPath, gravelShaderPaint)
+                else if (surfaceType == 2) canvas.drawPath(ribbonQuadPath, trailShaderPaint)
+            }
             canvas.drawLine(xBack[i], yBack[i], xBack[i + 1], yBack[i + 1], ribbonBackLinePaint)
             canvas.drawLine(xFront[i], yFront[i], xFront[i + 1], yFront[i + 1], ribbonFrontLinePaint)
         }
@@ -1505,6 +1535,11 @@ class Altimetria3DView @JvmOverloads constructor(
 
             ribbonSurfacePaint.color = topColor
             canvas.drawPath(ribbonQuadPath, ribbonSurfacePaint)
+            if (showSurfaceTextures) {
+                val surfaceType = (i / 10) % 3
+                if (surfaceType == 1) canvas.drawPath(ribbonQuadPath, gravelShaderPaint)
+                else if (surfaceType == 2) canvas.drawPath(ribbonQuadPath, trailShaderPaint)
+            }
             canvas.drawLine(isoX1, isoY1, isoX2, isoY2, ribbonBackLinePaint)
 
             // Cresta de horizonte azul hielo nítida
@@ -1821,6 +1856,11 @@ class Altimetria3DView @JvmOverloads constructor(
 
             ribbonSurfacePaint.color = Color.parseColor("#0A1120")
             canvas.drawPath(ribbonQuadPath, ribbonSurfacePaint)
+            if (showSurfaceTextures) {
+                val surfaceType = (i / 10) % 3
+                if (surfaceType == 1) canvas.drawPath(ribbonQuadPath, gravelShaderPaint)
+                else if (surfaceType == 2) canvas.drawPath(ribbonQuadPath, trailShaderPaint)
+            }
             canvas.drawLine(xBack[i], yBack[i], xBack[i + 1], yBack[i + 1], obsidianFacetPaint)
         }
 
