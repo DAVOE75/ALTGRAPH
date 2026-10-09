@@ -1265,6 +1265,7 @@ class MainActivity : Activity() {
             switchRadar3d.isEnabled = unlocked
             switchPowerBar.isEnabled = unlocked
             switchRadarAlerts.isEnabled = unlocked
+            switchShowSurfaceTextures.isEnabled = unlocked
             ftpInput.isEnabled = unlocked
             radarResSpinner.isEnabled = unlocked
             mapOverlaySpinner.isEnabled = unlocked

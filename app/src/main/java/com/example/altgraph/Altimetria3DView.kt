@@ -205,28 +205,17 @@ class Altimetria3DView @JvmOverloads constructor(
         style = Paint.Style.STROKE
     }
 
-    private val gravelShaderPaint: Paint by lazy {
-        val bitmap = android.graphics.Bitmap.createBitmap(48, 48, android.graphics.Bitmap.Config.ARGB_8888)
-        val c = Canvas(bitmap)
-        val p = Paint().apply { color = Color.parseColor("#80000000"); style = Paint.Style.FILL } // 50% opacity black
-        c.drawCircle(12f, 12f, 5f, p)
-        c.drawCircle(36f, 36f, 5f, p)
-        c.drawCircle(12f, 36f, 4f, p)
-        c.drawCircle(36f, 12f, 4f, p)
-        Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            shader = android.graphics.BitmapShader(bitmap, android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT)
-        }
+    private val gravelLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#99000000") // 60% opacity black
+        strokeWidth = 6f
+        style = Paint.Style.STROKE
+        pathEffect = android.graphics.DashPathEffect(floatArrayOf(6f, 12f), 0f) // Dotted effect
     }
 
-    private val trailShaderPaint: Paint by lazy {
-        val bitmap = android.graphics.Bitmap.createBitmap(64, 64, android.graphics.Bitmap.Config.ARGB_8888)
-        val c = Canvas(bitmap)
-        val p = Paint().apply { color = Color.parseColor("#A03E2723"); strokeWidth = 8f; style = Paint.Style.STROKE } // 62% opacity dark brown
-        c.drawLine(0f, 0f, 64f, 64f, p)
-        c.drawLine(0f, 64f, 64f, 0f, p) // Make it a cross/dirt pattern for better visibility
-        Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            shader = android.graphics.BitmapShader(bitmap, android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT)
-        }
+    private val trailLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#B33E2723") // 70% opacity dark brown
+        strokeWidth = 5f
+        style = Paint.Style.STROKE
     }
 
     private val subBlockPctTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -1452,8 +1441,12 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawPath(ribbonQuadPath, ribbonSurfacePaint)
             if (showSurfaceTextures) {
                 val surfaceType = (i / 10) % 3
-                if (surfaceType == 1) canvas.drawPath(ribbonQuadPath, gravelShaderPaint)
-                else if (surfaceType == 2) canvas.drawPath(ribbonQuadPath, trailShaderPaint)
+                if (surfaceType == 1) {
+                    canvas.drawLine(xFront[i], yFront[i], xBack[i], yBack[i], gravelLinePaint)
+                } else if (surfaceType == 2) {
+                    canvas.drawLine(xFront[i], yFront[i], xBack[i + 1], yBack[i + 1], trailLinePaint)
+                    canvas.drawLine(xFront[i + 1], yFront[i + 1], xBack[i], yBack[i], trailLinePaint)
+                }
             }
             canvas.drawLine(xBack[i], yBack[i], xBack[i + 1], yBack[i + 1], ribbonBackLinePaint)
             canvas.drawLine(xFront[i], yFront[i], xFront[i + 1], yFront[i + 1], ribbonFrontLinePaint)
@@ -1539,8 +1532,12 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawPath(ribbonQuadPath, ribbonSurfacePaint)
             if (showSurfaceTextures) {
                 val surfaceType = (i / 10) % 3
-                if (surfaceType == 1) canvas.drawPath(ribbonQuadPath, gravelShaderPaint)
-                else if (surfaceType == 2) canvas.drawPath(ribbonQuadPath, trailShaderPaint)
+                if (surfaceType == 1) {
+                    canvas.drawLine(xFront[i], yFront[i], xBack[i], yBack[i], gravelLinePaint)
+                } else if (surfaceType == 2) {
+                    canvas.drawLine(xFront[i], yFront[i], xBack[i + 1], yBack[i + 1], trailLinePaint)
+                    canvas.drawLine(xFront[i + 1], yFront[i + 1], xBack[i], yBack[i], trailLinePaint)
+                }
             }
             canvas.drawLine(isoX1, isoY1, isoX2, isoY2, ribbonBackLinePaint)
 
@@ -1860,8 +1857,12 @@ class Altimetria3DView @JvmOverloads constructor(
             canvas.drawPath(ribbonQuadPath, ribbonSurfacePaint)
             if (showSurfaceTextures) {
                 val surfaceType = (i / 10) % 3
-                if (surfaceType == 1) canvas.drawPath(ribbonQuadPath, gravelShaderPaint)
-                else if (surfaceType == 2) canvas.drawPath(ribbonQuadPath, trailShaderPaint)
+                if (surfaceType == 1) {
+                    canvas.drawLine(xFront[i], yFront[i], xBack[i], yBack[i], gravelLinePaint)
+                } else if (surfaceType == 2) {
+                    canvas.drawLine(xFront[i], yFront[i], xBack[i + 1], yBack[i + 1], trailLinePaint)
+                    canvas.drawLine(xFront[i + 1], yFront[i + 1], xBack[i], yBack[i], trailLinePaint)
+                }
             }
             canvas.drawLine(xBack[i], yBack[i], xBack[i + 1], yBack[i + 1], obsidianFacetPaint)
         }
