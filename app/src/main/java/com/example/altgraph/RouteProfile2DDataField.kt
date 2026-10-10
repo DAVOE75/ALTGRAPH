@@ -103,6 +103,13 @@ class RouteProfile2DDataField(extension: String) : DataTypeImpl(extension, "prof
                         if (strategy.routeName != lastRouteName || strategy.routeTotalLength != lastRouteLength) {
                             val fullProfile = AltgraphRepository.getFullProfileElevations()
                             routeProfileView.profileElevations = fullProfile
+                            var gain = 0.0
+                            for (i in 1 until fullProfile.size) {
+                                val diff = fullProfile[i] - fullProfile[i - 1]
+                                if (diff > 0) gain += diff
+                            }
+                            routeProfileView.altitudeGain = gain
+                            routeProfileView.routeName = strategy.routeName ?: ""
                             lastRouteName = strategy.routeName
                             lastRouteLength = strategy.routeTotalLength
                         }
