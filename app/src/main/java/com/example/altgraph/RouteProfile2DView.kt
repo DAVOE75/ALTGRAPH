@@ -51,6 +51,15 @@ class RouteProfile2DView(context: Context) : View(context) {
         color = Color.parseColor("#F59E0B") // Amber color for category
         textAlign = Paint.Align.CENTER
     }
+    private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#22FFFFFF") // Very faint white
+        strokeWidth = 1f
+        style = Paint.Style.STROKE
+    }
+    private val gridTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#55FFFFFF") // Faint white
+        textAlign = Paint.Align.LEFT
+    }
 
     private fun drawFlag(canvas: Canvas, cx: Float, cy: Float, colorStr: String) {
         val p = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = Color.parseColor(colorStr) }
@@ -90,14 +99,17 @@ class RouteProfile2DView(context: Context) : View(context) {
         subTextPaint.textSize = 18f * fontSizeScale
         
         FontHelper.applyFontToPaint(kmTextPaint, fontFamilyKey, Typeface.BOLD)
-        kmTextPaint.textSize = 16f * fontSizeScale
+        kmTextPaint.textSize = 22f * fontSizeScale // Larger as requested
         
         FontHelper.applyFontToPaint(peakTextPaint, fontFamilyKey, Typeface.BOLD)
         peakTextPaint.textSize = 16f * fontSizeScale
+        
+        FontHelper.applyFontToPaint(gridTextPaint, fontFamilyKey, Typeface.NORMAL)
+        gridTextPaint.textSize = 14f * fontSizeScale
 
         val minElev = profileElevations.minOrNull() ?: 0f
         val maxElev = profileElevations.maxOrNull() ?: 0f
-        // Add 150% padding to elevRange to avoid exaggerating the Y axis, as requested by user
+        // Add padding to elevRange to avoid exaggerating the Y axis
         val elevRange = (maxElev - minElev).coerceAtLeast(10f) * 2.5f
 
         val ptsCount = profileElevations.size
@@ -109,6 +121,26 @@ class RouteProfile2DView(context: Context) : View(context) {
         val endX = drawW
         val bottomY = drawH - 20f
         val topY = 100f // leave more space for text
+
+        // Draw Y-Axis Grid
+        val gridStep = when {
+            elevRange > 2000 -> 500f
+            elevRange > 1000 -> 250f
+            elevRange > 500 -> 100f
+            else -> 50f
+        }
+        val startGridElev = (minElev / gridStep).toInt() * gridStep
+        var currGridElev = startGridElev
+        while (currGridElev <= maxElev + gridStep) { // draw slightly above max if fits
+            if (currGridElev >= minElev) {
+                val gy = bottomY - ((currGridElev - minElev) / elevRange) * (bottomY - topY)
+                if (gy in topY..bottomY) {
+                    canvas.drawLine(0f, gy, drawW, gy, gridPaint)
+                    canvas.drawText("${currGridElev.toInt()}m", 5f, gy - 5f, gridTextPaint)
+                }
+            }
+            currGridElev += gridStep
+        }
 
         // Build the full path
         for (i in 0 until ptsCount) {
@@ -183,18 +215,22 @@ class RouteProfile2DView(context: Context) : View(context) {
         val lineTopY = 30f // almost touching the top border
         canvas.drawLine(currentX, bottomY, currentX, lineTopY, dashLinePaint)
         
-        // Text on vertical line (km) rotated 90 degrees
+        // Text on vertical line (km) rotated -90 degrees
         val kmText = String.format("%.1f km", currentDistance / 1000.0)
         val textWidth = kmTextPaint.measureText(kmText)
         
         canvas.save()
-        val textCenterY = 80f // below the altitude gain text
+        val textCenterY = 160f // lower it a bit more
         canvas.translate(currentX, textCenterY)
-        canvas.rotate(90f)
+        // rotate -90 so it reads from bottom to top and goes to the LEFT of the line
+        canvas.rotate(-90f)
         
+        // background padding
         val bgPaint = Paint().apply { color = Color.parseColor("#88000000"); style = Paint.Style.FILL }
-        canvas.drawRect(-textWidth / 2f - 4f, - 15f, textWidth / 2f + 4f, 5f, bgPaint)
-        canvas.drawText(kmText, 0f, 0f, kmTextPaint)
+        // For -90 deg rotation, positive Y is LEFT on screen
+        // So drawing from y=5 to y=35 places it to the LEFT of the line
+        canvas.drawRect(-textWidth / 2f - 4f, 5f, textWidth / 2f + 4f, 35f, bgPaint)
+        canvas.drawText(kmText, 0f, 30f, kmTextPaint) // text baseline at y=30
         canvas.restore()
 
         // Draw Dot
@@ -212,7 +248,7 @@ class RouteProfile2DView(context: Context) : View(context) {
         val titleText = routeName.ifEmpty { "RUTA" }.uppercase()
         canvas.drawText(titleText, 20f, 30f, textPaint)
         
-        val distText = String.format("%.1f km - %s", totalDistance / 1000.0, altitudeGainText)
+        val distText = String.format("Total %.1f km - %s", totalDistance / 1000.0, altitudeGainText)
         canvas.drawText(distText, 20f, 55f, subTextPaint)
 
         canvas.restore()
