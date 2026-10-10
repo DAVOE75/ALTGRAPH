@@ -96,11 +96,11 @@ class RouteProfile2DDataField(extension: String) : DataTypeImpl(extension, "prof
                         val strategy = snap.strategy
 
                         val isRotated = prefs.eliteProfileTv2dRotate
-                        val frame = listOf(strategy.routeTotalLength, strategy.remainingDistance, isRotated, isElite)
+                        val frame = listOf(snap.routeTotalLength, strategy.remainingDistance, isRotated, isElite)
                         if (frame == lastFrame) return@safeUpdate
 
                         // Fetch new full profile if route changed
-                        if (strategy.routeName != lastRouteName || strategy.routeTotalLength != lastRouteLength) {
+                        if (strategy.routeName != lastRouteName || snap.routeTotalLength != lastRouteLength) {
                             val fullProfile = AltgraphRepository.getFullProfileElevations()
                             routeProfileView.profileElevations = fullProfile
                             
@@ -115,20 +115,20 @@ class RouteProfile2DDataField(extension: String) : DataTypeImpl(extension, "prof
                             routeProfileView.altitudeGain = gain
                             routeProfileView.routeName = strategy.routeName ?: ""
                             lastRouteName = strategy.routeName
-                            lastRouteLength = strategy.routeTotalLength
+                            lastRouteLength = snap.routeTotalLength
                         }
 
                         currentCanvas.drawColor(Color.TRANSPARENT, android.graphics.PorterDuff.Mode.CLEAR)
                 
                         if (isElite) {
-                            routeProfileView.totalDistance = strategy.routeTotalLength
+                            routeProfileView.totalDistance = snap.routeTotalLength
                             // current distance is overall distance travelled
-                            routeProfileView.currentDistance = (strategy.routeTotalLength - strategy.remainingDistance).coerceAtLeast(0.0)
+                            routeProfileView.currentDistance = snap.currentRouteDistance
                             routeProfileView.isRotated = isRotated
                             routeProfileView.fontFamilyKey = prefs.fontFamilyKey
                             routeProfileView.fontSizeScale = prefs.fontSize3dScale
                             routeProfileView.altitudeGainText = context.getString(R.string.profile_tv_2d_gain, routeProfileView.altitudeGain)
-                            routeProfileView.activeClimbs = strategy.activeClimbs
+                            routeProfileView.activeClimbs = snap.routeClimbs
 
                             // Draw view
                             routeProfileView.draw(currentCanvas)

@@ -223,7 +223,7 @@ class Altimetria3DGraphDataType(extension: String) : DataTypeImpl(extension, "al
                             showBlockPercentages = prefs.showBlockPercentages,
                             altimetriaStyle = prefs.altimetriaStyle,
                             targetVam = prefs.targetVam,
-                            activeClimbs = strategy.activeClimbs,
+                            activeClimbs = snap.routeClimbs,
                             visibleAvgGrade = strategy.visibleAvgGrade,
                             visibleMaxGrade = strategy.visibleMaxGrade,
                             routeName = strategy.routeName,
