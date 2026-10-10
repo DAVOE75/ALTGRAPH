@@ -326,8 +326,9 @@ class RouteBarView(context: Context) : View(context) {
             // Reparto vertical según lo activo: barras inferiores, alertas, regla y franja de pendiente
             val bottomBarH = 12f
             val barsH = (if (showEnergyBar) bottomBarH else 0f) + (if (showPowerBar) bottomBarH else 0f)
-            val alertH = if (showRadarAlerts) h * 0.50f else 0f
-            val radarH = h - alertH - barsH
+            val nonRadarH = if (showRadarAlerts) h * 0.40f else barsH
+            val radarH = h - nonRadarH
+            val alertH = if (showRadarAlerts) nonRadarH - barsH else 0f
             val rulerH = (15f + 2f + RULER_TEXT_SIZE / 0.85f).coerceIn(radarH * 0.25f, radarH * 0.42f)
             val headerHeight = radarH - rulerH
             // 1. Dibujar franjas de color con ligera perspectiva isométrica
@@ -618,10 +619,11 @@ class RouteBarView(context: Context) : View(context) {
 
         } else {
             // VERTICAL MODE
-            val alertW = if (showRadarAlerts) w * 0.50f else 0f
             val sideBarW = 12f
             val barsW = (if (showEnergyBar) sideBarW else 0f) + (if (showPowerBar) sideBarW else 0f)
-            val radarW = w - alertW - barsW
+            val nonRadarW = if (showRadarAlerts) w * 0.40f else barsW
+            val radarW = w - nonRadarW
+            val alertW = if (showRadarAlerts) nonRadarW - barsW else 0f
             tickTextPaint.textSize = RULER_TEXT_SIZE
             val rulerW = (tickTextPaint.measureText("8888m") + 21f).coerceIn(radarW * 0.25f, radarW * 0.5f)
             val headerWidth = radarW - rulerW
@@ -980,23 +982,67 @@ class RouteBarView(context: Context) : View(context) {
             canvas.drawRect(android.graphics.RectF(left, top, right, bottom), bgPaint)
 
             if (alertText.isNotEmpty()) {
-                // Ajustar tamaño de texto según la altura disponible y la escala de letra
-                alertPaint.textSize = Math.min(38f * fontScale, (bottom - top) * 0.8f).coerceAtLeast(12f)
-
-                // Texto centrado vertical y horizontalmente en la franja
+                // En horizontal aprovechamos todo el alto (40%)
+                alertPaint.textSize = Math.min(38f * fontScale, (bottom - top) * 0.6f).coerceAtLeast(16f)
                 val cy = top + (bottom - top) / 2f + (alertPaint.textSize / 3f)
-                canvas.drawText(alertText, (left + right) / 2f, cy, alertPaint)
+                val textW = alertPaint.measureText(alertText)
+                val viewW = right - left
+
+                if (textW > viewW * 0.95f) {
+                    // Modo pancarta publicitaria (Marquee)
+                    val gap = 80f
+                    val totalW = textW + gap
+                    val speed = 0.08f // Velocidad de desplazamiento
+                    val timeMod = System.currentTimeMillis() % ((totalW / speed).toLong())
+                    val xOffset = -(timeMod * speed)
+
+                    alertPaint.textAlign = Paint.Align.LEFT
+                    canvas.save()
+                    canvas.clipRect(left, top, right, bottom)
+                    var drawX = left + xOffset
+                    while (drawX < right) {
+                        canvas.drawText(alertText, drawX, cy, alertPaint)
+                        drawX += totalW
+                    }
+                    canvas.restore()
+                    postInvalidateDelayed(40) // ~25 FPS
+                } else {
+                    alertPaint.textAlign = Paint.Align.CENTER
+                    canvas.drawText(alertText, left + viewW / 2f, cy, alertPaint)
+                }
             }
         } else {
             // Franja derecha (vertical mode)
             canvas.drawRect(android.graphics.RectF(left, top, right, bottom), bgPaint)
 
             if (alertText.isNotEmpty()) {
-                // Texto centrado rotado o vertical
-                // Para no complicarlo con rotación, lo centramos normal en la zona superior
-                alertPaint.textAlign = Paint.Align.CENTER
-                alertPaint.textSize = Math.min(35f * fontScale, (right - left) * 0.8f).coerceAtLeast(10f)
-                canvas.drawText(alertText, left + (right - left) / 2f, top + alertPaint.textSize + 10f, alertPaint)
+                // En vertical el texto necesita caber o rotar
+                alertPaint.textSize = Math.min(35f * fontScale, (bottom - top) * 0.8f).coerceAtLeast(16f)
+                val cy = top + (bottom - top) / 2f + (alertPaint.textSize / 3f)
+                val textW = alertPaint.measureText(alertText)
+                val viewW = right - left
+
+                if (textW > viewW * 0.95f) {
+                    val gap = 60f
+                    val totalW = textW + gap
+                    val speed = 0.08f
+                    val timeMod = System.currentTimeMillis() % ((totalW / speed).toLong())
+                    val xOffset = -(timeMod * speed)
+
+                    alertPaint.textAlign = Paint.Align.LEFT
+                    canvas.save()
+                    canvas.clipRect(left, top, right, bottom)
+                    var drawX = left + xOffset
+                    while (drawX < right) {
+                        canvas.drawText(alertText, drawX, cy, alertPaint)
+                        drawX += totalW
+                    }
+                    canvas.restore()
+                    postInvalidateDelayed(40)
+                } else {
+                    alertPaint.textAlign = Paint.Align.CENTER
+                    canvas.drawText(alertText, left + viewW / 2f, cy, alertPaint)
+                }
             }
         }
     }
