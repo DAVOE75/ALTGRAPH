@@ -38,7 +38,11 @@ class RouteProfile2DView(context: Context) : View(context) {
     private val subTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.LTGRAY
     }
-    private val kmTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val kmDoneTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#00E676") // Bright green
+        textAlign = Paint.Align.CENTER
+    }
+    private val kmRemainTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         textAlign = Paint.Align.CENTER
     }
@@ -98,8 +102,11 @@ class RouteProfile2DView(context: Context) : View(context) {
         FontHelper.applyFontToPaint(subTextPaint, fontFamilyKey, Typeface.NORMAL)
         subTextPaint.textSize = 18f * fontSizeScale
         
-        FontHelper.applyFontToPaint(kmTextPaint, fontFamilyKey, Typeface.BOLD)
-        kmTextPaint.textSize = 22f * fontSizeScale // Larger as requested
+        FontHelper.applyFontToPaint(kmDoneTextPaint, fontFamilyKey, Typeface.BOLD)
+        kmDoneTextPaint.textSize = 22f * fontSizeScale
+        
+        FontHelper.applyFontToPaint(kmRemainTextPaint, fontFamilyKey, Typeface.BOLD)
+        kmRemainTextPaint.textSize = 22f * fontSizeScale
         
         FontHelper.applyFontToPaint(peakTextPaint, fontFamilyKey, Typeface.BOLD)
         peakTextPaint.textSize = 16f * fontSizeScale
@@ -131,7 +138,7 @@ class RouteProfile2DView(context: Context) : View(context) {
         }
         val startGridElev = (minElev / gridStep).toInt() * gridStep
         var currGridElev = startGridElev
-        while (currGridElev <= maxElev + gridStep) { // draw slightly above max if fits
+        while (currGridElev <= maxElev + gridStep) {
             if (currGridElev >= minElev) {
                 val gy = bottomY - ((currGridElev - minElev) / elevRange) * (bottomY - topY)
                 if (gy in topY..bottomY) {
@@ -206,33 +213,45 @@ class RouteProfile2DView(context: Context) : View(context) {
             }
         }
         
+        // Vertical line indicating cyclist position
+        val lineTopY = 30f // almost touching the top border
+        canvas.drawLine(currentX, bottomY, currentX, lineTopY, dashLinePaint)
+        
+        // --- TEXT LEFT: DONE KM ---
+        val kmDoneText = String.format("%.1f km", currentDistance / 1000.0)
+        val doneWidth = kmDoneTextPaint.measureText(kmDoneText)
+        
+        canvas.save()
+        val textDoneCenterY = 80f // ARRIBA
+        canvas.translate(currentX, textDoneCenterY)
+        canvas.rotate(-90f) // from bottom to top
+        
+        val bgPaint = Paint().apply { color = Color.parseColor("#88000000"); style = Paint.Style.FILL }
+        // Left side of the line
+        canvas.drawRect(-doneWidth / 2f - 4f, 5f, doneWidth / 2f + 4f, 35f, bgPaint)
+        canvas.drawText(kmDoneText, 0f, 30f, kmDoneTextPaint)
+        canvas.restore()
+
+        // --- TEXT RIGHT: REMAINING KM ---
+        val remainDist = (totalDistance - currentDistance).coerceAtLeast(0.0)
+        val kmRemainText = String.format("-%.1f km", remainDist / 1000.0)
+        val remainWidth = kmRemainTextPaint.measureText(kmRemainText)
+        
+        canvas.save()
+        val textRemainCenterY = 160f // ABAJO
+        canvas.translate(currentX, textRemainCenterY)
+        canvas.rotate(90f) // from top to bottom
+        
+        // Right side of the line (when rotated 90, negative Y is right)
+        canvas.drawRect(-remainWidth / 2f - 4f, -35f, remainWidth / 2f + 4f, -5f, bgPaint)
+        canvas.drawText(kmRemainText, 0f, -10f, kmRemainTextPaint)
+        canvas.restore()
+
         // Draw icon or dot at current position
         val currentElevIndex = (progress * (ptsCount - 1)).toInt().coerceIn(0, ptsCount - 1)
         val currElev = profileElevations[currentElevIndex]
         val currY = bottomY - ((currElev - minElev) / elevRange) * (bottomY - topY)
         
-        // Vertical line indicating cyclist position
-        val lineTopY = 30f // almost touching the top border
-        canvas.drawLine(currentX, bottomY, currentX, lineTopY, dashLinePaint)
-        
-        // Text on vertical line (km) rotated -90 degrees
-        val kmText = String.format("%.1f km", currentDistance / 1000.0)
-        val textWidth = kmTextPaint.measureText(kmText)
-        
-        canvas.save()
-        val textCenterY = 160f // lower it a bit more
-        canvas.translate(currentX, textCenterY)
-        // rotate -90 so it reads from bottom to top and goes to the LEFT of the line
-        canvas.rotate(-90f)
-        
-        // background padding
-        val bgPaint = Paint().apply { color = Color.parseColor("#88000000"); style = Paint.Style.FILL }
-        // For -90 deg rotation, positive Y is LEFT on screen
-        // So drawing from y=5 to y=35 places it to the LEFT of the line
-        canvas.drawRect(-textWidth / 2f - 4f, 5f, textWidth / 2f + 4f, 35f, bgPaint)
-        canvas.drawText(kmText, 0f, 30f, kmTextPaint) // text baseline at y=30
-        canvas.restore()
-
         // Draw Dot
         canvas.drawCircle(currentX, currY, 8f, linePaint)
         val dotPaint = Paint().apply { color = Color.WHITE; style = Paint.Style.FILL }
