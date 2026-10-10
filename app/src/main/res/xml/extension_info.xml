@@ -64,4 +64,11 @@
         graphical="true"
         icon="@mipmap/ic_altgraph" />
 
+    <DataType
+        typeId="profile_tv_2d"
+        displayName="@string/data_type_profile_tv_2d_title"
+        description="@string/data_type_profile_tv_2d_desc"
+        graphical="true"
+        icon="@mipmap/ic_altgraph" />
+
 </ExtensionInfo>
