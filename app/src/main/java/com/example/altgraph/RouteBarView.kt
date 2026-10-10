@@ -356,7 +356,7 @@ class RouteBarView(context: Context) : View(context) {
                     val band = bands[i]
                     val nextBand = bands[i+1]
                     val boundary = (band.endIndex + 1) * blockWidth - progressOffset
-                    val blendW = blockWidth * 0.7f // Hacemos el difuminado un poco más ancho
+                    val blendW = blockWidth * 1.5f // Aumentamos el ancho del difuminado para que sea mucho más suave
                     
                     if (boundary > -blendW && boundary < w + blendW) {
                         val color1 = Color.parseColor(band.colorHex)
@@ -673,7 +673,7 @@ class RouteBarView(context: Context) : View(context) {
                     val band = bands[i]
                     val nextBand = bands[i+1]
                     val boundary = h - ((band.endIndex + 1) * blockHeight)
-                    val blendH = blockHeight * 0.7f
+                    val blendH = blockHeight * 1.5f // Aumentamos la altura del difuminado para que sea más suave
                     
                     if (boundary > -blendH && boundary < h + blendH) {
                         val color1 = Color.parseColor(band.colorHex)
