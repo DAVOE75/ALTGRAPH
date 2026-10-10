@@ -218,34 +218,30 @@ class RouteProfile2DView(context: Context) : View(context) {
         val lineTopY = 30f // almost touching the top border
         canvas.drawLine(currentX, bottomY, currentX, lineTopY, dashLinePaint)
         
-        // --- TEXT LEFT: DONE KM ---
+        // --- TEXT RIGHT: DONE KM ---
         val kmDoneText = String.format("%.1f km", currentDistance / 1000.0)
         val doneWidth = kmDoneTextPaint.measureText(kmDoneText)
         
-        canvas.save()
-        val textDoneCenterY = 80f // ARRIBA
-        canvas.translate(currentX, textDoneCenterY)
-        canvas.rotate(-90f) // from bottom to top
-        
-        val bgPaint = Paint().apply { color = Color.parseColor("#88000000"); style = Paint.Style.FILL }
-        // Left side of the line
-        canvas.drawRect(-doneWidth / 2f - 4f, 5f, doneWidth / 2f + 4f, 35f, bgPaint)
-        canvas.drawText(kmDoneText, 0f, 30f, kmDoneTextPaint)
-        canvas.restore()
-
         // --- TEXT RIGHT: REMAINING KM ---
         val remainDist = (totalDistance - currentDistance).coerceAtLeast(0.0)
         val kmRemainText = String.format("-%.1f km", remainDist / 1000.0)
         val remainWidth = kmRemainTextPaint.measureText(kmRemainText)
         
         canvas.save()
-        val textRemainCenterY = 160f // ABAJO
-        canvas.translate(currentX, textRemainCenterY)
-        canvas.rotate(90f) // from top to bottom
+        val textCenterY = 120f // CENTRADOS EN EL MISMO EJE Y
+        canvas.translate(currentX, textCenterY)
+        canvas.rotate(-90f) // from bottom to top for BOTH
         
-        // Right side of the line (when rotated 90, negative Y is right)
-        canvas.drawRect(-remainWidth / 2f - 4f, -35f, remainWidth / 2f + 4f, -5f, bgPaint)
-        canvas.drawText(kmRemainText, 0f, -10f, kmRemainTextPaint)
+        val bgPaint = Paint().apply { color = Color.parseColor("#88000000"); style = Paint.Style.FILL }
+        
+        // Done KM: nearest to the line (Right side means negative Y)
+        canvas.drawRect(-doneWidth / 2f - 4f, -35f, doneWidth / 2f + 4f, -5f, bgPaint)
+        canvas.drawText(kmDoneText, 0f, -10f, kmDoneTextPaint)
+        
+        // Remaining KM: further right
+        canvas.drawRect(-remainWidth / 2f - 4f, -65f, remainWidth / 2f + 4f, -35f, bgPaint)
+        canvas.drawText(kmRemainText, 0f, -40f, kmRemainTextPaint)
+        
         canvas.restore()
 
         // Draw icon or dot at current position
@@ -284,10 +280,10 @@ class RouteProfile2DView(context: Context) : View(context) {
                 if (pt.second > maxLng) maxLng = pt.second
             }
             
-            val mapBoxLeft = drawW * 0.5f
-            val mapBoxTop = 20f
-            val mapBoxRight = drawW - 30f
-            val mapBoxBottom = topY + 50f
+            val mapBoxLeft = 20f
+            val mapBoxTop = 80f
+            val mapBoxRight = drawW * 0.4f
+            val mapBoxBottom = topY + 120f
             
             val mapW = mapBoxRight - mapBoxLeft
             val mapH = mapBoxBottom - mapBoxTop
@@ -355,6 +351,38 @@ class RouteProfile2DView(context: Context) : View(context) {
             val dotP = Paint().apply { color = Color.WHITE; style = Paint.Style.FILL }
             canvas.drawCircle(currPx, currPy, 5f, miniMapPastPaint)
             canvas.drawCircle(currPx, currPy, 3f, dotP)
+            
+            // Draw climb markers on minimap
+            val miniMapPeakPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.parseColor("#F59E0B") // Amber/Orange color for category
+                style = Paint.Style.FILL
+            }
+            
+            for (climb in activeClimbs) {
+                val catUp = climb.category.uppercase()
+                val mappedCat = when {
+                    catUp.contains("1") -> "1ª"
+                    catUp.contains("2") -> "2ª"
+                    catUp.contains("3") -> "3ª"
+                    catUp.contains("4") -> "4ª"
+                    catUp.contains("ESPECIAL") || catUp.contains("H.C") || catUp.contains("HC") -> "H.C."
+                    else -> null
+                }
+                if (mappedCat != null) {
+                    val endPct = (climb.endDistance / totalDistance).toFloat().coerceIn(0f, 1f)
+                    val peakIdx = (endPct * (routeCoords.size - 1)).toInt().coerceIn(0, routeCoords.size - 1)
+                    val pt = routeCoords[peakIdx]
+                    val px = (offX + (pt.second - minLng) * Math.cos(Math.toRadians(midLat)) * scale).toFloat()
+                    val py = (offY + contentH - (pt.first - minLat) * scale).toFloat()
+                    
+                    val path = Path()
+                    path.moveTo(px, py - 6f) // Triangle pointing up
+                    path.lineTo(px + 6f, py + 4f)
+                    path.lineTo(px - 6f, py + 4f)
+                    path.close()
+                    canvas.drawPath(path, miniMapPeakPaint)
+                }
+            }
         }
 
         canvas.restore()
