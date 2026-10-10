@@ -104,6 +104,7 @@ class RouteBarView(context: Context) : View(context) {
     var showEnergyBar: Boolean = false
     var showPowerBar: Boolean = false
     var showRadarAlerts: Boolean = true
+    var showPowerGuide: Boolean = false
     var userFtp: Int = 250
     var showPoiRuler: Boolean = false
     var showHistogram: Boolean = false
@@ -827,6 +828,20 @@ class RouteBarView(context: Context) : View(context) {
         var alertText = ""
         var alertColorHex = "#212121" // Default dark gray
         
+        val currentBlockIdxSafe = (strat.riderProgress * strat.windowLengthMeters / strat.subBlockSizeMeters).toInt().coerceIn(0, strat.subBlocks.size - 1)
+        val currentGrade = if (strat.subBlocks.isNotEmpty()) strat.subBlocks[currentBlockIdxSafe].toDouble() else 0.0
+
+        val getTargetPowerStr = { grade: Double ->
+            val pct = when {
+                grade < 3.0 -> 0.75
+                grade < 5.0 -> 0.85
+                grade < 8.0 -> 0.95
+                grade < 10.0 -> 1.05
+                else -> 1.15
+            }
+            "${(userFtp * pct).toInt()}W"
+        }
+
         val activeClimb = strat.activeClimbs.find { trueRiderDist >= it.startDistance && trueRiderDist < it.endDistance }
         if (activeClimb != null) {
             val currentBlockIdx = (strat.riderProgress * strat.windowLengthMeters / strat.subBlockSizeMeters).toInt()
@@ -846,27 +861,38 @@ class RouteBarView(context: Context) : View(context) {
             }
 
             if (steepDist != null && steepGrade != null && steepDist < 5000) {
-                alertText = "Muro ${steepGrade.toInt()}% a ${formatDist(steepDist)}"
+                if (showPowerGuide) {
+                    alertText = "🔴 APRIETA: ${getTargetPowerStr(steepGrade.toDouble())} | Muro ${steepGrade.toInt()}% a ${formatDist(steepDist)}"
+                } else {
+                    alertText = "Muro ${steepGrade.toInt()}% a ${formatDist(steepDist)}"
+                }
                 alertColorHex = GradeColorScale.getColorHex(steepGrade.toDouble())
             } else {
                 val distToTop = activeClimb.endDistance - trueRiderDist
-                alertText = "Coronar a ${formatDist(distToTop)}"
-                alertColorHex = "#4CAF50" // Green
+                if (showPowerGuide) {
+                    alertText = "⚡ OBJETIVO: ${getTargetPowerStr(currentGrade)} | Coronar a ${formatDist(distToTop)}"
+                    alertColorHex = GradeColorScale.getColorHex(currentGrade)
+                } else {
+                    alertText = "Coronar a ${formatDist(distToTop)}"
+                    alertColorHex = "#4CAF50" // Green
+                }
             }
         } else {
             val nextClimb = strat.activeClimbs.filter { it.startDistance > trueRiderDist }.minByOrNull { it.startDistance }
             if (nextClimb != null) {
                 val distToStart = nextClimb.startDistance - trueRiderDist
                 val gradeStr = String.format(java.util.Locale.getDefault(), "%.1f", nextClimb.avgGrade)
-                alertText = "Puerto a ${formatDist(distToStart)} - ${formatDist(nextClimb.length)} al $gradeStr%"
+                if (showPowerGuide) {
+                    alertText = "🏔️ PREPARA: ${getTargetPowerStr(nextClimb.avgGrade)} | Puerto a ${formatDist(distToStart)}"
+                } else {
+                    alertText = "Puerto a ${formatDist(distToStart)} - ${formatDist(nextClimb.length)} al $gradeStr%"
+                }
                 alertColorHex = GradeColorScale.getColorHex(nextClimb.avgGrade)
             }
         }
 
         if (alertText.isEmpty()) {
             // Si no hay alerta, el color de la franja debe coincidir con la pendiente actual del ciclista
-            val currentBlockIdx = (strat.riderProgress * strat.windowLengthMeters / strat.subBlockSizeMeters).toInt().coerceIn(0, strat.subBlocks.size - 1)
-            val currentGrade = if (strat.subBlocks.isNotEmpty()) strat.subBlocks[currentBlockIdx].toDouble() else 0.0
             alertColorHex = GradeColorScale.getColorHex(currentGrade)
         }
 

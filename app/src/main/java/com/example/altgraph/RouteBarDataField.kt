@@ -116,6 +116,7 @@ class RouteBarDataType(extension: String) : DataTypeImpl(extension, "route_bar")
                             routeBarView.radarTheme = prefs.eliteRadarTheme
                             routeBarView.showPowerBar = prefs.elitePowerBarEnabled
                             routeBarView.showRadarAlerts = prefs.eliteRadarAlertsEnabled
+                            routeBarView.showPowerGuide = prefs.elitePowerGuideEnabled
                             routeBarView.userFtp = prefs.userFtp
                             routeBarView.draw(currentCanvas)
                         } else {

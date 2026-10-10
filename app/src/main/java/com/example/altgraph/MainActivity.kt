@@ -1184,7 +1184,20 @@ class MainActivity : Activity() {
             setOnCheckedChangeListener { _, v -> prefs.eliteRadarAlertsEnabled = v }
         }
         radarAlertsCard.addView(switchRadarAlerts)
-        tabEliteContainer.addView(radarAlertsCard)
+        // Power Guide (Pacing Dinámico)
+        val powerGuideCard = createCardContainer()
+        val switchPowerGuide = Switch(this).apply {
+            text = "Pacing / Power Guide (Alertas)"
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.elitePowerGuideEnabled
+            isEnabled = prefs.isEliteUnlocked
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.elitePowerGuideEnabled = isChecked
+            }
+        }
+        powerGuideCard.addView(switchPowerGuide)
+        tabEliteContainer.addView(powerGuideCard)
 
         // Power Zone Bar
         val powerBarCard = createCardContainer()
@@ -1265,6 +1278,7 @@ class MainActivity : Activity() {
             switchRadar3d.isEnabled = unlocked
             switchPowerBar.isEnabled = unlocked
             switchRadarAlerts.isEnabled = unlocked
+            switchPowerGuide.isEnabled = unlocked
             switchShowSurfaceTextures.isEnabled = unlocked
             ftpInput.isEnabled = unlocked
             radarResSpinner.isEnabled = unlocked
@@ -1284,6 +1298,7 @@ class MainActivity : Activity() {
                 switchRadar3d.isChecked = prefs.eliteRadar3dEnabled
                 switchPowerBar.isChecked = prefs.elitePowerBarEnabled
                 switchRadarAlerts.isChecked = prefs.eliteRadarAlertsEnabled
+                switchPowerGuide.isChecked = prefs.elitePowerGuideEnabled
             }
             
             if (unlocked) {
