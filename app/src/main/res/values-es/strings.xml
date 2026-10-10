@@ -195,4 +195,11 @@
     <string name="alert_power_push">ğŸ”´ APRIETA: %1$s | %2$s</string>
     <string name="alert_power_target">âš¡ OBJETIVO: %1$s | %2$s</string>
     <string name="alert_power_prepare">ğŸ”ï¸ PREPARA: %1$s | %2$s</string>
+    <string name="data_type_profile_tv_2d_desc">Gráfico altimétrico 2D estilo retransmisión ciclista</string>
+    <string name="pref_elite_profile_tv_2d_desc">Muestra el perfil completo de la ruta con la zona completada en color</string>
+    <string name="pref_elite_profile_tv_2d_rotate_title">Girar Perfil TV 90º</string>
+    <string name="pref_elite_profile_tv_2d_rotate_desc">Dibuja el gráfico apaisado en orientación horizontal</string>
+    <string name="data_type_profile_tv_2d_title">Perfil TV 2D</string>
+    <string name="pref_elite_profile_tv_2d_title">Perfil TV 2D</string>
 </resources>
+

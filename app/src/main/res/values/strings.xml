@@ -195,4 +195,11 @@
     <string name="alert_power_push">🔴 PUSH: %1$s | %2$s</string>
     <string name="alert_power_target">⚡ TARGET: %1$s | %2$s</string>
     <string name="alert_power_prepare">🏔️ PREPARE: %1$s | %2$s</string>
+    <string name="data_type_profile_tv_2d_desc">2D elevation profile chart like cycling broadcasts</string>
+    <string name="pref_elite_profile_tv_2d_desc">Shows the full stage profile with completed area colored</string>
+    <string name="pref_elite_profile_tv_2d_rotate_title">Rotate TV Profile 90�</string>
+    <string name="pref_elite_profile_tv_2d_rotate_desc">Draw the 2D profile horizontally (landscape orientation)</string>
+    <string name="data_type_profile_tv_2d_title">TV Profile 2D</string>
+    <string name="pref_elite_profile_tv_2d_title">TV Profile 2D</string>
 </resources>
+

@@ -132,4 +132,11 @@
     <string name="alert_power_push">ğŸ”´ POUSSEZ: %1$s | %2$s</string>
     <string name="alert_power_target">âš¡ CIBLE: %1$s | %2$s</string>
     <string name="alert_power_prepare">ğŸ”ï¸ PRÃ‰PAREZ: %1$s | %2$s</string>
+    <string name="data_type_profile_tv_2d_desc">Graphique d'élévation 2D style diffusion cycliste</string>
+    <string name="pref_elite_profile_tv_2d_desc">Affiche le profil complet de l'étape avec la zone terminée en couleur</string>
+    <string name="pref_elite_profile_tv_2d_rotate_title">Tourner Profil TV 90º</string>
+    <string name="pref_elite_profile_tv_2d_rotate_desc">Dessine le graphique en mode paysage (horizontal)</string>
+    <string name="data_type_profile_tv_2d_title">Profil TV 2D</string>
+    <string name="pref_elite_profile_tv_2d_title">Profil TV 2D</string>
 </resources>
+

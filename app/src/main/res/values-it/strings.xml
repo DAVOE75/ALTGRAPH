@@ -132,4 +132,11 @@
     <string name="alert_power_push">🔴 SPINGI: %1$s | %2$s</string>
     <string name="alert_power_target">⚡ OBIETTIVO: %1$s | %2$s</string>
     <string name="alert_power_prepare">🏔️ PREPARA: %1$s | %2$s</string>
+    <string name="data_type_profile_tv_2d_desc">Grafico altimetrico 2D stile trasmissione ciclistica</string>
+    <string name="pref_elite_profile_tv_2d_desc">Mostra il profilo completo della tappa con l'area completata a colori</string>
+    <string name="pref_elite_profile_tv_2d_rotate_title">Ruotare Profilo TV 90�</string>
+    <string name="pref_elite_profile_tv_2d_rotate_desc">Disegna il grafico 2D in orizzontale (modalit� paesaggio)</string>
+    <string name="data_type_profile_tv_2d_title">Profilo TV 2D</string>
+    <string name="pref_elite_profile_tv_2d_title">Profilo TV 2D</string>
 </resources>
+

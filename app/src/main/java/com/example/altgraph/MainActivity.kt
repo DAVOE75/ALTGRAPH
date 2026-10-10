@@ -1214,6 +1214,28 @@ class MainActivity : Activity() {
         tabEliteContainer.addView(smoothGradientsCard)
         tabEliteContainer.addView(powerGuideCard)
 
+        // Profile TV 2D Rotate
+        val profileTvRotateCard = createCardContainer()
+        val switchProfileTvRotate = Switch(this).apply {
+            text = getString(R.string.pref_elite_profile_tv_2d_rotate_title)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.eliteProfileTv2dRotate
+            isEnabled = prefs.isEliteUnlocked
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.eliteProfileTv2dRotate = isChecked
+            }
+        }
+        val textProfileTvRotateDesc = TextView(this).apply {
+            text = getString(R.string.pref_elite_profile_tv_2d_rotate_desc)
+            textSize = 12f
+            setTextColor(Color.LTGRAY)
+            setPadding(0, 4, 0, 0)
+        }
+        profileTvRotateCard.addView(switchProfileTvRotate)
+        profileTvRotateCard.addView(textProfileTvRotateDesc)
+        tabEliteContainer.addView(profileTvRotateCard)
+
         // Power Zone Bar
         val powerBarCard = createCardContainer()
         powerBarCard.orientation = LinearLayout.VERTICAL

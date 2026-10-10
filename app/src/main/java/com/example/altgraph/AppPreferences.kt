@@ -205,6 +205,10 @@ class AppPreferences(context: Context) {
     var eliteSmoothGradientsEnabled: Boolean
         get() = prefs.getBoolean(KEY_ELITE_SMOOTH_GRADIENTS_ENABLED, false) && isEliteUnlocked
         set(value) = prefs.edit().putBoolean(KEY_ELITE_SMOOTH_GRADIENTS_ENABLED, value).apply()
+
+    var eliteProfileTv2dRotate: Boolean
+        get() = prefs.getBoolean(KEY_ELITE_PROFILE_TV_2D_ROTATE, false) && isEliteUnlocked
+        set(value) = prefs.edit().putBoolean(KEY_ELITE_PROFILE_TV_2D_ROTATE, value).apply()
         
     var eliteMapOverlayMode: String
         get() = if (isEliteUnlocked) prefs.getString(KEY_ELITE_MAP_OVERLAY_MODE, "climbs") ?: "climbs" else "off"
@@ -283,6 +287,7 @@ class AppPreferences(context: Context) {
         private const val KEY_ELITE_RADAR_ALERTS_ENABLED = "elite_radar_alerts_enabled"
         private const val KEY_ELITE_POWER_GUIDE_ENABLED = "elite_power_guide_enabled"
         private const val KEY_ELITE_SMOOTH_GRADIENTS_ENABLED = "elite_smooth_gradients_enabled"
+        private const val KEY_ELITE_PROFILE_TV_2D_ROTATE = "elite_profile_tv_2d_rotate"
         private const val KEY_ELITE_MAP_OVERLAY_MODE = "elite_map_overlay_mode"
         private const val KEY_USER_FTP = "user_ftp"
         private const val KEY_ELITE_RADAR_RESOLUTION = "elite_radar_resolution"
