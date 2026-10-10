@@ -44,9 +44,8 @@ class RouteProfile2DView(context: Context) : View(context) {
     }
     private val dashLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        strokeWidth = 2f
+        strokeWidth = 1f
         style = Paint.Style.STROKE
-        pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f)
     }
     private val peakTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#F59E0B") // Amber color for category
@@ -91,7 +90,7 @@ class RouteProfile2DView(context: Context) : View(context) {
         subTextPaint.textSize = 18f * fontSizeScale
         
         FontHelper.applyFontToPaint(kmTextPaint, fontFamilyKey, Typeface.BOLD)
-        kmTextPaint.textSize = 18f * fontSizeScale
+        kmTextPaint.textSize = 16f * fontSizeScale
         
         FontHelper.applyFontToPaint(peakTextPaint, fontFamilyKey, Typeface.BOLD)
         peakTextPaint.textSize = 16f * fontSizeScale
@@ -157,12 +156,13 @@ class RouteProfile2DView(context: Context) : View(context) {
 
         // Draw peaks for climbs
         for (climb in activeClimbs) {
-            val mappedCat = when (climb.category.uppercase()) {
-                "1" -> "1ª"
-                "2" -> "2ª"
-                "3" -> "3ª"
-                "4" -> "4ª"
-                "HC" -> "H.C."
+            val catUp = climb.category.uppercase()
+            val mappedCat = when {
+                catUp.contains("1") -> "1ª"
+                catUp.contains("2") -> "2ª"
+                catUp.contains("3") -> "3ª"
+                catUp.contains("4") -> "4ª"
+                catUp.contains("ESPECIAL") || catUp.contains("H.C") || catUp.contains("HC") -> "H.C."
                 else -> null
             }
             if (mappedCat != null) {
@@ -183,17 +183,19 @@ class RouteProfile2DView(context: Context) : View(context) {
         val lineTopY = 30f // almost touching the top border
         canvas.drawLine(currentX, bottomY, currentX, lineTopY, dashLinePaint)
         
-        // Text on vertical line (km)
+        // Text on vertical line (km) rotated 90 degrees
         val kmText = String.format("%.1f km", currentDistance / 1000.0)
-        // Draw background for text
         val textWidth = kmTextPaint.measureText(kmText)
-        var tx = currentX
-        if (tx - textWidth / 2f < 0f) tx = textWidth / 2f
-        if (tx + textWidth / 2f > drawW) tx = drawW - textWidth / 2f
+        
+        canvas.save()
+        val textCenterY = 80f // below the altitude gain text
+        canvas.translate(currentX, textCenterY)
+        canvas.rotate(90f)
         
         val bgPaint = Paint().apply { color = Color.parseColor("#88000000"); style = Paint.Style.FILL }
-        canvas.drawRect(tx - textWidth / 2f - 4f, lineTopY - 20f, tx + textWidth / 2f + 4f, lineTopY + 5f, bgPaint)
-        canvas.drawText(kmText, tx, lineTopY, kmTextPaint)
+        canvas.drawRect(-textWidth / 2f - 4f, - 15f, textWidth / 2f + 4f, 5f, bgPaint)
+        canvas.drawText(kmText, 0f, 0f, kmTextPaint)
+        canvas.restore()
 
         // Draw Dot
         canvas.drawCircle(currentX, currY, 8f, linePaint)
