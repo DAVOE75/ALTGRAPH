@@ -413,19 +413,23 @@ class AltimetriaStrategyCalculator {
      * Además, cataloga los puertos calculando su APM.
      */
     fun syncRouteClimbs(routeKey: String, incoming: List<RouteClimb>) {
-        if (routeKeyForClimbs != routeKey) {
+        if (incoming.isEmpty()) return
+        
+        val currentStarts = routeClimbs.map { it.startDistance.toInt() }.toSet()
+        val incomingStarts = incoming.map { it.startDistance.toInt() }.toSet()
+        
+        if (currentStarts != incomingStarts || routeKeyForClimbs != routeKey) {
             routeKeyForClimbs = routeKey
-            if (incoming.isNotEmpty()) {
-                routeClimbs = incoming.map { calculateClimbCategory(it) }
-                Log.d("AltiCalc", "syncRouteClimbs: Nueva ruta '$routeKey'. Inicializados ${routeClimbs.size} puertos.")
+            
+            val filteredIncoming = mutableListOf<RouteClimb>()
+            for (inc in incoming.sortedByDescending { it.length }) {
+                if (filteredIncoming.none { Math.abs(it.endDistance - inc.endDistance) < 200.0 }) {
+                    filteredIncoming.add(inc)
+                }
             }
-        } else if (incoming.isNotEmpty()) {
-            val currentStartDists = routeClimbs.map { it.startDistance }.toSet()
-            val newClimbs = incoming.filter { it.startDistance !in currentStartDists }.map { calculateClimbCategory(it) }
-            if (newClimbs.isNotEmpty()) {
-                routeClimbs = (routeClimbs + newClimbs).sortedBy { it.startDistance }
-                Log.d("AltiCalc", "syncRouteClimbs: Añadidos ${newClimbs.size} nuevos puertos a '$routeKey'. Total: ${routeClimbs.size}")
-            }
+            
+            routeClimbs = filteredIncoming.sortedBy { it.startDistance }.map { calculateClimbCategory(it) }
+            Log.d("AltiCalc", "syncRouteClimbs: Updated ${routeClimbs.size} puertos.")
         }
     }
 

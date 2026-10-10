@@ -234,13 +234,13 @@ class RouteProfile2DView(context: Context) : View(context) {
         
         val bgPaint = Paint().apply { color = Color.parseColor("#88000000"); style = Paint.Style.FILL }
         
-        // Done KM (Green): Left side (Positive Y)
-        canvas.drawRect(-doneWidth / 2f - 4f, 5f, doneWidth / 2f + 4f, 35f, bgPaint)
-        canvas.drawText(kmDoneText, 0f, 30f, kmDoneTextPaint)
+        // Done KM (Green): Left side (Negative Y)
+        canvas.drawRect(-doneWidth / 2f - 4f, -35f, doneWidth / 2f + 4f, -5f, bgPaint)
+        canvas.drawText(kmDoneText, 0f, -10f, kmDoneTextPaint)
         
-        // Remaining KM (White): Right side (Negative Y)
-        canvas.drawRect(-remainWidth / 2f - 4f, -35f, remainWidth / 2f + 4f, -5f, bgPaint)
-        canvas.drawText(kmRemainText, 0f, -10f, kmRemainTextPaint)
+        // Remaining KM (White): Right side (Positive Y)
+        canvas.drawRect(-remainWidth / 2f - 4f, 5f, remainWidth / 2f + 4f, 35f, bgPaint)
+        canvas.drawText(kmRemainText, 0f, 30f, kmRemainTextPaint)
         
         canvas.restore()
 
@@ -295,7 +295,7 @@ class RouteProfile2DView(context: Context) : View(context) {
             }
 
             var climbY = 80f // Start at the same height as the minimap
-            val listStartX = drawW * 0.55f // Draw on the right half
+            val listStartX = drawW * 0.52f // A bit more to the left to fit text
 
             for ((i, item) in catClimbs.withIndex()) {
                 val climb = item.first
@@ -304,28 +304,35 @@ class RouteProfile2DView(context: Context) : View(context) {
                 val lenKm = climb.length / 1000.0
                 val avg = climb.avgGrade
                 
-                // Color green if passed
-                if (climb.endDistance <= currentDistance) {
-                    climbListPaint.color = Color.parseColor("#00E676")
-                    climbListCatPaint.color = Color.parseColor("#00E676")
+                // Dim green if passed, normal if not
+                val isPassed = climb.endDistance <= currentDistance
+                if (isPassed) {
+                    climbListPaint.color = Color.parseColor("#7700E676") // Atenuado
+                    climbListCatPaint.color = Color.parseColor("#7700E676")
                 } else {
                     climbListPaint.color = Color.parseColor("#DDDDDD")
                     climbListCatPaint.color = Color.parseColor("#F59E0B")
                 }
 
+                // Line 1: Pto 1 (3ª)  km 3.5
                 val ptoStr = "Pto ${i + 1} "
                 canvas.drawText(ptoStr, listStartX, climbY, climbListPaint)
                 val ptoWidth = climbListPaint.measureText(ptoStr)
 
-                val catStr = "($cat) "
+                val catStr = "($cat)"
                 canvas.drawText(catStr, listStartX + ptoWidth, climbY, climbListCatPaint)
                 val catWidth = climbListCatPaint.measureText(catStr)
+                
+                val startStr = String.format(" km %.1f", startKm)
+                canvas.drawText(startStr, listStartX + ptoWidth + catWidth, climbY, climbListPaint)
 
-                val detailsStr = String.format("- km %.1f | %.1f km | %.1f%%", startKm, lenKm, avg)
-                canvas.drawText(detailsStr, listStartX + ptoWidth + catWidth, climbY, climbListPaint)
+                // Line 2:   0.5 km al 6.5%
+                climbY += 22f * fontSizeScale
+                val detailsStr = String.format("  %.1f km al %.1f%%", lenKm, avg)
+                canvas.drawText(detailsStr, listStartX, climbY, climbListPaint)
 
                 climbY += 28f * fontSizeScale
-                if (climbY > drawH - 50f) break // Avoid drawing out of bounds
+                if (climbY > drawH - 30f) break // Avoid drawing out of bounds
             }
         }
 
@@ -352,7 +359,7 @@ class RouteProfile2DView(context: Context) : View(context) {
             
             // Draw faint concentric lines as "contour" background
             val contourBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.parseColor("#33444444") // very faint grey
+                color = Color.parseColor("#15FFFFFF") // Much fainter white
                 style = Paint.Style.STROKE
                 strokeWidth = 2f
             }
