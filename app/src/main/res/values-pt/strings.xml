@@ -131,11 +131,10 @@
     <string name="alert_power_push">ğŸ”´ APERTA: %1$s | %2$s</string>
     <string name="alert_power_target">âš¡ ALVO: %1$s | %2$s</string>
     <string name="alert_power_prepare">ğŸ”ï¸ PREPARA: %1$s | %2$s</string>
-    <string name="data_type_profile_tv_2d_desc">Gráfico de elevação 2D estilo transmissão de ciclismo</string>
-    <string name="pref_elite_profile_tv_2d_desc">Mostra o perfil completo da etapa com a área concluída colorida</string>
-    <string name="pref_elite_profile_tv_2d_rotate_title">Rodar Perfil TV 90º</string>
-    <string name="pref_elite_profile_tv_2d_rotate_desc">Desenha o gráfico 2D horizontalmente (modo paisagem)</string>
+    <string name="data_type_profile_tv_2d_desc">GrÃ¡fico de perfil 2D estilo transmissÃ£o de ciclismo</string>
+    <string name="pref_elite_profile_tv_2d_desc">Mostra o perfil completo da etapa com a Ã¡rea concluÃ­da em cores</string>
+    <string name="pref_elite_profile_tv_2d_rotate_title">Girar Perfil TV 90Âº</string>
+    <string name="pref_elite_profile_tv_2d_rotate_desc">Desenha o grÃ¡fico 2D na horizontal (modo paisagem)</string>
     <string name="data_type_profile_tv_2d_title">Perfil TV 2D</string>
     <string name="pref_elite_profile_tv_2d_title">Perfil TV 2D</string>
 </resources>
-

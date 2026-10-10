@@ -132,11 +132,10 @@
     <string name="alert_power_push">🔴 DRÜCKEN: %1$s | %2$s</string>
     <string name="alert_power_target">⚡ ZIEL: %1$s | %2$s</string>
     <string name="alert_power_prepare">🏔️ VORBEREITEN: %1$s | %2$s</string>
-    <string name="data_type_profile_tv_2d_desc">2D-H�henprofil wie bei Radsport-�bertragungen</string>
-    <string name="pref_elite_profile_tv_2d_desc">Zeigt das komplette Etappenprofil mit eingef�rbtem absolvierten Bereich</string>
-    <string name="pref_elite_profile_tv_2d_rotate_title">TV-Profil um 90� drehen</string>
+    <string name="data_type_profile_tv_2d_desc">2D-Höhenprofil-Diagramm im Stil von Radsportübertragungen</string>
+    <string name="pref_elite_profile_tv_2d_desc">Zeigt das gesamte Etappenprofil, wobei der gefahrene Bereich farbig ist</string>
+    <string name="pref_elite_profile_tv_2d_rotate_title">TV-Profil um 90º drehen</string>
     <string name="pref_elite_profile_tv_2d_rotate_desc">Zeichnet das 2D-Profil horizontal (Querformat)</string>
     <string name="data_type_profile_tv_2d_title">TV-Profil 2D</string>
     <string name="pref_elite_profile_tv_2d_title">TV-Profil 2D</string>
 </resources>
-

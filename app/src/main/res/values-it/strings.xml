@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ALTGRAPH</string>
 
@@ -10,7 +10,7 @@
     <string name="data_type_altimetria_3d_desc">Profilo 3D in prospettiva isometrica con rilievo della pendenza</string>
 
     <string name="data_type_fatigue_grade_title">Grado di Fatica (GF)</string>
-    <string name="data_type_fatigue_grade_desc">Indice scientifico di difficoltÃ  e fatica della salita</string>
+    <string name="data_type_fatigue_grade_desc">Indice scientifico di difficoltà e fatica della salita</string>
     <string name="data_type_climb_viewer_title">Visore Salite 3D</string>
     <string name="data_type_climb_viewer_desc">Visore 3D indipendente dei passi di montagna del percorso</string>
 
@@ -53,25 +53,25 @@
     <string name="setting_lookahead_meters_3d">Distanza di Anticipo 3D (Asse X)</string>
     <string name="setting_attack_threshold">Soglia Allarme Attacco (%)</string>
     <string name="setting_target_vam">VAM Obiettivo (m/h)</string>
-    <string name="setting_asphalt_factor">QualitÃ  dell\'Asfalto (TA)</string>
+    <string name="setting_asphalt_factor">Qualità dell\'Asfalto (TA)</string>
     <string name="setting_enable_alerts">Attiva Allarmi Visivi di Attacco</string>
     <string name="setting_font_size_3d">Dimensione Carattere Altimetria 3D</string>
     <string name="setting_show_block_percentages">Mostra % Pendenza nei Blocchi</string>
     <string name="setting_show_3d_cotas">Mostra Altitudini sul Grafico 3D</string>
-    <string name="setting_show_3d_ramps">Mostra Rampe Dure (â‰¥10%) in 3D</string>
+    <string name="setting_show_3d_ramps">Mostra Rampe Dure (≥10%) in 3D</string>
     <string name="setting_show_route_compass">Mostra Bussola sul Percorso Globale</string>
     <string name="setting_ramp_min_slope">Pendenza Minima Freccia Rampa (%)</string>
     <string name="setting_ramp_max_slope">Pendenza Massima Freccia Rampa (%)</string>
     <string name="setting_show_max_gradient">Mostra Pendenza Massima nell\'Intestazione 3D</string>
-    <string name="setting_rotate_90_cw">Ruota Grafico 90Â° (ModalitÃ  Orizzontale)</string>
+    <string name="setting_rotate_90_cw">Ruota Grafico 90° (Modalità Orizzontale)</string>
     <string name="setting_use_topographic">Usa il metodo topografico di calcolo della pendenza (Proiezione orizzontale)</string>
     <string name="setting_show_hairpins">Mostra Tornanti (Linee Nere)</string>
     <string name="setting_poi_filter">Filtro Punti di Interesse (POI)</string>
-    <string name="setting_poi_towns">ðŸ˜ï¸ Paesi e CittÃ </string>
-    <string name="setting_poi_water">ðŸ’§ Fontane d\'Acqua</string>
-    <string name="setting_poi_viewpoints">ðŸ“¸ Punti Panoramici</string>
-    <string name="setting_poi_summits">ðŸ“¡ Vette e Passi</string>
-    <string name="setting_show_3d_zoom">Attiva Controlli Zoom Tattile (ðŸ”) sul Grafico 3D</string>
+    <string name="setting_poi_towns">🏘️ Paesi e Città</string>
+    <string name="setting_poi_water">💧 Fontane d\'Acqua</string>
+    <string name="setting_poi_viewpoints">📸 Punti Panoramici</string>
+    <string name="setting_poi_summits">📡 Vette e Passi</string>
+    <string name="setting_show_3d_zoom">Attiva Controlli Zoom Tattile (🔍) sul Grafico 3D</string>
     <string name="setting_custom_maps_title">Gestore di Cartografia Personalizzata</string>
     <string name="setting_custom_maps_desc">Rileva e importa pacchetti di mappe vettoriali offline ad alta definizione (.mbtiles / .map) per Karoo</string>
     <string name="font_normal">Normale</string>
@@ -106,7 +106,7 @@
     <string name="elite_strava_segments">Strava Live Segments 3D (Beta)</string>
     <string name="elite_weather_overlay">Livello Vento e Meteo</string>
     <string name="elite_radar_enabled">Radar Altimetrico (Data Field)</string>
-    <string name="elite_map_overlay_mode">ModalitÃ  Sovrapposizione Mappa</string>
+    <string name="elite_map_overlay_mode">Modalità Sovrapposizione Mappa</string>
     <string name="elite_map_overlay_off">Disattivato</string>
     <string name="elite_map_overlay_climbs">Solo Salite</string>
     <string name="elite_map_overlay_all">Percorso Intero</string>
@@ -129,9 +129,9 @@
     <string name="alert_summit">Vetta a %1$s</string>
     <string name="alert_climb">Salita a %1$s - %2$s al %3$s%%</string>
     <string name="alert_finish">Arrivo a %1$s</string>
-    <string name="alert_power_push">ðŸ”´ SPINGI: %1$s | %2$s</string>
-    <string name="alert_power_target">âš¡ OBIETTIVO: %1$s | %2$s</string>
-    <string name="alert_power_prepare">ðŸ”ï¸ PREPARA: %1$s | %2$s</string>
+    <string name="alert_power_push">🔴 SPINGI: %1$s | %2$s</string>
+    <string name="alert_power_target">⚡ OBIETTIVO: %1$s | %2$s</string>
+    <string name="alert_power_prepare">🏔️ PREPARA: %1$s | %2$s</string>
     <string name="data_type_profile_tv_2d_desc">Grafico altimetrico 2D stile trasmissione ciclistica</string>
     <string name="pref_elite_profile_tv_2d_desc">Mostra il profilo completo della tappa con l\'area completata a colori</string>
     <string name="pref_elite_profile_tv_2d_rotate_title">Ruotare Profilo TV 90º</string>
@@ -139,4 +139,3 @@
     <string name="data_type_profile_tv_2d_title">Profilo TV 2D</string>
     <string name="pref_elite_profile_tv_2d_title">Profilo TV 2D</string>
 </resources>
-
