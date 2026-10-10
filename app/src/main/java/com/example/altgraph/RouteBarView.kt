@@ -348,11 +348,16 @@ class RouteBarView(context: Context) : View(context) {
                 val left = band.startIndex * blockWidth - progressOffset
                 val right = (band.endIndex + 1) * blockWidth - progressOffset
                 drawThemedBand(canvas, left, 0f, right, headerHeight, band.colorHex, radarTheme, true)
-
-                if (AppPreferences.getInstance(context).eliteSmoothGradientsEnabled && i < bands.size - 1) {
+            }
+            
+            // Draw gradients in a second pass so they don't get overdrawn by subsequent bands
+            if (AppPreferences.getInstance(context).eliteSmoothGradientsEnabled && radarTheme.lowercase(java.util.Locale.getDefault()) == "clasico") {
+                for (i in 0 until bands.size - 1) {
+                    val band = bands[i]
                     val nextBand = bands[i+1]
-                    val boundary = right
-                    val blendW = blockWidth * 0.5f
+                    val boundary = (band.endIndex + 1) * blockWidth - progressOffset
+                    val blendW = blockWidth * 0.7f // Hacemos el difuminado un poco más ancho
+                    
                     if (boundary > -blendW && boundary < w + blendW) {
                         val color1 = Color.parseColor(band.colorHex)
                         val color2 = Color.parseColor(nextBand.colorHex)
@@ -660,11 +665,16 @@ class RouteBarView(context: Context) : View(context) {
                 val topBandY = h - ((band.endIndex + 1) * blockHeight)
                 val bottomBandY = h - (band.startIndex * blockHeight)
                 drawThemedBand(canvas, 0f, topBandY - 1f, headerWidth, bottomBandY, band.colorHex, radarTheme, false)
-
-                if (AppPreferences.getInstance(context).eliteSmoothGradientsEnabled && i < bands.size - 1) {
+            }
+            
+            // Draw gradients in a second pass
+            if (AppPreferences.getInstance(context).eliteSmoothGradientsEnabled && radarTheme.lowercase(java.util.Locale.getDefault()) == "clasico") {
+                for (i in 0 until bands.size - 1) {
+                    val band = bands[i]
                     val nextBand = bands[i+1]
-                    val boundary = topBandY
-                    val blendH = blockHeight * 0.5f
+                    val boundary = h - ((band.endIndex + 1) * blockHeight)
+                    val blendH = blockHeight * 0.7f
+                    
                     if (boundary > -blendH && boundary < h + blendH) {
                         val color1 = Color.parseColor(band.colorHex)
                         val color2 = Color.parseColor(nextBand.colorHex)
