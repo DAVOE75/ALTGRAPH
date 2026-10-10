@@ -9,14 +9,7 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo-1.png" alt="ALTGRAPH Logo" width="250" />
-</p
-
-## 🚀 VERSIÓN 1.0.44: PACING DINÁMICO Y DIFUMINADO 🚀
-
-- **Power Guide / Pacing (Novedad ELITE)**: Se ha añadido un nuevo sistema inteligente al Radar Altimétrico. Basándose en tu FTP, Altgraph calculará en tiempo real los vatios ideales para cada tramo del puerto y te mostrará alertas de estrategia en la pantalla (Ej. '⚡ OBJETIVO: 240W' o '🔴 APRIETA: 300W'). ¡Tu propio director deportivo en el manillar!
-- **Difuminado de pendientes (Novedad ELITE)**: Opción para suavizar las transiciones visuales entre bloques de distintas pendientes en el Radar Altimétrico (Vista Estándar). En lugar de cortes bruscos, los colores se funden elegantemente creando un degradado suave a lo largo del terreno.
-
-<p align="center"><img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_smooth_gradients_v2.png" width="400" alt="Smooth Gradients" /></p>
+</p>
 
 ## 🔥 VERSIÓN 1.0.45: PERFIL TV 2D (ELITE) 🔥
 
@@ -24,6 +17,13 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
 - **Rotación Apaisada**: Incluye un ajuste exclusivo en el menú Elite para girar el gráfico 90º, ideal para colocar el campo de datos en vertical pero disfrutar del gráfico en su máxima anchura visual.
 
 <p align="center"><img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_tv_profile.png" width="400" alt="TV Profile" /></p>
+
+## 🚀 VERSIÓN 1.0.44: PACING DINÁMICO Y DIFUMINADO 🚀
+
+- **Power Guide / Pacing (Novedad ELITE)**: Se ha añadido un nuevo sistema inteligente al Radar Altimétrico. Basándose en tu FTP, Altgraph calculará en tiempo real los vatios ideales para cada tramo del puerto y te mostrará alertas de estrategia en la pantalla (Ej. '⚡ OBJETIVO: 240W' o '🔴 APRIETA: 300W'). ¡Tu propio director deportivo en el manillar!
+- **Difuminado de pendientes (Novedad ELITE)**: Opción para suavizar las transiciones visuales entre bloques de distintas pendientes en el Radar Altimétrico (Vista Estándar). En lugar de cortes bruscos, los colores se funden elegantemente creando un degradado suave a lo largo del terreno.
+
+<p align="center"><img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/screenshot_smooth_gradients_v2.png" width="400" alt="Smooth Gradients" /></p>
 
 ## 🚀 VERSIÓN 1.0.43: TEXTURAS DE TERRENO (GRAVEL/MTB) 🚀
 **Texturizado por Superficie (Novedad ELITE)**: Se ha añadido un nuevo interruptor en el Panel de Control Elite para activar texturas en la cinta 3D. Ahora, si activas esta opción, el motor de renderizado intercalará de forma dinámica patrones visuales de Grava (puntos oscuros) y Trail (líneas de sendero cruzadas) sobre los colores habituales del desnivel.
