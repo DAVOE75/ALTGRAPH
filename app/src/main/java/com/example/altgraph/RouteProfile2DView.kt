@@ -283,7 +283,6 @@ class RouteProfile2DView(context: Context) : View(context) {
 
         if (catClimbs.isNotEmpty()) {
             val climbListPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.parseColor("#DDDDDD")
                 textSize = 20f * fontSizeScale
                 typeface = Typeface.create(fontFamilyKey, Typeface.NORMAL)
                 textAlign = Paint.Align.LEFT
@@ -295,7 +294,7 @@ class RouteProfile2DView(context: Context) : View(context) {
                 textAlign = Paint.Align.LEFT
             }
 
-            var climbY = 30f
+            var climbY = 80f // Start at the same height as the minimap
             val listStartX = drawW * 0.55f // Draw on the right half
 
             for ((i, item) in catClimbs.withIndex()) {
@@ -304,6 +303,15 @@ class RouteProfile2DView(context: Context) : View(context) {
                 val startKm = climb.startDistance / 1000.0
                 val lenKm = climb.length / 1000.0
                 val avg = climb.avgGrade
+                
+                // Color green if passed
+                if (climb.endDistance <= currentDistance) {
+                    climbListPaint.color = Color.parseColor("#00E676")
+                    climbListCatPaint.color = Color.parseColor("#00E676")
+                } else {
+                    climbListPaint.color = Color.parseColor("#DDDDDD")
+                    climbListCatPaint.color = Color.parseColor("#F59E0B")
+                }
 
                 val ptoStr = "Pto ${i + 1} "
                 canvas.drawText(ptoStr, listStartX, climbY, climbListPaint)
@@ -341,6 +349,20 @@ class RouteProfile2DView(context: Context) : View(context) {
             
             val mapW = mapBoxRight - mapBoxLeft
             val mapH = mapBoxBottom - mapBoxTop
+            
+            // Draw faint concentric lines as "contour" background
+            val contourBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.parseColor("#33444444") // very faint grey
+                style = Paint.Style.STROKE
+                strokeWidth = 2f
+            }
+            canvas.save()
+            canvas.clipRect(mapBoxLeft, mapBoxTop, mapBoxRight, mapBoxBottom)
+            for (r in 10..400 step 20) {
+                canvas.drawCircle(mapBoxLeft + mapW * 0.3f, mapBoxTop + mapH * 0.4f, r.toFloat(), contourBgPaint)
+                canvas.drawCircle(mapBoxRight - mapW * 0.2f, mapBoxBottom - mapH * 0.2f, r.toFloat(), contourBgPaint)
+            }
+            canvas.restore()
             
             val midLat = (minLat + maxLat) / 2.0
             val latScale = mapH / Math.max(1e-6, maxLat - minLat)
