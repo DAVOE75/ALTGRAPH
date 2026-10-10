@@ -1197,6 +1197,21 @@ class MainActivity : Activity() {
             }
         }
         powerGuideCard.addView(switchPowerGuide)
+
+        // Smooth Gradients
+        val smoothGradientsCard = createCardContainer()
+        val switchSmoothGradients = Switch(this).apply {
+            text = getString(R.string.setting_smooth_gradients)
+            textSize = 15f
+            setTextColor(Color.WHITE)
+            isChecked = prefs.eliteSmoothGradientsEnabled
+            isEnabled = prefs.isEliteUnlocked
+            setOnCheckedChangeListener { _, isChecked ->
+                prefs.eliteSmoothGradientsEnabled = isChecked
+            }
+        }
+        smoothGradientsCard.addView(switchSmoothGradients)
+        tabEliteContainer.addView(smoothGradientsCard)
         tabEliteContainer.addView(powerGuideCard)
 
         // Power Zone Bar
@@ -1279,6 +1294,7 @@ class MainActivity : Activity() {
             switchPowerBar.isEnabled = unlocked
             switchRadarAlerts.isEnabled = unlocked
             switchPowerGuide.isEnabled = unlocked
+            switchSmoothGradients.isEnabled = unlocked
             switchShowSurfaceTextures.isEnabled = unlocked
             ftpInput.isEnabled = unlocked
             radarResSpinner.isEnabled = unlocked
@@ -1299,6 +1315,7 @@ class MainActivity : Activity() {
                 switchPowerBar.isChecked = prefs.elitePowerBarEnabled
                 switchRadarAlerts.isChecked = prefs.eliteRadarAlertsEnabled
                 switchPowerGuide.isChecked = prefs.elitePowerGuideEnabled
+                switchSmoothGradients.isChecked = prefs.eliteSmoothGradientsEnabled
             }
             
             if (unlocked) {

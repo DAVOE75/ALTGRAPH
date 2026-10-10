@@ -343,10 +343,30 @@ class RouteBarView(context: Context) : View(context) {
             val arrowX = (w * 0.25f).coerceAtLeast(cWidth / 2f)
             val progressOffset = (w * strat.riderProgress) - arrowX
 
-            for (band in bands) {
+            for (i in bands.indices) {
+                val band = bands[i]
                 val left = band.startIndex * blockWidth - progressOffset
                 val right = (band.endIndex + 1) * blockWidth - progressOffset
                 drawThemedBand(canvas, left, 0f, right, headerHeight, band.colorHex, radarTheme, true)
+
+                if (AppPreferences.getInstance(context).eliteSmoothGradientsEnabled && i < bands.size - 1) {
+                    val nextBand = bands[i+1]
+                    val boundary = right
+                    val blendW = blockWidth * 0.5f
+                    if (boundary > -blendW && boundary < w + blendW) {
+                        val color1 = Color.parseColor(band.colorHex)
+                        val color2 = Color.parseColor(nextBand.colorHex)
+                        val gradient = android.graphics.LinearGradient(
+                            boundary - blendW/2f, 0f, boundary + blendW/2f, 0f,
+                            color1, color2, android.graphics.Shader.TileMode.CLAMP
+                        )
+                        val blendPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                            shader = gradient
+                            style = Paint.Style.FILL
+                        }
+                        canvas.drawRect(boundary - blendW/2f, 0f, boundary + blendW/2f, headerHeight, blendPaint)
+                    }
+                }
             }
             if (showRadar3d) {
                 canvas.restore()
@@ -635,10 +655,30 @@ class RouteBarView(context: Context) : View(context) {
                 val skewFactorV = -0.35f // inclinación vertical para efecto 3D
                 canvas.skew(0f, skewFactorV)
             }
-            for (band in bands) {
-                val top = h - ((band.endIndex + 1) * blockHeight)
-                val bottom = h - (band.startIndex * blockHeight)
-                drawThemedBand(canvas, 0f, top - 1f, headerWidth, bottom, band.colorHex, radarTheme, false)
+            for (i in bands.indices) {
+                val band = bands[i]
+                val topBandY = h - ((band.endIndex + 1) * blockHeight)
+                val bottomBandY = h - (band.startIndex * blockHeight)
+                drawThemedBand(canvas, 0f, topBandY - 1f, headerWidth, bottomBandY, band.colorHex, radarTheme, false)
+
+                if (AppPreferences.getInstance(context).eliteSmoothGradientsEnabled && i < bands.size - 1) {
+                    val nextBand = bands[i+1]
+                    val boundary = topBandY
+                    val blendH = blockHeight * 0.5f
+                    if (boundary > -blendH && boundary < h + blendH) {
+                        val color1 = Color.parseColor(band.colorHex)
+                        val color2 = Color.parseColor(nextBand.colorHex)
+                        val gradient = android.graphics.LinearGradient(
+                            0f, boundary + blendH/2f, 0f, boundary - blendH/2f,
+                            color1, color2, android.graphics.Shader.TileMode.CLAMP
+                        )
+                        val blendPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                            shader = gradient
+                            style = Paint.Style.FILL
+                        }
+                        canvas.drawRect(0f, boundary - blendH/2f, headerWidth, boundary + blendH/2f, blendPaint)
+                    }
+                }
             }
             if (showRadar3d) {
                 canvas.restore()
