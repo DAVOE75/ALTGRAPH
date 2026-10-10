@@ -271,7 +271,7 @@ class RouteProfile2DView(context: Context) : View(context) {
 
         if (catClimbs.isNotEmpty()) {
             var climbY = 90f // Below the distance text
-            val listStartX = 20f // Aligned with Title and Distance text
+            val listStartX = drawW * 0.6f // Aligned to 60% towards the right
 
             for ((i, item) in catClimbs.withIndex()) {
                 val climb = item.first
