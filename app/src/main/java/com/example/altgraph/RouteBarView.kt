@@ -326,9 +326,8 @@ class RouteBarView(context: Context) : View(context) {
             // Reparto vertical según lo activo: barras inferiores, alertas, regla y franja de pendiente
             val bottomBarH = 12f
             val barsH = (if (showEnergyBar) bottomBarH else 0f) + (if (showPowerBar) bottomBarH else 0f)
-            val usableH = (h - barsH).coerceAtLeast(h * 0.5f)
-            val alertH = if (showRadarAlerts) (38f * fontScale * 1.25f).coerceIn(usableH * 0.2f, usableH * 0.35f) else 0f
-            val radarH = usableH - alertH
+            val alertH = if (showRadarAlerts) h * 0.50f else 0f
+            val radarH = h - alertH - barsH
             val rulerH = (15f + 2f + RULER_TEXT_SIZE / 0.85f).coerceIn(radarH * 0.25f, radarH * 0.42f)
             val headerHeight = radarH - rulerH
             // 1. Dibujar franjas de color con ligera perspectiva isométrica
@@ -619,7 +618,10 @@ class RouteBarView(context: Context) : View(context) {
 
         } else {
             // VERTICAL MODE
-            val radarW = if (showRadarAlerts) w * 0.60f else w.toFloat()
+            val alertW = if (showRadarAlerts) w * 0.50f else 0f
+            val sideBarW = 12f
+            val barsW = (if (showEnergyBar) sideBarW else 0f) + (if (showPowerBar) sideBarW else 0f)
+            val radarW = w - alertW - barsW
             tickTextPaint.textSize = RULER_TEXT_SIZE
             val rulerW = (tickTextPaint.measureText("8888m") + 21f).coerceIn(radarW * 0.25f, radarW * 0.5f)
             val headerWidth = radarW - rulerW
@@ -777,9 +779,55 @@ class RouteBarView(context: Context) : View(context) {
                 canvas.drawText(text, (headerWidth + radarW) / 2f, h - 6f, ghostTextPaint)
             }
 
+            // 7. Energy / Power Bars (ELITE) — thin vertical bars to the right of the radar
+            var leftOffset = radarW
+            if (showEnergyBar) {
+                val barLeft = leftOffset
+                val barWidth = sideBarW
+                val energyLevel = strat.energyBatteryLevel.coerceIn(0.0, 100.0).toFloat() / 100f
+                canvas.drawRect(barLeft, 0f, barLeft + barWidth, h, energyBgPaint)
+                val barColor = when {
+                    energyLevel > 0.6f -> Color.parseColor("#4CAF50")
+                    energyLevel > 0.3f -> Color.parseColor("#FFC107")
+                    else -> Color.parseColor("#F44336")
+                }
+                val barPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = barColor; style = Paint.Style.FILL }
+                canvas.drawRect(barLeft, h * (1f - energyLevel), barLeft + barWidth, h, barPaint)
+                leftOffset += sideBarW
+            }
+
+            if (showPowerBar) {
+                val barLeft = leftOffset
+                val barWidth = sideBarW
+                canvas.drawRect(barLeft, 0f, barLeft + barWidth, h, energyBgPaint)
+
+                val currentPwr = strat.currentPower.toFloat()
+                val ftp = userFtp.toFloat().coerceAtLeast(1f)
+                val percentFtp = currentPwr / ftp
+
+                val barColor = when {
+                    percentFtp < 0.55f -> Color.parseColor("#808080")
+                    percentFtp < 0.75f -> Color.parseColor("#4CAF50")
+                    percentFtp < 0.90f -> Color.parseColor("#FFEB3B")
+                    percentFtp < 1.05f -> Color.parseColor("#FF9800")
+                    percentFtp < 1.20f -> Color.parseColor("#F44336")
+                    percentFtp < 1.50f -> Color.parseColor("#9C27B0")
+                    else -> Color.parseColor("#FFEB3B")
+                }
+                if (percentFtp >= 1.50f) {
+                    val p2 = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE; style = Paint.Style.FILL }
+                    canvas.drawRect(barLeft, 0f, barLeft + barWidth, h, p2)
+                } else {
+                    val p2 = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = barColor; style = Paint.Style.FILL }
+                    val heightScale = (percentFtp / 1.5f).coerceIn(0f, 1f)
+                    canvas.drawRect(barLeft, h * (1f - heightScale), barLeft + barWidth, h, p2)
+                }
+                leftOffset += sideBarW
+            }
+
             // 6. Alertas dinámicas
             if (showRadarAlerts) {
-                drawAlerts(canvas, strat, isHorizontal = false, radarW, 0f, w, h, fontScale)
+                drawAlerts(canvas, strat, isHorizontal = false, w - alertW, 0f, w, h, fontScale)
             }
         }
     }
