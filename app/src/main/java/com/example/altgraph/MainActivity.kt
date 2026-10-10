@@ -1318,6 +1318,7 @@ class MainActivity : Activity() {
             switchPowerGuide.isEnabled = unlocked
             switchSmoothGradients.isEnabled = unlocked
             switchShowSurfaceTextures.isEnabled = unlocked
+            switchProfileTvRotate.isEnabled = unlocked
             ftpInput.isEnabled = unlocked
             radarResSpinner.isEnabled = unlocked
             mapOverlaySpinner.isEnabled = unlocked
@@ -1338,6 +1339,8 @@ class MainActivity : Activity() {
                 switchRadarAlerts.isChecked = prefs.eliteRadarAlertsEnabled
                 switchPowerGuide.isChecked = prefs.elitePowerGuideEnabled
                 switchSmoothGradients.isChecked = prefs.eliteSmoothGradientsEnabled
+                switchShowSurfaceTextures.isChecked = prefs.eliteShowSurfaceTexturesEnabled
+                switchProfileTvRotate.isChecked = prefs.eliteProfileTv2dRotate
             }
             
             if (unlocked) {
