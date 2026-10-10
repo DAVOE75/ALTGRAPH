@@ -18,17 +18,6 @@ class RouteProfile2DView(context: Context) : View(context) {
     var fontSizeScale: Float = 1.0f
     var activeClimbs: List<RouteClimb> = emptyList()
     
-    private var contourBitmap: Bitmap? = null
-
-    init {
-        try {
-            val resId = context.resources.getIdentifier("contour_bg", "drawable", context.packageName)
-            if (resId != 0) {
-                contourBitmap = BitmapFactory.decodeResource(context.resources, resId)
-            }
-        } catch (e: Exception) {}
-    }
-
     private val pathLine = Path()
     private val pathFill = Path()
     private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -245,13 +234,13 @@ class RouteProfile2DView(context: Context) : View(context) {
         
         val bgPaint = Paint().apply { color = Color.parseColor("#88000000"); style = Paint.Style.FILL }
         
-        // Done KM: nearest to the line (Right side means negative Y)
-        canvas.drawRect(-doneWidth / 2f - 4f, -35f, doneWidth / 2f + 4f, -5f, bgPaint)
-        canvas.drawText(kmDoneText, 0f, -10f, kmDoneTextPaint)
+        // Done KM (Green): Left side (Positive Y)
+        canvas.drawRect(-doneWidth / 2f - 4f, 5f, doneWidth / 2f + 4f, 35f, bgPaint)
+        canvas.drawText(kmDoneText, 0f, 30f, kmDoneTextPaint)
         
-        // Remaining KM: further right
-        canvas.drawRect(-remainWidth / 2f - 4f, -65f, remainWidth / 2f + 4f, -35f, bgPaint)
-        canvas.drawText(kmRemainText, 0f, -40f, kmRemainTextPaint)
+        // Remaining KM (White): Right side (Negative Y)
+        canvas.drawRect(-remainWidth / 2f - 4f, -35f, remainWidth / 2f + 4f, -5f, bgPaint)
+        canvas.drawText(kmRemainText, 0f, -10f, kmRemainTextPaint)
         
         canvas.restore()
 
@@ -278,6 +267,60 @@ class RouteProfile2DView(context: Context) : View(context) {
         val distText = String.format("Total %.1f km - %s", totalDistance / 1000.0, altitudeGainText)
         canvas.drawText(distText, 20f, 55f, subTextPaint)
 
+        // Draw Classified Climbs List on the Right
+        val catClimbs = activeClimbs.mapNotNull { climb ->
+            val catUp = climb.category.uppercase()
+            val mappedCat = when {
+                catUp.contains("1") -> "1ª"
+                catUp.contains("2") -> "2ª"
+                catUp.contains("3") -> "3ª"
+                catUp.contains("4") -> "4ª"
+                catUp.contains("ESPECIAL") || catUp.contains("H.C") || catUp.contains("HC") -> "H.C."
+                else -> null
+            }
+            if (mappedCat != null) Pair(climb, mappedCat) else null
+        }.sortedBy { it.first.startDistance }
+
+        if (catClimbs.isNotEmpty()) {
+            val climbListPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.parseColor("#DDDDDD")
+                textSize = 20f * fontSizeScale
+                typeface = Typeface.create(fontFamilyKey, Typeface.NORMAL)
+                textAlign = Paint.Align.LEFT
+            }
+            val climbListCatPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.parseColor("#F59E0B")
+                textSize = 20f * fontSizeScale
+                typeface = Typeface.create(fontFamilyKey, Typeface.BOLD)
+                textAlign = Paint.Align.LEFT
+            }
+
+            var climbY = 30f
+            val listStartX = drawW * 0.55f // Draw on the right half
+
+            for ((i, item) in catClimbs.withIndex()) {
+                val climb = item.first
+                val cat = item.second
+                val startKm = climb.startDistance / 1000.0
+                val lenKm = climb.length / 1000.0
+                val avg = climb.avgGrade
+
+                val ptoStr = "Pto ${i + 1} "
+                canvas.drawText(ptoStr, listStartX, climbY, climbListPaint)
+                val ptoWidth = climbListPaint.measureText(ptoStr)
+
+                val catStr = "($cat) "
+                canvas.drawText(catStr, listStartX + ptoWidth, climbY, climbListCatPaint)
+                val catWidth = climbListCatPaint.measureText(catStr)
+
+                val detailsStr = String.format("- km %.1f | %.1f km | %.1f%%", startKm, lenKm, avg)
+                canvas.drawText(detailsStr, listStartX + ptoWidth + catWidth, climbY, climbListPaint)
+
+                climbY += 28f * fontSizeScale
+                if (climbY > drawH - 50f) break // Avoid drawing out of bounds
+            }
+        }
+
         // Draw 2D Mini-map
         if (routeCoords.isNotEmpty()) {
             var minLat = Double.MAX_VALUE
@@ -298,16 +341,6 @@ class RouteProfile2DView(context: Context) : View(context) {
             
             val mapW = mapBoxRight - mapBoxLeft
             val mapH = mapBoxBottom - mapBoxTop
-            
-            contourBitmap?.let { bmp ->
-                val srcRect = Rect(0, 0, bmp.width, bmp.height)
-                val dstRect = RectF(mapBoxLeft, mapBoxTop, mapBoxRight, mapBoxBottom)
-                val paint = Paint(Paint.FILTER_BITMAP_FLAG).apply {
-                    alpha = 40 // Very subtle
-                    xfermode = PorterDuffXfermode(PorterDuff.Mode.SCREEN)
-                }
-                canvas.drawBitmap(bmp, srcRect, dstRect, paint)
-            }
             
             val midLat = (minLat + maxLat) / 2.0
             val latScale = mapH / Math.max(1e-6, maxLat - minLat)
