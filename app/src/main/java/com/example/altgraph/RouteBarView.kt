@@ -351,7 +351,9 @@ class RouteBarView(context: Context) : View(context) {
             }
             
             // Draw gradients in a second pass so they don't get overdrawn by subsequent bands
-            if (AppPreferences.getInstance(context).eliteSmoothGradientsEnabled && radarTheme.lowercase(java.util.Locale.getDefault()) == "clasico") {
+            val themeLower = radarTheme.lowercase(java.util.Locale.getDefault())
+            val isClassicTheme = themeLower == "estándar" || themeLower == "estandar" || themeLower == "clásico" || themeLower == "clasico"
+            if (AppPreferences.getInstance(context).eliteSmoothGradientsEnabled && isClassicTheme) {
                 for (i in 0 until bands.size - 1) {
                     val band = bands[i]
                     val nextBand = bands[i+1]
@@ -668,7 +670,9 @@ class RouteBarView(context: Context) : View(context) {
             }
             
             // Draw gradients in a second pass
-            if (AppPreferences.getInstance(context).eliteSmoothGradientsEnabled && radarTheme.lowercase(java.util.Locale.getDefault()) == "clasico") {
+            val themeLowerV = radarTheme.lowercase(java.util.Locale.getDefault())
+            val isClassicThemeV = themeLowerV == "estándar" || themeLowerV == "estandar" || themeLowerV == "clásico" || themeLowerV == "clasico"
+            if (AppPreferences.getInstance(context).eliteSmoothGradientsEnabled && isClassicThemeV) {
                 for (i in 0 until bands.size - 1) {
                     val band = bands[i]
                     val nextBand = bands[i+1]
