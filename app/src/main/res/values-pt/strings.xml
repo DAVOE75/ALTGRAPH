@@ -137,4 +137,5 @@
     <string name="pref_elite_profile_tv_2d_rotate_desc">Desenha o grÃ¡fico 2D na horizontal (modo paisagem)</string>
     <string name="data_type_profile_tv_2d_title">Perfil TV 2D</string>
     <string name="pref_elite_profile_tv_2d_title">Perfil TV 2D</string>
+    <string name="profile_tv_2d_gain">Desnível acumulado %1$.0f m</string>
 </resources>

@@ -138,4 +138,5 @@
     <string name="pref_elite_profile_tv_2d_rotate_desc">Disegna il grafico 2D in orizzontale (modalità paesaggio)</string>
     <string name="data_type_profile_tv_2d_title">Profilo TV 2D</string>
     <string name="pref_elite_profile_tv_2d_title">Profilo TV 2D</string>
+    <string name="profile_tv_2d_gain">Dislivello %1$.0f m</string>
 </resources>

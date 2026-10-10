@@ -201,4 +201,5 @@
     <string name="pref_elite_profile_tv_2d_rotate_desc">Draw the 2D profile horizontally (landscape orientation)</string>
     <string name="data_type_profile_tv_2d_title">TV Profile 2D</string>
     <string name="pref_elite_profile_tv_2d_title">TV Profile 2D</string>
+    <string name="profile_tv_2d_gain">Altitude gain %1$.0f m</string>
 </resources>

@@ -122,6 +122,10 @@ class RouteProfile2DDataField(extension: String) : DataTypeImpl(extension, "prof
                             // Let's use progress * total
                             routeProfileView.currentDistance = strategy.riderProgress * strategy.routeTotalLength
                             routeProfileView.isRotated = isRotated
+                            routeProfileView.fontFamilyKey = prefs.fontFamilyKey
+                            routeProfileView.fontSizeScale = prefs.fontSize3dScale
+                            routeProfileView.altitudeGainText = context.getString(R.string.profile_tv_2d_gain, routeProfileView.altitudeGain)
+                            routeProfileView.activeClimbs = strategy.activeClimbs
 
                             // Draw view
                             routeProfileView.draw(currentCanvas)
