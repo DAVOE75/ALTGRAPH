@@ -1187,7 +1187,7 @@ class MainActivity : Activity() {
         // Power Guide (Pacing Dinámico)
         val powerGuideCard = createCardContainer()
         val switchPowerGuide = Switch(this).apply {
-            text = "Pacing / Power Guide (Alertas)"
+            text = getString(R.string.setting_power_guide)
             textSize = 15f
             setTextColor(Color.WHITE)
             isChecked = prefs.elitePowerGuideEnabled

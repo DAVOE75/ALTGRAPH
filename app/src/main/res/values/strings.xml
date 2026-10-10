@@ -185,4 +185,5 @@
     <string name="radar_resolution_500m">500m</string>
     <string name="radar_resolution_1km">1km</string>
     <string name="setting_show_surface_textures">Terrain Surface Textures (Gravel/MTB)</string>
+    <string name="setting_power_guide">Pacing / Power Guide (Alertas)</string>
 </resources>

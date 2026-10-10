@@ -11,9 +11,14 @@ Revoluciona el concepto tradicional de altimetría ciclista incorporando una **S
   <img src="https://raw.githubusercontent.com/DAVOE75/ALTGRAPH/main/art/logo-1.png" alt="ALTGRAPH Logo" width="250" />
 </p
 
-🚀 VERSIÓN 1.0.43: TEXTURAS DE TERRENO (GRAVEL/MTB) 🚀 Texturizado por Superficie (Novedad ELITE): Se ha añadido un nuevo interruptor en el Panel de Control Elite para activar texturas en la cinta 3D. Ahora, si activas esta opción, el motor de renderizado intercalará de forma dinámica patrones visuales de Grava (puntos oscuros) y Trail (líneas de sendero) sobre los colores habituales de desnivel.
+## 🚀 VERSIÓN 1.0.44: PACING DINÁMICO (POWER GUIDE) 🚀
 
-⚠️ Nota: Actualmente funciona en modo de pre-visualización (Mock) para mostrar el nuevo motor gráfico. La textura coincidirá de forma exacta con el terreno real en cuanto Hammerhead libere los datos de "Superficie" en su SDK para desarrolladores..
+- **Power Guide / Pacing (Novedad ELITE)**: Se ha añadido un nuevo sistema inteligente al Radar Altimétrico. Basándose en tu FTP, Altgraph calculará en tiempo real los vatios ideales para cada tramo del puerto y te mostrará alertas de estrategia en la pantalla (Ej. '⚡ OBJETIVO: 240W' o '🔴 APRIETA: 300W'). ¡Tu propio director deportivo en el manillar!
+
+## 🚀 VERSIÓN 1.0.43: TEXTURAS DE TERRENO (GRAVEL/MTB) 🚀
+**Texturizado por Superficie (Novedad ELITE)**: Se ha añadido un nuevo interruptor en el Panel de Control Elite para activar texturas en la cinta 3D. Ahora, si activas esta opción, el motor de renderizado intercalará de forma dinámica patrones visuales de Grava (puntos oscuros) y Trail (líneas de sendero cruzadas) sobre los colores habituales del desnivel.
+
+*⚠️ Nota: Actualmente funciona en modo de pre-visualización (Mock) para mostrar el nuevo motor gráfico. La textura coincidirá de forma exacta con el terreno real en cuanto Hammerhead libere los datos de "Superficie" en su SDK para desarrolladores.*
 
 ## 🚀 ACTUALIZACIÓN MASIVA (v1.0.10 - v1.0.40): ESTABILIDAD, RESOLUCIÓN Y PRECISIÓN 🚀
 

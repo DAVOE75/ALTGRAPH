@@ -9,9 +9,15 @@ It revolutionizes the traditional concept of cycling altimetry by incorporating 
 
 
 
-## 🚀 VERSION 1.0.41: TERRAIN TEXTURES (GRAVEL/MTB) 🚀
+## 🚀 VERSION 1.0.44: DYNAMIC PACING (POWER GUIDE) 🚀
 
-- **Surface Texturing (ELITE Novelty)**: A new toggle has been added to the Elite Control Panel to activate textures on the 3D ribbon. Now, if you enable this option, the rendering engine will dynamically interleave visual patterns for Gravel (dark dots) and Trail (path lines) over the usual gradient colors. Ideal for getting a preview of when the asphalt ends!
+- **Power Guide / Pacing (ELITE Novelty)**: A new intelligent system has been added to the Altimetry Radar. Based on your FTP, Altgraph will calculate the ideal watts for each section of the climb in real-time and show you strategy alerts on screen (e.g. '⚡ TARGET: 240W' or '🔴 PUSH: 300W'). Your own sports director on your handlebars!
+
+## 🚀 VERSION 1.0.43: TERRAIN TEXTURES (GRAVEL/MTB) 🚀
+
+**Surface Texturing (ELITE Novelty)**: A new toggle has been added to the Elite Control Panel to activate textures on the 3D ribbon. Now, if you enable this option, the rendering engine will dynamically interleave visual patterns for Gravel (dark dots) and Trail (crossed path lines) over the usual gradient colors.
+
+*⚠️ Note: It currently works in a preview mode (Mock) to showcase the new graphics engine. The texture will perfectly match the real terrain as soon as Hammerhead releases the "Surface" data in their developer SDK.*
 
 ## 🚀 VERSION 1.0.9: ELITE GRADIENT ZONES HISTOGRAM 🚀
 
