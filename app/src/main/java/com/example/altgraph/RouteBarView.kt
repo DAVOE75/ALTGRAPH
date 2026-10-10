@@ -861,19 +861,21 @@ class RouteBarView(context: Context) : View(context) {
             }
 
             if (steepDist != null && steepGrade != null && steepDist < 5000) {
+                val wallText = context.getString(R.string.alert_wall, steepGrade.toInt().toString(), formatDist(steepDist))
                 if (showPowerGuide) {
-                    alertText = "🔴 APRIETA: ${getTargetPowerStr(steepGrade.toDouble())} | Muro ${steepGrade.toInt()}% a ${formatDist(steepDist)}"
+                    alertText = context.getString(R.string.alert_power_push, getTargetPowerStr(steepGrade.toDouble()), wallText)
                 } else {
-                    alertText = "Muro ${steepGrade.toInt()}% a ${formatDist(steepDist)}"
+                    alertText = wallText
                 }
                 alertColorHex = GradeColorScale.getColorHex(steepGrade.toDouble())
             } else {
                 val distToTop = activeClimb.endDistance - trueRiderDist
+                val summitText = context.getString(R.string.alert_summit, formatDist(distToTop))
                 if (showPowerGuide) {
-                    alertText = "⚡ OBJETIVO: ${getTargetPowerStr(currentGrade)} | Coronar a ${formatDist(distToTop)}"
+                    alertText = context.getString(R.string.alert_power_target, getTargetPowerStr(currentGrade), summitText)
                     alertColorHex = GradeColorScale.getColorHex(currentGrade)
                 } else {
-                    alertText = "Coronar a ${formatDist(distToTop)}"
+                    alertText = summitText
                     alertColorHex = "#4CAF50" // Green
                 }
             }
@@ -882,10 +884,11 @@ class RouteBarView(context: Context) : View(context) {
             if (nextClimb != null) {
                 val distToStart = nextClimb.startDistance - trueRiderDist
                 val gradeStr = String.format(java.util.Locale.getDefault(), "%.1f", nextClimb.avgGrade)
+                val climbText = context.getString(R.string.alert_climb, formatDist(distToStart), formatDist(nextClimb.length), gradeStr)
                 if (showPowerGuide) {
-                    alertText = "🏔️ PREPARA: ${getTargetPowerStr(nextClimb.avgGrade)} | Puerto a ${formatDist(distToStart)}"
+                    alertText = context.getString(R.string.alert_power_prepare, getTargetPowerStr(nextClimb.avgGrade), climbText)
                 } else {
-                    alertText = "Puerto a ${formatDist(distToStart)} - ${formatDist(nextClimb.length)} al $gradeStr%"
+                    alertText = climbText
                 }
                 alertColorHex = GradeColorScale.getColorHex(nextClimb.avgGrade)
             }
@@ -898,7 +901,7 @@ class RouteBarView(context: Context) : View(context) {
 
         // Sin más puertos por delante, el último aviso deja paso a la distancia a meta
         if (alertText.isEmpty() && strat.routeTotalLength > 0.0 && strat.remainingDistance > 0.0) {
-            alertText = "Meta a ${formatDist(strat.remainingDistance)}"
+            alertText = context.getString(R.string.alert_finish, formatDist(strat.remainingDistance))
         }
 
         // Fondo de la franja: mezclamos el color de alerta con un poco de transparencia/blanco para que sea "más claro"
