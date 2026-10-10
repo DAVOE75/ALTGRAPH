@@ -39,6 +39,12 @@ class RouteProfile2DView(context: Context) : View(context) {
     private val subTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.LTGRAY
     }
+    private val climbListPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        textAlign = Paint.Align.LEFT
+    }
+    private val climbListCatPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        textAlign = Paint.Align.LEFT
+    }
     private val kmDoneTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#00E676") // Bright green
         textAlign = Paint.Align.CENTER
@@ -102,6 +108,12 @@ class RouteProfile2DView(context: Context) : View(context) {
         
         FontHelper.applyFontToPaint(subTextPaint, fontFamilyKey, Typeface.NORMAL)
         subTextPaint.textSize = 18f * fontSizeScale
+        
+        FontHelper.applyFontToPaint(climbListPaint, fontFamilyKey, Typeface.NORMAL)
+        climbListPaint.textSize = 20f * fontSizeScale
+        
+        FontHelper.applyFontToPaint(climbListCatPaint, fontFamilyKey, Typeface.BOLD)
+        climbListCatPaint.textSize = 20f * fontSizeScale
         
         FontHelper.applyFontToPaint(kmDoneTextPaint, fontFamilyKey, Typeface.BOLD)
         kmDoneTextPaint.textSize = 22f * fontSizeScale
@@ -282,18 +294,6 @@ class RouteProfile2DView(context: Context) : View(context) {
         }.sortedBy { it.first.startDistance }
 
         if (catClimbs.isNotEmpty()) {
-            val climbListPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                textSize = 20f * fontSizeScale
-                typeface = Typeface.create(fontFamilyKey, Typeface.NORMAL)
-                textAlign = Paint.Align.LEFT
-            }
-            val climbListCatPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.parseColor("#F59E0B")
-                textSize = 20f * fontSizeScale
-                typeface = Typeface.create(fontFamilyKey, Typeface.BOLD)
-                textAlign = Paint.Align.LEFT
-            }
-
             var climbY = 80f // Start at the same height as the minimap
             val listStartX = drawW * 0.52f // A bit more to the left to fit text
 
