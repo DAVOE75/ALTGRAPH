@@ -1339,7 +1339,7 @@ class MainActivity : Activity() {
                 switchRadarAlerts.isChecked = prefs.eliteRadarAlertsEnabled
                 switchPowerGuide.isChecked = prefs.elitePowerGuideEnabled
                 switchSmoothGradients.isChecked = prefs.eliteSmoothGradientsEnabled
-                switchShowSurfaceTextures.isChecked = prefs.eliteShowSurfaceTexturesEnabled
+                switchShowSurfaceTextures.isChecked = prefs.showSurfaceTextures
                 switchProfileTvRotate.isChecked = prefs.eliteProfileTv2dRotate
             }
             
