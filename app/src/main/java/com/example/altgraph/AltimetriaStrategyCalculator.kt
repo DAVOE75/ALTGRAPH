@@ -453,8 +453,8 @@ class AltimetriaStrategyCalculator {
                         if (grade > 0.0) {
                             accumulatedHardness += FatigueGradeCalculator.calculateSegmentHardness(grade, dDist / 1000.0)
                         }
+                        lastPt = pt
                     }
-                    lastPt = pt
                 }
             }
         }
@@ -1344,10 +1344,11 @@ class AltimetriaStrategyCalculator {
                             totalAscent += dElev
                             ascentDistance += dDist
                         }
+                        lastPt = pt
                     }
+                } else {
+                    lastPt = pt
                 }
-
-                lastPt = pt
                 endPt = pt
 
                 if (pt.distance > windowEndDist) {
