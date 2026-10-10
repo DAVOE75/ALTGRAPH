@@ -11,6 +11,7 @@ class RouteProfile2DView(context: Context) : View(context) {
     var currentDistance: Double = 0.0
     var isRotated: Boolean = false
     var routeName: String = ""
+    var routeCoords: List<Pair<Double, Double>> = emptyList()
     var altitudeGain: Double = 0.0
     var altitudeGainText: String = ""
     var fontFamilyKey: String = "sans-serif-condensed"
@@ -269,6 +270,92 @@ class RouteProfile2DView(context: Context) : View(context) {
         
         val distText = String.format("Total %.1f km - %s", totalDistance / 1000.0, altitudeGainText)
         canvas.drawText(distText, 20f, 55f, subTextPaint)
+
+        // Draw 2D Mini-map
+        if (routeCoords.isNotEmpty()) {
+            var minLat = Double.MAX_VALUE
+            var maxLat = -Double.MAX_VALUE
+            var minLng = Double.MAX_VALUE
+            var maxLng = -Double.MAX_VALUE
+            for (pt in routeCoords) {
+                if (pt.first < minLat) minLat = pt.first
+                if (pt.first > maxLat) maxLat = pt.first
+                if (pt.second < minLng) minLng = pt.second
+                if (pt.second > maxLng) maxLng = pt.second
+            }
+            
+            val mapBoxLeft = drawW * 0.5f
+            val mapBoxTop = 20f
+            val mapBoxRight = drawW - 30f
+            val mapBoxBottom = topY + 50f
+            
+            val mapW = mapBoxRight - mapBoxLeft
+            val mapH = mapBoxBottom - mapBoxTop
+            
+            val midLat = (minLat + maxLat) / 2.0
+            val latScale = mapH / Math.max(1e-6, maxLat - minLat)
+            val lngSpanRaw = (maxLng - minLng) * Math.cos(Math.toRadians(midLat))
+            val lngScale = mapW / Math.max(1e-6, lngSpanRaw)
+            
+            val scale = Math.min(latScale, lngScale)
+            
+            val contentW = (maxLng - minLng) * Math.cos(Math.toRadians(midLat)) * scale
+            val contentH = (maxLat - minLat) * scale
+            val offX = mapBoxLeft + (mapW - contentW) / 2f
+            val offY = mapBoxTop + (mapH - contentH) / 2f
+            
+            val mapPathPast = Path()
+            val mapPathFuture = Path()
+            
+            val currentIdx = (progress * (routeCoords.size - 1)).toInt().coerceIn(0, routeCoords.size - 1)
+            var currPx = 0f
+            var currPy = 0f
+            
+            for (i in routeCoords.indices) {
+                val pt = routeCoords[i]
+                val px = (offX + (pt.second - minLng) * Math.cos(Math.toRadians(midLat)) * scale).toFloat()
+                val py = (offY + contentH - (pt.first - minLat) * scale).toFloat()
+                
+                if (i == 0) {
+                    mapPathPast.moveTo(px, py)
+                    if (currentIdx == 0) {
+                        mapPathFuture.moveTo(px, py)
+                        currPx = px
+                        currPy = py
+                    }
+                } else if (i <= currentIdx) {
+                    mapPathPast.lineTo(px, py)
+                    if (i == currentIdx) {
+                        mapPathFuture.moveTo(px, py)
+                        currPx = px
+                        currPy = py
+                    }
+                } else {
+                    if (i == currentIdx + 1 && currentIdx == 0) {
+                        // Just to make sure path starts correctly if index is 0
+                    }
+                    mapPathFuture.lineTo(px, py)
+                }
+            }
+            
+            val miniMapPastPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.parseColor("#00E676")
+                strokeWidth = 3f
+                style = Paint.Style.STROKE
+            }
+            val miniMapFuturePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.parseColor("#666666")
+                strokeWidth = 3f
+                style = Paint.Style.STROKE
+            }
+            
+            canvas.drawPath(mapPathFuture, miniMapFuturePaint)
+            canvas.drawPath(mapPathPast, miniMapPastPaint)
+            
+            val dotP = Paint().apply { color = Color.WHITE; style = Paint.Style.FILL }
+            canvas.drawCircle(currPx, currPy, 5f, miniMapPastPaint)
+            canvas.drawCircle(currPx, currPy, 3f, dotP)
+        }
 
         canvas.restore()
     }

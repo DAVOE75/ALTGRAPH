@@ -76,6 +76,10 @@ class AltgraphCore(val calculator: AltimetriaStrategyCalculator = AltimetriaStra
     fun climbStrategy(climb: RouteClimb, start: Double?, length: Double?): StrategyData =
         calculator.getStrategyDataForClimb(climb, start, length)
         
+    fun getFullRouteCoords(): List<Pair<Double, Double>> {
+        return calculator.routePoints.map { Pair(it.latitude, it.longitude) }
+    }
+
     fun getFullProfileElevations(): FloatArray {
         val pts = if (calculator.routeElevationProfile.isNotEmpty()) {
             calculator.routeElevationProfile

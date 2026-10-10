@@ -198,6 +198,9 @@ object AltgraphRepository {
     suspend fun getFullProfileElevations(): FloatArray =
         withContext(dispatcher()) { core.getFullProfileElevations() }
 
+    suspend fun getFullRouteCoords(): List<Pair<Double, Double>> =
+        withContext(dispatcher()) { core.getFullRouteCoords() }
+
     fun pan3d(deltaMeters: Double) {
         scope?.launch { core.pan3dMeters += deltaMeters }
     }
