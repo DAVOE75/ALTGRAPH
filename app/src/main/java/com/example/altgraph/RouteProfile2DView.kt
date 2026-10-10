@@ -66,17 +66,17 @@ class RouteProfile2DView(context: Context) : View(context) {
         textAlign = Paint.Align.LEFT
     }
 
-    private fun drawFlag(canvas: Canvas, cx: Float, cy: Float, colorStr: String) {
+    private fun drawFlag(canvas: Canvas, cx: Float, cy: Float, colorStr: String, scale: Float = 1.0f) {
         val p = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL; color = Color.parseColor(colorStr) }
-        val stick = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 3f; color = Color.WHITE }
-        canvas.drawLine(cx, cy, cx, cy - 30f, stick)
+        val stick = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 3f * scale; color = Color.WHITE }
+        canvas.drawLine(cx, cy, cx, cy - 30f * scale, stick)
         val path = Path()
-        path.moveTo(cx, cy - 30f)
-        path.lineTo(cx + 15f, cy - 22f)
-        path.lineTo(cx, cy - 15f)
+        path.moveTo(cx, cy - 30f * scale)
+        path.lineTo(cx + 15f * scale, cy - 22f * scale)
+        path.lineTo(cx, cy - 15f * scale)
         path.close()
         canvas.drawPath(path, p)
-        canvas.drawCircle(cx, cy, 4f, p)
+        canvas.drawCircle(cx, cy, 4f * scale, p)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -280,10 +280,10 @@ class RouteProfile2DView(context: Context) : View(context) {
                 if (pt.second > maxLng) maxLng = pt.second
             }
             
-            val mapBoxLeft = 20f
-            val mapBoxTop = 80f
-            val mapBoxRight = drawW * 0.4f
-            val mapBoxBottom = topY + 120f
+            val mapBoxLeft = 10f
+            val mapBoxTop = 75f
+            val mapBoxRight = drawW * 0.45f
+            val mapBoxBottom = topY + 180f
             
             val mapW = mapBoxRight - mapBoxLeft
             val mapH = mapBoxBottom - mapBoxTop
@@ -383,6 +383,17 @@ class RouteProfile2DView(context: Context) : View(context) {
                     canvas.drawPath(path, miniMapPeakPaint)
                 }
             }
+
+            // Draw Start and End Flags on minimap
+            val startPt = routeCoords.first()
+            val pxStart = (offX + (startPt.second - minLng) * Math.cos(Math.toRadians(midLat)) * scale).toFloat()
+            val pyStart = (offY + contentH - (startPt.first - minLat) * scale).toFloat()
+            drawFlag(canvas, pxStart, pyStart, "#00E676", 0.6f) // Start Flag (Green, smaller)
+            
+            val endPt = routeCoords.last()
+            val pxEnd = (offX + (endPt.second - minLng) * Math.cos(Math.toRadians(midLat)) * scale).toFloat()
+            val pyEnd = (offY + contentH - (endPt.first - minLat) * scale).toFloat()
+            drawFlag(canvas, pxEnd, pyEnd, "#FFFFFF", 0.6f) // End Flag (White, smaller)
         }
 
         canvas.restore()
