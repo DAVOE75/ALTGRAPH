@@ -96,7 +96,7 @@ class RouteProfile2DDataField(extension: String) : DataTypeImpl(extension, "prof
                         val strategy = snap.strategy
 
                         val isRotated = prefs.eliteProfileTv2dRotate
-                        val frame = listOf(strategy.routeTotalLength, strategy.riderProgress, isRotated, isElite)
+                        val frame = listOf(strategy.routeTotalLength, strategy.remainingDistance, isRotated, isElite)
                         if (frame == lastFrame) return@safeUpdate
 
                         // Fetch new full profile if route changed
@@ -118,9 +118,8 @@ class RouteProfile2DDataField(extension: String) : DataTypeImpl(extension, "prof
                 
                         if (isElite) {
                             routeProfileView.totalDistance = strategy.routeTotalLength
-                            // current distance is roughly total * progress, or windowStart
-                            // Let's use progress * total
-                            routeProfileView.currentDistance = strategy.riderProgress * strategy.routeTotalLength
+                            // current distance is overall distance travelled
+                            routeProfileView.currentDistance = (strategy.routeTotalLength - strategy.remainingDistance).coerceAtLeast(0.0)
                             routeProfileView.isRotated = isRotated
                             routeProfileView.fontFamilyKey = prefs.fontFamilyKey
                             routeProfileView.fontSizeScale = prefs.fontSize3dScale
