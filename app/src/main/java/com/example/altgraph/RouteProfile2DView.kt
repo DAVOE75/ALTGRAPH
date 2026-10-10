@@ -18,6 +18,17 @@ class RouteProfile2DView(context: Context) : View(context) {
     var fontSizeScale: Float = 1.0f
     var activeClimbs: List<RouteClimb> = emptyList()
     
+    private var contourBitmap: Bitmap? = null
+
+    init {
+        try {
+            val resId = context.resources.getIdentifier("contour_bg", "drawable", context.packageName)
+            if (resId != 0) {
+                contourBitmap = BitmapFactory.decodeResource(context.resources, resId)
+            }
+        } catch (e: Exception) {}
+    }
+
     private val pathLine = Path()
     private val pathFill = Path()
     private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -287,6 +298,16 @@ class RouteProfile2DView(context: Context) : View(context) {
             
             val mapW = mapBoxRight - mapBoxLeft
             val mapH = mapBoxBottom - mapBoxTop
+            
+            contourBitmap?.let { bmp ->
+                val srcRect = Rect(0, 0, bmp.width, bmp.height)
+                val dstRect = RectF(mapBoxLeft, mapBoxTop, mapBoxRight, mapBoxBottom)
+                val paint = Paint(Paint.FILTER_BITMAP_FLAG).apply {
+                    alpha = 40 // Very subtle
+                    xfermode = PorterDuffXfermode(PorterDuff.Mode.SCREEN)
+                }
+                canvas.drawBitmap(bmp, srcRect, dstRect, paint)
+            }
             
             val midLat = (minLat + maxLat) / 2.0
             val latScale = mapH / Math.max(1e-6, maxLat - minLat)
