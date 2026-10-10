@@ -110,10 +110,10 @@ class RouteProfile2DView(context: Context) : View(context) {
         subTextPaint.textSize = 18f * fontSizeScale
         
         FontHelper.applyFontToPaint(climbListPaint, fontFamilyKey, Typeface.NORMAL)
-        climbListPaint.textSize = 20f * fontSizeScale
+        climbListPaint.textSize = 17f * fontSizeScale
         
         FontHelper.applyFontToPaint(climbListCatPaint, fontFamilyKey, Typeface.BOLD)
-        climbListCatPaint.textSize = 20f * fontSizeScale
+        climbListCatPaint.textSize = 17f * fontSizeScale
         
         FontHelper.applyFontToPaint(kmDoneTextPaint, fontFamilyKey, Typeface.BOLD)
         kmDoneTextPaint.textSize = 22f * fontSizeScale
@@ -244,7 +244,7 @@ class RouteProfile2DView(context: Context) : View(context) {
         canvas.translate(currentX, textCenterY)
         canvas.rotate(-90f) // from bottom to top for BOTH
         
-        val bgPaint = Paint().apply { color = Color.parseColor("#88000000"); style = Paint.Style.FILL }
+        val bgPaint = Paint().apply { color = Color.parseColor("#EE000000"); style = Paint.Style.FILL }
         
         // Done KM (Green): Left side (Negative Y)
         canvas.drawRect(-doneWidth / 2f - 4f, -35f, doneWidth / 2f + 4f, -5f, bgPaint)
@@ -294,8 +294,8 @@ class RouteProfile2DView(context: Context) : View(context) {
         }.sortedBy { it.first.startDistance }
 
         if (catClimbs.isNotEmpty()) {
-            var climbY = 80f // Start at the same height as the minimap
-            val listStartX = drawW * 0.52f // A bit more to the left to fit text
+            var climbY = 110f // Bajarlo un poco mas
+            val listStartX = drawW * 0.44f // Mas a la izquierda para que quepa todo
 
             for ((i, item) in catClimbs.withIndex()) {
                 val climb = item.first
@@ -314,7 +314,7 @@ class RouteProfile2DView(context: Context) : View(context) {
                     climbListCatPaint.color = Color.parseColor("#F59E0B")
                 }
 
-                // Line 1: Pto 1 (3ª)  km 3.5
+                // Line 1: Pto 1 (3ª) km 3.5 | 0.5 km al 6.5%
                 val ptoStr = "Pto ${i + 1} "
                 canvas.drawText(ptoStr, listStartX, climbY, climbListPaint)
                 val ptoWidth = climbListPaint.measureText(ptoStr)
@@ -323,16 +323,11 @@ class RouteProfile2DView(context: Context) : View(context) {
                 canvas.drawText(catStr, listStartX + ptoWidth, climbY, climbListCatPaint)
                 val catWidth = climbListCatPaint.measureText(catStr)
                 
-                val startStr = String.format(" km %.1f", startKm)
+                val startStr = String.format(" km %.1f | %.1f km al %.1f%%", startKm, lenKm, avg)
                 canvas.drawText(startStr, listStartX + ptoWidth + catWidth, climbY, climbListPaint)
 
-                // Line 2:   0.5 km al 6.5%
                 climbY += 22f * fontSizeScale
-                val detailsStr = String.format("  %.1f km al %.1f%%", lenKm, avg)
-                canvas.drawText(detailsStr, listStartX, climbY, climbListPaint)
-
-                climbY += 28f * fontSizeScale
-                if (climbY > drawH - 30f) break // Avoid drawing out of bounds
+                if (climbY > drawH - 20f) break // Avoid drawing out of bounds
             }
         }
 
