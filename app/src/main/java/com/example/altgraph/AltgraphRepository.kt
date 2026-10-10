@@ -194,6 +194,9 @@ object AltgraphRepository {
 
     suspend fun climbStrategy(climb: RouteClimb, start: Double?, length: Double?): StrategyData =
         withContext(dispatcher()) { core.climbStrategy(climb, start, length) }
+        
+    suspend fun getFullProfileElevations(): FloatArray =
+        withContext(dispatcher()) { core.getFullProfileElevations() }
 
     fun pan3d(deltaMeters: Double) {
         scope?.launch { core.pan3dMeters += deltaMeters }

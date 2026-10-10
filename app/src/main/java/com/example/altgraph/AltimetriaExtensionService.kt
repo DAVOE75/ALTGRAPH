@@ -16,7 +16,8 @@ class AltimetriaExtensionService : KarooExtension("altgraph", "0.4.63") {
             FatigueGradeDataField("altgraph"),
             ClimbPacingDataField("altgraph"),
             GradientTrendDataField("altgraph"),
-            GradeZonesDataField("altgraph")
+            GradeZonesDataField("altgraph"),
+            RouteProfile2DDataField("altgraph")
         )
     }
 

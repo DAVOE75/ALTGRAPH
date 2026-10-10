@@ -75,6 +75,28 @@ class AltgraphCore(val calculator: AltimetriaStrategyCalculator = AltimetriaStra
 
     fun climbStrategy(climb: RouteClimb, start: Double?, length: Double?): StrategyData =
         calculator.getStrategyDataForClimb(climb, start, length)
+        
+    fun getFullProfileElevations(): FloatArray {
+        val pts = if (calculator.routeElevationProfile.isNotEmpty()) {
+            calculator.routeElevationProfile
+        } else {
+            calculator.routePoints.map { com.example.altgraph.ElevationPolylineDecoder.ElevationPoint(it.distance, it.elevation) }
+        }
+        val count = pts.size
+        if (count == 0) return FloatArray(0)
+        
+        val maxPoints = 1000
+        if (count <= maxPoints) {
+            return FloatArray(count) { pts[it].elevation.toFloat() }
+        }
+        
+        val result = FloatArray(maxPoints)
+        for (i in 0 until maxPoints) {
+            val idx = (i * count) / maxPoints
+            result[i] = pts[idx].elevation.toFloat()
+        }
+        return result
+    }
 }
 
 /** Holders activos del tick; se llama desde hilos Binder. */
