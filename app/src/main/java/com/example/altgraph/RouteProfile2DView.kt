@@ -230,31 +230,7 @@ class RouteProfile2DView(context: Context) : View(context) {
         val lineTopY = 30f // almost touching the top border
         canvas.drawLine(currentX, bottomY, currentX, lineTopY, dashLinePaint)
         
-        // --- TEXT RIGHT: DONE KM ---
-        val kmDoneText = String.format("%.1f km", currentDistance / 1000.0)
-        val doneWidth = kmDoneTextPaint.measureText(kmDoneText)
-        
-        // --- TEXT RIGHT: REMAINING KM ---
-        val remainDist = (totalDistance - currentDistance).coerceAtLeast(0.0)
-        val kmRemainText = String.format("-%.1f km", remainDist / 1000.0)
-        val remainWidth = kmRemainTextPaint.measureText(kmRemainText)
-        
-        canvas.save()
-        val textCenterY = 120f // CENTRADOS EN EL MISMO EJE Y
-        canvas.translate(currentX, textCenterY)
-        canvas.rotate(-90f) // from bottom to top for BOTH
-        
-        val bgPaint = Paint().apply { color = Color.parseColor("#EE000000"); style = Paint.Style.FILL }
-        
-        // Done KM (Green): Left side (Negative Y)
-        canvas.drawRect(-doneWidth / 2f - 4f, -35f, doneWidth / 2f + 4f, -5f, bgPaint)
-        canvas.drawText(kmDoneText, 0f, -10f, kmDoneTextPaint)
-        
-        // Remaining KM (White): Right side (Positive Y)
-        canvas.drawRect(-remainWidth / 2f - 4f, 5f, remainWidth / 2f + 4f, 35f, bgPaint)
-        canvas.drawText(kmRemainText, 0f, 30f, kmRemainTextPaint)
-        
-        canvas.restore()
+
 
         // Draw icon or dot at current position
         val currentElevIndex = (progress * (ptsCount - 1)).toInt().coerceIn(0, ptsCount - 1)
@@ -294,7 +270,7 @@ class RouteProfile2DView(context: Context) : View(context) {
         }.sortedBy { it.first.startDistance }
 
         if (catClimbs.isNotEmpty()) {
-            var climbY = 110f // Bajarlo un poco mas
+            var climbY = 70f // Subirlo un poco mas para que no pise los KM (que se leen en paisaje más a la derecha)
             val listStartX = drawW * 0.44f // Mas a la izquierda para que quepa todo
 
             for ((i, item) in catClimbs.withIndex()) {
@@ -473,6 +449,31 @@ class RouteProfile2DView(context: Context) : View(context) {
             val pyEnd = (offY + contentH - (endPt.first - minLat) * scale).toFloat()
             drawFlag(canvas, pxEnd, pyEnd, "#FFFFFF", 0.6f) // End Flag (White, smaller)
         }
+
+        // --- DRAW KM TEXTS LAST SO THEY ARE ON TOP OF EVERYTHING ---
+        val kmDoneText = String.format("%.1f km", currentDistance / 1000.0)
+        val doneWidth = kmDoneTextPaint.measureText(kmDoneText)
+        
+        val remainDist = (totalDistance - currentDistance).coerceAtLeast(0.0)
+        val kmRemainText = String.format("-%.1f km", remainDist / 1000.0)
+        val remainWidth = kmRemainTextPaint.measureText(kmRemainText)
+        
+        canvas.save()
+        val textCenterY = 120f // CENTRADOS EN EL MISMO EJE Y
+        canvas.translate(currentX, textCenterY)
+        canvas.rotate(-90f) // from bottom to top for BOTH
+        
+        val bgPaint = Paint().apply { color = Color.parseColor("#EE000000"); style = Paint.Style.FILL }
+        
+        // Done KM (Green): Left side (Negative Y)
+        canvas.drawRect(-doneWidth / 2f - 4f, -35f, doneWidth / 2f + 4f, -5f, bgPaint)
+        canvas.drawText(kmDoneText, 0f, -10f, kmDoneTextPaint)
+        
+        // Remaining KM (White): Right side (Positive Y)
+        canvas.drawRect(-remainWidth / 2f - 4f, 5f, remainWidth / 2f + 4f, 35f, bgPaint)
+        canvas.drawText(kmRemainText, 0f, 30f, kmRemainTextPaint)
+        
+        canvas.restore()
 
         canvas.restore()
     }
