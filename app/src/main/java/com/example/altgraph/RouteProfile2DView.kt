@@ -270,8 +270,8 @@ class RouteProfile2DView(context: Context) : View(context) {
         }.sortedBy { it.first.startDistance }
 
         if (catClimbs.isNotEmpty()) {
-            var climbY = 70f // Subirlo un poco mas para que no pise los KM (que se leen en paisaje más a la derecha)
-            val listStartX = drawW * 0.44f // Mas a la izquierda para que quepa todo
+            var climbY = 90f // Below the distance text
+            val listStartX = 20f // Aligned with Title and Distance text
 
             for ((i, item) in catClimbs.withIndex()) {
                 val climb = item.first
@@ -463,15 +463,15 @@ class RouteProfile2DView(context: Context) : View(context) {
         canvas.translate(currentX, textCenterY)
         canvas.rotate(-90f) // from bottom to top for BOTH
         
-        val bgPaint = Paint().apply { color = Color.parseColor("#EE000000"); style = Paint.Style.FILL }
+        val bgPaint = Paint().apply { color = Color.BLACK; style = Paint.Style.FILL }
         
         // Done KM (Green): Left side (Negative Y)
-        canvas.drawRect(-doneWidth / 2f - 4f, -35f, doneWidth / 2f + 4f, -5f, bgPaint)
+        canvas.drawRect(-doneWidth / 2f - 10f, -40f, doneWidth / 2f + 10f, 2f, bgPaint)
         canvas.drawText(kmDoneText, 0f, -10f, kmDoneTextPaint)
         
         // Remaining KM (White): Right side (Positive Y)
-        canvas.drawRect(-remainWidth / 2f - 4f, 5f, remainWidth / 2f + 4f, 35f, bgPaint)
-        canvas.drawText(kmRemainText, 0f, 30f, kmRemainTextPaint)
+        canvas.drawRect(-remainWidth / 2f - 10f, 10f, remainWidth / 2f + 10f, 50f, bgPaint)
+        canvas.drawText(kmRemainText, 0f, 40f, kmRemainTextPaint)
         
         canvas.restore()
 
